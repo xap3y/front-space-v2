@@ -1,0 +1,184 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Space API",
+        "description": "- [API](https://call.xap3y.tech)\n- [GitHub Repository](https://github.com/xap3y/space-api)",
+        "version": "1.0-beta.11"
+    },
+    "servers": [
+        {
+            "url": "https://call.xap3y.tech/v1"
+        }
+    ],
+    "paths": {
+        "/image/get/{uniqueId}": {
+            "get": {
+                "summary": "Get an image by unique ID",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "boolean" },
+                                        "message": { "type": "string" },
+                                        "timestamp": { "type": "string", "format": "date-time" },
+                                        "uniqueId": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete an image by unique ID",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "security": [{ "apiKeyAuth": [] }],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            }
+        },
+        "/image/upload": {
+            "post": {
+                "summary": "Upload an image",
+                "security": [{ "apiKeyAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": { "type": "string", "format": "binary" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            }
+        },
+        "/paste/get/{uniqueId}": {
+            "get": {
+                "summary": "Get a paste by unique ID",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            },
+            "delete": {
+                "summary": "Delete a paste by unique ID",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "security": [{ "apiKeyAuth": [] }],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            }
+        },
+        "/paste/create": {
+            "post": {
+                "summary": "Create a paste",
+                "security": [{ "apiKeyAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": { "type": "string", "format": "binary" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            }
+        },
+        "/url/get/{uniqueId}": {
+            "get": {
+                "summary": "Get a shortened URL by unique ID",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            },
+            "delete": {
+                "summary": "Delete a shortened URL by unique ID",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "security": [{ "apiKeyAuth": [] }],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            }
+        },
+        "/url/r/{uniqueId}": {
+            "get": {
+                "summary": "Redirect to the original URL",
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "responses": {
+                    "302": {
+                        "description": "Redirect to the original URL"
+                    }
+                }
+            }
+        },
+        "/url/create": {
+            "post": {
+                "summary": "Create a shortened URL",
+                "security": [{ "apiKeyAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "url": { "type": "string", "format": "uri" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "$ref": "#/components/responses/StandardResponse" }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "apiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "X-API-Key"
+            }
+        },
+        "responses": {
+            "StandardResponse": {
+                "description": "Standard API response",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": { "type": "boolean" },
+                                "message": { "type": "string" },
+                                "timestamp": { "type": "string", "format": "date-time" },
+                                "uniqueId": { "type": "string" }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
