@@ -71,7 +71,7 @@ export const linktree: LinkItem[] = [
             },
             {
                 label: "User",
-                href: "/user/[search]",
+                href: "/user",
                 links: [
                     {
                         label: "null",

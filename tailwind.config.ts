@@ -9,11 +9,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#171717",
-        secondary: "#1c1c1c",
-        primary_light: "#242424",
+        primary: "var(--col-primary)",
+        secondary: "var(--col-secondary)",
+        primary_light: "var(--col-primary-light)",
         battleship_gray: "#858585",
-        whitesmoke: "#f5f5f5",
+        whitesmoke: "var(--col-whitesmoke)",
         telegram: "#24A1DE",
         telegram2: "#0088cc",
         "telegram-darker": "#0081c3",

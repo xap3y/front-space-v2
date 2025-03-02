@@ -1,5 +1,6 @@
 const API_URL = process.env.API_URL || "http://127.0.0.1:8012";
-const API_KEY = process.env.API_KEY || "";
+
+const supportedLocales = ['ru', 'en', 'cs'];
 
 export function getApiUrl() {
     return process.env.API_URL || "http://127.0.0.1:8012";
@@ -7,6 +8,16 @@ export function getApiUrl() {
 
 export function getSecretKey() {
     return process.env.SECRET_KEY || "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6";
+}
+
+export function getDefaultLocale(): string {
+    const locale = process.env.DEFAULT_LOCALE || "ru";
+
+    if (!supportedLocales.includes(locale)) {
+        return "ru";
+    }
+
+    return locale;
 }
 
 export function getApiKey() {
@@ -64,3 +75,5 @@ export async function getValidatedResponse(url: string): Promise<any> {
 
     return data["message"];
 }
+
+export default supportedLocales;

@@ -17,3 +17,8 @@ export interface UrlSet {
     customUrl?: string | null;
     custom?: Map<string, string> | null;
 }
+
+export interface Quote {
+    text: string;
+    author?: string | null;
+}

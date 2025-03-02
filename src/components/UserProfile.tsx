@@ -1,16 +1,31 @@
-import { FaTelegram, FaGithub, FaSnapchatGhost, FaReddit, FaDiscord,
-    FaSoundcloud, FaSpotify, FaYoutube, FaSteam, FaInstagram,
-    FaFacebookMessenger, FaLinkedin, FaTwitch, FaVk, FaWhatsapp, FaFacebook} from 'react-icons/fa';
-import { FaThreads, FaGitlab, FaXTwitter, FaEarthAmericas, FaTiktok } from "react-icons/fa6";
-import { CiMail } from "react-icons/ci";
-import { SocialLinkButton } from "@/components/SocialLinkButton";
+import {
+    FaDiscord,
+    FaFacebook,
+    FaGithub,
+    FaLinkedin,
+    FaReddit,
+    FaSnapchatGhost,
+    FaSoundcloud,
+    FaSpotify,
+    FaTelegram,
+    FaTwitch,
+    FaVk,
+    FaWhatsapp,
+    FaYoutube
+} from 'react-icons/fa';
+import {FaEarthAmericas, FaThreads, FaXTwitter} from "react-icons/fa6";
+import {CiMail} from "react-icons/ci";
+import {SocialLinkButton} from "@/components/SocialLinkButton";
 import {UserObj} from "@/types/user";
+import {useTranslation} from "@/hooks/useTranslation";
 
 interface Props {
     user: UserObj
 }
 
 export function UserProfile({ user }: Props) {
+
+    const lang = useTranslation();
 
     const iconSize = 32;
 
@@ -114,22 +129,22 @@ export function UserProfile({ user }: Props) {
             {/* Stats */}
             <div className="w-full mt-6 text-lg font-parkinsans font-bold">
                 <div className="flex justify-between border-b border-gray-600 py-2">
-                    <span>Total Images Uploaded:</span>
+                    <span>{lang.pages.user.total_images_text}:</span>
                     <span>0 MB</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
-                    <span>Joined Date:</span>
+                    <span>{lang.pages.user.joined_date_text}:</span>
                     <span>{user.createdAt}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
-                    <span>Storage Used:</span>
+                    <span>{lang.pages.user.storage_used_text}:</span>
                     <span>0 MB</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
-                    <span>Invited by:</span>
+                    <span>{lang.pages.user.invited_by_text}:</span>
                     {user.invitor == null
                         ? <span className={"text-gray-600"}>N/A</span>
                         : <a className={"decoration-0 text-blue-600"} href={"/profile/" + user.invitor.username}>{user.invitor.username}</a>

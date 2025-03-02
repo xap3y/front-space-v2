@@ -10,3 +10,18 @@
     font-weight: 500;
     font-style: normal;
 }
+
+.dark {
+    --col-primary: #171717;
+    --col-secondary: #1c1c1c;
+    --col-primary-light: #242424;
+    --col-whitesmoke: #f5f5f5;
+}
+
+.light {
+    --col-primary: #f5f5f5;
+    --col-secondary: #f0f0f0;
+    --col-primary-light: #e5e5e5;
+    --col-whitesmoke: #171717;
+    color: var(--col-whitesmoke);
+}

@@ -10,6 +10,7 @@ import { MdEmail } from "react-icons/md";
 import LoadingPage from "@/components/LoadingPage";
 import { getUser } from "@/lib/auth";
 import { getApiUrl } from "@/lib/core";
+import {useTranslation} from "@/hooks/useTranslation";
 
 export default function LoginPage() {
 
@@ -18,6 +19,8 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const router = useRouter();
     const [loading, setLoading] = useState(true);
+
+    const lang = useTranslation();
 
     useEffect(() => {
         console.log("USE EFFECT")
@@ -68,7 +71,7 @@ export default function LoginPage() {
         e.preventDefault();
 
         if (password.length < 5) {
-            return toast.error('Password must be at least 5 characters long');
+            return toast.error(lang.pages.login.short_password);
         }
         else if (!email.includes('@')) {
             return toast.error('Invalid email');
@@ -77,6 +80,9 @@ export default function LoginPage() {
         try {
             /*setPassword('');*/
 
+            const toastId = toast.info("Logging in...", {
+                isLoading: true
+            })
             console.log("API URL: " + getApiUrl() + '/v1/auth/login');
 
             const response = await fetch(getApiUrl() + '/v1/auth/login', {
@@ -94,11 +100,11 @@ export default function LoginPage() {
             const data = await response.json();
             if (!response.ok) {
                 if (!data["message"]) {
-                    toast.error('Login failed');
+                    toast.update(toastId, { render: "Login failed!", type: "error", isLoading: false, autoClose: 1500})
                     return;
                 }
 
-                toast.error(data["message"]);
+                toast.update(toastId, { render: data["message"], type: "error", isLoading: false, autoClose: 1500})
                 return;
             }
 
@@ -109,12 +115,14 @@ export default function LoginPage() {
                 maxAge: 60 * 60 * 24 * 7,
             });
 
-            toast.success('Login successful');
+            toast.update(toastId, { render: lang.pages.login.success, type: "success", isLoading: false, autoClose: 1300})
             setLoading(true);
-            router.push('/home/dashboard/');
+            setTimeout(() => {
+                router.push('/home/dashboard/');
+            }, 500)
         } catch (e) {
             console.error(e);
-            toast.error('Login failed');
+            toast.error("Login failed!")
         }
     };
 
@@ -135,17 +143,16 @@ export default function LoginPage() {
                 >
                     <div className="p-8">
                         <h2 className="text-center text-3xl font-extrabold text-white">
-                            XAP3Y - Space
+                            {lang.pages.login.title}
                         </h2>
-                        <p className="mt-4 text-center text-gray-400">Sign in to continue</p>
+                        <p className="mt-4 text-center text-gray-400">{lang.pages.login.under_title}</p>
                         <form autoComplete={"new-password"} method="POST" onSubmit={handleSubmit} className="mt-8 space-y-6">
                             <div className="rounded-md shadow-sm">
                                 <div>
-                                    <label className="sr-only" htmlFor="email">Email address</label>
                                     <div className="flex items-center">
                                         < MdEmail className="w-8 h-8 mr-2" />
                                         <input
-                                            placeholder= "Email address"
+                                            placeholder={lang.pages.login.email_placeholder}
                                             className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
                                             required
                                             autoComplete="new-password"
@@ -157,11 +164,10 @@ export default function LoginPage() {
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <label className="sr-only" htmlFor="password">Password</label>
                                     <div className="flex items-center">
                                         < FaKey className="w-8 h-8 mr-2" />
                                         <input
-                                            placeholder="Password"
+                                            placeholder={lang.pages.login.password_placeholder}
                                             className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                             required
                                             autoComplete="new-password"
@@ -178,10 +184,10 @@ export default function LoginPage() {
                             <div className="flex items-center justify-center mt-4">
 
                                 <div className="text-sm font-bold flex">
-                                    <span className="text-gray-400 mr-1">Don&apos;t have an account?</span>
+                                    <span className="text-gray-400 mr-1">{lang.pages.login.no_account}</span>
                                     <p className="font-bold text-telegram hover:text-telegram-bright cursor-pointer"
                                        onClick={() => router.push('/register')}
-                                    >Sign up</p>
+                                    >{lang.pages.login.signup_text}</p>
 
                                 </div>
                             </div>
@@ -191,7 +197,7 @@ export default function LoginPage() {
                                     className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                     type="submit"
                                 >
-                                    Sign In
+                                    {lang.pages.login.button_text}
                                 </button>
                             </div>
                         </form>
@@ -201,7 +207,7 @@ export default function LoginPage() {
                             className="font-normal text-telegram hover:text-telegram-brightest"
                             onClick={() => toast.error('Feature disabled!')}
                         >
-                            Forgot your password?
+                            {lang.pages.login.forgot_password}
                         </button>
                     </div>
                 </div>

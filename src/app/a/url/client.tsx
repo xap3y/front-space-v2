@@ -66,7 +66,7 @@ export default function UrlShortener() {
                     <form onSubmit={handleSubmit} className={"flex flex-col gap-4"}>
 
                         <input
-                            className={"bg-primary px-4 py-3 outline-none w-[280px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
+                            className={"bg-primary px-4 py-3 outline-none sm:w-[400px] w-[200px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
                             name="text"
                             required
                             placeholder="Original URL"
@@ -77,7 +77,7 @@ export default function UrlShortener() {
                         />
 
                         <input
-                            className={"bg-primary px-4 py-3 outline-none w-[280px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
+                            className={"bg-primary px-4 py-3 outline-none sm:w-[400px] w-[200px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
                             name="text"
                             required
                             placeholder="API Key"

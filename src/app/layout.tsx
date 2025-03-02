@@ -4,6 +4,8 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { Analytics } from '@vercel/analytics/next';
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import {getTheme} from "@/hooks/getTheme";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -45,9 +47,10 @@ export default function RootLayout({
         <html lang="en">
         <body
             cz-shortcut-listen="true"
-            className={`${geistSans.variable} ${geistMono.variable} h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
+            className={`dark ${geistSans.variable} ${geistMono.variable} h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
         >
         {children}
+        <LanguageSwitcher />
         <Analytics />
         <ToastContainer theme={"dark"} />
         </body>
