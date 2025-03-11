@@ -8,9 +8,11 @@ export async function getUserApi(id: string): Promise<UserObj | null> {
     console.log("Calling getUserApi with id: " + id)
 
     const data = await getValidatedResponse('/v1/user/get/' + id);
+    console.log("data is " + data)
     if (!data) return null;
     const user = data as UserObj;
     user.createdAt = new Date(user.createdAt).toLocaleString()
+    console.log("user is " + user)
     return user;
 }
 

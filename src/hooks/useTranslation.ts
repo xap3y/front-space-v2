@@ -39,3 +39,5 @@ export function setLanguage(newLang: string) {
 export function getLanguageCode() {
     return getCookie("locale") || getDefaultLocale();
 }
+
+export default translations;

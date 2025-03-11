@@ -22,6 +22,9 @@ export default function Page() {
             setLoading(false)
         };
 
+        console.log(username)
+        console.log(user)
+
         if (!user) {
             fetchUser();
         } else {

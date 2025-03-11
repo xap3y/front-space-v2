@@ -18,6 +18,8 @@ const cs: LanguageModel = {
         },
         user: {
             total_images_text: "Celkem obrázků",
+            total_pastes_text: "Celkem pastů",
+            total_short_urls_text: "Celkem zkrácených URL",
             joined_date_text: "Datum registrace",
             storage_used_text: "Využité úložiště",
             invited_by_text: "Pozván od"
@@ -36,12 +38,36 @@ const cs: LanguageModel = {
             invalid_title_length_alert: "Nadpis je příliš krátký!",
             paste_created_alert: "Haste Vytvořen",
             view_paste_text: "View created paste:"
+        },
+        portable_image: {
+            drag_and_drop_text: "Přetáhněte obrázek sem",
+            button_text: "Nahrát Obrázek",
+            image_uploaded_alert: "Obrázek byl úspěšně nahrán"
+        },
+        user_finder: {
+            title: "Vyhledat Uživatele",
+            subtitle: "Najít uživatele podle jeho uživatelského jména nebo UID",
+            input_placeholder: "uživatelského jméno | UID",
+            button_text: "Najít Uživatele",
+            no_user_found_error: "Uživatel nebyl nalezen",
+            empty_field_error: "Prosím zadejte uživatelské jméno nebo UID"
         }
     },
     global: {
         api_key_input_placeholder: "API Klíč",
         processing_button_text: "Zpracovává se...",
         bad_api_key_alert: "Špatný API klíč"
+    },
+    toasts: {
+        error: {
+            changing_theme: "Přepínání tématu...",
+            change_theme: "Nepodařilo se změnit téma"
+        },
+        success: {
+            copied_to_clipboard: "Zkopírováno do schránky",
+            change_theme: "Téma změněno",
+            language_changed: "Jazyk změněn na: "
+        },
     }
 };
 

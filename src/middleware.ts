@@ -4,6 +4,7 @@ import { decrypt } from "@/lib/crypto";
 import { getCookie, deleteCookie } from 'cookies-next/server';
 import {UserObj} from "@/types/user";
 import supportedLocales, {getDefaultLocale} from "@/lib/core";
+import {toast} from "react-toastify";
 
 function languageMiddleware(req: NextRequest, res: NextResponse) {
     const cookieLocale = req.cookies.get('locale')?.value;
@@ -34,6 +35,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
     if (!authCookie) {
         console.log("No auth token found");
+        //toast.error("Unauthorized access");
         return NextResponse.redirect(new URL("/login", req.url));
     }
 

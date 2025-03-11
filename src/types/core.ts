@@ -22,3 +22,7 @@ export interface Quote {
     text: string;
     author?: string | null;
 }
+
+export interface FunFact {
+    text: string;
+}

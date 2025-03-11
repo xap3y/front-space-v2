@@ -66,6 +66,10 @@ export const linktree: LinkItem[] = [
                     {
                         label: "Image",
                         href: "/a/image"
+                    },
+                    {
+                        label: "Mail",
+                        href: "/a/mail"
                     }
                 ]
             },

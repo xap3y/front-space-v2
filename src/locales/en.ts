@@ -18,6 +18,8 @@ const en: LanguageModel = {
         },
         user: {
             total_images_text: "Total images",
+            total_pastes_text: "Total pastes",
+            total_short_urls_text: "Total short URLs",
             joined_date_text: "Joined date",
             storage_used_text: "Storage used",
             invited_by_text: "Invited by"
@@ -36,12 +38,36 @@ const en: LanguageModel = {
             invalid_title_length_alert: "Invalid Title length!",
             paste_created_alert: "Paste created",
             view_paste_text: "View created paste:"
+        },
+        portable_image: {
+            drag_and_drop_text: "Drag & drop an image here or click to select",
+            button_text: "Upload Image",
+            image_uploaded_alert: "Image uploaded successfully"
+        },
+        user_finder: {
+            title: "User Finder",
+            subtitle: "Find a user by their username or UID",
+            input_placeholder: "Username | UID",
+            button_text: "Find User",
+            no_user_found_error: "User not found",
+            empty_field_error: "Please enter username or UID"
         }
     },
     global: {
         api_key_input_placeholder: "API Key",
         processing_button_text: "Processing...",
         bad_api_key_alert: "Invalid API Key"
+    },
+    toasts: {
+        error: {
+            changing_theme: "Switching theme...",
+            change_theme: "Failed to change theme"
+        },
+        success: {
+            copied_to_clipboard: "Copied to clipboard",
+            change_theme: "Theme changed",
+            language_changed: "Language changed to: "
+        },
     }
 };
 

@@ -8,6 +8,12 @@ export interface UserObj {
     invitor?: UserInvitor | null;
     socials?: UserSocials | null;
     apiKey: string;
+    stats: {
+        totalUploads: number;
+        pastesCreated: number;
+        urlsShortened: number;
+        storageUsed: number;
+    }
 }
 
 export interface UserInvitor {

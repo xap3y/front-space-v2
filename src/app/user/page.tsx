@@ -1,31 +1,34 @@
 'use client';
 
-import {useState} from "react";
+import {useEffect, useState, useTransition} from "react";
 import {getUserApi} from "@/lib/apiGetters";
 import {toast} from "react-toastify";
 import {useRouter} from 'next/navigation'
 import { useUser } from '@/context/UserContext';
 import LoadingPage from "@/components/LoadingPage";
 import {UserObj} from "@/types/user";
+import {useTranslation} from "@/hooks/useTranslation";
 
 export default function UserFinder() {
 
     const router = useRouter()
     const [username, setUsername] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const { user, setUser } = useUser();
+
+    const lang = useTranslation();
 
     const findUser = async () => {
 
         if (username == "") {
-            return toast.error("Please enter a username or UID");
+            return toast.error(lang.pages.user_finder.empty_field_error);
         }
         setLoading(true)
         const user: UserObj | null = await getUserApi(username + "");
 
         if (user == null) {
             setLoading(false)
-            return toast.error("User not found");
+            return toast.error(lang.pages.user_finder.no_user_found_error);
         }
 
         setUser(user);
@@ -36,6 +39,11 @@ export default function UserFinder() {
         // @ts-ignore
         e.preventDefault();
     }
+
+    useEffect(() => {
+        toast.error("Поставщик пользователя вернул NULL")
+        setLoading(false)
+    }, []);
 
     return (
         <>
@@ -51,13 +59,13 @@ export default function UserFinder() {
                             className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
                         >
                             <div className="p-4">
-                                <h1 className="text-3xl font-bold text-center text-white">User Finder</h1>
-                                <p className="text-center">Find a user by their username or UID</p>
+                                <h1 className="text-3xl font-bold text-center text-white">{lang.pages.user_finder.title}</h1>
+                                <p className="text-center">{lang.pages.user_finder.subtitle}</p>
                             </div>
                             <div className="p-4">
                                 <div className="mb-4">
                                     <input
-                                        placeholder= "Username | User ID"
+                                        placeholder={lang.pages.user_finder.input_placeholder}
                                         className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
                                         required
                                         autoComplete="new-password"
@@ -74,7 +82,7 @@ export default function UserFinder() {
                                         type={"submit"}
                                         onClick={findUser}
                                     >
-                                        Find User
+                                        {lang.pages.user_finder.button_text}
                                     </button>
                                 </div>
                             </div>

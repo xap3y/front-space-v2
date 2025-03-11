@@ -15,6 +15,14 @@ export default async function Page() {
                     {
                         label: "Paste",
                         href: "/a/paste"
+                    },
+                    {
+                        label: "Image",
+                        href: "/a/image"
+                    },
+                    {
+                        label: "Mail",
+                        href: "/a/mail"
                     }
                 ]
             } />

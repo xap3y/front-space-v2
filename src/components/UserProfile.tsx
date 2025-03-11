@@ -18,6 +18,7 @@ import {CiMail} from "react-icons/ci";
 import {SocialLinkButton} from "@/components/SocialLinkButton";
 import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
+import {useEffect} from "react";
 
 interface Props {
     user: UserObj
@@ -26,7 +27,6 @@ interface Props {
 export function UserProfile({ user }: Props) {
 
     const lang = useTranslation();
-
     const iconSize = 32;
 
     return (
@@ -36,7 +36,7 @@ export function UserProfile({ user }: Props) {
             {/* Profile Picture */}
             <img
                 src={(user.avatar ? user.avatar : "https://www.gravatar.com/avatar/")}
-                alt={`${user.username}'s profile`}
+                alt={`${user.username}'s avatar`}
                 className="w-24 h-24 rounded-full shadow-lg border-4 border-gray-700 text-center leading-10"
             />
 
@@ -127,27 +127,37 @@ export function UserProfile({ user }: Props) {
             {/*<p className="text-gray-400">{user.role}</p>*/}
 
             {/* Stats */}
-            <div className="w-full mt-6 text-lg font-parkinsans font-bold">
+            <div className="w-full mt-6 text-lg font-parkinsans">
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.total_images_text}:</span>
-                    <span>0 MB</span>
+                    <span className={"font-bold"}>{user.stats.totalUploads}</span>
+                </div>
+
+                <div className="flex justify-between border-b border-gray-600 py-2">
+                    <span>{lang.pages.user.total_pastes_text}:</span>
+                    <span className={"font-bold"}>{user.stats.pastesCreated}</span>
+                </div>
+
+                <div className="flex justify-between border-b border-gray-600 py-2">
+                    <span>{lang.pages.user.total_short_urls_text}:</span>
+                    <span className={"font-bold"}>{user.stats.urlsShortened}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.joined_date_text}:</span>
-                    <span>{user.createdAt}</span>
+                    <span className={"font-bold"}>{user.createdAt}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.storage_used_text}:</span>
-                    <span>0 MB</span>
+                    <span className={"font-bold"}>{(user.stats.storageUsed / 1024 / 1024).toFixed(2) + " MB"}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.invited_by_text}:</span>
                     {user.invitor == null
-                        ? <span className={"text-gray-600"}>N/A</span>
-                        : <a className={"decoration-0 text-blue-600"} href={"/profile/" + user.invitor.username}>{user.invitor.username}</a>
+                        ? <span className={"text-primary-brighter font-bold"}>N/A</span>
+                        : <a className={"decoration-0 text-blue-600 font-bold"} href={"/user/" + user.invitor.username}>{user.invitor.username + " (" + user.invitor.uid + ")"}</a>
                     }
                 </div>
             </div>
@@ -205,7 +215,7 @@ export function UserProfile({ user }: Props) {
                         )}
                         {user.socials.github && (
                             <SocialLinkButton href={`https://github.com/${user.socials.github}`}>
-                                <FaGithub size={iconSize}/>
+                                <FaGithub title={"github"} size={iconSize}/>
                             </SocialLinkButton>
                         )}
                         {user.socials.gitlab && (
@@ -215,6 +225,7 @@ export function UserProfile({ user }: Props) {
                                      alt={"GitLab"}
                                      width={iconSize}
                                      height={iconSize}
+                                     title={"gitlab"}
                                 />
                             </SocialLinkButton>
                         )}
@@ -241,6 +252,7 @@ export function UserProfile({ user }: Props) {
                                     alt={"Steam"}
                                     width={iconSize}
                                     height={iconSize}
+                                    title={"steam"}
                                 />
                             </SocialLinkButton>
                         )}
@@ -278,17 +290,17 @@ export function UserProfile({ user }: Props) {
                         )}
                         {user.socials.whatsapp && (
                             <SocialLinkButton href={`https://wa.me/${user.socials.whatsapp}`}>
-                                <FaWhatsapp size={iconSize} color={"#25D366"}/>
+                                <FaWhatsapp title={"Whatsapp"} size={iconSize} color={"#25D366"}/>
                             </SocialLinkButton>
                         )}
                         {user.socials.facebook && (
                             <SocialLinkButton href={`https://facebook.com/${user.socials.facebook}`}>
-                                <FaFacebook size={iconSize} color={"#1877F2"}/>
+                                <FaFacebook title={"Facebook"} size={iconSize} color={"#1877F2"}/>
                             </SocialLinkButton>
                         )}
                         {user.socials.vk && (
                             <SocialLinkButton href={`https://vk.com/${user.socials.vk}`}>
-                                <FaVk size={iconSize} color={"#0077FF"}/>
+                                <FaVk title={"vk"} size={iconSize} color={"#0077FF"}/>
                             </SocialLinkButton>
                         )}
                     </div>

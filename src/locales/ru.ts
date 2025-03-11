@@ -19,6 +19,8 @@ const ru: LanguageModel = {
         },
         user: {
             total_images_text: "Всего изображений",
+            total_pastes_text: "Всего паст",
+            total_short_urls_text: "Всего сокращенных URL",
             joined_date_text: "Дата регистрации",
             storage_used_text: "Используемое хранилище",
             invited_by_text: "Пригласил"
@@ -30,19 +32,43 @@ const ru: LanguageModel = {
         },
         portable_paste: {
             title: "[RU] Paste Creator",
-            title_input_placeholder: "[RU] Title",
+            title_input_placeholder: "Заголовок",
             paste_input_placeholder: "[RU] Paste",
             button_text: "[RU] Create Paste",
             invalid_paste_length_alert: "[RU] Invalid Paste length!",
-            invalid_title_length_alert: "[RU] Invalid Title length!",
+            invalid_title_length_alert: "Неверная длина заголовка!",
             paste_created_alert: "[RU] Paste created",
             view_paste_text: "[RU] View created paste:"
+        },
+        portable_image: {
+            drag_and_drop_text: "Перетащите изображение сюда или нажмите, чтобы выбрать",
+            button_text: "Загрузить изображение",
+            image_uploaded_alert: "Изображение успешно загружено"
+        },
+        user_finder: {
+            title: "Поиск пользователя",
+            subtitle: "Найти пользователя по его имени пользователя или UID",
+            input_placeholder: "Имя пользователя | UID",
+            button_text: "Найти пользователя",
+            no_user_found_error: "Пользователь не найден",
+            empty_field_error: "Введите имя пользователя или UID"
         }
     },
     global: {
         api_key_input_placeholder: "API ключ",
-        processing_button_text: "[RU] Processing...",
-        bad_api_key_alert: "[RU] Invalid API Key"
+        processing_button_text: "Обработка...",
+        bad_api_key_alert: "Неверный API ключ"
+    },
+    toasts: {
+        error: {
+            changing_theme: "Переключение темы...",
+            change_theme: "Не удалось изменить тему"
+        },
+        success: {
+            copied_to_clipboard: "Скопировано в буфер обмена",
+            change_theme: "Тема изменена",
+            language_changed: "Язык изменен на: "
+        },
     }
 };
 

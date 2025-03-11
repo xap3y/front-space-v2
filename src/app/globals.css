@@ -25,3 +25,16 @@
     --col-whitesmoke: #171717;
     color: var(--col-whitesmoke);
 }
+
+@keyframes spin2 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spin-full {
+    animation: spin2 .2s linear;
+}

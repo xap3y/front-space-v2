@@ -5,8 +5,7 @@ import Image from "next/image";
 import {getCookie, setCookie} from "cookies-next/client";
 import {getDefaultLocale} from "@/lib/core";
 import { FaArrowUp, FaSun, FaMoon } from "react-icons/fa6";
-import {getLanguageCode, setLanguage} from "@/hooks/useTranslation";
-import Loading from "@/components/Loading";
+import translations, {setLanguage, useTranslation} from "@/hooks/useTranslation";
 import {toast} from "react-toastify";
 
 const languages = [
@@ -16,6 +15,8 @@ const languages = [
 ];
 
 export default function LanguageSwitcher() {
+
+    const lang = useTranslation();
 
     const [locale, setLocale] = useState("ru");
     const [isOpen, setIsOpen] = useState(false);
@@ -41,28 +42,27 @@ export default function LanguageSwitcher() {
         if (newLang === displayedLocale) return;
         setIsChanging(true);
 
-        toast.success("Language changed to: " + newLang.toLocaleUpperCase(), {
-            autoClose: 1000,
-            pauseOnHover: false,
-            closeOnClick: true
-        })
-
         setTimeout(() => {
             setDisplayedLocale(newLang);
             setIsChanging(false);
-            setLanguage(newLang);
+            toast.success(translations[newLang].toasts.success.language_changed + newLang.toLocaleUpperCase(), {
+                autoClose: 1000,
+                pauseOnHover: false,
+                closeOnClick: true
+            })
         }, 150);
     };
 
     const changeTheme = () => {
 
+        if (spinning) return;
         //toast.error("Something went wrong!")
-        const toast2 = toast.info("Changing theme", {
+        const toast2 = toast.info(lang.toasts.error.changing_theme, {
             isLoading: true
         })
 
         setTimeout(() => {
-            toast.update(toast2, {isLoading: false, render: "Failed to change the theme", type: "error"})
+            toast.update(toast2, {isLoading: false, render: lang.toasts.error.change_theme, type: "error", closeOnClick: true, autoClose: 600})
         }, 400);
         if (spinning) return;
         setSpinning(true);
@@ -70,7 +70,7 @@ export default function LanguageSwitcher() {
         setTimeout(() => {
             setSpinning(false);
             setIsLightMode(!isLightMode);
-        }, 200);
+        }, 250);
     };
 
     if (loading) {

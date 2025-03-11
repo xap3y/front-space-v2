@@ -1,14 +1,14 @@
-import UrlShortener from "@/app/a/url/client";
 import type {Metadata} from "next";
+import TempMailo from "@/app/a/mail/client";
 
 export const metadata: Metadata = {
-    title: "Space - URL Shortener",
+    title: "Space - Temp mailo",
 };
 
 export default async function Page() {
     return (
         <>
-            <UrlShortener />
+            <TempMailo />
         </>
     )
 }

@@ -32,11 +32,36 @@ export function getCurlHeaders(apiKey: string = getApiKey()) {
         'x-api-key': apiKey
     }
 }
+
 export async function postApi(url: string, body: any, apiKey: string) {
     const response = await fetch(API_URL + url, {
         method: "POST",
         headers: getCurlHeaders(apiKey),
         body: JSON.stringify(body)
+    })
+
+    if (!response.ok) {
+        return null;
+    }
+
+    const data = await response.json();
+
+    if (!validateResponse(data)) {
+        return null;
+    }
+
+    return data["message"];
+
+}
+
+export async function postApiForm(url: string, body: FormData, apiKey: string) {
+    const response = await fetch(API_URL + url, {
+        method: "POST",
+        headers: {
+            'x-api-key': apiKey,
+            "Access-Control-Allow-Origin": "*"
+        },
+        body: body
     })
 
     if (!response.ok) {
@@ -63,11 +88,14 @@ export async function getValidatedResponse(url: string): Promise<any> {
         headers: getCurlHeaders(),
     });
 
+    const data = await response.json();
+
+    console.log("response is " + data.toString())
     if (!response.ok) {
         return null;
     }
 
-    const data = await response.json();
+    //const data = await response.json();
 
     if (!validateResponse(data)) {
         return null;

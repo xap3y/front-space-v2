@@ -75,3 +75,5 @@ export const quotes: Quote[] = [
         author: ""
     }
 ]
+
+export default quotes;
