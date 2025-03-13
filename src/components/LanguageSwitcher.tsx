@@ -129,7 +129,7 @@ export default function LanguageSwitcher() {
                         {languages.map(({ code, label, flag }) => (
                             <div
                                 key={code}
-                                className="flex items-center p-2 hover:bg-primary_light transition-all duration-200 cursor-pointer"
+                                className="flex items-center p-2 hover:bg-primary bg-primary_light transition-all duration-200 cursor-pointer"
                                 onClick={() => changeLanguage(code)}
                             >
                                 <Image src={flag} alt={`${label} flag`} width={24} height={16} />

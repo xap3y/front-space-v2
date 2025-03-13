@@ -1,14 +1,15 @@
 import type {Metadata} from "next";
-import HomeDashboardPage from "@/app/home/dashboard/client";
+import HomeUrlsPage from "@/app/home/urls/client";
 
 export const metadata: Metadata = {
     title: "Space - Home (urls)",
 };
 
-export default function Page() {
+
+export default async function Page() {
     return (
         <>
-            <HomeDashboardPage />
+            <HomeUrlsPage />
         </>
     )
 }

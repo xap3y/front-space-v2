@@ -51,6 +51,14 @@ const cs: LanguageModel = {
             button_text: "Najít Uživatele",
             no_user_found_error: "Uživatel nebyl nalezen",
             empty_field_error: "Prosím zadejte uživatelské jméno nebo UID"
+        },
+        image_viewer: {
+            uploaded_by: "Nahrál",
+            uploaded_on: "Nahráno",
+            download_button_text: "Stáhnout",
+            copy_button_text: "Kopírovat",
+            report_button_text: "Nahlásit",
+            download_alert: "Stahování..."
         }
     },
     global: {
@@ -68,6 +76,17 @@ const cs: LanguageModel = {
             change_theme: "Téma změněno",
             language_changed: "Jazyk změněn na: "
         },
+    },
+    comp: {
+        sidebar: {
+            home: "Domů",
+            images: "Obrázky",
+            pastes: "Pastes",
+            short_urls: "Zkrácené URL",
+            settings: "Nastavení",
+            profile: "Profil",
+            logout: "Odhlásit se"
+        }
     }
 };
 

@@ -47,6 +47,13 @@ export default function Page() {
         });
     }
 
+    const reportImage = () => {
+        toast.error("Not implemented yet!", {
+            autoClose: 500,
+            closeOnClick: true
+        })
+    }
+
     const downloadImage = async () => {
         if (!image) return;
         try {
@@ -93,11 +100,11 @@ export default function Page() {
 
                             <div>
                             <span className={"text-lg"}>
-                                Uploaded by <a className={"font-bold text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
+                                {lang.pages.image_viewer.uploaded_by} <a className={"font-bold text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
                             </span>
                             </div>
 
-                            <div className={"mt-10"}>
+                            <div className={"mt-4"}>
                                 {image.type == "mp4" && (
                                     <video className={"max-h-[600px] rounded shadow-lg"} controls>
                                         <source src={getApiUrl() + "/v1/image/get/" + uid} type="video/mp4" />
@@ -110,9 +117,9 @@ export default function Page() {
                                 )}
                             </div>
 
-                            <div className={"mt-2"}>
+                            <div className={"mt-5"}>
                                 <span className={"text-lg"}>
-                                    Uploaded on {image.uploadedAt}
+                                    {lang.pages.image_viewer.uploaded_on} {image.uploadedAt}
                                 </span>
                             </div>
 
@@ -120,17 +127,17 @@ export default function Page() {
 
                                 <button className={"flex items-center gap-2 bg-green-600 text-white p-2 rounded mt-2"} onClick={downloadImage}>
                                     <FaDownload />
-                                    Download
+                                    {lang.pages.image_viewer.download_button_text}
                                 </button>
 
                                 <button className={"flex items-center gap-2 bg-telegram text-white p-2 rounded mt-2"} onClick={copyToClipboard}>
                                     <FaRegCopy />
-                                    Copy
+                                    {lang.pages.image_viewer.copy_button_text}
                                 </button>
 
-                                <button className={"flex items-center gap-2 bg-red-700 text-white p-2 rounded mt-2"}>
+                                <button className={"flex items-center gap-2 bg-red-700 text-white p-2 rounded mt-2"} onClick={reportImage} >
                                     <MdReport />
-                                    Report
+                                    {lang.pages.image_viewer.report_button_text}
                                 </button>
                             </div>
 

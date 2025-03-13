@@ -26,3 +26,11 @@ export interface Quote {
 export interface FunFact {
     text: string;
 }
+
+export interface Sidebar {
+    title: string;
+    href: string;
+    icon: React.ReactNode;
+    permission?: string;
+    page: string;
+}

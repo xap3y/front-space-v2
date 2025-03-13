@@ -52,6 +52,14 @@ const ru: LanguageModel = {
             button_text: "Найти пользователя",
             no_user_found_error: "Пользователь не найден",
             empty_field_error: "Введите имя пользователя или UID"
+        },
+        image_viewer: {
+            uploaded_by: "NULL",
+            uploaded_on: "NULL",
+            download_button_text: "NULL",
+            copy_button_text: "NULL",
+            report_button_text: "NULL",
+            download_alert: "NULL"
         }
     },
     global: {
@@ -69,6 +77,17 @@ const ru: LanguageModel = {
             change_theme: "Тема изменена",
             language_changed: "Язык изменен на: "
         },
+    },
+    comp: {
+        sidebar: {
+            home: "Главная",
+            images: "Изображения",
+            pastes: "Пасты",
+            short_urls: "Сократить URL",
+            settings: "Настройки",
+            profile: "Профиль",
+            logout: "Выйти"
+        }
     }
 };
 

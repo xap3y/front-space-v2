@@ -1,6 +1,6 @@
 {
   "name": "xap3y-space-v2",
-  "version": "0.1.0",
+  "version": "0.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -24,6 +24,7 @@
     "react-medium-image-zoom": "^5.2.13",
     "react-responsive-pinch-zoom-pan": "^0.3.0",
     "react-toastify": "^11.0.3",
+    "react-tooltip": "^5.28.0",
     "redark-theme": "^1.0.3",
     "redoc": "^2.4.0",
     "styled-components": "^6.1.15"

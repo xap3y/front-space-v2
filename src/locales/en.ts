@@ -51,6 +51,14 @@ const en: LanguageModel = {
             button_text: "Find User",
             no_user_found_error: "User not found",
             empty_field_error: "Please enter username or UID"
+        },
+        image_viewer: {
+            uploaded_by: "Uploaded by",
+            uploaded_on: "Uploaded on",
+            download_button_text: "Download",
+            copy_button_text: "Copy",
+            report_button_text: "Report",
+            download_alert: "Downloading..."
         }
     },
     global: {
@@ -68,6 +76,17 @@ const en: LanguageModel = {
             change_theme: "Theme changed",
             language_changed: "Language changed to: "
         },
+    },
+    comp: {
+        sidebar: {
+            home: "Home",
+            images: "Images",
+            pastes: "Pastes",
+            short_urls: "Shortened URLs",
+            settings: "Settings",
+            profile: "Profile",
+            logout: "Logout"
+        }
     }
 };
 

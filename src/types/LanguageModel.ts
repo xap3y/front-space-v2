@@ -50,6 +50,14 @@ export default interface LanguageModel {
             button_text: string;
             no_user_found_error: string;
             empty_field_error: string;
+        },
+        image_viewer: {
+            uploaded_by: string;
+            uploaded_on: string;
+            download_button_text: string;
+            copy_button_text: string;
+            report_button_text: string;
+            download_alert: string;
         }
     },
     global: {
@@ -67,5 +75,16 @@ export default interface LanguageModel {
             change_theme: string;
             language_changed: string;
         },
+    },
+    comp: {
+        sidebar: {
+            home: string;
+            images: string;
+            pastes: string;
+            short_urls: string;
+            settings: string;
+            profile: string;
+            logout: string;
+        }
     }
 }
