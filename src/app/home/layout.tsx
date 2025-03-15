@@ -29,7 +29,7 @@ export default function HomeLayout({
     return (
             <>
                 <PageProvider>
-                    <div className={"flex flex-row w-full overflow-x-hidden"}>
+                    <div className={"flex flex-row overflow-x-hidden"}>
                         <SidebarComp sidebar={[
                             {title: lang.comp.sidebar.home, icon: <FaHome className={"w-[30px] h-[30px]"} />, href: "/dashboard", page: "home"},
                             {title: lang.comp.sidebar.images, icon: <FaImages className={"w-[30px] h-[30px]"} />, href: "/gallery", page: "gallery"},

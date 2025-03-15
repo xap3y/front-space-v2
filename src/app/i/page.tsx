@@ -1,13 +1,13 @@
 'use client';
 
 import {useState} from "react";
-import {toast} from "react-toastify";
 import {useRouter} from 'next/navigation'
-import { useUser } from '@/context/UserContext';
 import LoadingPage from "@/components/LoadingPage";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import {useImage} from "@/context/ImageContext";
 import {UploadedImage} from "@/types/image";
+import {errorToast} from "@/lib/client";
+import {useTranslation} from "@/hooks/useTranslation";
 
 export default function ImageFinder() {
 
@@ -15,18 +15,19 @@ export default function ImageFinder() {
     const [uid, setUid] = useState("");
     const [loading, setLoading] = useState(false);
     const { image, setImage } = useImage();
+    const lang = useTranslation();
 
     const findImage = async () => {
 
         if (uid == "") {
-            return toast.error("Please enter a uniqueId");
+            return errorToast(lang.pages.image_finder.empty_field_error, 600);
         }
         setLoading(true)
         const img: UploadedImage | null = await getImageInfoApi(uid + "");
 
         if (img == null) {
             setLoading(false)
-            return toast.error("Image not found");
+            return errorToast(lang.pages.image_finder.no_image_found_error, 1000);
         }
         setImage(img);
         router.push(`/i/${img.uniqueId}`)
@@ -45,22 +46,21 @@ export default function ImageFinder() {
             )}
 
             {!loading && (
-                <main className="flex items-center justify-center min-h-screen">
-                    <div className="max-w-lg w-full mx-3">
+                <main className="flex overflow-y-hidden mt-40 lg:mt-0 lg:items-center justify-center lg:min-h-screen">
+                    <div className="overflow-y-hidden max-w-lg w-full mx-3">
                         <div
                             className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
                         >
                             <div className="p-4">
-                                <h1 className="text-3xl font-bold text-center text-white">Image Finder</h1>
-                                <p className="text-center">Find a image by unique identifier</p>
+                                <h1 className="text-3xl font-bold text-center text-white">{lang.pages.image_finder.title}</h1>
+                                <p className="text-center">{lang.pages.image_finder.subtitle}</p>
                             </div>
                             <form onSubmit={handleSubmit} className="p-4" >
                                 <div className="mb-4">
                                     <input
-                                        placeholder= "Image Unique ID"
+                                        placeholder={lang.pages.image_finder.input_placeholder}
                                         className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
                                         required
-                                        autoComplete="new-password"
                                         type="text"
                                         name="uid"
                                         id="uid"
@@ -74,7 +74,7 @@ export default function ImageFinder() {
                                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-telegram hover:bg-telegram-brightest hover:text-primary focus:outline-none transition-all duration-200 transform"
                                         onClick={findImage}
                                     >
-                                        Lookup Image
+                                        {lang.pages.image_finder.button_text}
                                     </button>
                                 </div>
                             </form>

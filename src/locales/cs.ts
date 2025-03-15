@@ -59,6 +59,14 @@ const cs: LanguageModel = {
             copy_button_text: "Kopírovat",
             report_button_text: "Nahlásit",
             download_alert: "Stahování..."
+        },
+        image_finder: {
+            title: "Vyhledávač Obrázků",
+            subtitle: "Najít obrázek podle jeho UID",
+            input_placeholder: "UID obrázku",
+            button_text: "Hledat Obrázek",
+            no_image_found_error: "Obrázek nebyl nalezen",
+            empty_field_error: "Prosím zadejte UID obrázku"
         }
     },
     global: {

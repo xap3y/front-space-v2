@@ -58,6 +58,14 @@ export default interface LanguageModel {
             copy_button_text: string;
             report_button_text: string;
             download_alert: string;
+        },
+        image_finder: {
+            title: string;
+            subtitle: string;
+            input_placeholder: string;
+            button_text: string;
+            no_image_found_error: string;
+            empty_field_error: string;
         }
     },
     global: {

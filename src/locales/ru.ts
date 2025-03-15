@@ -54,12 +54,20 @@ const ru: LanguageModel = {
             empty_field_error: "Введите имя пользователя или UID"
         },
         image_viewer: {
-            uploaded_by: "NULL",
-            uploaded_on: "NULL",
-            download_button_text: "NULL",
-            copy_button_text: "NULL",
-            report_button_text: "NULL",
-            download_alert: "NULL"
+            uploaded_by: "Загружено",
+            uploaded_on: "Загружено",
+            download_button_text: "Скачать",
+            copy_button_text: "Копировать",
+            report_button_text: "Сообщить",
+            download_alert: "Скачивание начнется в течение нескольких секунд"
+        },
+        image_finder: {
+            title: "Поиск изображения",
+            subtitle: "Найти изображение по его UID",
+            input_placeholder: "UID изображения",
+            button_text: "Найти изображение",
+            no_image_found_error: "Изображение не найдено",
+            empty_field_error: "Введите UID изображения"
         }
     },
     global: {

@@ -59,6 +59,14 @@ const en: LanguageModel = {
             copy_button_text: "Copy",
             report_button_text: "Report",
             download_alert: "Downloading..."
+        },
+        image_finder: {
+            title: "Image Finder",
+            subtitle: "Find an image by its unique identifier",
+            input_placeholder: "Image Unique ID",
+            button_text: "Lookup Image",
+            no_image_found_error: "Image not found!",
+            empty_field_error: "Please enter a uniqueId"
         }
     },
     global: {

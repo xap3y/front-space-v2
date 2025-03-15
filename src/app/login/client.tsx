@@ -56,7 +56,10 @@ export default function LoginPage() {
                 }
                 // @ts-expect-error
                 setError(error.message);
-                toast.error('API error!');
+                toast.error('API error!', {
+                    autoClose: 600,
+                    closeOnClick: true
+                });
                 console.log("[GET] " + getApiUrl() + "/status " + error);
             } finally {
                 setLoading(false)
@@ -115,7 +118,7 @@ export default function LoginPage() {
                 maxAge: 60 * 60 * 24 * 7,
             });
 
-            toast.update(toastId, { render: lang.pages.login.success, type: "success", isLoading: false, autoClose: 1300})
+            toast.update(toastId, { render: lang.pages.login.success, type: "success", isLoading: false, autoClose: 1000, closeOnClick: true})
             setLoading(true);
             setTimeout(() => {
                 router.push('/home/dashboard/');
@@ -133,7 +136,7 @@ export default function LoginPage() {
     }
 
     return (
-        <main className="flex items-center justify-center min-h-screen">
+        <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
 
             {/*<ErrorBanner message="API is down!" />*/}
 
@@ -141,7 +144,7 @@ export default function LoginPage() {
                 <div
                     className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
                 >
-                    <div className="p-8">
+                    <div className="p-3 lg:p-8">
                         <h2 className="text-center text-3xl font-extrabold text-white">
                             {lang.pages.login.title}
                         </h2>
@@ -153,7 +156,7 @@ export default function LoginPage() {
                                         < MdEmail className="w-8 h-8 mr-2" />
                                         <input
                                             placeholder={lang.pages.login.email_placeholder}
-                                            className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
+                                            className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                             required
                                             autoComplete="new-password"
                                             type="email"
