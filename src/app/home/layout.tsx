@@ -9,6 +9,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {PageProvider} from "@/context/PageContext";
 import GalleryPageServer from "@/app/home/gallery/page";
 import GalleryPage from "@/app/home/gallery/client";
+import {Tooltip} from "react-tooltip";
 
 export default function HomeLayout({
                                         children,
@@ -30,6 +31,7 @@ export default function HomeLayout({
             <>
                 <PageProvider>
                     <div className={"flex flex-row overflow-x-hidden"}>
+                        <Tooltip id="my-tooltip" />
                         <SidebarComp sidebar={[
                             {title: lang.comp.sidebar.home, icon: <FaHome className={"w-[30px] h-[30px]"} />, href: "/dashboard", page: "home"},
                             {title: lang.comp.sidebar.images, icon: <FaImages className={"w-[30px] h-[30px]"} />, href: "/gallery", page: "gallery"},

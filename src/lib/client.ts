@@ -6,3 +6,10 @@ export const errorToast = (message: string, delay: number = 1000) => {
         closeOnClick: true,
     })
 }
+
+export const okToast = (message: string, delay: number = 1000) => {
+    return toast.success(message, {
+        autoClose: delay,
+        closeOnClick: true,
+    })
+}

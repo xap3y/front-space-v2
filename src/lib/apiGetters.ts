@@ -16,6 +16,14 @@ export async function getUserApi(id: string): Promise<UserObj | null> {
     return user;
 }
 
+export async function getUserImages(uid: string): Promise<UploadedImage[] | null> {
+
+    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/images");
+    if (!data) return null;
+    const images = data as UploadedImage[];
+    return images;
+}
+
 export async function getImageInfoApi(uid: string): Promise<UploadedImage | null> {
     console.log("Calling getImageInfoApi with uid: " + uid)
 

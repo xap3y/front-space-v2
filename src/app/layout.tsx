@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+/*import { Geist, Geist_Mono } from "next/font/google";*/
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/next';
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {getTheme} from "@/hooks/getTheme";
 
-const geistSans = Geist({
+/*const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
 });
@@ -15,7 +15,7 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
-});
+});*/
 
 export const metadata: Metadata = {
     title: "Space Frontend v2",
@@ -47,7 +47,7 @@ export default function RootLayout({
         <html lang="en">
         <body
             cz-shortcut-listen="true"
-            className={`dark ${geistSans.variable} ${geistMono.variable} h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
+            className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
         >
         {children}
         <LanguageSwitcher />

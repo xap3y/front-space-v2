@@ -3,7 +3,7 @@ const API_URL = process.env.API_URL || "http://127.0.0.1:8012";
 const supportedLocales = ['ru', 'en', 'cs'];
 
 export function getApiUrl() {
-    return process.env.API_URL || "http://127.0.0.1:8012";
+    return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8012";
 }
 
 export function getSecretKey() {
@@ -11,7 +11,7 @@ export function getSecretKey() {
 }
 
 export function getDefaultLocale(): string {
-    const locale = process.env.DEFAULT_LOCALE || "ru";
+    const locale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "ru";
 
     if (!supportedLocales.includes(locale)) {
         return "ru";
