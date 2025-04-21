@@ -18,7 +18,9 @@ import {CiMail} from "react-icons/ci";
 import {SocialLinkButton} from "@/components/SocialLinkButton";
 import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
-import {useEffect} from "react";
+import {getUserRoleBadge} from "@/lib/client";
+import {UserPopupCard} from "@/components/UserPopupCard";
+import {useState} from "react";
 
 interface Props {
     user: UserObj
@@ -26,8 +28,18 @@ interface Props {
 
 export function UserProfile({ user }: Props) {
 
+    const [showCard, setShowCard] = useState(false);
+    const [position, setPosition] = useState({ x: 1212, y: 530 });
+    const handleMouseEnter = () => setShowCard(true);
+    const handleMouseLeave = () => setShowCard(false);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        setPosition({ x: e.clientX, y: e.clientY });
+    };
     const lang = useTranslation();
     const iconSize = 32;
+
+    const userBadge = getUserRoleBadge(user.role);
 
     return (
         <div
@@ -49,85 +61,12 @@ export function UserProfile({ user }: Props) {
                     {"UID: " + user.uid}
                 </span>
 
-            {user.role == "OWNER" && (
-                <span
-                    className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
-                    owner
-                </span>
-            )}
-            {user.role == "ADMIN" && (
-                <span
-                    className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                    admin
-                </span>
-            )}
-
-            {user.role == "USER" && (
-                /*<span className='bg-transparent text-amber-600 border border-amber-400 text-lg ml-2 font-medium mr-2 px-1.5 rounded-full py-1'>
-                    owner
-                </span>*/
-                <span
-                    className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                    user
-                </span>
-            )}
-
-            {user.role == "MODERATOR" && (
-                /*<span className='bg-transparent text-amber-600 border border-amber-400 text-lg ml-2 font-medium mr-2 px-1.5 rounded-full py-1'>
-                    owner
-                </span>*/
-                <span className="bg-blue-500 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    moderator
-                </span>
-            )}
-
-            {user.role == "GUEST" && (
-                /*<span className='bg-transparent text-amber-600 border border-amber-400 text-lg ml-2 font-medium mr-2 px-1.5 rounded-full py-1'>
-                    owner
-                </span>*/
-                <span className="bg-primary-darker text-white text-xs font-medium px-2.5 py-0.5 rounded">
-                    guest
-                </span>
-            )}
-
-            {user.role == "BANNED" && (
-                /*<span className='bg-transparent text-amber-600 border border-amber-400 text-lg ml-2 font-medium mr-2 px-1.5 rounded-full py-1'>
-                    owner
-                </span>*/
-                <span className="bg-red-600 text-gray-800 text-xs px-2.5 py-0.5 rounded font-parkinsans font-bold">
-                    BANNED
-                </span>
-            )}
-
-            {user.role == "DELETED" && (
-                /*<span className='bg-transparent text-amber-600 border border-amber-400 text-lg ml-2 font-medium mr-2 px-1.5 rounded-full py-1'>
-                    owner
-                </span>*/
-                <span className="bg-red-600 text-gray-800 text-xs px-2.5 py-0.5 rounded font-parkinsans font-bold">
-                    DELETED
-                </span>
-            )}
-
-            {user.role == "TESTER" && (
-                /*<span className='bg-transparent text-amber-600 border border-amber-400 text-lg ml-2 font-medium mr-2 px-1.5 rounded-full py-1'>
-                    owner
-                </span>*/
-                <span className={"flex gap-3"}>
-                    <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        tester
-                    </span>
-
-                    <span
-                        className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                        admin
-                    </span>
-                </span>
-            )}
+            {userBadge}
 
             {/*<p className="text-gray-400">{user.role}</p>*/}
 
             {/* Stats */}
-            <div className="w-full mt-6 text-lg font-parkinsans">
+            <div onMouseMove={handleMouseMove} className="w-full mt-6 text-lg font-parkinsans">
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.total_images_text}:</span>
                     <span className={"font-bold"}>{user.stats.totalUploads}</span>
@@ -154,10 +93,16 @@ export function UserProfile({ user }: Props) {
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
-                    <span>{lang.pages.user.invited_by_text}:</span>
+                    <span>{lang.global.invited_by_text}:</span>
                     {user.invitor == null
                         ? <span className={"text-primary-brighter font-bold"}>N/A</span>
-                        : <a className={"decoration-0 text-blue-600 font-bold"} href={"/user/" + user.invitor.username}>{user.invitor.username + " (" + user.invitor.uid + ")"}</a>
+                        : <a onMouseEnter={handleMouseEnter}
+                             onMouseLeave={handleMouseLeave}
+                             className={"decoration-0 text-blue-600 font-bold"}
+                             href={"/user/" + user.invitor.username}
+                        >
+                            {user.invitor.username + " (" + user.invitor.uid + ")"}
+                        </a>
                     }
                 </div>
             </div>
@@ -303,6 +248,19 @@ export function UserProfile({ user }: Props) {
                                 <FaVk title={"vk"} size={iconSize} color={"#0077FF"}/>
                             </SocialLinkButton>
                         )}
+                    </div>
+                )
+            }
+
+            {
+                user.invitor && (
+                    <div
+                        className={`pointer-events-none transition-all duration-200 ease-out transform ${
+                            showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                        } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
+                        style={{ top: position.y + 10, left: position.x + 20 }}
+                    >
+                        <UserPopupCard user={user.invitor as UserObj} lang={lang} />
                     </div>
                 )
             }

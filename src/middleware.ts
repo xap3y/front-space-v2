@@ -60,7 +60,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     }
 
     // Optional: Check role if required for admin
-    if (req.nextUrl.pathname.startsWith("/admin") && user.role !== "admin") {
+    if (req.nextUrl.pathname.startsWith("/admin") && user.role !== "ADMIN") {
         return NextResponse.redirect(new URL("/", req.url));
     }
 

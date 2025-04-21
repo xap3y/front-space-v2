@@ -1,3 +1,5 @@
+import {DefaultResponse} from "@/types/core";
+
 const API_URL = process.env.API_URL || "http://127.0.0.1:8012";
 
 const supportedLocales = ['ru', 'en', 'cs'];
@@ -82,26 +84,36 @@ export function validateResponse(data: any): boolean {
     return !data["error"] && data["message"];
 }
 
-export async function getValidatedResponse(url: string): Promise<any> {
-    const response = await fetch(getApiUrl() + url, {
-        method: 'GET',
-        headers: getCurlHeaders(),
-    });
+export async function getValidatedResponse(url: string): Promise<DefaultResponse> {
 
-    const data = await response.json();
+    try {
+        const response = await fetch(getApiUrl() + url, {
+            method: 'GET',
+            headers: getCurlHeaders(),
+        });
 
-    console.log("response is " + data.toString())
-    if (!response.ok) {
-        return null;
+        const data = await response.json();
+
+        console.log("response is " + data.toString())
+        if (!response.ok) {
+            if (response.status.toString().startsWith("4")) {
+                return {error: true, message: "Client error"} as DefaultResponse;
+            } else {
+                return {error: true, message: "Server error"} as DefaultResponse;
+            }
+        }
+
+        //const data = await response.json();
+
+        if (!validateResponse(data)) {
+            return {error: true, message: "Failed to validate data"} as DefaultResponse;
+        }
+
+        return {error: false, message: "OK", data: data["message"]} as DefaultResponse;
+        //return data["message"];
+    } catch (e) {
+        return {error: true, message: "Server error"} as DefaultResponse;
     }
-
-    //const data = await response.json();
-
-    if (!validateResponse(data)) {
-        return null;
-    }
-
-    return data["message"];
 }
 
 export default supportedLocales;

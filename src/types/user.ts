@@ -2,7 +2,7 @@ export interface UserObj {
     uid: number;
     email: string;
     username: string;
-    role: string;
+    role: RoleType;
     avatar?: string | null;
     createdAt: string;
     invitor?: UserInvitor | null;
@@ -19,7 +19,9 @@ export interface UserObj {
 export interface UserInvitor {
     uid: number;
     username: string;
-    role: string;
+    role: RoleType;
+    avatar: string;
+    createdAt: string;
 }
 
 export interface UserSocials {
@@ -55,3 +57,5 @@ export interface UserObjShort {
     createdAt: string;
     invitor: UserInvitor | null;
 }
+
+export type RoleType = "DELETED" | "BANNED" | "TESTER" | "GUEST" | "MODERATOR" | "USER" | "ADMIN" | "OWNER";

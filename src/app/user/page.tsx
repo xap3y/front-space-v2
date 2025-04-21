@@ -8,6 +8,7 @@ import { useUser } from '@/context/UserContext';
 import LoadingPage from "@/components/LoadingPage";
 import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
+import {DefaultResponse} from "@/types/core";
 
 export default function UserFinder() {
 
@@ -24,7 +25,8 @@ export default function UserFinder() {
             return toast.error(lang.pages.user_finder.empty_field_error);
         }
         setLoading(true)
-        const user: UserObj | null = await getUserApi(username + "");
+        const res: DefaultResponse = await getUserApi(username + "");
+        const user = res.data as UserObj
 
         if (user == null) {
             setLoading(false)
@@ -41,7 +43,7 @@ export default function UserFinder() {
     }
 
     useEffect(() => {
-        toast.error("Поставщик пользователя вернул NULL")
+        //toast.error("Поставщик пользователя вернул NULL")
         setLoading(false)
     }, []);
 

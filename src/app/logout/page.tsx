@@ -6,6 +6,8 @@ import LoadingPage from "@/components/LoadingPage";
 import { useUser } from "@/hooks/useUser";
 import {toast} from "react-toastify";
 import {useEffect} from "react";
+import {getApiUrl} from "@/lib/core";
+import {logApiRes} from "@/lib/logger";
 
 export default function Page() {
 
@@ -19,8 +21,30 @@ export default function Page() {
             return;
         }
         if (!loadingUser && user) {
-            logout();
-            router.push('/login/')
+            async function fetchData() {
+                const response = await fetch(getApiUrl() + "/v1/auth/logout", {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                });
+
+                logApiRes(response);
+                if (response.ok) {
+                    logout();
+                }
+                router.push('/login')
+            }
+            fetchData()
+                .then(() => {
+                    console.log("Logged out");
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                });
         }
     }, [loadingUser, user, error])
 

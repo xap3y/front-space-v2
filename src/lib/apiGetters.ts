@@ -1,35 +1,44 @@
 'use server';
-import {getValidatedResponse} from "@/lib/core";
-import {UserObj} from "@/types/user";
+import {getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {PasteDto} from "@/types/paste";
+import {ShortUrlDto} from "@/types/url";
+import {DefaultResponse} from "@/types/core";
 
-export async function getUserApi(id: string): Promise<UserObj | null> {
+export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
 
     const data = await getValidatedResponse('/v1/user/get/' + id);
     console.log("data is " + data)
-    if (!data) return null;
-    const user = data as UserObj;
+    if (data.error) return data;
+    /*const user = data["data"] as UserObj;
     user.createdAt = new Date(user.createdAt).toLocaleString()
-    console.log("user is " + user)
-    return user;
+    console.log("user is " + user)*/
+    return data;
 }
 
 export async function getUserImages(uid: string): Promise<UploadedImage[] | null> {
 
     const data = await getValidatedResponse('/v1/admin/user/' + uid + "/images");
     if (!data) return null;
-    const images = data as UploadedImage[];
+    const images = data["data"] as UploadedImage[];
     return images;
+}
+
+export async function getUserShortUrls(uid: string): Promise<ShortUrlDto[] | DefaultResponse> {
+
+    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/urls");
+    if (data.error) return {error: true, message: "Failed to get short URLs"} as DefaultResponse;
+    const urlList = data["data"] as ShortUrlDto[];
+    return urlList;
 }
 
 export async function getImageInfoApi(uid: string): Promise<UploadedImage | null> {
     console.log("Calling getImageInfoApi with uid: " + uid)
 
     const data = await getValidatedResponse('/v1/image/info/' + uid);
-    if (!data) return null;
-    const img = data as UploadedImage;
+    if (data.error) return null;
+    const img = data["data"] as UploadedImage;
     img.uploader.createdAt = new Date(img.uploader.createdAt).toLocaleString()
     img.uploadedAt = new Date(img.uploadedAt).toLocaleString()
     return img;
@@ -40,12 +49,30 @@ export async function getPasteApi(uid: string): Promise<PasteDto | null> {
 
     const data = await getValidatedResponse('/v1/paste/get/' + uid);
 
-    if (!data) return null;
+    if (data.error) return null;
 
-    const pasteDto = data as PasteDto;
+    const pasteDto = data["data"] as PasteDto;
 
     pasteDto.uploader.createdAt = new Date(pasteDto.uploader.createdAt).toLocaleString()
     pasteDto.createdAt = new Date(pasteDto.createdAt).toLocaleString()
 
     return pasteDto;
+}
+
+export async function getImageCountStatsOnDate(start: string, end: string, apiKey: string): Promise<any|null> {
+    console.debug("[getImageCountStatsOnDate] CALL ")
+    const response = await fetch(getApiUrl() + "/v1/stats/all", {
+        method: 'POST',
+        headers: getCurlHeaders(apiKey),
+        body: JSON.stringify({
+            fromDate: start,
+            toDate: end,
+            fillMissing: true
+        })
+    });
+
+    const data = await response.json();
+    if (!data) return null;
+    console.debug("[getImageCountStatsOnDate] DATA IS " + data)
+    return data;
 }

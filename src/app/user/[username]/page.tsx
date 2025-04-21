@@ -8,6 +8,7 @@ import {useEffect, useState} from "react";
 import NotFound from "next/dist/client/components/not-found-error";
 import LoadingPage from "@/components/LoadingPage";
 import {UserObj} from "@/types/user";
+import {DefaultResponse} from "@/types/core";
 
 export default function Page() {
 
@@ -17,8 +18,8 @@ export default function Page() {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const user2: UserObj | null = await getUserApi(username + "");
-            setUser(user2);
+            const user2: DefaultResponse = await getUserApi(username + "");
+            setUser(user2.data as UserObj);
             setLoading(false)
         };
 

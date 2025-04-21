@@ -22,7 +22,6 @@ const en: LanguageModel = {
             total_short_urls_text: "Total short URLs",
             joined_date_text: "Joined date",
             storage_used_text: "Storage used",
-            invited_by_text: "Invited by"
         },
         portable_url: {
             title: "URL Shortener",
@@ -58,7 +57,10 @@ const en: LanguageModel = {
             download_button_text: "Download",
             copy_button_text: "Copy",
             report_button_text: "Report",
-            download_alert: "Downloading..."
+            download_alert: "Downloading...",
+            password_required: "This image is password protected",
+            password_placeholder: "Enter password",
+            view_image_button_placeholder: "View Image",
         },
         image_finder: {
             title: "Image Finder",
@@ -67,23 +69,48 @@ const en: LanguageModel = {
             button_text: "Lookup Image",
             no_image_found_error: "Image not found!",
             empty_field_error: "Please enter a uniqueId"
+        },
+        profile: {
+            title: "Account overview"
         }
     },
     global: {
         api_key_input_placeholder: "API Key",
         processing_button_text: "Processing...",
-        bad_api_key_alert: "Invalid API Key"
+        bad_api_key_alert: "Invalid API Key",
+        invited_by_text: "Invited by",
+        total_images_text: "Total images",
+        total_pastes_text: "Total pastes",
+        total_short_urls_text: "Total short URLs",
+        joined_date_text: "Joined date",
+        storage_used_text: "Storage used",
+        click_to_copy: "Click to copy",
+        click_to_show: "Click to show",
+        click_to_hide: "Click to hide",
+        member_since: "Member since",
+        click_to_edit: "Click to edit",
+        click_to_save: "Click to save",
+        click_to_delete: "Click to delete",
+        not_connected_text: "Not connected",
+        disabled_text: "Disabled",
     },
     toasts: {
         error: {
             changing_theme: "Switching theme...",
-            change_theme: "Failed to change theme"
+            change_theme: "Failed to change theme",
+            email_change: "Failed to change email",
+            invalid_password: "Invalid password",
         },
         success: {
             copied_to_clipboard: "Copied to clipboard",
             change_theme: "Theme changed",
-            language_changed: "Language changed to: "
+            language_changed: "Language changed to: ",
+            email_change: "Email changed successfully",
+            password: "missing password",
         },
+        loading: {
+            fetching_image: "Fetching image...",
+        }
     },
     comp: {
         sidebar: {

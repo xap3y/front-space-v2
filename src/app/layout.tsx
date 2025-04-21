@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 /*import { Geist, Geist_Mono } from "next/font/google";*/
+
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { Analytics } from '@vercel/analytics/next';
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import {getTheme} from "@/hooks/getTheme";
+import {ClientRoot} from "@/components/ClientRoot";
 
 /*const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -20,14 +21,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
     title: "Space Frontend v2",
     description: "XAP3Y's space",
-    keywords: ["XAP3Y", "XAP3X", "Martin Hoke", "ksapeks", "xapex", "xapey", "xap3j", "Hoke Martin", "ксап3й", "ксапей"],
+    keywords: ["XAP3Y", "XAP3X", "ksapeks", "xapex", "xapey", "xap3j", "ксап3й", "ксапей"],
     openGraph: {
         title: "XAP3Y's space",
         description: "Frontend for XAP3Y's space API",
         type: "website",
         locale: "en_US",
         siteName: "XAP3Y's space",
-        url: "https://sp.xap3y.tech",
+        url: "https://space.xap3y.tech",
     },
     twitter: {
         title: "XAP3Y's space",
@@ -49,7 +50,9 @@ export default function RootLayout({
             cz-shortcut-listen="true"
             className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
         >
-        {children}
+        <ClientRoot>
+            {children}
+        </ClientRoot>
         <LanguageSwitcher />
         <Analytics />
         <ToastContainer theme={"dark"} />

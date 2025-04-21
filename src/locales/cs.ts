@@ -22,7 +22,6 @@ const cs: LanguageModel = {
             total_short_urls_text: "Celkem zkrácených URL",
             joined_date_text: "Datum registrace",
             storage_used_text: "Využité úložiště",
-            invited_by_text: "Pozván od"
         },
         portable_url: {
             title: "Zkracovač URL",
@@ -58,7 +57,10 @@ const cs: LanguageModel = {
             download_button_text: "Stáhnout",
             copy_button_text: "Kopírovat",
             report_button_text: "Nahlásit",
-            download_alert: "Stahování..."
+            download_alert: "Stahování...",
+            password_placeholder: "Heslo",
+            password_required: "Pro zobrazení obrázku je vyžadováno heslo",
+            view_image_button_placeholder: "Zobrazit obrázek",
         },
         image_finder: {
             title: "Vyhledávač Obrázků",
@@ -67,23 +69,48 @@ const cs: LanguageModel = {
             button_text: "Hledat Obrázek",
             no_image_found_error: "Obrázek nebyl nalezen",
             empty_field_error: "Prosím zadejte UID obrázku"
+        },
+        profile: {
+            title: "Přehled účtu",
         }
     },
     global: {
         api_key_input_placeholder: "API Klíč",
         processing_button_text: "Zpracovává se...",
-        bad_api_key_alert: "Špatný API klíč"
+        bad_api_key_alert: "Špatný API klíč",
+        invited_by_text: "Pozván od",
+        total_images_text: "Celkem obrázků",
+        total_pastes_text: "Celkem pastů",
+        total_short_urls_text: "Celkem zkrácených URL",
+        joined_date_text: "Datum registrace",
+        storage_used_text: "Využité úložiště",
+        click_to_copy: "Klikněte pro zkopírování",
+        click_to_show: "Klikněte pro zobrazení",
+        click_to_hide: "Klikněte pro skrytí",
+        member_since: "Člen od",
+        click_to_edit: "Klikněte pro úpravu",
+        click_to_delete: "Klikněte pro smazání",
+        click_to_save: "Klikněte pro uložení",
+        disabled_text: "Není dostupné",
+        not_connected_text: "Není připojeno",
     },
     toasts: {
         error: {
             changing_theme: "Přepínání tématu...",
-            change_theme: "Nepodařilo se změnit téma"
+            change_theme: "Nepodařilo se změnit téma",
+            email_change: "Nepodařilo se změnit email",
+            invalid_password: "Neplatné heslo",
         },
         success: {
             copied_to_clipboard: "Zkopírováno do schránky",
             change_theme: "Téma změněno",
-            language_changed: "Jazyk změněn na: "
+            language_changed: "Jazyk změněn na: ",
+            email_change: "Email změněn",
+            password: ""
         },
+        loading: {
+            fetching_image: "Načítání obrázku...",
+        }
     },
     comp: {
         sidebar: {

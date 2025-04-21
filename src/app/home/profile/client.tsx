@@ -1,22 +1,74 @@
 "use client";
 
-import {usePage} from "@/context/PageContext";
-import {useEffect, useState} from "react";
-import {useUser} from "@/hooks/useUser";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import {okToast} from "@/lib/client";
-import {DateChart} from "@/components/DateChart";
+import {JSX, useEffect, useState} from "react";
 /*import "@/app/debug.css";*/
+import {useUser} from "@/hooks/useUser";
+import LoadingPage from "@/components/LoadingPage";
+import {usePage} from "@/context/PageContext";
+import {errorToast, getUserRoleBadge, okToast} from "@/lib/client";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
+import {useTranslation} from "@/hooks/useTranslation";
+import LanguageModel from "@/types/LanguageModel";
+import { MdOutlineEmail, MdEdit, MdOutlineStorage, MdFilterList } from "react-icons/md";
+import { FaDiscord, FaShieldAlt, FaSave, FaCalendarAlt } from "react-icons/fa";
+import { FaPhone, FaFilter } from "react-icons/fa6";
+import {DateChart} from "@/components/DateChart";
+import {UserPopupCard} from "@/components/UserPopupCard";
+import {UserObj} from "@/types/user";
+import {getImageCountStatsOnDate} from "@/lib/apiGetters";
+import {PairType} from "@/types/core";
+import {DatePickerComp} from "@/components/DatePickerComp";
+import {ErrorPage} from "@/components/ErrorPage";
+import {useRouter} from "next/navigation";
 
-export default function HomeProfilePage() {
-
-    const { pageName, setPage } = usePage();
-    const [ apiKey, setApiKey ] = useState<string>("********");
+export default function HomeProfilePage(): JSX.Element {
 
     const { user, loadingUser, error } = useUser();
-    
-    const apiKeyToggle = () => {
+    const { pageName, setPage } = usePage();
+    const [ loading, setLoading ] = useState<boolean>(true)
+    const [ apiKey, setApiKey ] = useState<string>("********");
+    const lang: LanguageModel = useTranslation();
 
+    const [fetchError, setFetchError] = useState(false);
+    const [fetchErrorMessage, setFetchErrorMessage] = useState<string>("Error fetching data");
+
+    const [showCard, setShowCard] = useState(false);
+    const [position, setPosition] = useState({ x: 750, y: 520 });
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedEmail, setEditedEmail] = useState<string>("");
+    const [isSaving, setIsSaving] = useState(false);
+    const [currentEmail, setCurrentEmail] = useState<string>("");
+
+    const [graphDataLabels, setGraphDataLabels] = useState<string[]>([]);
+    const [graphDataValuesImages, setGraphDataValuesImages] = useState<number[]>([]);
+    const [graphDataValuesPastes, setGraphDataValuesPastes] = useState<number[]>([]);
+    const [graphDataValuesUrls, setGraphDataValuesUrls] = useState<number[]>([]);
+
+    const router = useRouter()
+
+    const [graphDateFrom, setGraphDateFrom] = useState<Date>(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 9);
+        return d;
+    })
+    const [graphDateTo, setGraphDateTo] = useState<Date>(new Date());
+
+    const handleMouseEnter = () => setShowCard(true);
+    const handleMouseLeave = () => setShowCard(false);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        //console.log(e.clientX, e.clientY)
+        setPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleEmailSave = async () => {
+        setEditedEmail(currentEmail);
+        errorToast(lang.toasts.error.email_change, 1000)
+        setIsEditing(false);
+    };
+
+    const apiKeyToggle = () => {
         if (user?.apiKey == null) return;
 
         if (!apiKey.includes("***")) {
@@ -29,94 +81,321 @@ export default function HomeProfilePage() {
     const copyKey = () => {
         if (apiKey.includes("***")) return;
         navigator.clipboard.writeText(user?.apiKey || "")
-        okToast("API Key copied to clipboard!", 300)
+        okToast(lang.toasts.success.copied_to_clipboard, 300)
+    }
+
+    const updateGraphData = async (from: Date, to: Date) => {
+        if (user == null) return;
+        const data = await getImageCountStatsOnDate(from.toISOString().split("T")[0], to.toISOString().split("T")[0], user.apiKey);
+        console.log(JSON.stringify(data) + "<<")
+
+        const arrImages = data["message"]["imagesPerDay"] as PairType[]
+        const arrPastes = data["message"]["pastesPerDay"] as PairType[]
+        const arrUrls = data["message"]["urlsPerDay"] as PairType[]
+
+        // set labels
+        const labelArr: string[] = arrImages.map(p => p.first)
+        setGraphDataLabels(labelArr)
+
+        // set values
+        const valuesArrImages: number[] = arrImages.map(p => p.second)
+        const valuesArrIPastes: number[] = arrPastes.map(p => p.second)
+        const valuesArrIUrls: number[] = arrUrls.map(p => p.second)
+        setGraphDataValuesImages(valuesArrImages)
+        setGraphDataValuesPastes(valuesArrIPastes)
+        setGraphDataValuesUrls(valuesArrIUrls)
     }
 
     useEffect(() => {
         setPage("profile")
-    }, [])
 
-    if (loadingUser || error || !user) return <></>
+        if (error) {
+            setFetchErrorMessage(error)
+            setFetchError(true);
+            setLoading(false)
+            console.log("ERROR IS " + error)
+            return;
+        }
+        if (loadingUser || !user) {
+            return;
+        }
+
+        setEditedEmail(user.email)
+        setCurrentEmail(user.email)
+        setLoading(false);
+        updateGraphData(graphDateFrom, graphDateTo)
+    }, [user, loadingUser])
+
+    const handleGraphDataChange = (from: Date, to: Date) => {
+        setGraphDateFrom(from)
+        setGraphDateTo(to)
+        updateGraphData(from, to)
+    };
+
+    if (loading) return <LoadingPage/>
+
+    if (fetchError || !user) {
+        return <ErrorPage message={fetchErrorMessage} lang={lang} callBack={()=> {
+            router.replace("/")
+        }} />
+    }
 
     return (
         <>
-            <main className={"flex flex-col w-full"}>
-                <div className={"w-full flex flex-col items-center gap-2 text-4xl"}>
-                    <div className={"flex flex-row gap-4 mt-10"}>
-                        <h1>Welcome, </h1>
-                        <p className={"text-yellow-500 font-bold"}>{user.username}</p>
-                    </div>
+            <main className={"flex flex-col xl:ml-[70px] ml-0 w-full xl:pt-12 xl:px-12 px-32 pt-10"}>
+
+                <div>
+                    <h1 className={"text-4xl"}>{lang.pages.profile.title}</h1>
                 </div>
 
-                <div className={"w-auto flex items-start ml-20 pt-20"}>
-                    <div className={"flex flex-col rounded-xl bg-primary_light p-2 text-xl"}>
+                <div className={"flex xl:flex-row flex-col gap-4 mt-20 w-full xl:items-start items-center justify-center"}>
+                    <div className={"flex flex-col xl:w-[30%] w-full"}>
+                        {/*Profile card*/}
+                        <div onMouseMove={handleMouseMove} className={"flex flex-col p-4 items-center border-white rounded-sm border-2"}>
 
-                        <div className={"flex flex-row p-2 gap-4 items-center"}>
-                            <img className={"rounded-full w-10 h-10"} src={user.avatar || ""} alt={"PFP"} />
+                            {/*Profile card avatar*/}
+                            <div className={"w-32 h-32 "}>
+                                <img src={user.avatar || ""} className={"rounded-full w-32 h-32 border-gray-400 border-4"} />
+                            </div>
 
-                            <p className={"font-bold text-2xl text-yellow-500 pb-1"}>{user.username}</p>
-                            <p>{"(UID: " + user.uid + ")"}</p>
-                        </div>
+                            {/*Profile card username*/}
+                            <p className={"text-3xl font-bold text-yellow-500 mb-2"}>{user.username}</p>
 
-                        <hr className={"rounded-full border-opacity-50 border-[1px] border-primary-brighter my-0.5"} />
-                        <div className={"flex flex-row p-2 gap-2 items-center"}>
-                            <p>Storage used: </p>
-                            <b>{(user.stats.storageUsed / 1024 / 1024).toFixed(2)} MB</b>
-                        </div>
+                            {getUserRoleBadge(user.role)}
 
-                        <hr className={"rounded-full border-opacity-50 border-[1px] border-primary-brighter my-0.5"} />
-                        <div className={"flex flex-row p-2 gap-2 items-center"}>
-                            <p>Images uploaded: </p>
-                            <b>{user.stats.totalUploads}</b>
-                        </div>
 
-                        <hr className={"rounded-full border-opacity-50 border-[1px] border-primary-brighter my-0.5"} />
 
-                        <div className={"flex flex-row p-2 gap-2 items-center"}>
-                            <p>Invited by: </p>
-                            <a className={"text-telegram font-bold"} href={"/user/" + user.invitor?.username}>{user.invitor?.username}</a>
-                        </div>
+                            <div className={"flex my-4 gap-4"}>
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            </div>
 
-                        <hr className={"rounded-full border-opacity-50 border-[1px] border-primary-brighter my-0.5"} />
+                            <div className={"px-1 w-full"}>
 
-                        <div className={"flex flex-row p-2 gap-2 items-center"}>
-                            <p>API Key: </p>
-                            <b data-tooltip-id="my-tooltip" data-tooltip-content={apiKey.includes("***") ? "" : "Click to copy"} data-tooltip-place="top" onClick={copyKey} className={`${apiKey.includes("***") ? "select-none" : "cursor-pointer"} text-telegram mr-2`}>{apiKey}</b>
-                            <button className={"transition-all duration-200 hover:-translate-y-0.5"} onClick={apiKeyToggle} data-tooltip-id="my-tooltip" data-tooltip-content={apiKey.includes("***") ? "Click to show" : "Click to hide"}>
-                                {
-                                    apiKey.includes("***") ? <FaEyeSlash className={"w-6 h-6"} /> : <FaEye className={"w-6 h-6"} />
-                                }
-                            </button>
+                                {/*Profile card API key*/}
+                                <div className={"flex flex-row justify-between"}>
+                                    <p className={"text-lg font-bold mr-5"}>{lang.global.api_key_input_placeholder}</p>
+
+                                    <div className={"flex gap-5 justify-center items-center"}>
+                                        {/*<p className={"text-lg"}>{apiKey}</p>*/}
+                                        <b data-tooltip-id="my-tooltip" data-tooltip-content={apiKey.includes("***") ? "" : lang.global.click_to_copy} data-tooltip-place="top" onClick={copyKey} className={`${apiKey.includes("***") ? "select-none" : "cursor-pointer text-telegram"} mr-2`}>{apiKey}</b>
+                                        <button className={"transition-all duration-200 hover:-translate-y-0.5"} onClick={apiKeyToggle} data-tooltip-id="my-tooltip" data-tooltip-content={apiKey.includes("***") ? lang.global.click_to_show : lang.global.click_to_hide}>
+                                            {
+                                                apiKey.includes("***") ? <FaEyeSlash className={"w-6 h-6"} /> : <FaEye className={"w-6 h-6"} />
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <hr className={"w-full rounded-full border-opacity-50 border-[1px] border-gray-100 opacity-80 my-2"} />
+
+                                {/*Profile card creation date*/}
+                                <div className={"flex flex-row justify-between"}>
+                                    <p className={"text-lg font-bold mr-5"}>{lang.global.joined_date_text}</p>
+
+                                    <p className={"text-lg"}>{new Date(user.createdAt).toLocaleString()}</p>
+                                </div>
+
+                                <hr className={"w-full rounded-full border-opacity-50 border-[1px] border-gray-100 opacity-80 my-2"} />
+
+                                {/*Profile card invited by*/}
+                                <div className={"flex flex-row justify-between"}>
+                                    <p className={"text-lg font-bold mr-5"}>{lang.global.invited_by_text}</p>
+
+                                    {
+                                        user.invitor ? (
+                                            <a
+                                                onMouseEnter={handleMouseEnter}
+                                                onMouseLeave={handleMouseLeave}
+                                                className={"text-telegram font-bold"} href={"/user/" + user.invitor.username}
+                                            >
+                                                {user.invitor.username}
+                                            </a>
+                                        ) : (
+                                            <p className={"text-lg"}>N/A</p>
+                                        )
+                                    }
+                                </div>
+
+                                <hr className={"w-full rounded-full border-opacity-50 border-[1px] border-gray-100 opacity-80 my-2"} />
+
+                                {/*Profile card storage used*/}
+                                <div className={"flex flex-row justify-between"}>
+                                    <p className={"text-lg font-bold mr-5"}>{lang.global.storage_used_text}</p>
+
+                                    <p className={"text-lg"}>{Math.round(user.stats.storageUsed / 1024 / 1024) + " MB"}</p>
+                                </div>
+                            </div>
+
+
+                            {/*Profile card buttons*/}
+                            <div className={"flex flex-row mt-3 gap-4"}>
+                                <button>EDIT</button>
+
+                                <button>SHARE</button>
+                            </div>
+
                         </div>
                     </div>
 
-                    <div className={"ml-20 w-[80%] pr-20 flex items-center justify-center"}>
-                        <div className={"flex flex-col justify-center items-center"}>
+                    {/*right-side*/}
+                    <div className={"flex flex-col xl:w-[59%] w-full gap-4"}>
 
-                            <div>
-                                <p className={"text-3xl font-bold"}>Chart</p>
+                        {/*Profile settings*/}
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 w-full"}>
+
+                            {/*Email field*/}
+                            <div className={"flex flex-row justify-between w-full"}>
+                                <div className={"flex flex-row gap-4 items-center"}>
+                                    <MdOutlineEmail className={"text-2xl"} />
+                                    <p className={"text-3xl font-bold mr-5"}>Email</p>
+                                </div>
+
+                                <div className={"flex flex-row gap-6 min-w-[250px]"}>
+                                    {isEditing ? (
+                                        <>
+                                            <input
+                                                className="text-2xl border-b-2 border-gray-300 focus:outline-none focus:border-yellow-500 transition-all duration-200 bg-transparent"
+                                                value={editedEmail}
+                                                onChange={(e) => setEditedEmail(e.target.value)}
+                                                disabled={isSaving}
+                                            />
+                                            <button
+                                                onClick={handleEmailSave}
+                                                disabled={isSaving}
+                                                data-tooltip-id="my-tooltip"
+                                                data-tooltip-content={lang.global.click_to_save}
+                                                data-tooltip-place="top"
+                                                className={`transition-all duration-200 hover:-translate-y-0.5 ${
+                                                    isSaving ? "opacity-50 cursor-not-allowed" : ""
+                                                }`}
+                                            >
+                                                <FaSave className="w-6 h-6 text-green-500" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-3xl">{currentEmail}</p>
+                                            <button
+                                                className="transition-all duration-200 hover:-translate-y-0.5"
+                                                data-tooltip-id="my-tooltip"
+                                                data-tooltip-content={lang.global.click_to_edit}
+                                                data-tooltip-place="top"
+                                                onClick={() => setIsEditing(true)}
+                                            >
+                                                <MdEdit className="w-6 h-6" />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className={"w-full rounded-xl bg-primary_light p-2"}>
+                            <hr className={"w-full rounded-full border-opacity-10 border-[1px] border-gray-100 my-6"} />
+
+                            {/*Phone field*/}
+                            <div className={"flex flex-row justify-between w-full"}>
+
+                                <div className={"flex flex-row gap-4 items-center"}>
+                                    <FaPhone className={"text-2xl"} />
+                                    <p className={"text-3xl font-bold mr-5"}>Phone</p>
+                                </div>
+
+
+                                <div className={"flex flex-row gap-6"}>
+                                    <p className={"text-3xl"}>{lang.global.disabled_text}</p>
+                                    <button className={"transition-all duration-200 hover:-translate-y-0.5"} data-tooltip-id="my-tooltip" data-tooltip-content={lang.global.click_to_edit} data-tooltip-place="top">
+
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr className={"w-full rounded-full border-opacity-10 border-[1px] border-gray-100 my-6"} />
+
+                            {/*Discord field*/}
+                            <div className={"flex flex-row justify-between w-full"}>
+
+                                <div className={"flex flex-row gap-4 items-center"}>
+                                    <FaDiscord className={"text-2xl"} />
+                                    <p className={"text-3xl font-bold mr-5"}>Discord</p>
+                                </div>
+
+
+                                <div className={"flex flex-row gap-6"}>
+                                    <p className={"text-3xl"}>{user.socials?.discord ? user.socials.discord : lang.global.not_connected_text}</p>
+                                    <button className={"transition-all duration-200 hover:-translate-y-0.5"} data-tooltip-id="my-tooltip" data-tooltip-content={lang.global.click_to_edit} data-tooltip-place="top">
+
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr className={"w-full rounded-full border-opacity-10 border-[1px] border-gray-100 my-6"} />
+
+                            {/*2FA field*/}
+                            <div className={"flex flex-row justify-between w-full"}>
+
+                                <div className={"flex flex-row gap-4 items-center"}>
+                                    <FaShieldAlt className={"text-2xl"} />
+                                    <p className={"text-3xl font-bold mr-5"}>2FA</p>
+                                </div>
+
+
+                                <div className={"flex flex-row gap-6"}>
+                                    <p className={"text-3xl"}>{lang.global.disabled_text}</p>
+                                    <button className={"transition-all duration-200 hover:-translate-y-0.5"} data-tooltip-id="my-tooltip" data-tooltip-content={lang.global.click_to_edit} data-tooltip-place="top">
+
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={"flex flex-col p-6 border-white rounded-sm border-2 w-full"}>
+                            <div className={"flex flex-row gap-6 justify-between items-center"}>
+
+                                <p className={"text-3xl font-bold"}>Stats</p>
+
+                                <div className={"flex flex-row gap-10 py-3 px-10 bg-secondary rounded-full"}>
+                                    <div className={"flex flex-row items-center text-xl"}>
+                                        <FaFilter />
+                                        <span className={"ml-2"}>Filter by:</span>
+                                    </div>
+                                    <DatePickerComp onDateChangeAction={handleGraphDataChange} />
+                                    {/*<button className={"text-xl p-2 border-2 border-gray-400 rounded-lg flex items-center gap-2 font-bold"}>
+                                        <FaCalendarAlt /> Date
+                                    </button>*/}
+                                    {/*<button className={"text-xl p-2 border-2 border-gray-400 rounded-lg flex items-center gap-2 font-bold"}>
+                                        <MdOutlineStorage /> Size
+                                    </button>
+                                    <button className={"text-xl p-2 border-2 border-gray-400 rounded-lg flex items-center gap-2 font-bold"}>
+                                        <MdFilterList /> Type
+                                    </button>*/}
+                                </div>
+                            </div>
+
+                            <div className={"p-2 bg-secondary rounded-xl w-full mt-4 h-80"}>
+                                {/* Chart component */}
                                 <DateChart data={{
-                                    labels: ['2024-03-10', '2024-03-11', '2024-03-12', '2024-03-13'],
+                                    labels: graphDataLabels,
                                     datasets: [
                                         {
                                             label: 'Images Uploaded',
-                                            data: [2, 12, 0],
+                                            data: graphDataValuesImages,
                                             borderColor: 'red',
                                             fill: true,
                                         },
                                         {
                                             label: 'Pastes Created',
-                                            data: [0, 0, 20],
+                                            data: graphDataValuesPastes,
                                             borderColor: 'orange',
                                             fill: false,
                                         },
                                         {
                                             label: 'URL Shortened',
-                                            data: [8, 1, 8],
-                                            borderColor: 'yellow',
+                                            data: graphDataValuesUrls,
+                                            borderColor: 'cyan',
                                             fill: false,
                                         },
                                     ],
@@ -126,6 +405,19 @@ export default function HomeProfilePage() {
                     </div>
                 </div>
             </main>
+
+            {
+                user.invitor && (
+                    <div
+                        className={`pointer-events-none transition-all duration-200 ease-out transform ${
+                            showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                        } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
+                        style={{ top: position.y + 10, left: position.x + 20 }}
+                    >
+                        <UserPopupCard user={user.invitor as UserObj} lang={lang} />
+                    </div>
+                )
+            }
         </>
     )
 }

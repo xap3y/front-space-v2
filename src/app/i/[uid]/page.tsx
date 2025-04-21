@@ -20,11 +20,24 @@ export default function Page() {
     const [loading, setLoading] = useState(true);
     const { image, setImage } = useImage();
 
+    const [password, setPassword] = useState("");
+    const [passwordRequired, setPasswordRequired] = useState(false);
+    const [showImage, setShowImage] = useState(false);
+    const [error, setError] = useState("");
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+
     const lang = useTranslation();
 
     useEffect(() => {
         const fetchImage = async () => {
             const imageDto: UploadedImage | null = await getImageInfoApi(uid + "");
+            if (imageDto?.requiresPassword || !imageDto?.isPublic) {
+                setPasswordRequired(true)
+                setShowImage(false)
+            } else {
+                setImageUrl(imageDto.urlSet.rawUrl);
+                setShowImage(true)
+            }
             setImage(imageDto);
             setLoading(false)
         };
@@ -34,6 +47,12 @@ export default function Page() {
             fetchImage();
         } else {
             console.log("Using cached image")
+            if (image.requiresPassword || !image.isPublic) {
+                setPasswordRequired(true)
+                setShowImage(false)
+            }
+            setImageUrl(image.urlSet.rawUrl);
+            setShowImage(true)
             setLoading(false)
         }
         console.log(image)
@@ -54,43 +73,76 @@ export default function Page() {
         })
     }
 
+    const fetchImageBlob = async () => {
+        const toastId = toast.loading(lang.toasts.loading.fetching_image);
+        setLoading(true)
+        console.log("CALLING")
+        try {
+            const res = await fetch(`${getApiUrl()}/v1/image/get/${uid}`, {
+                headers: { "x-password": password },
+            });
+
+            if (!res.ok) {
+                toast.update(toastId, {
+                    render: lang.toasts.error.invalid_password,
+                    type: "error",
+                    autoClose: 1500,
+                    closeOnClick: true,
+                    isLoading: false
+                })
+                setPassword("")
+                return;
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            setImageUrl(url);
+            setShowImage(true);
+            setPasswordRequired(false);
+        } catch (err) {
+            setError("Failed to fetch image");
+        } finally {
+            setLoading(false)
+        }
+    };
+
     const downloadImage = async () => {
         if (!image) return;
         try {
-            const response = await fetch(image.urlSet.rawUrl || "", {
-                method: "GET",
-            });
-
-            if (!response.ok) throw new Error("Failed to download");
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-
             const a = document.createElement("a");
-            a.href = url;
+            a.href = imageUrl || "";
             a.download = image.uniqueId + "." + image.type;
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(imageUrl||"");
             document.body.removeChild(a);
         } catch (error) {
             console.error("Download error:", error);
         }
     }
 
+    const handleSubmitPassword = async () => {
+        await fetchImageBlob();
+    };
+
+    if (loading) {
+        return <LoadingPage />;
+    }
+
+    if (!image && !loading) {
+        return <NotFound />;
+    }
+
+    if (!image) {
+        return <NotFound />;
+    }
+
+    if (error) {
+        return <div className="text-red-500">{error}</div>;
+    }
+
     return (
         <>
-            {loading && (
-                <LoadingPage/>
-            )}
-
-            {(!image && !loading) && (
-                <NotFound/>
-            )}
-
-
-            {image && (
-
+            {showImage ? (
                 <>
                     <div className={"flex items-center justify-center"}>
                         <div className={"p-4 mt-10 lg:mt-20 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-secondary"}>
@@ -107,13 +159,13 @@ export default function Page() {
                             <div className={"mt-4"}>
                                 {image.type == "mp4" && (
                                     <video className={"max-h-[600px] rounded shadow-lg"} controls>
-                                        <source src={getApiUrl() + "/v1/image/get/" + uid} type="video/mp4" />
+                                        <source src={imageUrl || ""} type="video/mp4" />
                                         Your browser does not support the video tag.
                                     </video>
                                 )}
 
                                 {image.type != "mp4" && (
-                                    <img className={"rounded"} src={getApiUrl() + "/v1/image/get/" + uid} alt={image.uniqueId} />
+                                    <img className={"rounded"} src={imageUrl || ""} alt={image.uniqueId} />
                                 )}
                             </div>
 
@@ -144,8 +196,38 @@ export default function Page() {
                         </div>
                     </div>
                 </>
+            ) : passwordRequired ? (
+                <>
+                    <div className="flex h-screen justify-center items-center flex-col gap-2">
+                        <p className={"text-3xl font-bold mb-4"}>
+                            {lang.pages.image_viewer.password_required}
+                        </p>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleSubmitPassword();
+                            }}
+                            className="flex flex-col gap-2"
+                        >
+                            <input
+                                type="password"
+                                id={"img-credentials"}
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder={lang.pages.image_viewer.password_placeholder}
+                                className="p-2 rounded text-whitesmoke outline-none bg-secondary shadow-xl border border-dark-grey2 focus:border-blue-500 transition duration-200"
+                            />
+                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200">
+                                {lang.pages.image_viewer.view_image_button_placeholder}
+                            </button>
+                            {error && <p className="text-red-500">{error}</p>}
+                        </form>
+                    </div>
+                </>
+            ) : null}
 
-                /*<div className="min-h-screen w-full flex items-center justify-center bg-dark-grey2">
+                {/*<div className="min-h-screen w-full flex items-center justify-center bg-dark-grey2">
 
                     {image.type == "mp4" && (
                         <video className={"max-h-[900px]"} controls>
@@ -157,8 +239,7 @@ export default function Page() {
                     {image.type != "mp4" && (
                         <img src={getApiUrl() + "/v1/image/get/" + uid} alt={image.uniqueId} />
                     )}
-                </div>*/
-            )}
+                </div>*/}
         </>
     )
 }

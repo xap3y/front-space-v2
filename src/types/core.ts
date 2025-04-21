@@ -34,3 +34,15 @@ export interface Sidebar {
     permission?: string;
     page: string;
 }
+
+export interface PairType {
+    first: string;
+    second: number
+}
+
+export interface DefaultResponse {
+    error: boolean;
+    message: any;
+    timestamp: string;
+    data?: any;
+}

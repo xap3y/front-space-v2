@@ -5,14 +5,19 @@ import { setCookie } from "cookies-next/client";
 import { encrypt } from "@/lib/crypto";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { FaKey } from "react-icons/fa";
+import { FaKey, FaArrowLeft } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import LoadingPage from "@/components/LoadingPage";
 import { getUser } from "@/lib/auth";
 import { getApiUrl } from "@/lib/core";
 import {useTranslation} from "@/hooks/useTranslation";
+import {logApiRes} from "@/lib/logger";
+import { useApiStatusStore } from "@/lib/stores/apiStatusStore";
+import {ErrorPage} from "@/components/ErrorPage";
 
 export default function LoginPage() {
+
+    const { isApiUp } = useApiStatusStore();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -23,6 +28,11 @@ export default function LoginPage() {
     const lang = useTranslation();
 
     useEffect(() => {
+        if (!isApiUp) {
+            console.log("API is down < LoginPage />");
+            return;
+        }
+
         console.log("USE EFFECT")
         console.log("Checking user..");
         async function checkUser() {
@@ -46,12 +56,13 @@ export default function LoginPage() {
                     },
                 });
                 const data = await response.json();
-                console.log("[GET | 200] " + getApiUrl() + "/status " + data["error"]);
+                logApiRes(response, data);
+                //console.debug(`[GET | ${response.status}] ` + getApiUrl() + "/status " + data["error"]);
             } catch (error) {
                 // @ts-expect-error
                 if (error.message.includes("NetworkError")) {
                     toast.error('API is offline!');
-                    console.error("[GET] " + getApiUrl() + "/status -> NetworkError");
+                    console.debug("[GET] " + getApiUrl() + "/status -> NetworkError");
                     return;
                 }
                 // @ts-expect-error
@@ -66,8 +77,13 @@ export default function LoginPage() {
             }
         }
 
-        fetchData();
-    }, []);
+        if (isApiUp == true) {
+            console.log("API is up");
+            fetchData();
+        } else {
+            console.log("API is NOT up");
+        }
+    }, [isApiUp]);
 
     const handleSubmit = async (e: unknown) => {
         // @ts-expect-error
@@ -95,11 +111,17 @@ export default function LoginPage() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     email: email,
                     password: password,
                 }),
             });
+            // get cookies to set from the response
+            const cookies = response.headers.get('set-cookie');
+            if (cookies) {
+                console.log("Cookies: " + cookies);
+            }
             const data = await response.json();
             if (!response.ok) {
                 if (!data["message"]) {
@@ -128,6 +150,16 @@ export default function LoginPage() {
             toast.error("Login failed!")
         }
     };
+
+    if (!isApiUp) {
+        return (
+            <>
+                <ErrorPage message={"Server error occurred"} lang={lang} callBack={() => {
+                    router.replace("/")
+                }} />
+            </>
+        )
+    }
 
     if (loading) {
         return (

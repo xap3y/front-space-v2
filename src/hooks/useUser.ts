@@ -11,6 +11,11 @@ export function useUser() {
         const fetchUser = async () => {
             try {
                 const user: UserObj | null = await getUser();
+                if (!user) {
+                    setError("User not found.");
+                    setUser(null);
+                    return;
+                }
                 setUser(user);
             } catch (err) {
                 console.error("Failed to fetch user:", err);

@@ -7,8 +7,10 @@ import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
 import {getUserImages} from "@/lib/apiGetters";
 import {UploadedImage} from "@/types/image";
-import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
+import {copyToClipboard} from "@/lib/client";
+import {ErrorPage} from "@/components/ErrorPage";
+import {useRouter} from "next/navigation";
 
 export default function HomeGalleryPage() {
 
@@ -17,6 +19,9 @@ export default function HomeGalleryPage() {
     const [ loading, setLoading ] = useState<boolean>(true)
     const [ images, setImages ] = useState<UploadedImage[]>([])
     const lang = useTranslation();
+    const [fetchError, setFetchError] = useState(false);
+
+    const router = useRouter();
 
     useEffect(() => {
         setPage("gallery")
@@ -30,27 +35,27 @@ export default function HomeGalleryPage() {
             if (imagesFromApi != null) {
                 setImages(imagesFromApi);
                 console.log(imagesFromApi)
+            } else {
+                setFetchError(true);
             }
             setLoading(false)
         };
         fetchImages()
     }, [user, loadingUser])
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast.success(lang.toasts.success.copied_to_clipboard, {
-            autoClose: 500,
-            closeOnClick: true
-        });
-    }
-
     if (loading) return <LoadingPage/>
+
+    if (fetchError || !user) {
+        return <ErrorPage message={"Failed to fetch images"} lang={lang} callBack={()=> {
+            router.replace("/")
+        }} />
+    }
 
     return (
         <>
             <div className={"w-full"}>
                 <div className={"flex justify-center flex-row flex-wrap p-20 gap-8"}>
-                    {images.map((image, index) => (
+                    {images.filter(image => image.isPublic).map((image, index) => (
                         <div className={"flex flex-col rounded-xl bg-secondary p-2"} key={image.uniqueId}>
                             <div className={"text-center px-10"}>
                                 <p
@@ -58,7 +63,7 @@ export default function HomeGalleryPage() {
                                     data-tooltip-content={"Click to copy"}
                                     data-tooltip-place="top"
                                     className={"text-xl font-bold text-telegram cursor-pointer hover:underline"}
-                                    onClick={() => copyToClipboard(image.urlSet.rawUrl)}
+                                    onClick={() => copyToClipboard(image.urlSet.rawUrl, lang.toasts.success.copied_to_clipboard)}
                                 >
                                     {image.uniqueId + "." + image.type}
                                 </p>

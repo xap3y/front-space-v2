@@ -21,7 +21,6 @@ export default interface LanguageModel {
             total_short_urls_text: string;
             joined_date_text: string;
             storage_used_text: string;
-            invited_by_text: string;
         },
         portable_url: {
             title: string;
@@ -58,6 +57,9 @@ export default interface LanguageModel {
             copy_button_text: string;
             report_button_text: string;
             download_alert: string;
+            password_required: string;
+            password_placeholder: string;
+            view_image_button_placeholder: string;
         },
         image_finder: {
             title: string;
@@ -66,23 +68,48 @@ export default interface LanguageModel {
             button_text: string;
             no_image_found_error: string;
             empty_field_error: string;
+        },
+        profile: {
+            title: string;
         }
     },
     global: {
         api_key_input_placeholder: string;
         processing_button_text: string;
         bad_api_key_alert: string;
+        invited_by_text: string;
+        storage_used_text: string;
+        total_images_text: string;
+        total_pastes_text: string;
+        total_short_urls_text: string;
+        joined_date_text: string;
+        click_to_show: string;
+        click_to_hide: string;
+        click_to_copy: string;
+        member_since: string;
+        click_to_edit: string;
+        click_to_save: string;
+        click_to_delete: string;
+        disabled_text: string;
+        not_connected_text: string;
     },
     toasts: {
         error: {
             changing_theme: string;
             change_theme: string;
+            email_change: string;
+            invalid_password: string;
         },
         success: {
             copied_to_clipboard: string;
             change_theme: string;
             language_changed: string;
+            email_change: string;
+            password: string;
         },
+        loading: {
+            fetching_image: string;
+        }
     },
     comp: {
         sidebar: {

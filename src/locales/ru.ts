@@ -23,7 +23,6 @@ const ru: LanguageModel = {
             total_short_urls_text: "Всего сокращенных URL",
             joined_date_text: "Дата регистрации",
             storage_used_text: "Используемое хранилище",
-            invited_by_text: "Пригласил"
         },
         portable_url: {
             title: "Сокращатель URL",
@@ -59,7 +58,10 @@ const ru: LanguageModel = {
             download_button_text: "Скачать",
             copy_button_text: "Копировать",
             report_button_text: "Сообщить",
-            download_alert: "Скачивание начнется в течение нескольких секунд"
+            download_alert: "Скачивание начнется в течение нескольких секунд",
+            password_placeholder: "пароль",
+            password_required: "Для просмотра изображения требуется пароль",
+            view_image_button_placeholder: "Посмотреть изображение",
         },
         image_finder: {
             title: "Поиск изображения",
@@ -68,23 +70,48 @@ const ru: LanguageModel = {
             button_text: "Найти изображение",
             no_image_found_error: "Изображение не найдено",
             empty_field_error: "Введите UID изображения"
+        },
+        profile: {
+            title: "Обзор аккаунта",
         }
     },
     global: {
         api_key_input_placeholder: "API ключ",
         processing_button_text: "Обработка...",
-        bad_api_key_alert: "Неверный API ключ"
+        bad_api_key_alert: "Неверный API ключ",
+        invited_by_text: "Пригласил",
+        storage_used_text: "Используемое хранилище",
+        total_images_text: "Всего изображений",
+        total_pastes_text: "Всего паст",
+        total_short_urls_text: "Всего сокращенных URL",
+        joined_date_text: "Дата регистрации",
+        click_to_copy: "Нажмите, чтобы скопировать",
+        click_to_show: "Нажмите, чтобы показать",
+        click_to_hide: "Нажмите, чтобы скрыть",
+        member_since: "Член с",
+        click_to_edit: "Нажмите, чтобы редактировать",
+        click_to_delete: "Нажмите, чтобы удалить",
+        click_to_save: "Нажмите, чтобы сохранить",
+        disabled_text: "Недоступно",
+        not_connected_text: "Не подключено",
     },
     toasts: {
         error: {
             changing_theme: "Переключение темы...",
-            change_theme: "Не удалось изменить тему"
+            change_theme: "Не удалось изменить тему",
+            email_change: "Не удалось изменить электронную почту",
+            invalid_password: "Неверный пароль",
         },
         success: {
             copied_to_clipboard: "Скопировано в буфер обмена",
             change_theme: "Тема изменена",
-            language_changed: "Язык изменен на: "
+            language_changed: "Язык изменен на: ",
+            email_change: "Электронная почта изменена",
+            password: ""
         },
+        loading: {
+            fetching_image: "Получение изображения...",
+        }
     },
     comp: {
         sidebar: {

@@ -1,16 +1,12 @@
 
-import {ChartProps, Line} from 'react-chartjs-2';
+import {Line} from 'react-chartjs-2';
 import 'chart.js/auto';
 
-interface Props {
-    data: any;
-}
-
-export function DateChart({data}: Props) {
+export function DateChart({data}) {
 
     const options = {
         interaction: {
-            mode: "index",
+            mode: 'nearest',
             intersect: false,
         },
         plugins: {
@@ -25,7 +21,7 @@ export function DateChart({data}: Props) {
                 beginAtZero: true,
                 ticks: {
                     stepSize: 1,
-                    callback: (value: number) => value.toFixed(0),
+                    callback: (value) => value.toFixed(0),
                 },
             },
         },
@@ -34,14 +30,14 @@ export function DateChart({data}: Props) {
     // @ts-ignore
     return (
         <>
-            {/*<LineChart width={500} height={300} data={data}>
+            {/*<LineChart width={400} height={100} data={data}>
                 <Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
             </LineChart>*/}
-            <Line width={600} height={300} data={data}  />
+            <Line width={400} height={100} data={data} options={options} />
         </>
     )
 }

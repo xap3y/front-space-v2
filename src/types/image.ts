@@ -9,4 +9,8 @@ export interface UploadedImage {
     urlSet: UrlSet;
     uploader: UserObjShort;
     uploadedAt: string;
+    requiresPassword: boolean;
+    isPublic: boolean;
+    description: string;
+    expiresAt?: string;
 }
