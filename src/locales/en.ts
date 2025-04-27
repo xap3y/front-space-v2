@@ -1,6 +1,6 @@
 import LanguageModel from "@/types/LanguageModel";
 
-const en: LanguageModel = {
+const en = {
     pages: {
         login: {
             title: "XAP3Y - Space",

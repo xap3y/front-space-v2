@@ -1,7 +1,7 @@
 {
     "pages": {
         "login": {
-            "title": "XAP3Y - Space",
+            "title": "Space - Zaloguj się",
             "under_title": "Zaloguj się, aby kontynuować",
             "email_placeholder": "Adres e-mail",
             "password_placeholder": "Hasło",
@@ -15,7 +15,7 @@
             "success": "Pomyślnie zalogowano"
         },
         "register": {
-            "title": "XAP3Y - Space",
+            "title": "Space - Rejestracja",
             "under_title": "Utwórz swoje konto",
             "confirm_password_placeholder": "Potwierdź hasło",
             "invite_code_placeholder": "Kod zaproszenia",

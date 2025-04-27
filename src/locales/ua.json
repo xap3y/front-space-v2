@@ -1,141 +1,141 @@
 {
     "pages": {
         "login": {
-            "title": "XAP3Y - Space",
-            "under_title": "Sign in to continue",
-            "email_placeholder": "Email address",
-            "password_placeholder": "Password",
-            "no_account": "Don't have an account?",
-            "signup_text": "Sign up",
-            "button_text": "Sign In",
-            "forgot_password": "Forgot password?",
-            "user_not_found": "User not found",
-            "wrong_password": "Wrong password",
-            "short_password": "Password is too short",
-            "success": "Login successful"
+            "title": "Space - Login",
+            "under_title": "Увійдіть, щоб продовжити",
+            "email_placeholder": "Адреса електронної пошти",
+            "password_placeholder": "Пароль",
+            "no_account": "Немає акаунту?",
+            "signup_text": "Зареєструватися",
+            "button_text": "Увійти",
+            "forgot_password": "Забули пароль?",
+            "user_not_found": "Користувача не знайдено",
+            "wrong_password": "Неправильний пароль",
+            "short_password": "Пароль занадто короткий",
+            "success": "Увійшло успішно"
         },
         "register": {
-            "title": "XAP3Y - Register",
-            "under_title": "Create your account",
-            "confirm_password_placeholder": "Confirm Password",
-            "invite_code_placeholder": "Invite Code",
-            "button_text": "Register",
-            "already_have_account": "Already have an account?",
-            "login_text": "Login",
-            "invalid_email_alert": "Invalid email address",
-            "password_too_short_alert": "Password is too short",
-            "passwords_do_not_match_alert": "Passwords do not match",
-            "invalid_invite_code_alert": "Invalid invite code",
-            "success_alert": "Registration successful, please login",
-            "failed_alert": "Registration failed",
-            "email_already_exists_alert": "Email already exists",
-            "username_already_exists_alert": "Username already exists"
+            "title": "Space - register",
+            "under_title": "Створіть акаунт",
+            "confirm_password_placeholder": "Підтвердіть пароль",
+            "invite_code_placeholder": "Запрошувальний код",
+            "button_text": "Зареєструватися",
+            "already_have_account": "Вже є акаунт?",
+            "login_text": "Увійти",
+            "invalid_email_alert": "Невірна адреса електронної пошти",
+            "password_too_short_alert": "Пароль занадто короткий",
+            "passwords_do_not_match_alert": "Паролі не співпадають",
+            "invalid_invite_code_alert": "Невірний запрошувальний код",
+            "success_alert": "Реєстрація успішна, будь ласка, увійдіть",
+            "failed_alert": "Реєстрація не вдалася",
+            "email_already_exists_alert": "Електронна пошта вже існує",
+            "username_already_exists_alert": "Ім'я користувача вже існує"
         },
         "user": {
-            "total_images_text": "Total images",
-            "total_pastes_text": "Total pastes",
-            "total_short_urls_text": "Total short URLs",
-            "joined_date_text": "Joined date",
-            "storage_used_text": "Storage used"
+            "total_images_text": "Загальна кількість зображень",
+            "total_pastes_text": "Загальна кількість паст",
+            "total_short_urls_text": "Загальна кількість скорочених URL",
+            "joined_date_text": "Дата реєстрації",
+            "storage_used_text": "Використано пам'яті"
         },
         "portable_url": {
-            "title": "URL Shortener",
-            "original_url_placeholder": "Original URL",
-            "button_text": "Short URL"
+            "title": "Скорочувач URL",
+            "original_url_placeholder": "Оригінальний URL",
+            "button_text": "Скорочений URL"
         },
         "portable_paste": {
-            "title": "Paste Creator",
-            "title_input_placeholder": "Title",
-            "paste_input_placeholder": "Paste",
-            "button_text": "Create Paste",
-            "invalid_paste_length_alert": "Invalid Paste length!",
-            "invalid_title_length_alert": "Invalid Title length!",
-            "paste_created_alert": "Paste created",
-            "view_paste_text": "View created paste:"
+            "title": "Творець паст",
+            "title_input_placeholder": "Назва",
+            "paste_input_placeholder": "Паста",
+            "button_text": "Створити пасту",
+            "invalid_paste_length_alert": "Невірна довжина пасти!",
+            "invalid_title_length_alert": "Невірна довжина назви!",
+            "paste_created_alert": "Паста створена",
+            "view_paste_text": "Переглянути створену пасту:"
         },
         "portable_image": {
-            "drag_and_drop_text": "Drag & drop an image here or click to select",
-            "button_text": "Upload Image",
-            "image_uploaded_alert": "Image uploaded successfully"
+            "drag_and_drop_text": "Перетягніть зображення сюди або натисніть, щоб вибрати",
+            "button_text": "Завантажити зображення",
+            "image_uploaded_alert": "Зображення успішно завантажено"
         },
         "user_finder": {
-            "title": "User Finder",
-            "subtitle": "Find a user by their username or UID",
-            "input_placeholder": "Username | UID",
-            "button_text": "Find User",
-            "no_user_found_error": "User not found",
-            "empty_field_error": "Please enter username or UID"
+            "title": "Пошук користувача",
+            "subtitle": "Знайдіть користувача за його ім'ям або UID",
+            "input_placeholder": "Ім'я користувача | UID",
+            "button_text": "Знайти користувача",
+            "no_user_found_error": "Користувача не знайдено",
+            "empty_field_error": "Будь ласка, введіть ім'я користувача або UID"
         },
         "image_viewer": {
-            "uploaded_by": "Uploaded by",
-            "uploaded_on": "Uploaded on",
-            "download_button_text": "Download",
-            "copy_button_text": "Copy",
-            "report_button_text": "Report",
-            "download_alert": "Downloading...",
-            "password_required": "This image is password protected",
-            "password_placeholder": "Enter password",
-            "view_image_button_placeholder": "View Image"
+            "uploaded_by": "Завантажено",
+            "uploaded_on": "Завантажено",
+            "download_button_text": "Завантажити",
+            "copy_button_text": "Копіювати",
+            "report_button_text": "Поскаржитися",
+            "download_alert": "Завантаження...",
+            "password_required": "Це зображення захищене паролем",
+            "password_placeholder": "Введіть пароль",
+            "view_image_button_placeholder": "Переглянути зображення"
         },
         "image_finder": {
-            "title": "Image Finder",
-            "subtitle": "Find an image by its unique identifier",
-            "input_placeholder": "Image Unique ID",
-            "button_text": "Lookup Image",
-            "no_image_found_error": "Image not found!",
-            "empty_field_error": "Please enter a uniqueId"
+            "title": "Пошук зображень",
+            "subtitle": "Знайдіть зображення за його унікальним ідентифікатором",
+            "input_placeholder": "Унікальний ID зображення",
+            "button_text": "Шукати зображення",
+            "no_image_found_error": "Зображення не знайдено!",
+            "empty_field_error": "Будь ласка, введіть унікальний ID"
         },
         "profile": {
-            "title": "Account overview"
+            "title": "Огляд акаунту"
         }
     },
     "global": {
-        "api_key_input_placeholder": "API Key",
-        "processing_button_text": "Processing...",
-        "bad_api_key_alert": "Invalid API Key",
-        "invited_by_text": "Invited by",
-        "total_images_text": "Total images",
-        "total_pastes_text": "Total pastes",
-        "total_short_urls_text": "Total short URLs",
-        "joined_date_text": "Joined date",
-        "storage_used_text": "Storage used",
-        "click_to_copy": "Click to copy",
-        "click_to_show": "Click to show",
-        "click_to_hide": "Click to hide",
-        "member_since": "Member since",
-        "click_to_edit": "Click to edit",
-        "click_to_save": "Click to save",
-        "click_to_delete": "Click to delete",
-        "not_connected_text": "Not connected",
-        "disabled_text": "Disabled"
+        "api_key_input_placeholder": "API ключ",
+        "processing_button_text": "Обробка...",
+        "bad_api_key_alert": "Невірний API ключ",
+        "invited_by_text": "Запрошений",
+        "total_images_text": "Загальна кількість зображень",
+        "total_pastes_text": "Загальна кількість паст",
+        "total_short_urls_text": "Загальна кількість скорочених URL",
+        "joined_date_text": "Дата реєстрації",
+        "storage_used_text": "Використано пам'яті",
+        "click_to_copy": "Натисніть, щоб скопіювати",
+        "click_to_show": "Натисніть, щоб показати",
+        "click_to_hide": "Натисніть, щоб приховати",
+        "member_since": "Член з",
+        "click_to_edit": "Натисніть, щоб редагувати",
+        "click_to_save": "Натисніть, щоб зберегти",
+        "click_to_delete": "Натисніть, щоб видалити",
+        "not_connected_text": "Не підключено",
+        "disabled_text": "Вимкнено"
     },
     "toasts": {
         "error": {
-            "changing_theme": "Switching theme...",
-            "change_theme": "Failed to change theme",
-            "email_change": "Failed to change email",
-            "invalid_password": "Invalid password"
+            "changing_theme": "Зміна теми...",
+            "change_theme": "Не вдалося змінити тему",
+            "email_change": "Не вдалося змінити електронну пошту",
+            "invalid_password": "Невірний пароль"
         },
         "success": {
-            "copied_to_clipboard": "Copied to clipboard",
-            "change_theme": "Theme changed",
-            "language_changed": "Language changed to: ",
-            "email_change": "Email changed successfully",
-            "password": "missing password"
+            "copied_to_clipboard": "Скопійовано в буфер обміну",
+            "change_theme": "Тему змінено",
+            "language_changed": "Мова змінена на: ",
+            "email_change": "Електронну пошту змінено успішно",
+            "password": "відсутній пароль"
         },
         "loading": {
-            "fetching_image": "Fetching image..."
+            "fetching_image": "Отримання зображення..."
         }
     },
     "comp": {
         "sidebar": {
-            "home": "Home",
-            "images": "Images",
-            "pastes": "Pastes",
-            "short_urls": "Shortened URLs",
-            "settings": "Settings",
-            "profile": "Profile",
-            "logout": "Logout"
+            "home": "Головна",
+            "images": "Зображення",
+            "pastes": "Пасти",
+            "short_urls": "Скорочені URL",
+            "settings": "Налаштування",
+            "profile": "Профіль",
+            "logout": "Вихід"
         }
     }
 }

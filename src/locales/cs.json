@@ -1,7 +1,7 @@
 {
     "pages": {
         "login": {
-            "title": "XAP3Y - Space",
+            "title": "Space - Přihlášení",
             "under_title": "Přihlaste se pro pokračování",
             "email_placeholder": "Emailová adresa",
             "password_placeholder": "Heslo",
@@ -15,7 +15,7 @@
             "success": "Přihlášení proběhlo úspěšně"
         },
         "register": {
-            "title": "XAP3Y - Space",
+            "title": "Space - Registrace",
             "under_title": "Registrovat účet",
             "confirm_password_placeholder": "Potvrďte heslo",
             "invite_code_placeholder": "Pozvánkový kód",

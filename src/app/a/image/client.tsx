@@ -12,6 +12,7 @@ import { IoMdClipboard } from "react-icons/io";
 import LoadingPage from "@/components/LoadingPage";
 import {UploadedImage} from "@/types/image";
 import {isVideoFile} from "@/lib/core";
+import {useRouter} from "next/navigation";
 
 
 export default function ImageUploader() {
@@ -20,9 +21,12 @@ export default function ImageUploader() {
     const [apiKey, setApiKey] = useState("");
     const { user, loadingUser, error } = useUser();
     const lang: LanguageModel = useTranslation();
+    const [uploading, setUploading] = useState<boolean>(false);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
+
+    const router = useRouter();
 
     const cleanText = (text: string) => text.replace(/[^\x20-\x7E]/g, "");
 
@@ -47,6 +51,7 @@ export default function ImageUploader() {
             return toast.error("Please fill all required fields!");
         }
 
+        setUploading(true)
         const formData = new FormData();
         formData.append("file", file);
         formData.append("apiKey", apiKey);
@@ -65,10 +70,11 @@ export default function ImageUploader() {
 
         console.log(uploadedImg)
         console.log(uploadedImage)
-        setUploadedImage(uploadedImg);
+        //setUploadedImage(uploadedImg);
 
         toast.success(lang.pages.portable_image.image_uploaded_alert);
 
+        router.push(uploadedImg.urlSet.portalUrl)
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -135,19 +141,22 @@ export default function ImageUploader() {
                                 onChange={(e) => setApiKey(e.target.value)}
                                 className={`w-full p-2 border rounded bg-transparent focus:outline-none ${!!user ? "cursor-not-allowed" : ""}`}
                             />
-                            <button type={"submit"} disabled={!file || !apiKey} className="w-full bg-blue-500 text-white p-2 rounded">
-                                {lang.pages.portable_image.button_text}
+
+                            <button type={"submit"} disabled={uploading} className="w-full bg-blue-500 text-white p-2 rounded">
+                                {uploading ? "Uploading..." : lang.pages.portable_image.button_text}
                             </button>
 
-                            <div className="mt-4">
-                                <p>Upload Progress: {uploadProgress}%</p>
-                                <div className="w-full bg-gray-300 rounded h-4">
-                                    <div
-                                        className="bg-blue-500 h-4 rounded"
-                                        style={{ width: `${uploadProgress}%` }}
-                                    />
+                            {uploading && (
+                                <div className="mt-4">
+                                    <p>Upload Progress: {uploadProgress}%</p>
+                                    <div className="w-full bg-gray-300 rounded h-4">
+                                        <div
+                                            className="bg-blue-500 h-4 rounded"
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </form>

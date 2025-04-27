@@ -1,7 +1,6 @@
 import LanguageModel from "@/types/LanguageModel";
 
-// Russian (ru) language pack
-const ru: LanguageModel = {
+const ru = {
     pages: {
         login: {
             title: "XAP3Y - Space",
