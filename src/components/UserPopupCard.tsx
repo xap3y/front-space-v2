@@ -11,7 +11,7 @@ export function UserPopupCard({ lang, user }: Props) {
     return (
         <>
             <img
-                src={user.avatar || ""}
+                src={user.avatar || "/images/default-avatar.svg"}
                 alt="avatar"
                 className="w-12 h-12 rounded-full mb-2"
             />

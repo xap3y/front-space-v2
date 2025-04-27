@@ -1,0 +1,141 @@
+{
+    "pages": {
+        "login": {
+            "title": "XAP3Y - Space",
+            "under_title": "Zaloguj się, aby kontynuować",
+            "email_placeholder": "Adres e-mail",
+            "password_placeholder": "Hasło",
+            "no_account": "Nie masz konta?",
+            "signup_text": "Zarejestruj się",
+            "button_text": "Zaloguj się",
+            "forgot_password": "Zapomniałeś hasła?",
+            "user_not_found": "Użytkownik nie znaleziony",
+            "wrong_password": "Nieprawidłowe hasło",
+            "short_password": "Hasło jest za krótkie",
+            "success": "Pomyślnie zalogowano"
+        },
+        "register": {
+            "title": "XAP3Y - Space",
+            "under_title": "Utwórz swoje konto",
+            "confirm_password_placeholder": "Potwierdź hasło",
+            "invite_code_placeholder": "Kod zaproszenia",
+            "button_text": "Zarejestruj się",
+            "already_have_account": "Masz już konto?",
+            "login_text": "Zaloguj się",
+            "invalid_email_alert": "Nieprawidłowy adres e-mail",
+            "password_too_short_alert": "Hasło jest za krótkie",
+            "passwords_do_not_match_alert": "Hasła nie są takie same",
+            "invalid_invite_code_alert": "Nieprawidłowy kod zaproszenia",
+            "success_alert": "Rejestracja udana, zaloguj się",
+            "failed_alert": "Rejestracja nie powiodła się",
+            "email_already_exists_alert": "Adres e-mail już istnieje",
+            "username_already_exists_alert": "Nazwa użytkownika już istnieje"
+        },
+        "user": {
+            "total_images_text": "Łączna liczba obrazów",
+            "total_pastes_text": "Łączna liczba wklejek",
+            "total_short_urls_text": "Łączna liczba skróconych URL",
+            "joined_date_text": "Data dołączenia",
+            "storage_used_text": "Wykorzystana przestrzeń"
+        },
+        "portable_url": {
+            "title": "Skracacz URL",
+            "original_url_placeholder": "Oryginalny URL",
+            "button_text": "Skróć URL"
+        },
+        "portable_paste": {
+            "title": "Twórca wklejek",
+            "title_input_placeholder": "Tytuł",
+            "paste_input_placeholder": "Wklejka",
+            "button_text": "Utwórz wklejkę",
+            "invalid_paste_length_alert": "Nieprawidłowa długość wklejki!",
+            "invalid_title_length_alert": "Nieprawidłowa długość tytułu!",
+            "paste_created_alert": "Wklejka utworzona",
+            "view_paste_text": "Zobacz utworzoną wklejkę:"
+        },
+        "portable_image": {
+            "drag_and_drop_text": "Przeciągnij i upuść obraz tutaj lub kliknij, aby wybrać",
+            "button_text": "Prześlij obraz",
+            "image_uploaded_alert": "Obraz przesłany pomyślnie"
+        },
+        "user_finder": {
+            "title": "Wyszukiwarka użytkowników",
+            "subtitle": "Znajdź użytkownika po nazwie lub UID",
+            "input_placeholder": "Nazwa użytkownika | UID",
+            "button_text": "Znajdź użytkownika",
+            "no_user_found_error": "Użytkownik nie znaleziony",
+            "empty_field_error": "Wprowadź nazwę użytkownika lub UID"
+        },
+        "image_viewer": {
+            "uploaded_by": "Przesłane przez",
+            "uploaded_on": "Przesłane dnia",
+            "download_button_text": "Pobierz",
+            "copy_button_text": "Kopiuj",
+            "report_button_text": "Zgłoś",
+            "download_alert": "Pobieranie...",
+            "password_required": "Ten obraz jest chroniony hasłem",
+            "password_placeholder": "Wprowadź hasło",
+            "view_image_button_placeholder": "Zobacz obraz"
+        },
+        "image_finder": {
+            "title": "Wyszukiwarka obrazów",
+            "subtitle": "Znajdź obraz po jego unikalnym identyfikatorze",
+            "input_placeholder": "Unikalny ID obrazu",
+            "button_text": "Wyszukaj obraz",
+            "no_image_found_error": "Obraz nie znaleziony!",
+            "empty_field_error": "Wprowadź unikalny ID"
+        },
+        "profile": {
+            "title": "Podsumowanie konta"
+        }
+    },
+    "global": {
+        "api_key_input_placeholder": "Klucz API",
+        "processing_button_text": "Przetwarzanie...",
+        "bad_api_key_alert": "Nieprawidłowy klucz API",
+        "invited_by_text": "Zaproszony przez",
+        "total_images_text": "Łączna liczba obrazów",
+        "total_pastes_text": "Łączna liczba wklejek",
+        "total_short_urls_text": "Łączna liczba skróconych URL",
+        "joined_date_text": "Data dołączenia",
+        "storage_used_text": "Wykorzystana przestrzeń",
+        "click_to_copy": "Kliknij, aby skopiować",
+        "click_to_show": "Kliknij, aby pokazać",
+        "click_to_hide": "Kliknij, aby ukryć",
+        "member_since": "Członek od",
+        "click_to_edit": "Kliknij, aby edytować",
+        "click_to_save": "Kliknij, aby zapisać",
+        "click_to_delete": "Kliknij, aby usunąć",
+        "not_connected_text": "Niepołączony",
+        "disabled_text": "Wyłączony"
+    },
+    "toasts": {
+        "error": {
+            "changing_theme": "Zmiana motywu...",
+            "change_theme": "Nie udało się zmienić motywu",
+            "email_change": "Nie udało się zmienić adresu e-mail",
+            "invalid_password": "Nieprawidłowe hasło"
+        },
+        "success": {
+            "copied_to_clipboard": "Skopiowano do schowka",
+            "change_theme": "Motyw zmieniony",
+            "language_changed": "Język zmieniony na: ",
+            "email_change": "Adres e-mail zmieniony pomyślnie",
+            "password": "brakujące hasło"
+        },
+        "loading": {
+            "fetching_image": "Pobieranie obrazu..."
+        }
+    },
+    "comp": {
+        "sidebar": {
+            "home": "Strona główna",
+            "images": "Obrazy",
+            "pastes": "Wklejki",
+            "short_urls": "Skrócone URL",
+            "settings": "Ustawienia",
+            "profile": "Profil",
+            "logout": "Wyloguj się"
+        }
+    }
+}

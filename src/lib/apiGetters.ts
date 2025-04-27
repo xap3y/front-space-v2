@@ -2,7 +2,7 @@
 import {getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {PasteDto} from "@/types/paste";
-import {ShortUrlDto} from "@/types/url";
+import {ShortUrlDto, ShortUrlLog} from "@/types/url";
 import {DefaultResponse} from "@/types/core";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
@@ -33,10 +33,17 @@ export async function getUserShortUrls(uid: string): Promise<ShortUrlDto[] | Def
     return urlList;
 }
 
+export async function getUserShortUrlLogs(uid: string): Promise<ShortUrlLog[] | DefaultResponse> {
+    const data = await getValidatedResponse('/v1/url/get/' + uid + "/logs");
+    if (data.error) return {error: true, message: "Failed to get short URL logs"} as DefaultResponse;
+    const urlList = data["data"] as ShortUrlLog[];
+    return urlList;
+}
+
 export async function getImageInfoApi(uid: string): Promise<UploadedImage | null> {
     console.log("Calling getImageInfoApi with uid: " + uid)
 
-    const data = await getValidatedResponse('/v1/image/info/' + uid);
+    const data = await getValidatedResponse('/v1/image/info/' + uid, true);
     if (data.error) return null;
     const img = data["data"] as UploadedImage;
     img.uploader.createdAt = new Date(img.uploader.createdAt).toLocaleString()

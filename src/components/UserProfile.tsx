@@ -47,7 +47,7 @@ export function UserProfile({ user }: Props) {
 
             {/* Profile Picture */}
             <img
-                src={(user.avatar ? user.avatar : "https://www.gravatar.com/avatar/")}
+                src={(user.avatar ? user.avatar : "/images/default-avatar.svg")}
                 alt={`${user.username}'s avatar`}
                 className="w-24 h-24 rounded-full shadow-lg border-4 border-gray-700 text-center leading-10"
             />
@@ -84,7 +84,7 @@ export function UserProfile({ user }: Props) {
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.joined_date_text}:</span>
-                    <span className={"font-bold"}>{user.createdAt}</span>
+                    <span className={"font-bold"}>{new Date(user.createdAt).toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">
@@ -125,7 +125,7 @@ export function UserProfile({ user }: Props) {
                         {user.socials.instagram && (
                             <SocialLinkButton href={`https://instagram.com/${user.socials.instagram}`}>
                                 <img alt={"IG"} width={iconSize} height={iconSize}
-                                     src={"https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg"}/>
+                                     src={"/icons/instagram.svg"}/>
                             </SocialLinkButton>
                         )}
                         {user.socials.twitter && (
@@ -166,7 +166,7 @@ export function UserProfile({ user }: Props) {
                         {user.socials.gitlab && (
                             <SocialLinkButton href={`https://gitlab.com/${user.socials.gitlab}`}>
                                 {/*<FaGitlab size={iconSize}/>*/}
-                                <img src={"https://upload.wikimedia.org/wikipedia/commons/3/35/GitLab_icon.svg"}
+                                <img src={"/icons/gitlab.svg"}
                                      alt={"GitLab"}
                                      width={iconSize}
                                      height={iconSize}
@@ -193,7 +193,7 @@ export function UserProfile({ user }: Props) {
                             <SocialLinkButton href={`https://steamcommunity.com/id/${user.socials.steam}`}>
                                 {/*<FaSteam size={iconSize} color={"#008ABE"}/>*/}
                                 <img
-                                    src={"https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg"}
+                                    src={"/icons/steam.svg"}
                                     alt={"Steam"}
                                     width={iconSize}
                                     height={iconSize}
@@ -205,7 +205,7 @@ export function UserProfile({ user }: Props) {
                             <SocialLinkButton href={`https://m.me/${user.socials.messenger}`}>
                                 {/*<FaFacebookMessenger size={iconSize} color={"#00B2FF"}/>*/}
                                 <img
-                                    src={"https://upload.wikimedia.org/wikipedia/commons/b/be/Facebook_Messenger_logo_2020.svg"}
+                                    src={"/icons/messenger.svg"}
                                     alt={"Messenger"}
                                     width={iconSize}
                                     height={iconSize}
@@ -226,7 +226,7 @@ export function UserProfile({ user }: Props) {
                             <SocialLinkButton href={`https://tiktok.com/@${user.socials.tiktok}`}>
                                 {/*<FaTiktok size={iconSize} color={"black"}/>*/}
                                 <img
-                                    src={"https://logos.logofury.com/logo_src/024dcc7ab2bdb2db20498f046371cd08.svg"}
+                                    src={"/icons/tiktok.svg"}
                                     alt={"TikTok"}
                                     width={iconSize - 5}
                                     height={iconSize - 5}

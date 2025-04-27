@@ -38,3 +38,7 @@
 .spin-full {
     animation: spin2 .2s linear;
 }
+
+.text-security-disc {
+    -webkit-text-security: disc;
+}

@@ -3,10 +3,10 @@ export interface UserObj {
     email: string;
     username: string;
     role: RoleType;
-    avatar?: string | null;
+    avatar?: string;
     createdAt: string;
-    invitor?: UserInvitor | null;
-    socials?: UserSocials | null;
+    invitor?: UserInvitor;
+    socials?: UserSocials;
     apiKey: string;
     stats: {
         totalUploads: number;

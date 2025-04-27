@@ -15,6 +15,23 @@ export default interface LanguageModel {
             short_password: string;
             success: string;
         },
+        register: {
+            title: string;
+            under_title: string;
+            confirm_password_placeholder: string;
+            invite_code_placeholder: string;
+            button_text: string;
+            already_have_account: string;
+            login_text: string;
+            invalid_email_alert: string;
+            password_too_short_alert: string;
+            passwords_do_not_match_alert: string;
+            invalid_invite_code_alert: string;
+            success_alert: string;
+            failed_alert: string;
+            email_already_exists_alert: string;
+            username_already_exists_alert: string;
+        },
         user: {
             total_images_text: string;
             total_pastes_text: string;

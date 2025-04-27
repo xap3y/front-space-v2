@@ -1,6 +1,9 @@
 import {DefaultResponse} from "@/types/core";
 
-const API_URL = process.env.API_URL || "http://127.0.0.1:8012";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8012";
+
+const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'];
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', "heic", "heif", "svg", "tiff", "ico", "raw"];
 
 const supportedLocales = ['ru', 'en', 'cs'];
 
@@ -13,10 +16,10 @@ export function getSecretKey() {
 }
 
 export function getDefaultLocale(): string {
-    const locale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "ru";
+    const locale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 
     if (!supportedLocales.includes(locale)) {
-        return "ru";
+        return "en";
     }
 
     return locale;
@@ -26,13 +29,17 @@ export function getApiKey() {
     return process.env.API_KEY || "null_API";
 }
 
-export function getCurlHeaders(apiKey: string = getApiKey()) {
-    return {
-        "Access-Control-Allow-Origin": "*",
+export function getCurlHeaders(apiKey: string = getApiKey(), noAuth: boolean = false) {
+
+    const data: HeadersInit = {
+        'Access-Control-Allow-Origin': "*",
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'x-api-key': apiKey
     }
+    if (!noAuth) {
+        data['x-api-key'] = apiKey;
+    }
+    return data;
 }
 
 export async function postApi(url: string, body: any, apiKey: string) {
@@ -84,12 +91,12 @@ export function validateResponse(data: any): boolean {
     return !data["error"] && data["message"];
 }
 
-export async function getValidatedResponse(url: string): Promise<DefaultResponse> {
+export async function getValidatedResponse(url: string, noAuth: boolean = false): Promise<DefaultResponse> {
 
     try {
         const response = await fetch(getApiUrl() + url, {
             method: 'GET',
-            headers: getCurlHeaders(),
+            headers: getCurlHeaders(getApiKey(), noAuth)
         });
 
         const data = await response.json();
@@ -114,6 +121,16 @@ export async function getValidatedResponse(url: string): Promise<DefaultResponse
     } catch (e) {
         return {error: true, message: "Server error"} as DefaultResponse;
     }
+}
+
+export function isVideoFile(type: string): boolean {
+    const ext = type.toLowerCase();
+    return VIDEO_EXTENSIONS.includes(ext || "");
+}
+
+export function isImageType(type: string): boolean {
+    const ext = type.toLowerCase();
+    return IMAGE_EXTENSIONS.includes(ext || "");
 }
 
 export default supportedLocales;

@@ -16,8 +16,10 @@ export default function Page() {
 
     useEffect(() => {
         if (error) {
-            console.error(error);
-            toast.error("Failed to logout")
+            logout()
+            //console.error(error);
+            //toast.error("Failed to logout")
+            router.push('/login')
             return;
         }
         if (!loadingUser && user) {

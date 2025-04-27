@@ -15,6 +15,15 @@ export default function Home() {
                     <a href={"/login"}>login</a>
                     <a href={"/home/dashboard"}> | dashboard</a>
                     <a href={"/i"}> | img finder</a>
+
+                </div>
+
+                <div className={"flex flex-row gap-4 mt-2 text-telegram"}>
+
+                    <a href={"/a"}>portable</a>
+                    <a href={"/user"}> | user finder</a>
+                    <a href={"/docs"}> | docs</a>
+
                 </div>
             </div>
         </>

@@ -7,11 +7,17 @@ import {getDefaultLocale} from "@/lib/core";
 import { FaArrowUp, FaSun, FaMoon } from "react-icons/fa6";
 import translations, {setLanguage, useTranslation} from "@/hooks/useTranslation";
 import {toast} from "react-toastify";
+import {useRouter} from "next/navigation";
+import {FaHome} from "react-icons/fa";
 
 const languages = [
     { code: "en", label: "English", flag: "/flags/en.svg" },
-    { code: "ru", label: "Русский", flag: "/flags/ru.svg" },
     { code: "cs", label: "Čeština", flag: "/flags/cs.svg" },
+    { code: "sk", label: "Slovenština", flag: "/flags/sk.svg" },
+    { code: "pl", label: "Polski", flag: "/flags/pl.svg" },
+    { code: "ru", label: "Русский", flag: "/flags/ru.svg" },
+    { code: "ua", label: "українська", flag: "/flags/ua.svg" },
+    { code: "de", label: "Deutsch", flag: "/flags/de.svg" },
 ];
 
 export default function LanguageSwitcher() {
@@ -25,6 +31,8 @@ export default function LanguageSwitcher() {
     const [displayedLocale, setDisplayedLocale] = useState(locale);
     const [spinning, setSpinning] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
+
+    const router = useRouter();
 
     useEffect(() => {
         const cookieLocale = getCookie("locale");
@@ -73,6 +81,10 @@ export default function LanguageSwitcher() {
         }, 250);
     };
 
+    const goHome = () => {
+        router.push("/");
+    }
+
     if (loading) {
         return (
             <></>
@@ -81,6 +93,9 @@ export default function LanguageSwitcher() {
 
     return (
         <div className="fixed bottom-4 right-4 z-50 flex">
+            <div className={`cursor-pointer flex items-center justify-center w-10 h-10 bg-primary_light rounded-md mr-2`} onClick={goHome}>
+                <FaHome size={16} color="white" />
+            </div>
             <div className={`${spinning ? "cursor-auto" : "cursor-pointer"} flex items-center justify-center w-10 h-10 bg-primary_light rounded-md mr-2`} onClick={changeTheme}>
                 {isLightMode ? (
                     <FaSun className={`transition-transform ${spinning ? "rotate-180" : "rotate-0"}`} size={16} color="yellow" />
@@ -132,7 +147,7 @@ export default function LanguageSwitcher() {
                                 className="flex items-center p-2 hover:bg-primary bg-primary_light transition-all duration-200 cursor-pointer"
                                 onClick={() => changeLanguage(code)}
                             >
-                                <Image src={flag} alt={`${label} flag`} width={24} height={16} />
+                                <Image src={flag} alt={`${code}`} width={24} height={16} />
                                 <span className="ml-2">{label}</span>
                             </div>
                         ))}

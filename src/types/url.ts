@@ -10,4 +10,11 @@ export interface ShortUrlDto {
     expiresAt: string;
     urlSet: UrlSet;
     uploader: UserObjShort;
+    logs: ShortUrlLog[];
+}
+
+export interface ShortUrlLog {
+    userAgent: string;
+    ipAddress: string;
+    time: string;
 }

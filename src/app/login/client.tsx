@@ -28,9 +28,11 @@ export default function LoginPage() {
     const lang = useTranslation();
 
     useEffect(() => {
-        if (!isApiUp) {
-            console.log("API is down < LoginPage />");
-            return;
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
+        if (emailParam) {
+            setEmail(emailParam);
+            router.replace("/login", { scroll: false });
         }
 
         console.log("USE EFFECT")
@@ -72,17 +74,17 @@ export default function LoginPage() {
                     closeOnClick: true
                 });
                 console.log("[GET] " + getApiUrl() + "/status " + error);
-            } finally {
-                setLoading(false)
             }
         }
 
-        if (isApiUp == true) {
+        if (isApiUp) {
             console.log("API is up");
             fetchData();
         } else {
             console.log("API is NOT up");
         }
+
+        setLoading(false)
     }, [isApiUp]);
 
     const handleSubmit = async (e: unknown) => {
@@ -96,12 +98,11 @@ export default function LoginPage() {
             return toast.error('Invalid email');
         }
 
+        const toastId = toast.info("Logging in...", {
+            isLoading: true
+        })
         try {
             /*setPassword('');*/
-
-            const toastId = toast.info("Logging in...", {
-                isLoading: true
-            })
             console.log("API URL: " + getApiUrl() + '/v1/auth/login');
 
             const response = await fetch(getApiUrl() + '/v1/auth/login', {
@@ -147,9 +148,15 @@ export default function LoginPage() {
             }, 500)
         } catch (e) {
             console.error(e);
-            toast.error("Login failed!")
+            toast.update(toastId, { render: "Login failed!", type: "error", isLoading: false, autoClose: 3000, closeOnClick: true})
         }
     };
+
+    if (loading) {
+        return (
+            <LoadingPage />
+        )
+    }
 
     if (!isApiUp) {
         return (
@@ -158,12 +165,6 @@ export default function LoginPage() {
                     router.replace("/")
                 }} />
             </>
-        )
-    }
-
-    if (loading) {
-        return (
-            <LoadingPage />
         )
     }
 
@@ -194,6 +195,7 @@ export default function LoginPage() {
                                             type="email"
                                             name="email"
                                             id="email"
+                                            value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                         />
                                     </div>

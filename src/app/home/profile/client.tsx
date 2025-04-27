@@ -93,6 +93,9 @@ export default function HomeProfilePage(): JSX.Element {
         const arrPastes = data["message"]["pastesPerDay"] as PairType[]
         const arrUrls = data["message"]["urlsPerDay"] as PairType[]
 
+        console.log("Graph data: " + data["message"])
+        console.log("arrImages: " + arrImages)
+
         // set labels
         const labelArr: string[] = arrImages.map(p => p.first)
         setGraphDataLabels(labelArr)

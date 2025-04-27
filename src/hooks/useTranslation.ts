@@ -2,13 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import LanguageModel from "@/types/LanguageModel";
-import en from '@/locales/en';
-import ru from '@/locales/ru';
-import cs from '@/locales/cs';
+import en from '@/locales/en.json';
+import ru from '@/locales/ru.json';
+import cs from '@/locales/cs.json';
+import sk from '@/locales/sk.json';
+import de from '@/locales/de.json';
+import ua from '@/locales/ua.json';
+import pl from '@/locales/pl.json';
 import {getCookie, setCookie} from "cookies-next/client";
 import {getDefaultLocale} from "@/lib/core";
 
-const translations: Record<string, LanguageModel> = { en, ru, cs };
+const translations: Record<string, LanguageModel> = {
+    cs: cs as LanguageModel,
+    en: en as LanguageModel,
+    ru: ru as LanguageModel,
+    sk: sk as LanguageModel,
+    ua: ua as LanguageModel,
+    pl: pl as LanguageModel,
+};
 
 export function useTranslation(): LanguageModel {
     const [locale, setLocale] = useState(() => {
@@ -25,7 +36,7 @@ export function useTranslation(): LanguageModel {
         return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
 
-    return translations[locale] || translations.ru;
+    return translations[locale] || translations.en;
 }
 
 /**
