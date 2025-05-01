@@ -2,140 +2,141 @@
     "pages": {
         "login": {
             "title": "XAP3Y - Space",
-            "under_title": "Sign in to continue",
-            "email_placeholder": "Email address",
-            "password_placeholder": "Password",
-            "no_account": "Don't have an account?",
-            "signup_text": "Sign up",
-            "button_text": "Sign In",
-            "forgot_password": "Forgot password?",
-            "user_not_found": "User not found",
-            "wrong_password": "Wrong password",
-            "short_password": "Password is too short",
-            "success": "Login successful"
+            "under_title": "Anmelden, um fortzufahren",
+            "email_placeholder": "E-Mail-Adresse",
+            "password_placeholder": "Passwort",
+            "no_account": "Noch keinen Account?",
+            "signup_text": "Registrieren",
+            "button_text": "Anmelden",
+            "forgot_password": "Passwort vergessen?",
+            "user_not_found": "Benutzer nicht gefunden",
+            "wrong_password": "Falsches Passwort",
+            "short_password": "Passwort ist zu kurz",
+            "success": "Anmeldung erfolgreich"
         },
         "register": {
-            "title": "XAP3Y - Register",
-            "under_title": "Create your account",
-            "confirm_password_placeholder": "Confirm Password",
-            "invite_code_placeholder": "Invite Code",
-            "button_text": "Register",
-            "already_have_account": "Already have an account?",
-            "login_text": "Login",
-            "invalid_email_alert": "Invalid email address",
-            "password_too_short_alert": "Password is too short",
-            "passwords_do_not_match_alert": "Passwords do not match",
-            "invalid_invite_code_alert": "Invalid invite code",
-            "success_alert": "Registration successful, please login",
-            "failed_alert": "Registration failed",
-            "email_already_exists_alert": "Email already exists",
-            "username_already_exists_alert": "Username already exists"
+            "title": "XAP3Y - Registrierung",
+            "under_title": "Erstelle deinen Account",
+            "confirm_password_placeholder": "Passwort bestätigen",
+            "invite_code_placeholder": "Einladungscode",
+            "button_text": "Registrieren",
+            "already_have_account": "Bereits einen Account?",
+            "login_text": "Anmelden",
+            "invalid_email_alert": "Ungültige E-Mail-Adresse",
+            "password_too_short_alert": "Passwort ist zu kurz",
+            "passwords_do_not_match_alert": "Passwörter stimmen nicht überein",
+            "invalid_invite_code_alert": "Ungültiger Einladungscode",
+            "success_alert": "Registrierung erfolgreich, bitte anmelden",
+            "failed_alert": "Registrierung fehlgeschlagen",
+            "email_already_exists_alert": "E-Mail existiert bereits",
+            "username_already_exists_alert": "Benutzername existiert bereits"
         },
         "user": {
-            "total_images_text": "Total images",
-            "total_pastes_text": "Total pastes",
-            "total_short_urls_text": "Total short URLs",
-            "joined_date_text": "Joined date",
-            "storage_used_text": "Storage used"
+            "total_images_text": "Gesamtanzahl Bilder",
+            "total_pastes_text": "Gesamtanzahl Pastes",
+            "total_short_urls_text": "Gesamtanzahl Kurz-URLs",
+            "joined_date_text": "Beitrittsdatum",
+            "storage_used_text": "Verwendeter Speicher"
         },
         "portable_url": {
-            "title": "URL Shortener",
-            "original_url_placeholder": "Original URL",
-            "button_text": "Short URL"
+            "title": "URL-Verkürzer",
+            "original_url_placeholder": "Original-URL",
+            "button_text": "URL kürzen"
         },
         "portable_paste": {
-            "title": "Paste Creator",
-            "title_input_placeholder": "Title",
+            "title": "Paste-Ersteller",
+            "title_input_placeholder": "Titel",
             "paste_input_placeholder": "Paste",
-            "button_text": "Create Paste",
-            "invalid_paste_length_alert": "Invalid Paste length!",
-            "invalid_title_length_alert": "Invalid Title length!",
-            "paste_created_alert": "Paste created",
-            "view_paste_text": "View created paste:"
+            "button_text": "Paste erstellen",
+            "invalid_paste_length_alert": "Ungültige Paste-Länge!",
+            "invalid_title_length_alert": "Ungültige Titel-Länge!",
+            "paste_created_alert": "Paste erstellt",
+            "view_paste_text": "Erstellte Paste anzeigen:"
         },
         "portable_image": {
-            "drag_and_drop_text": "Drag & drop an image here or click to select",
-            "button_text": "Upload Image",
-            "image_uploaded_alert": "Image uploaded successfully"
+            "drag_and_drop_text": "Bild hierher ziehen oder klicken, um auszuwählen",
+            "button_text": "Bild hochladen",
+            "image_uploaded_alert": "Bild erfolgreich hochgeladen"
         },
         "user_finder": {
-            "title": "User Finder",
-            "subtitle": "Find a user by their username or UID",
-            "input_placeholder": "Username | UID",
-            "button_text": "Find User",
-            "no_user_found_error": "User not found",
-            "empty_field_error": "Please enter username or UID"
+            "title": "Benutzersuche",
+            "subtitle": "Finde einen Benutzer anhand seines Benutzernamens oder seiner UID",
+            "input_placeholder": "Benutzername | UID",
+            "button_text": "Benutzer finden",
+            "no_user_found_error": "Benutzer nicht gefunden",
+            "empty_field_error": "Bitte Benutzernamen oder UID eingeben"
         },
         "image_viewer": {
-            "uploaded_by": "Uploaded by",
-            "uploaded_on": "Uploaded on",
-            "download_button_text": "Download",
-            "copy_button_text": "Copy",
-            "report_button_text": "Report",
-            "download_alert": "Downloading...",
-            "password_required": "This image is password protected",
-            "password_placeholder": "Enter password",
-            "view_image_button_placeholder": "View Image"
+            "uploaded_by": "Hochgeladen von",
+            "uploaded_on": "Hochgeladen am",
+            "download_button_text": "Herunterladen",
+            "copy_button_text": "Kopieren",
+            "report_button_text": "Melden",
+            "download_alert": "Wird heruntergeladen...",
+            "password_required": "Dieses Bild ist passwortgeschützt",
+            "password_placeholder": "Passwort eingeben",
+            "view_image_button_placeholder": "Bild anzeigen"
         },
         "image_finder": {
-            "title": "Image Finder",
-            "subtitle": "Find an image by its unique identifier",
-            "input_placeholder": "Image Unique ID",
-            "button_text": "Lookup Image",
-            "no_image_found_error": "Image not found!",
-            "empty_field_error": "Please enter a uniqueId"
+            "title": "Bildsuche",
+            "subtitle": "Finde ein Bild anhand seiner eindeutigen ID",
+            "input_placeholder": "Eindeutige Bild-ID",
+            "button_text": "Bild suchen",
+            "no_image_found_error": "Bild nicht gefunden!",
+            "empty_field_error": "Bitte eine eindeutige ID eingeben"
         },
         "profile": {
-            "title": "Account overview"
+            "title": "Kontoübersicht"
         }
     },
     "global": {
-        "api_key_input_placeholder": "API Key",
-        "processing_button_text": "Processing...",
-        "bad_api_key_alert": "Invalid API Key",
-        "invited_by_text": "Invited by",
-        "total_images_text": "Total images",
-        "total_pastes_text": "Total pastes",
-        "total_short_urls_text": "Total short URLs",
-        "joined_date_text": "Joined date",
-        "storage_used_text": "Storage used",
-        "click_to_copy": "Click to copy",
-        "click_to_show": "Click to show",
-        "click_to_hide": "Click to hide",
-        "member_since": "Member since",
-        "click_to_edit": "Click to edit",
-        "click_to_save": "Click to save",
-        "click_to_delete": "Click to delete",
-        "not_connected_text": "Not connected",
-        "disabled_text": "Disabled"
+        "api_key_input_placeholder": "API-Schlüssel",
+        "processing_button_text": "Wird verarbeitet...",
+        "bad_api_key_alert": "Ungültiger API-Schlüssel",
+        "invited_by_text": "Eingeladen von",
+        "total_images_text": "Gesamtanzahl Bilder",
+        "total_pastes_text": "Gesamtanzahl Pastes",
+        "total_short_urls_text": "Gesamtanzahl Kurz-URLs",
+        "joined_date_text": "Beitrittsdatum",
+        "storage_used_text": "Verwendeter Speicher",
+        "click_to_copy": "Klicken zum Kopieren",
+        "click_to_show": "Klicken zum Anzeigen",
+        "click_to_hide": "Klicken zum Verbergen",
+        "member_since": "Mitglied seit",
+        "click_to_edit": "Klicken zum Bearbeiten",
+        "click_to_save": "Klicken zum Speichern",
+        "click_to_delete": "Klicken zum Löschen",
+        "click_to_connect": "Klicken zum Verbinden",
+        "not_connected_text": "Nicht verbunden",
+        "disabled_text": "Deaktiviert"
     },
     "toasts": {
         "error": {
-            "changing_theme": "Switching theme...",
-            "change_theme": "Failed to change theme",
-            "email_change": "Failed to change email",
-            "invalid_password": "Invalid password"
+            "changing_theme": "Theme wird gewechselt...",
+            "change_theme": "Themewechsel fehlgeschlagen",
+            "email_change": "E-Mail-Änderung fehlgeschlagen",
+            "invalid_password": "Ungültiges Passwort"
         },
         "success": {
-            "copied_to_clipboard": "Copied to clipboard",
-            "change_theme": "Theme changed",
-            "language_changed": "Language changed to: ",
-            "email_change": "Email changed successfully",
-            "password": "missing password"
+            "copied_to_clipboard": "In die Zwischenablage kopiert",
+            "change_theme": "Theme geändert",
+            "language_changed": "Sprache geändert zu: ",
+            "email_change": "E-Mail erfolgreich geändert",
+            "password": "Passwort fehlt"
         },
         "loading": {
-            "fetching_image": "Fetching image..."
+            "fetching_image": "Bild wird abgerufen..."
         }
     },
     "comp": {
         "sidebar": {
-            "home": "Home",
-            "images": "Images",
+            "home": "Startseite",
+            "images": "Bilder",
             "pastes": "Pastes",
-            "short_urls": "Shortened URLs",
-            "settings": "Settings",
-            "profile": "Profile",
-            "logout": "Logout"
+            "short_urls": "Kurz-URLs",
+            "settings": "Einstellungen",
+            "profile": "Profil",
+            "logout": "Abmelden"
         }
     }
 }

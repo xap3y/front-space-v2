@@ -15,7 +15,7 @@
             "success": "Увійшло успішно"
         },
         "register": {
-            "title": "Space - register",
+            "title": "ксапей - register",
             "under_title": "Створіть акаунт",
             "confirm_password_placeholder": "Підтвердіть пароль",
             "invite_code_placeholder": "Запрошувальний код",
@@ -106,6 +106,7 @@
         "click_to_edit": "Натисніть, щоб редагувати",
         "click_to_save": "Натисніть, щоб зберегти",
         "click_to_delete": "Натисніть, щоб видалити",
+        "click_to_connect": "Натисніть, щоб підключити",
         "not_connected_text": "Не підключено",
         "disabled_text": "Вимкнено"
     },

@@ -1,7 +1,7 @@
 {
     "pages": {
         "login": {
-            "title": "Space - Přihlášení",
+            "title": "XAP3Y's SPACE - Přihlášení",
             "under_title": "Přihlaste se pro pokračování",
             "email_placeholder": "Emailová adresa",
             "password_placeholder": "Heslo",
@@ -106,6 +106,7 @@
         "click_to_edit": "Klikněte pro úpravu",
         "click_to_delete": "Klikněte pro smazání",
         "click_to_save": "Klikněte pro uložení",
+        "click_to_connect": "Klikněte pro připojení",
         "disabled_text": "Není dostupné",
         "not_connected_text": "Není připojeno"
     },

@@ -19,6 +19,7 @@ const translations: Record<string, LanguageModel> = {
     sk: sk as LanguageModel,
     ua: ua as LanguageModel,
     pl: pl as LanguageModel,
+    de: de as LanguageModel,
 };
 
 export function useTranslation(): LanguageModel {

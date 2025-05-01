@@ -1,7 +1,7 @@
 {
     "pages": {
         "login": {
-            "title": "XAP3Y - Space",
+            "title": "ксапей - спaцэ",
             "under_title": "Войдите, чтобы продолжить",
             "email_placeholder": "Адрес электронной почты",
             "password_placeholder": "Пароль",
@@ -15,7 +15,7 @@
             "success": "Вход выполнен успешно"
         },
         "register": {
-            "title": "XAP3Y - Space",
+            "title": "ксапей - Space",
             "under_title": "Создайте свой аккаунт",
             "confirm_password_placeholder": "Подтвердите пароль",
             "invite_code_placeholder": "Код приглашения",
@@ -106,6 +106,7 @@
         "click_to_edit": "Нажмите, чтобы редактировать",
         "click_to_delete": "Нажмите, чтобы удалить",
         "click_to_save": "Нажмите, чтобы сохранить",
+        "click_to_connect": "Нажмите, чтобы подключить",
         "disabled_text": "Недоступно",
         "not_connected_text": "Не подключено"
     },

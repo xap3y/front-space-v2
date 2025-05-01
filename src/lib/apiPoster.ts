@@ -66,6 +66,7 @@ export async function uploadImage(formData: FormData, apiKey: string, onProgress
                 'x-api-key': apiKey,
                 'Content-Type': 'multipart/form-data',
             },
+            timeout: 0,
             onUploadProgress: (progressEvent) => {
                 if (progressEvent.total) {
                     const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);

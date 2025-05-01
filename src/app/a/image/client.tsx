@@ -13,17 +13,23 @@ import LoadingPage from "@/components/LoadingPage";
 import {UploadedImage} from "@/types/image";
 import {isVideoFile} from "@/lib/core";
 import {useRouter} from "next/navigation";
+import {OrbitProgress} from "react-loading-indicators";
 
 
 export default function ImageUploader() {
 
     const [file, setFile] = useState<File | null>(null);
     const [apiKey, setApiKey] = useState("");
+    const [password, setPassword] = useState("");
+    const [description, setDescription] = useState("");
     const { user, loadingUser, error } = useUser();
     const lang: LanguageModel = useTranslation();
-    const [uploading, setUploading] = useState<boolean>(false);
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
+    const [uploading, setUploading] = useState<boolean>(false);
+    const [withDescription, setWithDescription] = useState<boolean>(false);
+    const [withPassword, setWithPassword] = useState<boolean>(true);
+
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
 
     const router = useRouter();
@@ -51,10 +57,15 @@ export default function ImageUploader() {
             return toast.error("Please fill all required fields!");
         }
 
+        if (withPassword && password.length > 0 && password.length < 3) {
+            return toast.error("Password length is shorter then 3");
+        }
+
         setUploading(true)
         const formData = new FormData();
         formData.append("file", file);
         formData.append("apiKey", apiKey);
+        if (withPassword && password.length > 2) formData.append("password", password)
 
         const uploadedImg = await uploadImage(formData, apiKey, (progress) => {
             setUploadProgress(progress);
@@ -96,6 +107,10 @@ export default function ImageUploader() {
         }
     }, [loadingUser, user]);
 
+    useEffect(() => {
+        console.log("WITH PASS", withPassword)
+    }, [withPassword]);
+
     const resetUpload = () => {
         setFile(null);
         setUploadedImage(null);
@@ -112,8 +127,8 @@ export default function ImageUploader() {
         <>
             {!uploadedImage && (
                 <form onSubmit={handleSubmit} className="fixed inset-0 flex items-center justify-center bg-primary bg-opacity-50">
-                    <div className="p-6 rounded-xl bg-secondary shadow-lg w-full max-w-md">
-                        <div className="space-y-4">
+                    <div className="p-6 rounded-xl bg-secondary shadow-lg w-full max-w-md xl:min-w-[550px]">
+                        <div className="space-y-6">
                             {!file && (
                                 <div
                                     {...getRootProps()}
@@ -128,23 +143,57 @@ export default function ImageUploader() {
                                 </div>
                             )}
                             {file && (
-                                <div className="flex justify-between items-center p-2 border-2 border-primary_light rounded-lg">
+                                <div className="flex justify-between items-center p-2 border-2 border-lime-700 rounded-lg">
                                     <span>{cleanText(file.name)}</span>
-                                    <button className={"ml-2"} onClick={handleRemoveFile}> <MdOutlineDelete className={"w-6 h-6"} /> </button>
+                                    <button className={"ml-2"} onClick={handleRemoveFile}> <MdOutlineDelete className={"w-6 h-6 text-red-500"} /> </button>
                                 </div>
                             )}
                             <input
-                                type="password"
+                                type="text"
                                 placeholder={lang.global.api_key_input_placeholder}
                                 value={apiKey}
                                 disabled={!!user}
                                 onChange={(e) => setApiKey(e.target.value)}
-                                className={`w-full p-2 border rounded bg-transparent focus:outline-none ${!!user ? "cursor-not-allowed" : ""}`}
+                                className={`text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none ${!!user ? "cursor-not-allowed" : ""}`}
                             />
 
+
+                            <div className={"flex gap-4 items-center"}>
+                                {/*<input
+                                    type={"checkbox"}
+                                    onChange={()=> {
+                                        setWithPassword(!withPassword)
+                                    }}
+                                    checked={withPassword}
+                                    className={"hidden"}
+                                />
+
+                                <span onClick={()=> {
+                                    if (uploading) return;
+                                    setWithPassword(!withPassword)
+                                }} className={`cursor-pointer w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${withPassword ? 'bg-blue-600 border-blue-500' : 'bg-white border-gray-400'}`} >
+                                </span>*/}
+
+                                <input
+                                    type="text"
+                                    placeholder={"Password (leave blank for no password)"}
+                                    value={password}
+                                    disabled={uploading || !withPassword}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className={`text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none`}
+                                />
+                            </div>
+
+                            {!uploading ? (
                             <button type={"submit"} disabled={uploading} className="w-full bg-blue-500 text-white p-2 rounded">
-                                {uploading ? "Uploading..." : lang.pages.portable_image.button_text}
-                            </button>
+                                {lang.pages.portable_image.button_text}
+                            </button>) : (
+                                <>
+                                    <div className={"flex items-center justify-center"}>
+                                        <OrbitProgress color="#32cd32" variant={"dotted"} size={"small"} text="" textColor=""/>
+                                    </div>
+                                </>
+                            )}
 
                             {uploading && (
                                 <div className="mt-4">

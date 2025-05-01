@@ -13,6 +13,10 @@ import { MdReport } from "react-icons/md";
 import { FaRegCopy } from "react-icons/fa";
 import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
+import {IoMdTrash} from "react-icons/io";
+import {useUser} from "@/hooks/useUser";
+import {UserPopupCard} from "@/components/UserPopupCard";
+import {UserObj} from "@/types/user";
 
 export default function Page() {
 
@@ -20,14 +24,26 @@ export default function Page() {
     const [loading, setLoading] = useState(true);
     const { image, setImage } = useImage();
 
+    const { user, loadingUser } = useUser();
+
     const [password, setPassword] = useState("");
     const [passwordRequired, setPasswordRequired] = useState(false);
     const [showImage, setShowImage] = useState(false);
     const [error, setError] = useState("");
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(true);
+    const [showCard, setShowCard] = useState(false);
+    const [position, setPosition] = useState({ x: 750, y: 300 });
 
     const lang = useTranslation();
+
+
+    const handleMouseEnter = () => setShowCard(true);
+    const handleMouseLeave = () => setShowCard(false);
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        setPosition({ x: e.clientX, y: e.clientY });
+    };
 
     useEffect(() => {
 
@@ -191,14 +207,14 @@ export default function Page() {
             {(!passwordRequired && showImage && image.type) ? (
                 <>
                     <div className={"flex items-center justify-center"}>
-                        <div className={"p-4 mt-10 lg:mt-20 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-secondary"}>
+                        <div className={"p-4 mt-10 lg:mt-20 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-secondary"} onMouseMove={handleMouseMove}>
                             <div className={"flex p-2"}>
                                 <h1 className={"text-3xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
                             </div>
 
                             <div>
                             <span className={"text-lg"}>
-                                {lang.pages.image_viewer.uploaded_by} <a className={"font-bold text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
+                                {lang.pages.image_viewer.uploaded_by} <a onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className={"font-bold text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
                             </span>
                             </div>
 
@@ -212,7 +228,7 @@ export default function Page() {
                                     </>
 
                                 ) : (<>
-                                        <img className={"rounded"} src={imageUrl || ""} alt={image.uniqueId} />
+                                        <img className={"rounded max-h-[600px]"} src={imageUrl || ""} alt={image.uniqueId} />
                                     </>)}
                             </div>
 
@@ -240,13 +256,31 @@ export default function Page() {
                                     {lang.pages.image_viewer.copy_button_text}
                                 </button>
 
-                                <button className={"flex items-center gap-2 bg-red-700 text-white p-2 rounded mt-2"} onClick={reportImage} >
+                                <button className={"flex items-center gap-2 bg-red-600 text-white p-2 rounded mt-2"} onClick={reportImage} >
                                     <MdReport />
                                     {lang.pages.image_viewer.report_button_text}
                                 </button>
+
+                                {/* TODO - DELETE */}
+                                {(user && user.uid == image.uploader.uid) && (
+                                    <button className={"flex items-center gap-2 bg-red-700 text-white p-2 rounded mt-2"} onClick={reportImage} >
+                                        <IoMdTrash />
+                                        {"DELETE"}
+                                    </button>
+                                )}
+
                             </div>
 
                         </div>
+                    </div>
+
+                    <div
+                        className={`pointer-events-none transition-all duration-200 ease-out transform ${
+                            showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                        } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
+                        style={{ top: position.y + 10, left: position.x + 20 }}
+                    >
+                        <UserPopupCard user={image.uploader as UserObj} lang={lang} />
                     </div>
                 </>
             ) : passwordRequired ? (

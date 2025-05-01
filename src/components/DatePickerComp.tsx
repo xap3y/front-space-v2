@@ -28,7 +28,7 @@ export function DatePickerComp({onDateChangeAction}: Props) {
         <>
             <div className="relative inline-block">
                 <button
-                    className="text-xl p-2 border-2 border-gray-400 rounded-lg flex items-center gap-2 font-bold"
+                    className="lg:text-xl text-lg p-2 border-2 border-gray-400 rounded-lg flex items-center gap-2 font-bold"
                     onClick={() => setShowPicker(!showPicker)}
                 >
                     <FaCalendarAlt /> Date

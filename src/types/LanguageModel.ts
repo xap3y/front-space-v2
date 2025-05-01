@@ -107,6 +107,7 @@ export default interface LanguageModel {
         click_to_edit: string;
         click_to_save: string;
         click_to_delete: string;
+        click_to_connect: string;
         disabled_text: string;
         not_connected_text: string;
     },
