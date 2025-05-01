@@ -2,7 +2,7 @@
 import {Line} from 'react-chartjs-2';
 import 'chart.js/auto';
 
-export function DateChart({data,width, height}) {
+export function DateChart({data}) {
 
     const options = {
         interaction: {
@@ -37,7 +37,7 @@ export function DateChart({data,width, height}) {
                 <YAxis />
                 <Tooltip />
             </LineChart>*/}
-            <Line width={width} height={height} data={data} options={options} />
+            <Line width={400} height={100} data={data} options={options} />
         </>
     )
 }

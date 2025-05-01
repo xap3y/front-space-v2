@@ -406,7 +406,7 @@ export default function HomeProfilePage(): JSX.Element {
                                             fill: false,
                                         },
                                     ],
-                                }} width={400} height={100} />
+                                }}/>
                             </div>
                         </div>
                     </div>
