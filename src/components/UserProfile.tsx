@@ -29,7 +29,7 @@ interface Props {
 export function UserProfile({ user }: Props) {
 
     const [showCard, setShowCard] = useState(false);
-    const [position, setPosition] = useState({ x: 1212, y: 530 });
+    const [position, setPosition] = useState({ x: 0, y: 0 });
     const handleMouseEnter = () => setShowCard(true);
     const handleMouseLeave = () => setShowCard(false);
 
@@ -43,7 +43,7 @@ export function UserProfile({ user }: Props) {
 
     return (
         <div
-            className="flex flex-col items-center w-full max-w-lg p-6 mx-auto bg-primary_light text-gray-200 rounded-lg shadow-lg">
+            className="flex flex-col items-center w-full max-w-lg lg:mb-0 mb-20 lg:mx-auto mx-3 p-6 bg-primary_light text-gray-200 rounded-lg shadow-lg">
 
             {/* Profile Picture */}
             <img
@@ -66,7 +66,7 @@ export function UserProfile({ user }: Props) {
             {/*<p className="text-gray-400">{user.role}</p>*/}
 
             {/* Stats */}
-            <div onMouseMove={handleMouseMove} className="w-full mt-6 text-lg font-parkinsans">
+            <div onMouseMove={handleMouseMove} className="w-full mt-6 lg:text-lg text-md font-parkinsans">
                 <div className="flex justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.total_images_text}:</span>
                     <span className={"font-bold"}>{user.stats.totalUploads}</span>
@@ -82,9 +82,9 @@ export function UserProfile({ user }: Props) {
                     <span className={"font-bold"}>{user.stats.urlsShortened}</span>
                 </div>
 
-                <div className="flex justify-between border-b border-gray-600 py-2">
+                <div className="flex items-center justify-between border-b border-gray-600 py-2">
                     <span>{lang.pages.user.joined_date_text}:</span>
-                    <span className={"font-bold"}>{new Date(user.createdAt).toLocaleString()}</span>
+                    <span className={"font-bold lg:text-lg text-xs"}>{new Date(user.createdAt).toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between border-b border-gray-600 py-2">

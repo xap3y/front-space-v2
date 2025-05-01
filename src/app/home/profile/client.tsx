@@ -33,7 +33,7 @@ export default function HomeProfilePage(): JSX.Element {
     const [fetchErrorMessage, setFetchErrorMessage] = useState<string>("Error fetching data");
 
     const [showCard, setShowCard] = useState(false);
-    const [position, setPosition] = useState({ x: 750, y: 520 });
+    const [position, setPosition] = useState({ x: 0, y: 0 });
 
     const [isEditing, setIsEditing] = useState(false);
     const [editedEmail, setEditedEmail] = useState<string>("");
@@ -360,11 +360,11 @@ export default function HomeProfilePage(): JSX.Element {
                         </div>
 
                         <div className={"flex flex-col p-6 border-white rounded-sm border-2 w-full"}>
-                            <div className={"flex flex-row lg:gap-6 gap-2 justify-between items-center"}>
+                            <div className={"flex lg:flex-row flex-col lg:gap-6 gap-2 justify-between items-center"}>
 
                                 <p className={"text-3xl ml-2 font-bold"}>Stats</p>
 
-                                <div className={"flex flex-row lg:gap-10 gap-4 py-3 px-10 bg-secondary rounded-full"}>
+                                <div className={"flex flex-row items-center lg:gap-10 gap-4 py-3 lg:px-10 px-4 bg-secondary rounded-full"}>
                                     <div className={"flex flex-row items-center lg:text-xl text-lg"}>
                                         <FaFilter />
                                         <span className={"ml-2"}>Filter by</span>
