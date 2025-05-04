@@ -1,9 +1,12 @@
+'use server';
 import {ShortUrlDto} from "@/types/url";
-import {getApiUrl, getCurlHeaders, postApi, postApiForm} from "@/lib/core";
+import {getApiKey, getApiUrl, getCurlHeaders, postApi} from "@/lib/core";
 import {PasteDto} from "@/types/paste";
 import {UploadedImage} from "@/types/image";
 import {DefaultResponse} from "@/types/core";
 import axios from "axios";
+import {DiscordConnection} from "@/types/discord";
+import defaultPeriodStats, {PeriodStats} from "@/types/stats";
 
 
 export async function createShortUrl(url: string, apikey: string): Promise<ShortUrlDto | null> {
@@ -54,6 +57,32 @@ export async function createPaste(title: string, paste: string, apikey: string):
     return pasteDto;
 }
 
+export async function authorizeDiscordConnectionRaw(tokenData: any, apiKey: string, url: string = "/v1/discord/authorize"): Promise<Response> {
+    const body = JSON.stringify({
+        accessToken: tokenData["access_token"],
+        refreshToken: tokenData["refresh_token"],
+        expiresAt: tokenData["expires_in"]
+    })
+    const response = await fetch(getApiUrl() + url, {
+        method: 'POST',
+        headers: getCurlHeaders(apiKey),
+        body: body,
+        credentials: "include"
+    });
+
+    return response
+}
+
+export async function authorizeDiscordConnection(tokenData: any, apiKey: string, url: string = "/v1/discord/authorize"): Promise<DiscordConnection | null> {
+    const response = await authorizeDiscordConnectionRaw(tokenData, apiKey, url);
+    const data = await response.json();
+    if (data.error) {
+        console.log(data)
+        return null;
+    }
+    return data["message"] as DiscordConnection;
+}
+
 export async function uploadImage(formData: FormData, apiKey: string, onProgress?: (progress: number) => void): Promise<UploadedImage | null> {
 
     console.log("Calling uploadImage with file:")
@@ -86,4 +115,13 @@ export async function uploadImage(formData: FormData, apiKey: string, onProgress
         console.error('Upload error:', error);
         return null;
     }
+}
+
+export async function getPeriodStats(preset: string = "TODAY"): Promise<PeriodStats> {
+
+    console.log("GETTING PERIOD DATA")
+    const data = await postApi('/v1/stats/get', {preset: preset}, getApiKey());
+    if (!data) return defaultPeriodStats;
+
+    return data as PeriodStats;
 }

@@ -5,7 +5,7 @@ import { setCookie } from "cookies-next/client";
 import { encrypt } from "@/lib/crypto";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { FaKey, FaArrowLeft } from "react-icons/fa";
+import {FaKey, FaArrowLeft, FaDiscord} from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import LoadingPage from "@/components/LoadingPage";
 import { getUser } from "@/lib/auth";
@@ -14,6 +14,7 @@ import {useTranslation} from "@/hooks/useTranslation";
 import {logApiRes} from "@/lib/logger";
 import { useApiStatusStore } from "@/lib/stores/apiStatusStore";
 import {ErrorPage} from "@/components/ErrorPage";
+import {errorToast} from "@/lib/client";
 
 export default function LoginPage() {
 
@@ -30,10 +31,20 @@ export default function LoginPage() {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const emailParam = urlParams.get('email');
+        const errorParam = urlParams.get('errortoast');
         if (emailParam) {
             setEmail(emailParam);
-            router.replace("/login", { scroll: false });
         }
+
+        if (errorParam) {
+            if (errorParam == "discord") {
+                errorToast("No user found with this Discord account", 2000);
+            } else if (errorParam == "discord_server") {
+                errorToast("Server error occurred ", 2000);
+            }
+        }
+
+        if (emailParam || errorParam) router.replace("/login", { scroll: false });
 
         console.log("USE EFFECT")
         console.log("Checking user..");
@@ -85,7 +96,7 @@ export default function LoginPage() {
         }
 
         setLoading(false)
-    }, [isApiUp]);
+    }, []);
 
     const handleSubmit = async (e: unknown) => {
         // @ts-expect-error
@@ -182,7 +193,32 @@ export default function LoginPage() {
                             {lang.pages.login.title}
                         </h2>
                         <p className="mt-4 text-center text-gray-400">{lang.pages.login.under_title}</p>
-                        <form autoComplete={"new-password"} method="POST" onSubmit={handleSubmit} className="mt-8 space-y-6">
+
+                        {/*Discord login*/}
+                        <div className={"w-full flex flex-col items-center justify-center"}>
+                            <div className="mt-4 text-center cursor-pointer">
+                                <a
+                                    className="w-full max-w-xs flex items-center justify-center gap-3 px-6 py-2
+                                 bg-[#5865F2] border-4 border-[#404EED] text-white rounded-2xl
+                                 font-semibold text-md hover:bg-[#4752C4] transition-all duration-200"
+                                    href={process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL}
+                                >
+                                    <FaDiscord size={24} />
+                                    Login using Discord
+                                </a>
+                            </div>
+
+                            <div className={"flex my-4 gap-4"}>
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            </div>
+                        </div>
+
+                        <form autoComplete={"new-password"} method="POST" onSubmit={handleSubmit} className="space-y-6">
                             <div className="rounded-md shadow-sm">
                                 <div>
                                     <div className="flex items-center">

@@ -204,7 +204,7 @@ export default function RegisterPage() {
                                     <div className="text-sm font-bold flex">
                                         <span className="text-gray-400 mr-1">{lang.pages.register.already_have_account}</span>
                                         <p className="font-bold text-telegram hover:text-telegram-bright cursor-pointer"
-                                           onClick={() => router.push('/register')}
+                                           onClick={() => router.push('/login')}
                                         >{lang.pages.register.login_text}</p>
 
                                     </div>

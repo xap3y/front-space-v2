@@ -138,7 +138,7 @@ export default function ImageUploader() {
                                 >
                                     <input {...getInputProps()} />
                                     <div className="flex flex-col items-center text-gray-300">
-                                        <p className={`${isDragActive ? "text-gray-500" : ""}`}>{lang.pages.portable_image.drag_and_drop_text}</p>
+                                        <p className={`${isDragActive ? "text-gray-500" : ""} lg:text-base text-xs`}>{lang.pages.portable_image.drag_and_drop_text}</p>
                                     </div>
                                 </div>
                             )}
@@ -154,7 +154,7 @@ export default function ImageUploader() {
                                 value={apiKey}
                                 disabled={!!user}
                                 onChange={(e) => setApiKey(e.target.value)}
-                                className={`text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none ${!!user ? "cursor-not-allowed" : ""}`}
+                                className={`lg:text-base text-xs text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none ${!!user ? "cursor-not-allowed" : ""}`}
                             />
 
 
@@ -180,7 +180,7 @@ export default function ImageUploader() {
                                     value={password}
                                     disabled={uploading || !withPassword}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className={`text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none`}
+                                    className={`xl:text-base text-xs text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none`}
                                 />
                             </div>
 

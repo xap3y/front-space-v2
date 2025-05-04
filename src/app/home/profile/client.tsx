@@ -11,15 +11,16 @@ import {useTranslation} from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
 import { MdOutlineEmail, MdEdit, MdOutlineStorage, MdFilterList } from "react-icons/md";
 import { FaDiscord, FaShieldAlt, FaSave, FaCalendarAlt } from "react-icons/fa";
-import {FaPhone, FaFilter, FaLink} from "react-icons/fa6";
+import {FaPhone, FaFilter, FaLink, FaXmark} from "react-icons/fa6";
 import {DateChart} from "@/components/DateChart";
 import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
-import {getImageCountStatsOnDate} from "@/lib/apiGetters";
+import {getImageCountStatsOnDate, getUserDiscordConnection, revokeUserDiscordConnection} from "@/lib/apiGetters";
 import {PairType} from "@/types/core";
 import {DatePickerComp} from "@/components/DatePickerComp";
 import {ErrorPage} from "@/components/ErrorPage";
 import {useRouter} from "next/navigation";
+import {DiscordConnection} from "@/types/discord";
 
 export default function HomeProfilePage(): JSX.Element {
 
@@ -39,6 +40,8 @@ export default function HomeProfilePage(): JSX.Element {
     const [editedEmail, setEditedEmail] = useState<string>("");
     const [isSaving, setIsSaving] = useState(false);
     const [currentEmail, setCurrentEmail] = useState<string>("");
+
+    const [discordConnection, setDiscordConnection] = useState<DiscordConnection | null>();
 
     const [graphDataLabels, setGraphDataLabels] = useState<string[]>([]);
     const [graphDataValuesImages, setGraphDataValuesImages] = useState<number[]>([]);
@@ -61,6 +64,17 @@ export default function HomeProfilePage(): JSX.Element {
         //console.log(e.clientX, e.clientY)
         setPosition({ x: e.clientX, y: e.clientY });
     };
+
+    const revokeDiscordConnection = async () => {
+        if (!discordConnection || !user) return;
+        const res = await revokeUserDiscordConnection(user.apiKey);
+        if (res) {
+            setDiscordConnection(null);
+            okToast("Discord connection revoked", 1000)
+        } else {
+            errorToast("Cannot revoke discord connection", 1000)
+        }
+    }
 
     const handleEmailSave = async () => {
         setEditedEmail(currentEmail);
@@ -112,6 +126,10 @@ export default function HomeProfilePage(): JSX.Element {
     useEffect(() => {
         setPage("profile")
 
+        if (error == 'User not found.') {
+            return router.push("/login");
+        }
+
         if (error) {
             setFetchErrorMessage(error)
             setFetchError(true);
@@ -127,7 +145,12 @@ export default function HomeProfilePage(): JSX.Element {
         setCurrentEmail(user.email)
         setLoading(false);
         updateGraphData(graphDateFrom, graphDateTo)
-    }, [user, loadingUser])
+        const getDiscordStatus = async () => {
+            const discordConnection = await getUserDiscordConnection(user.apiKey)
+            setDiscordConnection(discordConnection)
+        }
+        getDiscordStatus();
+    }, [user, loadingUser, error])
 
     const handleGraphDataChange = (from: Date, to: Date) => {
         setGraphDateFrom(from)
@@ -135,9 +158,9 @@ export default function HomeProfilePage(): JSX.Element {
         updateGraphData(from, to)
     };
 
-    if (loading) return <LoadingPage/>
+    if (loading || !user) return <LoadingPage/>
 
-    if (fetchError || !user) {
+    if (fetchError) {
         return <ErrorPage message={fetchErrorMessage} lang={lang} callBack={()=> {
             router.replace("/")
         }} />
@@ -323,20 +346,33 @@ export default function HomeProfilePage(): JSX.Element {
                                     <p className={"lg:text-3xl text-lg font-bold mr-5"}>Discord</p>
                                 </div>
 
+                                {
+                                    discordConnection ? (
+                                        <>
+                                            <div className={"flex flex-row lg:gap-4 gap-3 items-center mr-2"}>
+                                                <img src={"https://cdn.discordapp.com/avatars/" + discordConnection.discordId + "/" + discordConnection.avatar + ".png"} className={"rounded-full lg:w-10 lg:h-10 w-8 h-8 border-gray-400 border-2"} />
+                                                <span className={"text-3xl font-bold mb-1"}>{discordConnection.username}</span>
+                                                <FaXmark onClick={revokeDiscordConnection} className={"text-red-500 w-8 h-8 cursor-pointer duration-200 hover:-translate-y-0.5"} />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className={"flex flex-row lg:gap-6 gap-3 items-center"}>
+                                                <p className={"lg:text-3xl text-lg"}>{user.socials?.discord ? user.socials.discord : lang.global.not_connected_text}</p>
+                                                <a
+                                                    className={"transition-all duration-200 hover:-translate-y-0.5"}
+                                                    data-tooltip-id="my-tooltip"
+                                                    data-tooltip-content={lang.global.click_to_connect}
+                                                    data-tooltip-place="top"
+                                                    href={process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL}
+                                                >
+                                                    <FaLink className={"lg:text-2xl text-xl"} />
+                                                </a>
 
-                                <div className={"flex flex-row lg:gap-6 gap-3 items-center"}>
-                                    <p className={"lg:text-3xl text-lg"}>{user.socials?.discord ? user.socials.discord : lang.global.not_connected_text}</p>
-                                    <a
-                                        className={"transition-all duration-200 hover:-translate-y-0.5"}
-                                        data-tooltip-id="my-tooltip"
-                                        data-tooltip-content={lang.global.click_to_connect}
-                                        data-tooltip-place="top"
-                                        href={process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL}
-                                    >
-                                        <FaLink className={"lg:text-2xl text-xl"} />
-                                    </a>
-
-                                </div>
+                                            </div>
+                                        </>
+                                    )
+                                }
                             </div>
 
                             <hr className={"w-full rounded-full border-opacity-10 border-[1px] border-gray-100 my-6"} />

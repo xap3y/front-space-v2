@@ -3,7 +3,6 @@
 import {Sidebar} from "@/types/core";
 import { MdLogout } from "react-icons/md";
 import 'react-tooltip/dist/react-tooltip.css'
-import { Tooltip } from 'react-tooltip'
 import {usePage} from "@/context/PageContext";
 import {useRouter} from "next/navigation";
 import {useEffect, useState} from "react";

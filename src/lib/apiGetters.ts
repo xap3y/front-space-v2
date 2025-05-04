@@ -4,6 +4,7 @@ import {UploadedImage} from "@/types/image";
 import {PasteDto} from "@/types/paste";
 import {ShortUrlDto, ShortUrlLog} from "@/types/url";
 import {DefaultResponse} from "@/types/core";
+import {DiscordConnection} from "@/types/discord";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
@@ -15,6 +16,49 @@ export async function getUserApi(id: string): Promise<DefaultResponse> {
     user.createdAt = new Date(user.createdAt).toLocaleString()
     console.log("user is " + user)*/
     return data;
+}
+
+export async function getUserDiscordConnection(apiKey: string): Promise<DiscordConnection | null> {
+    try {
+        const url = '/v1/discord/get/@me';
+        const response = await fetch(getApiUrl() + url, {
+            method: 'GET',
+            headers: getCurlHeaders(apiKey)
+        });
+        const data = await response.json();
+        if (data.error) return null;
+        return data["message"] as DiscordConnection;
+    } catch (error) {
+        return null;
+    }
+}
+
+export async function revokeUserDiscordConnectionToken(token: string): Promise<boolean> {
+    try {
+        const url = '/v1/discord/token/' + token;
+        const response = await fetch(getApiUrl() + url, {
+            method: 'DELETE',
+            headers: getCurlHeaders()
+        });
+        const data = await response.json();
+        return !data.error
+    } catch (error) {
+        return false;
+    }
+}
+
+export async function revokeUserDiscordConnection(apiKey: string): Promise<boolean> {
+    try {
+        const url = '/v1/discord/get/@me';
+        const response = await fetch(getApiUrl() + url, {
+            method: 'DELETE',
+            headers: getCurlHeaders(apiKey)
+        });
+        const data = await response.json();
+        return !data.error
+    } catch (error) {
+        return false;
+    }
 }
 
 export async function getUserImages(uid: string): Promise<UploadedImage[] | null> {

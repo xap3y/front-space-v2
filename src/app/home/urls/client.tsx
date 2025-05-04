@@ -65,11 +65,8 @@ export default function HomeUrlsPage() {
             return;
         }
 
-        if (error) {
-            debugLog("Error loading user data")
-            setLoading(false)
-            setFetchError(true)
-            return
+        if (error == 'User not found.') {
+            return router.push("/login");
         }
 
         const fetchShortUrls = async () => {
@@ -93,9 +90,9 @@ export default function HomeUrlsPage() {
     }, [user, loadingUser, error])
 
 
-    if (loading) return <LoadingPage/>
+    if (loading || !user) return <LoadingPage/>
 
-    if (fetchError || !user) {
+    if (fetchError) {
         return <ErrorPage message={"Failed to fetch URLs"} lang={lang} callBack={()=> {
             router.replace("/")
         }} />

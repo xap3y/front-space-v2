@@ -6,7 +6,7 @@ export default function Home() {
         <>
             <div className={"flex flex-col justify-center items-center"}>
 
-                <div className={"mt-10 font-bold text-4xl"}>
+                <div className={"mt-10 font-bold text-4xl text-center"}>
                     <h1>Xap3y's space v0.4</h1>
                 </div>
 

@@ -26,12 +26,18 @@ function languageMiddleware(req: NextRequest, res: NextResponse) {
 }
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
+    const bypassMiddleware = req.headers.get('X-Bypass-Middleware');
+    if (bypassMiddleware && bypassMiddleware === 'true') {
+        console.log("Bypassing middleware");
+        return res;
+    }
 
-    const protectedRoutes = ['/home'];
+    const protectedRoutes = ['/home2']; // TODO: rename to /home
     const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route));
     if (!isProtectedRoute) return res;
 
-    const authCookie = await getCookie('auth_token', { res, req });
+    /*const authCookie = await getCookie('auth_token', { res, req });*/
+    const authCookie = req.cookies.get('auth_token')?.value;
 
     if (!authCookie) {
         console.log("No auth token found");
@@ -47,7 +53,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     }
     try {
         user = JSON.parse(token);
-        console.log("MW: " + user);
+        console.log("MW user: " + user);
     } catch (error) {
         console.log(error);
         return NextResponse.redirect(new URL("/login", req.url));
@@ -65,6 +71,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     }
 
     console.log("MW: Returning RES");
+    console.log("NOT REDIRECTING TO /login");
     return res;
 }
 

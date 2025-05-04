@@ -29,6 +29,9 @@ export default function HomeGalleryPage() {
         if (loadingUser) {
             return;
         }
+        else if (error == 'User not found.') {
+            return router.push("/login");
+        }
 
         const fetchImages = async () => {
             const imagesFromApi: UploadedImage[] | null = await getUserImages(user?.uid + "");
@@ -41,11 +44,11 @@ export default function HomeGalleryPage() {
             setLoading(false)
         };
         fetchImages()
-    }, [user, loadingUser])
+    }, [user, loadingUser, error])
 
-    if (loading) return <LoadingPage/>
+    if (loading || !user) return <LoadingPage/>
 
-    if (fetchError || !user) {
+    if (fetchError) {
         return <ErrorPage message={"Failed to fetch images"} lang={lang} callBack={()=> {
             router.replace("/")
         }} />
