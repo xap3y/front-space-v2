@@ -6,7 +6,7 @@ import {useUser} from "@/hooks/useUser";
 import {useTranslation} from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
 import {toast} from "react-toastify";
-import {createPaste, uploadImage} from "@/lib/apiPoster";
+import {createPaste} from "@/lib/apiPoster";
 import { MdOutlineDelete } from "react-icons/md";
 import { IoMdClipboard } from "react-icons/io";
 import LoadingPage from "@/components/LoadingPage";
@@ -14,6 +14,7 @@ import {UploadedImage} from "@/types/image";
 import {isVideoFile} from "@/lib/core";
 import {useRouter} from "next/navigation";
 import {OrbitProgress} from "react-loading-indicators";
+import {uploadImage} from "@/lib/client";
 
 
 export default function ImageUploader() {

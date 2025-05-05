@@ -1,6 +1,9 @@
 import {toast} from "react-toastify";
 import {RoleType} from "@/types/user";
 import {JSX} from "react";
+import {UploadedImage} from "@/types/image";
+import axios from "axios";
+import {getApiUrl} from "@/lib/core";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -77,5 +80,39 @@ export const getUserRoleBadge: (role: RoleType) => JSX.Element = (role: RoleType
             return <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                     user
                 </span>
+    }
+}
+
+export async function uploadImage(formData: FormData, apiKey: string, onProgress?: (progress: number) => void): Promise<UploadedImage | null> {
+
+    console.log("Calling uploadImage with file:")
+
+    /*const data = await postApiForm('/v1/image/upload', formData, apiKey);*/
+
+    try {
+        const response = await axios.post(getApiUrl() + "/v1/image/upload", formData, {
+            headers: {
+                'x-api-key': apiKey,
+                'Content-Type': 'multipart/form-data',
+            },
+            timeout: 0,
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    if (onProgress) onProgress(percent);
+                }
+            },
+        });
+
+        if (!response.status.toString().startsWith("2") || !response.data) {
+            return null;
+        }
+
+        console.log("Response data: ", response.data);
+        console.log("Response data.message: ", response.data["message"]);
+        return response.data["message"] as UploadedImage;
+    } catch (error) {
+        console.error('Upload error:', error);
+        return null;
     }
 }
