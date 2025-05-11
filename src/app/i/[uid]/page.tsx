@@ -8,7 +8,7 @@ import NotFound from "next/dist/client/components/not-found-error";
 import {useImage} from "@/context/ImageContext";
 import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
-import { FaDownload } from "react-icons/fa6";
+import {FaArrowDown, FaDownload} from "react-icons/fa6";
 import { MdReport } from "react-icons/md";
 import { FaRegCopy } from "react-icons/fa";
 import {toast} from "react-toastify";
@@ -35,6 +35,10 @@ export default function Page() {
     const [error, setError] = useState("");
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(true);
+    const [open, setOpen] = useState(false);
+
+    const toggleDropdown = () => setOpen(!open);
+    const closeDropdown = () => setOpen(false);
 
     const lang = useTranslation();
     const router = useRouter();
@@ -99,10 +103,10 @@ export default function Page() {
         console.log(image)
     }, [uid, setImage]);
 
-    const copyToClipboard = () => {
-        console.log(image?.urlSet.shortUrl)
+    const copyToClipboard = (url: string) => {
+        //console.log(image?.urlSet.shortUrl)
         //navigator.clipboard.writeText(getApiUrl() + "/v1/image/get/" + uid);
-        navigator.clipboard.writeText(image?.urlSet.shortUrl || "")
+        navigator.clipboard.writeText(url || "")
         toast.success(lang.toasts.success.copied_to_clipboard, {
             autoClose: 500,
             closeOnClick: true
@@ -311,10 +315,64 @@ export default function Page() {
                                         {lang.pages.image_viewer.download_button_text}
                                     </button>
 
-                                    <button className={"lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"} onClick={copyToClipboard}>
+                                    {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"} onClick={copyToClipboard}>
                                         <FaRegCopy />
                                         {lang.pages.image_viewer.copy_button_text}
-                                    </button>
+                                    </button>*/}
+
+                                    <div className="relative inline-block text-left">
+                                        <button
+                                            className="lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"
+                                            onClick={toggleDropdown}
+                                        >
+                                            <FaArrowDown />
+                                            {lang.pages.image_viewer.copy_button_text}
+                                        </button>
+
+                                        <div
+                                            className={`absolute right-0 mt-1 min-w-52 bg-zinc-900 rounded border border-zinc-700 shadow-lg z-50 overflow-hidden transform transition-all duration-300 ease-in-out origin-top ${
+                                                open ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0 pointer-events-none"
+                                            }`}
+                                        >
+
+                                            <button
+                                                key={"short"}
+                                                onClick={() => {
+                                                    closeDropdown()
+                                                    copyToClipboard(image?.urlSet.shortUrl || "")
+                                                }}
+                                                className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
+                                            >
+                                                Short URL
+                                            </button>
+
+                                            <hr className="border-zinc-700" />
+
+                                            <button
+                                                key={"portal"}
+                                                onClick={() => {
+                                                    closeDropdown()
+                                                    copyToClipboard("https://space.xap3y.tech/i/" + uid)
+                                                }}
+                                                className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
+                                            >
+                                                Portal URL
+                                            </button>
+
+                                            <hr className="border-zinc-700" />
+
+                                            <button
+                                                key={"raw"}
+                                                onClick={() => {
+                                                    closeDropdown()
+                                                    copyToClipboard(image?.urlSet.rawUrl || "")
+                                                }}
+                                                className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
+                                            >
+                                                Raw URL
+                                            </button>
+                                        </div>
+                                    </div>
 
                                     <button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-600 text-white px-2 rounded"} onClick={reportImage} >
                                         <MdReport />
