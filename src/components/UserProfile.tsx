@@ -21,6 +21,8 @@ import {useTranslation} from "@/hooks/useTranslation";
 import {getUserRoleBadge} from "@/lib/client";
 import {UserPopupCard} from "@/components/UserPopupCard";
 import {useState} from "react";
+import {useIsMobile} from "@/hooks/utils";
+import {useHoverCard} from "@/hooks/useHoverCard";
 
 interface Props {
     user: UserObj
@@ -28,14 +30,16 @@ interface Props {
 
 export function UserProfile({ user }: Props) {
 
-    const [showCard, setShowCard] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const handleMouseEnter = () => setShowCard(true);
-    const handleMouseLeave = () => setShowCard(false);
+    const isMobile = useIsMobile();
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setPosition({ x: e.clientX, y: e.clientY });
-    };
+    const {
+        showCard,
+        position,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleMouseMove,
+    } = useHoverCard(isMobile);
+
     const lang = useTranslation();
     const iconSize = 32;
 

@@ -42,7 +42,7 @@ export function SidebarComp({ sidebar, logout_text }: Props) {
 
     return (
         <>
-            <div className={`fixed w-[70px] min-w-[70px] animate-fadeInLeft duration-150 transition-all h-screen bg-secondary items-center flex flex-col justify-between py-3 pb-5 pt-5 ${!isVisible ? "-translate-x-full" : ""} ${isHidden ? "hidden" : ""}`}>
+            <div className={`fixed w-[70px] min-w-[70px] animate-fadeInLeft duration-150 transition-all h-screen bg-secondary items-center flex z-20 flex-col justify-between py-3 pb-5 pt-5 ${!isVisible ? "-translate-x-full" : ""} ${isHidden ? "hidden" : ""}`}>
                 <div className="flex flex-col items-center">
                     {sidebar.map(({ title, href, icon, page }) => (
                         <div

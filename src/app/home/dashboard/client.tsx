@@ -42,6 +42,7 @@ export default function HomeDashboardPage() {
             return;
         }
         else if (error == 'User not found.') {
+            //console.log("USER NOT FOUND")
             return router.push("/login");
         }
     }, [user, loadingUser, error])
@@ -61,7 +62,7 @@ export default function HomeDashboardPage() {
 
     return (
         <>
-            <div className={"w-full"}>
+            <div className={"w-full max-h-screen overflow-y-scroll"}>
                 <h1 className={"text-center font-bold text-4xl mt-4"}>Dashboard</h1>
 
                 <div className={"mt-12 items-center p-2 w-full flex justify-center"}>

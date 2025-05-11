@@ -108,7 +108,11 @@
         "click_to_delete": "Kliknite pre vymazanie",
         "click_to_connect": "Kliknite pre pripojenie",
         "not_connected_text": "Nepřipojený",
-        "disabled_text": "Zakázané"
+        "disabled_text": "Zakázané",
+        "show_advanced_settings": "Zobraziť pokročilé nastavenia",
+        "hide_advanced_settings": "Skryť pokročilé nastavenia",
+        "description": "Popis",
+        "automatic": "Automaticky"
     },
     "toasts": {
         "error": {

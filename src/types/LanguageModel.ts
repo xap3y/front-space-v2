@@ -110,6 +110,10 @@ export default interface LanguageModel {
         click_to_connect: string;
         disabled_text: string;
         not_connected_text: string;
+        show_advanced_settings: string;
+        hide_advanced_settings: string;
+        description: string;
+        automatic: string;
     },
     toasts: {
         error: {

@@ -4,6 +4,8 @@ import {JSX} from "react";
 import {UploadedImage} from "@/types/image";
 import axios from "axios";
 import {getApiUrl} from "@/lib/core";
+import {CallServer} from "@/types/core";
+import {request} from "node:http";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -83,9 +85,9 @@ export const getUserRoleBadge: (role: RoleType) => JSX.Element = (role: RoleType
     }
 }
 
-export async function uploadImage(formData: FormData, apiKey: string, onProgress?: (progress: number) => void): Promise<UploadedImage | null> {
+export async function uploadImage(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void): Promise<UploadedImage | null> {
 
-    console.log("Calling uploadImage with file:")
+    console.log("Calling uploadImage with CS: " + callServer?.url || "DEFAULT")
 
     /*const data = await postApiForm('/v1/image/upload', formData, apiKey);*/
 
@@ -115,4 +117,61 @@ export async function uploadImage(formData: FormData, apiKey: string, onProgress
         console.error('Upload error:', error);
         return null;
     }
+}
+
+export async function deleteImageApi(imageId: string, apiKey: string): Promise<boolean> {
+    console.log("Calling deleteImage with imageId: " + imageId)
+
+    try {
+        const response = await axios.delete(getApiUrl() + "/v1/image/get/" + imageId, {
+            headers: {
+                'x-api-key': apiKey,
+                'Content-Type': 'application/json',
+            },
+            timeout: 0,
+        });
+        if (!response.status.toString().startsWith("2") || !response.data) {
+            return false;
+        }
+        const error: boolean = response.data["error"];
+        if (error) {
+            console.error("Error deleting image: ", response.data["message"]);
+            return false;
+        }
+        return !error;
+    }
+    catch (error) {
+        //console.error('Delete error:', error);
+        return false;
+    }
+}
+
+
+export async function pingServer(url: string): Promise<number | null> {
+
+    const http = new XMLHttpRequest();
+
+    const started = new Date().getTime();
+
+    let time= null;
+
+    http.open("GET", url, true);
+
+    http.onreadystatechange = function () {
+
+        console.log("test" + url)
+        if (http.readyState == 4) {
+            const ended = new Date().getTime();
+
+            time = started - ended;
+        }
+    }
+
+    try {
+        http.send(null)
+        return time;
+    } catch (e) {
+        return null;
+    }
+
 }

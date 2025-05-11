@@ -108,7 +108,11 @@
         "click_to_delete": "Click to delete",
         "click_to_connect": "Click to connect",
         "not_connected_text": "Not connected",
-        "disabled_text": "Disabled"
+        "disabled_text": "Disabled",
+        "show_advanced_settings": "Show advanced settings",
+        "hide_advanced_settings": "Hide advanced settings",
+        "description": "Description",
+        "automatic": "Automatic"
     },
     "toasts": {
         "error": {

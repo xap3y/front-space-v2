@@ -108,7 +108,11 @@
         "click_to_delete": "Klicken zum Löschen",
         "click_to_connect": "Klicken zum Verbinden",
         "not_connected_text": "Nicht verbunden",
-        "disabled_text": "Deaktiviert"
+        "disabled_text": "Deaktiviert",
+        "show_advanced_settings": "Erweiterte Einstellungen anzeigen",
+        "hide_advanced_settings": "Erweiterte Einstellungen ausblenden",
+        "description": "Beschreibung",
+        "automatic": "Automatisch"
     },
     "toasts": {
         "error": {

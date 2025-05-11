@@ -108,7 +108,11 @@
         "click_to_delete": "Натисніть, щоб видалити",
         "click_to_connect": "Натисніть, щоб підключити",
         "not_connected_text": "Не підключено",
-        "disabled_text": "Вимкнено"
+        "disabled_text": "Вимкнено",
+        "show_advanced_settings": "Показати розширені налаштування",
+        "hide_advanced_settings": "Сховати розширені налаштування",
+        "description": "Опис",
+        "automatic": "Автоматично"
     },
     "toasts": {
         "error": {

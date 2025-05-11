@@ -1,7 +1,7 @@
 'use client';
 
-import {useParams} from "next/navigation";
-import {useEffect, useRef, useState} from "react";
+import {useParams, useRouter} from "next/navigation";
+import {useEffect, useState} from "react";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import LoadingPage from "@/components/LoadingPage";
 import NotFound from "next/dist/client/components/not-found-error";
@@ -17,6 +17,9 @@ import {IoMdTrash} from "react-icons/io";
 import {useUser} from "@/hooks/useUser";
 import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
+import {useHoverCard} from "@/hooks/useHoverCard";
+import {useIsMobile} from "@/hooks/utils";
+import {deleteImageApi, errorToast} from "@/lib/client";
 
 export default function Page() {
 
@@ -32,18 +35,19 @@ export default function Page() {
     const [error, setError] = useState("");
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(true);
-    const [showCard, setShowCard] = useState(false);
-    const [position, setPosition] = useState({ x: 750, y: 300 });
 
     const lang = useTranslation();
+    const router = useRouter();
 
+    const isMobile = useIsMobile();
 
-    const handleMouseEnter = () => setShowCard(true);
-    const handleMouseLeave = () => setShowCard(false);
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setPosition({ x: e.clientX, y: e.clientY });
-    };
+    const {
+        showCard,
+        position,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleMouseMove,
+    } = useHoverCard(isMobile);
 
     useEffect(() => {
 
@@ -110,6 +114,42 @@ export default function Page() {
             autoClose: 500,
             closeOnClick: true
         })
+    }
+
+    const deleteImage = async () => {
+        if (!image || !user || !user.apiKey) {
+            errorToast("You need to be logged!")
+            return;
+        }
+
+        const toastId = toast.loading("Deleting image...");
+
+        const res: boolean = await deleteImageApi(image.uniqueId, user.apiKey);
+
+        if (res) {
+            toast.update(toastId, {
+                render: "Image deleted successfully",
+                type: "success",
+                autoClose: 1200,
+                closeOnClick: true,
+                isLoading: false
+            })
+            setShowImage(false);
+            setLoading(true)
+
+            setTimeout(() => {
+                router.push("/i")
+            }, 200);
+        } else {
+            toast.update(toastId, {
+                render: "Failed to delete image",
+                type: "error",
+                autoClose: 1200,
+                closeOnClick: true,
+                isLoading: false
+            })
+        }
+
     }
 
     const fetchImageBlob = async (pass?: string) => {
@@ -206,87 +246,113 @@ export default function Page() {
         <>
             {(!passwordRequired && showImage && image.type) ? (
                 <>
-                    <div className={"flex items-center justify-center"}>
-                        <div className={"p-4 mt-10 lg:mt-20 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-secondary"} onMouseMove={handleMouseMove}>
-                            <div className={"flex p-2"}>
-                                <h1 className={"text-3xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
-                            </div>
+                    <div className={"max-h-screen overflow-y-scroll overflow-x-hidden"}>
 
-                            <div>
-                            <span className={"text-lg"}>
-                                {lang.pages.image_viewer.uploaded_by} <a onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className={"font-bold text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
+                        <div className={"flex items-center justify-center lg:mb-0 pb-56"}>
+                            <div className={"p-4 mt-2 lg:mt-20 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-secondary"} onMouseMove={handleMouseMove}>
+                                <div className={"flex flex-col items-center justify-center p-2"}>
+                                    <h1 className={"lg:text-3xl text-xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
+
+                                    <span className={"lg:text-lg text-base font-bold text-gray-400"}>
+                                        {image.size > 1024 ? ((image.size / 1024).toFixed(2) + " MB") : (image.size.toFixed(2) + " KB")}
+                                    </span>
+                                </div>
+
+                                <div>
+                            <span className={"lg:text-lg text-base gap-2 flex items-center justify-center"}>
+                                <span className={"font-medium"}>{lang.pages.image_viewer.uploaded_by}</span>
+                                {
+                                    image.uploader ? (
+                                        <>
+                                            <a onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className={"font-bold underline text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className={"text-zinc-500"}>N/A</span>
+                                        </>
+                                    )
+                                }
+
                             </span>
-                            </div>
+                                </div>
 
-                            <div className={"mt-4"}>
-                                {isVideoFile(image.type) ? (
-                                    <>
-                                        <video className={"rounded shadow-lg max-h-[600px] video-js vjs-default-skin"} controls>
-                                            <source src={imageUrl || ""} type="video/mp4" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </>
+                                <div className={"mt-4"}>
+                                    {isVideoFile(image.type) ? (
+                                        <>
+                                            <video className={"rounded shadow-lg max-h-[600px] video-js vjs-default-skin"} controls>
+                                                <source src={imageUrl || ""} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </>
 
-                                ) : (<>
-                                        <img className={"rounded max-h-[600px]"} src={imageUrl || ""} alt={image.uniqueId} />
+                                    ) : (<>
+                                        <img className={"rounded lg:max-h-[550px] max-h-[400px]"} src={imageUrl || ""} alt={image.uniqueId} />
                                     </>)}
-                            </div>
+                                </div>
 
-                            <div className={"mt-5 flex flex-col gap-2 text-center"}>
-                                <span className={"text-lg"}>
-                                    {lang.pages.image_viewer.uploaded_on} {image.uploadedAt}
-                                </span>
+                                <div className={"mt-5 flex flex-col gap-2 text-center"}>
+                                    <span className={"lg:text-lg text-xs"}>
+                                        {lang.pages.image_viewer.uploaded_on} {image.uploadedAt}
+                                    </span>
 
-                                <span className={"text-lg font-bold"}>
-                                    {image.size > 1024 ? ((image.size / 1024).toFixed(2) + " MB") : (image.size.toFixed(2) + " KB")}
+                                    {image.description && (
+                                        <span>
+                                            {image.description}
+                                        </span>
+                                    )}
 
-                                </span>
-                            </div>
+                                </div>
 
 
-                            <div className={"flex flex-row gap-6 mt-4"}>
+                                <div className={"flex flex-row gap-6 mt-4 flex-wrap justify-center w-full lg:text-base text-sm font-bold"}>
 
-                                <button className={"flex items-center gap-2 bg-green-600 text-white p-2 rounded mt-2"} onClick={downloadImage}>
-                                    <FaDownload />
-                                    {lang.pages.image_viewer.download_button_text}
-                                </button>
-
-                                <button className={"flex items-center gap-2 bg-telegram text-white p-2 rounded mt-2"} onClick={copyToClipboard}>
-                                    <FaRegCopy />
-                                    {lang.pages.image_viewer.copy_button_text}
-                                </button>
-
-                                <button className={"flex items-center gap-2 bg-red-600 text-white p-2 rounded mt-2"} onClick={reportImage} >
-                                    <MdReport />
-                                    {lang.pages.image_viewer.report_button_text}
-                                </button>
-
-                                {/* TODO - DELETE */}
-                                {(user && user.uid == image.uploader.uid) && (
-                                    <button className={"flex items-center gap-2 bg-red-700 text-white p-2 rounded mt-2"} onClick={reportImage} >
-                                        <IoMdTrash />
-                                        {"DELETE"}
+                                    <button className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"} onClick={downloadImage}>
+                                        <FaDownload />
+                                        {lang.pages.image_viewer.download_button_text}
                                     </button>
-                                )}
+
+                                    <button className={"lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"} onClick={copyToClipboard}>
+                                        <FaRegCopy />
+                                        {lang.pages.image_viewer.copy_button_text}
+                                    </button>
+
+                                    <button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-600 text-white px-2 rounded"} onClick={reportImage} >
+                                        <MdReport />
+                                        {lang.pages.image_viewer.report_button_text}
+                                    </button>
+
+                                    {/* TODO - DELETE */}
+                                    {(user && image.uploader && user.uid == image.uploader.uid) && (
+                                        <button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-700 text-white px-2 rounded"} onClick={deleteImage} >
+                                            <IoMdTrash />
+                                            {"DELETE"}
+                                        </button>
+                                    )}
+
+                                </div>
 
                             </div>
-
                         </div>
+
                     </div>
 
-                    <div
-                        className={`pointer-events-none transition-all duration-200 ease-out transform ${
-                            showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                        } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
-                        style={{ top: position.y + 10, left: position.x + 20 }}
-                    >
-                        <UserPopupCard user={image.uploader as UserObj} lang={lang} />
-                    </div>
+                    {
+                        image.uploader && (
+                            <div
+                                className={`pointer-events-none transition-all duration-200 ease-out transform ${
+                                    showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                                } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
+                                style={{ top: position.y + 10, left: position.x + 20 }}
+                            >
+                                <UserPopupCard user={image.uploader as UserObj} lang={lang} />
+                            </div>
+                        )
+                    }
                 </>
             ) : passwordRequired ? (
                 <>
                     <div className="flex h-screen justify-center items-center flex-col gap-2">
-                        <p className={"text-3xl font-bold mb-4"}>
+                        <p className={"xl:text-3xl text-2xl font-bold mb-4 text-center"}>
                             {lang.pages.image_viewer.password_required}
                         </p>
                         <form
@@ -333,6 +399,12 @@ export default function Page() {
                         <img src={getApiUrl() + "/v1/image/get/" + uid} alt={image.uniqueId} />
                     )}
                 </div>*/}
+
+            <>
+                <a href={"/a/image"} className={"xl:text-base text-xs fixed bottom-4 left-4 z-50 flex text-telegram underline opacity-50"}>
+                    Upload new {">"}
+                </a>
+            </>
         </>
     )
 }

@@ -40,7 +40,8 @@ export async function getUser(): Promise<UserObj | null> {
 
     const user = data["message"] as UserObj;
 
-    console.debug("obj: " + JSON.stringify(user));
+    //console.debug("obj: " + JSON.stringify(user));
+    console.debug("user: " + user.username);
     console.debug("==GET USER END==");
 
     return user;

@@ -54,7 +54,7 @@
             "view_paste_text": "View created paste:"
         },
         "portable_image": {
-            "drag_and_drop_text": "Přetáhněte obrázek sem",
+            "drag_and_drop_text": "Vyberte nebo přetáhněte obrázek sem",
             "button_text": "Nahrát Obrázek",
             "image_uploaded_alert": "Obrázek byl úspěšně nahrán"
         },
@@ -108,7 +108,11 @@
         "click_to_save": "Klikněte pro uložení",
         "click_to_connect": "Klikněte pro připojení",
         "disabled_text": "Není dostupné",
-        "not_connected_text": "Není připojeno"
+        "not_connected_text": "Není připojeno",
+        "show_advanced_settings": "Zobrazit pokročilé nastavení",
+        "hide_advanced_settings": "Schovat pokročilé nastavení",
+        "description": "Popisek",
+        "automatic": "Automatickty"
     },
     "toasts": {
         "error": {

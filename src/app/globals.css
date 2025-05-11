@@ -42,3 +42,7 @@
 .text-security-disc {
     -webkit-text-security: disc;
 }
+
+html {
+    -webkit-text-size-adjust: 100%;
+}

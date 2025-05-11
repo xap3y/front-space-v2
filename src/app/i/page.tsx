@@ -68,7 +68,7 @@ export default function ImageFinder() {
                                         onChange={(e) => setUid(e.target.value)}
                                     />
                                 </div>
-                                <div className="mb-4">
+                                <div className="mb-2 flex flex-col items-center gap-4">
                                     <button
                                         type={"submit"}
                                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-telegram hover:bg-telegram-brightest hover:text-primary focus:outline-none transition-all duration-200 transform"
@@ -76,6 +76,8 @@ export default function ImageFinder() {
                                     >
                                         {lang.pages.image_finder.button_text}
                                     </button>
+
+                                    <a href={"/a/image"} className={"text-telegram opacity-70 cursor-pointer font-medium hover:underline text-sm"}>Portable image uploader</a>
                                 </div>
                             </form>
                         </div>

@@ -10,7 +10,7 @@ export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
 
     const data = await getValidatedResponse('/v1/user/get/' + id);
-    console.log("data is " + data)
+    //console.log("data is " + data)
     if (data.error) return data;
     /*const user = data["data"] as UserObj;
     user.createdAt = new Date(user.createdAt).toLocaleString()
@@ -88,9 +88,10 @@ export async function getImageInfoApi(uid: string): Promise<UploadedImage | null
     console.log("Calling getImageInfoApi with uid: " + uid)
 
     const data = await getValidatedResponse('/v1/image/info/' + uid, true);
+    console.log(data);
     if (data.error) return null;
     const img = data["data"] as UploadedImage;
-    img.uploader.createdAt = new Date(img.uploader.createdAt).toLocaleString()
+    if (img.uploader) img.uploader.createdAt = new Date(img.uploader.createdAt).toLocaleString()
     img.uploadedAt = new Date(img.uploadedAt).toLocaleString()
     return img;
 }

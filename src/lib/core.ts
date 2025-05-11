@@ -2,10 +2,10 @@ import {DefaultResponse} from "@/types/core";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8012";
 
-const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'];
+const VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', '3gp', 'm4v', 'm4p', 'qt', 'ogg', 'ogv', 'vob', 'flv', 'yuv', 'webm', 'mpeg', 'mpg', 'h264', 'h265'];
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', "heic", "heif", "svg", "tiff", "ico", "raw"];
 
-const supportedLocales = ['ru', 'en', 'cs'];
+const supportedLocales = ['en', 'ru', 'cs', 'pl', 'ua', 'de', 'sk'];
 
 export function getApiUrl() {
     return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8012";

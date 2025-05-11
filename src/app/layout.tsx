@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Analytics } from '@vercel/analytics/next';
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {ClientRoot} from "@/components/ClientRoot";
+import Head from "next/head";
 
 /*const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -46,9 +47,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+        <Head>
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        </Head>
         <body
             cz-shortcut-listen="true"
-            className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
+            className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code overflow-y-hidden`}
         >
         <ClientRoot>
             {children}

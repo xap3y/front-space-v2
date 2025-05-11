@@ -9,6 +9,8 @@ import NotFound from "next/dist/client/components/not-found-error";
 import LoadingPage from "@/components/LoadingPage";
 import {UserObj} from "@/types/user";
 import {DefaultResponse} from "@/types/core";
+import {useIsMobile} from "@/hooks/utils";
+import {useHoverCard} from "@/hooks/useHoverCard";
 
 export default function Page() {
 
@@ -24,7 +26,7 @@ export default function Page() {
         };
 
         console.log(username)
-        console.log(user)
+        //console.log(user)
 
         if (!user) {
             fetchUser();
@@ -44,7 +46,7 @@ export default function Page() {
             )}
 
             {user && (
-                <div className="min-h-screen flex items-center justify-center bg-dark-grey2">
+                <div className="min-h-screen overflow-y-scroll flex items-center justify-center bg-dark-grey2 mt-2">
                     <UserProfile user={user} />
                 </div>
             )}

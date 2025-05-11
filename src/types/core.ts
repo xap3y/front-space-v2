@@ -46,3 +46,10 @@ export interface DefaultResponse {
     timestamp: string;
     data?: any;
 }
+
+export interface CallServer {
+    name: string;
+    url: string;
+    location: string;
+    flag: string;
+}

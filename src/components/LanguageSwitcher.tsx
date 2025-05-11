@@ -93,10 +93,10 @@ export default function LanguageSwitcher() {
 
     return (
         <div className="fixed bottom-4 right-4 z-50 flex">
-            <div className={`cursor-pointer flex items-center justify-center w-10 h-10 bg-primary_light rounded-md mr-2`} onClick={goHome}>
-                <FaHome size={16} color="white" />
+            <div className={`border-2 border-dotted border-zinc-600 cursor-pointer flex items-center justify-center lg:w-10 w-8 lg:h-10 h-8 bg-primary_light rounded-md mr-2`} onClick={goHome}>
+                <FaHome className={"rounded-md"} size={16} color="white" />
             </div>
-            <div className={`${spinning ? "cursor-auto" : "cursor-pointer"} flex items-center justify-center w-10 h-10 bg-primary_light rounded-md mr-2`} onClick={changeTheme}>
+            <div className={`${spinning ? "cursor-auto" : "cursor-pointer"} border-2 border-dotted border-zinc-600 flex items-center justify-center lg:w-10 w-8 lg:h-10 h-8 bg-primary_light rounded-md mr-2`} onClick={changeTheme}>
                 {isLightMode ? (
                     <FaSun className={`transition-transform ${spinning ? "rotate-180" : "rotate-0"}`} size={16} color="yellow" />
                 ) : (
@@ -104,7 +104,7 @@ export default function LanguageSwitcher() {
                 )}
             </div>
             <div
-                className="relative bg-primary_light p-2 rounded-lg shadow-lg cursor-pointer select-none"
+                className="border-2 border-dotted border-zinc-600 lg:h-10 h-8 flex items-center relative bg-primary_light p-2 rounded-lg shadow-lg cursor-pointer select-none"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 {/* Selected Language */}
@@ -122,17 +122,17 @@ export default function LanguageSwitcher() {
                     </div>
 
                     {/* Language Name */}
-                    <div className={`transition-opacity duration-300 ${isChanging ? "opacity-0" : "opacity-100"}`}>
-                        <span className="ml-2">{languages.find((l) => l.code === displayedLocale)?.label}</span>
+                    <div className={`${isOpen ? "" : "hidden"} lg:block transition-opacity duration-300 ${isChanging ? "opacity-0" : "opacity-100"}`}>
+                        <span className="ml-2 font-medium">{languages.find((l) => l.code === displayedLocale)?.label}</span>
                     </div>
 
                     {/* Space */}
-                    <span className={"mx-2"}></span>
+                    <span className={"lg:mx-2 mx-1"}></span>
 
                     {/* Arrow Icon */}
                     <FaArrowUp
                         className={`ml-auto transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}
-                        size={18}
+                        size={16}
                         color={"white"}
                         style={{ strokeWidth: 1.5 }}
                     />
@@ -140,11 +140,11 @@ export default function LanguageSwitcher() {
 
                 {/* Dropdown - Opens Upwards */}
                 {isOpen && (
-                    <div className="absolute left-0 bottom-full mb-2 w-full border border-primary_light rounded shadow-lg">
+                    <div className="border-2 border-dotted border-zinc-600 absolute left-0 bottom-full mb-2 w-full rounded shadow-lg">
                         {languages.map(({ code, label, flag }) => (
                             <div
                                 key={code}
-                                className="flex items-center p-2 hover:bg-primary bg-primary_light transition-all duration-200 cursor-pointer"
+                                className={`${(code == displayedLocale) ? "bg-secondary font-semibold" : "bg-primary_light"} flex items-center p-2 hover:bg-primary transition-all duration-200 cursor-pointer`}
                                 onClick={() => changeLanguage(code)}
                             >
                                 <Image src={flag} alt={`${code}`} width={24} height={16} />

@@ -21,6 +21,8 @@ import {DatePickerComp} from "@/components/DatePickerComp";
 import {ErrorPage} from "@/components/ErrorPage";
 import {useRouter} from "next/navigation";
 import {DiscordConnection} from "@/types/discord";
+import {useIsMobile} from "@/hooks/utils";
+import {useHoverCard} from "@/hooks/useHoverCard";
 
 export default function HomeProfilePage(): JSX.Element {
 
@@ -32,9 +34,6 @@ export default function HomeProfilePage(): JSX.Element {
 
     const [fetchError, setFetchError] = useState(false);
     const [fetchErrorMessage, setFetchErrorMessage] = useState<string>("Error fetching data");
-
-    const [showCard, setShowCard] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
 
     const [isEditing, setIsEditing] = useState(false);
     const [editedEmail, setEditedEmail] = useState<string>("");
@@ -57,13 +56,15 @@ export default function HomeProfilePage(): JSX.Element {
     })
     const [graphDateTo, setGraphDateTo] = useState<Date>(new Date());
 
-    const handleMouseEnter = () => setShowCard(true);
-    const handleMouseLeave = () => setShowCard(false);
+    const isMobile = useIsMobile();
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        //console.log(e.clientX, e.clientY)
-        setPosition({ x: e.clientX, y: e.clientY });
-    };
+    const {
+        showCard,
+        position,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleMouseMove,
+    } = useHoverCard(isMobile);
 
     const revokeDiscordConnection = async () => {
         if (!discordConnection || !user) return;
@@ -168,7 +169,7 @@ export default function HomeProfilePage(): JSX.Element {
 
     return (
         <>
-            <main className={"flex flex-col xl:ml-[70px] ml-0 w-full xl:pt-12 xl:px-12 lg:px-32 px-2 pt-10"}>
+            <main className={"flex max-h-screen overflow-y-scroll flex-col xl:ml-[70px] ml-0 w-full xl:pt-12 xl:px-12 lg:px-32 px-2 pt-10"}>
 
                 <div>
                     <h1 className={"text-4xl text-center"}>{lang.pages.profile.title}</h1>
@@ -235,7 +236,7 @@ export default function HomeProfilePage(): JSX.Element {
                                             <a
                                                 onMouseEnter={handleMouseEnter}
                                                 onMouseLeave={handleMouseLeave}
-                                                className={"text-telegram font-bold"} href={"/user/" + user.invitor.username}
+                                                className={"text-telegram font-bold hover:underline"} href={"/user/" + user.invitor.username}
                                             >
                                                 {user.invitor.username}
                                             </a>

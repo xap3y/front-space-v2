@@ -108,7 +108,11 @@
         "click_to_save": "Нажмите, чтобы сохранить",
         "click_to_connect": "Нажмите, чтобы подключить",
         "disabled_text": "Недоступно",
-        "not_connected_text": "Не подключено"
+        "not_connected_text": "Не подключено",
+        "show_advanced_settings": "Показать расширенные настройки",
+        "hide_advanced_settings": "Скрыть расширенные настройки",
+        "description": "Описание",
+        "automatic": "Автоматически"
     },
     "toasts": {
         "error": {
