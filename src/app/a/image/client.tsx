@@ -114,6 +114,7 @@ export default function ImageUploader() {
 
         const callServerSelected = (selected.name == "Automatic") ? null : selected;
 
+        setShowAdvanced(false)
         setUploading(true)
         const formData = new FormData();
         formData.append("file", file);
@@ -174,6 +175,7 @@ export default function ImageUploader() {
         setPassword("")
         setCustomUid("")
         setUploadedImage(null);
+        setUploading(false)
         setUploadProgress(0);
     }
 
@@ -245,7 +247,9 @@ export default function ImageUploader() {
                             <div className={"flex flex-col gap-2 items-start"}>
                                 <button
                                     type="button"
-                                    onClick={() => setShowAdvanced(!showAdvanced)}
+                                    onClick={() => {
+                                        if (!uploading) setShowAdvanced(!showAdvanced)
+                                    }}
                                     className="flex gap-2 items-center pl-2 text-sm text-primary-brighter hover:underline focus:outline-none"
                                 >
                                     {showAdvanced ? lang.global.hide_advanced_settings : lang.global.show_advanced_settings}

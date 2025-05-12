@@ -24,7 +24,7 @@ export default {
         "primary-brighter": "rgb(120, 120, 120)",
       },
       fontFamily: {
-        'source-code': ['Source Code Pro', 'sans-serif'],
+        'source-code': ['SourceCodeVf', 'sans-serif'],
       },
       keyframes: {
         fadeInLeft: {
