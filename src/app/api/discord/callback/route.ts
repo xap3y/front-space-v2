@@ -3,7 +3,6 @@ import {cookies} from "next/headers";
 import {getApiKey, getApiUrl} from "@/lib/core";
 import {DiscordConnection, DiscordTokenData} from "@/types/discord";
 import {authorizeDiscordConnection, authorizeDiscordConnectionRaw} from "@/lib/apiPoster";
-import {revokeUserDiscordConnectionToken} from "@/lib/apiGetters";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
@@ -16,9 +15,9 @@ export async function GET(req: NextRequest) {
 
     const cookieHeader = (await cookies()).toString();
 
-    const authToken = cookieHeader.split('; ').find(row => row.startsWith('session_token='));
+    const authToken = cookieHeader.split('; ').find(row => row.startsWith('discord='));
 
-    if (authToken) {
+    if (!authToken) {
         console.log("ADDING TYPE")
         const res = await fetch(getApiUrl() + "/v1/auth/me", {
             method: "GET",
