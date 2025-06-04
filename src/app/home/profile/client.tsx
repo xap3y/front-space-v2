@@ -11,7 +11,7 @@ import {useTranslation} from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
 import { MdOutlineEmail, MdEdit, MdOutlineStorage, MdFilterList } from "react-icons/md";
 import { FaDiscord, FaShieldAlt, FaSave, FaCalendarAlt } from "react-icons/fa";
-import {FaPhone, FaFilter, FaLink, FaXmark} from "react-icons/fa6";
+import {FaPhone, FaFilter, FaLink, FaXmark, FaArrowRight} from "react-icons/fa6";
 import {DateChart} from "@/components/DateChart";
 import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
@@ -23,6 +23,7 @@ import {useRouter} from "next/navigation";
 import {DiscordConnection} from "@/types/discord";
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
+import {ImEmbed2} from "react-icons/im";
 
 export default function HomeProfilePage(): JSX.Element {
 
@@ -260,10 +261,58 @@ export default function HomeProfilePage(): JSX.Element {
                             {/*Profile card buttons*/}
                             <div className={"flex flex-row mt-3 gap-4"}>
 
-
                             </div>
 
                         </div>
+
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                            {/* Subscription details, do ULTIMATE tier for testing purposes */}
+
+                            <div className={"flex flex-row justify-between w-full"}>
+                                <div className={"flex flex-row gap-4 items-center"}>
+                                    <MdOutlineStorage className={"lg:text-2xl text-lg"} />
+                                    <p className={"lg:text-xl text-lg font-bold mr-5"}>Subscription</p>
+                                </div>
+
+                                <div className={"flex flex-row lg:gap-6 gap-3 items-center"}>
+                                    <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                    <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                    <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                            {/* Add <a> redirect button (to /settings/discord) to discord embed settings with > arrow icon */}
+                            <div className={"flex flex-row justify-between w-full"}>
+                                <div className={"flex flex-row gap-4 items-center"}>
+                                    <ImEmbed2 className={"lg:text-2xl text-lg"} />
+                                    <p className={"lg:text-xl text-lg font-bold mr-5"}>Embed settings</p>
+                                </div>
+
+                                {/* > arrow icon */}
+                                <div className={"flex flex-row lg:gap-6 gap-3 items-center"}>
+                                    <FaArrowRight className={"lg:text-2xl text-lg"} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                            {/**/}
+                        </div>
+
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                            {/**/}
+                        </div>
+
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                            {/**/}
+                        </div>
+
+                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                            {/**/}
+                        </div>
+
                     </div>
 
                     {/*right-side*/}

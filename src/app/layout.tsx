@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/next';
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {ClientRoot} from "@/components/ClientRoot";
 import Head from "next/head";
+import {ErrorToast} from "@/components/ErrorToast";
 
 /*const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -54,6 +55,7 @@ export default function RootLayout({
             cz-shortcut-listen="true"
             className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code overflow-y-hidden`}
         >
+        <ErrorToast type={"WARN"} message="RUNNING DEV ENVIROMENT" />
         <ClientRoot>
             {children}
         </ClientRoot>
