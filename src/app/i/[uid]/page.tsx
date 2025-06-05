@@ -153,7 +153,6 @@ export default function Page() {
                 isLoading: false
             })
         }
-
     }
 
     const fetchImageBlob = async (pass?: string) => {

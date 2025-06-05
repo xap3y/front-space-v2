@@ -55,7 +55,7 @@ export default function RootLayout({
             cz-shortcut-listen="true"
             className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code overflow-y-hidden`}
         >
-        <ErrorToast type={"WARN"} message="RUNNING DEV ENVIROMENT" />
+        <ErrorToast type={"INFO"} message={`NEXT_PUBLIC_URL_FORWARD is set to ${process.env.NEXT_PUBLIC_URL_FORWARD}`} />
         <ClientRoot>
             {children}
         </ClientRoot>

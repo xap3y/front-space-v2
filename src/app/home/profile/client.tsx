@@ -24,6 +24,8 @@ import {DiscordConnection} from "@/types/discord";
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {ImEmbed2} from "react-icons/im";
+import {ErrorToast} from "@/components/ErrorToast";
+import {UploadedImage} from "@/types/image";
 
 export default function HomeProfilePage(): JSX.Element {
 
@@ -102,6 +104,9 @@ export default function HomeProfilePage(): JSX.Element {
 
     const updateGraphData = async (from: Date, to: Date) => {
         if (user == null) return;
+        console.log("FROM: " + from.toISOString().split("T")[0])
+        console.log("TO: " + to.toISOString().split("T")[0])
+        console.log("KEY: " + user.apiKey)
         const data = await getImageCountStatsOnDate(from.toISOString().split("T")[0], to.toISOString().split("T")[0], user.apiKey);
         console.log(JSON.stringify(data) + "<<")
 
@@ -170,6 +175,9 @@ export default function HomeProfilePage(): JSX.Element {
 
     return (
         <>
+
+            <ErrorToast type={"WARN"} message={`THIS PAGE RUNS development ENV`} />
+
             <main className={"flex max-h-screen overflow-y-scroll flex-col xl:ml-[70px] ml-0 w-full xl:pt-12 xl:px-12 lg:px-32 px-2 pt-10"}>
 
                 <div>
@@ -282,12 +290,12 @@ export default function HomeProfilePage(): JSX.Element {
                             </div>
                         </div>
 
-                        <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
+                        <a className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"} href={"/static/config.sxcu"}>
                             {/* Add <a> redirect button (to /settings/discord) to discord embed settings with > arrow icon */}
                             <div className={"flex flex-row justify-between w-full"}>
                                 <div className={"flex flex-row gap-4 items-center"}>
                                     <ImEmbed2 className={"lg:text-2xl text-lg"} />
-                                    <p className={"lg:text-xl text-lg font-bold mr-5"}>Embed settings</p>
+                                    <p className={"lg:text-xl text-lg font-bold mr-5"}>Download ShareX config file</p>
                                 </div>
 
                                 {/* > arrow icon */}
@@ -295,7 +303,7 @@ export default function HomeProfilePage(): JSX.Element {
                                     <FaArrowRight className={"lg:text-2xl text-lg"} />
                                 </div>
                             </div>
-                        </div>
+                        </a>
 
                         <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
                             {/**/}
