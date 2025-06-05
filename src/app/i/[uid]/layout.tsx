@@ -1,4 +1,4 @@
-import type {Metadata} from "next";
+import type {Metadata, ResolvingMetadata} from "next";
 import {getImageInfoApi} from "@/lib/apiGetters";
 
 
@@ -8,8 +8,24 @@ async function fetchImageData(uid: string) {
     return res;
 }
 
-export async function generateMetadata({ params }: { params: { uid: string } }): Promise<Metadata> {
-    const imageData = await fetchImageData(params.uid);
+export default async function Layout({
+                                        children,
+                                    }: {
+    children: React.ReactNode;
+}) {
+    return (
+        <>
+            {children}
+        </>
+    )
+}
+
+export async function generateMetadata(
+    { params }: { params: Promise<{ uid: string }> },
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    const { uid } = await params
+    const imageData = await fetchImageData(uid);
 
     return {
         title: `${imageData.uniqueId}'s Profile`,
@@ -21,15 +37,4 @@ export async function generateMetadata({ params }: { params: { uid: string } }):
             url: `${imageData.urlSet.portalUrl}`
         },
     };
-}
-
-
-export default function Layout({
-                                        children,
-                                        params
-                                    }: {
-    children: React.ReactNode;
-    params: { uid: string };
-}) {
-    return {children}
 }
