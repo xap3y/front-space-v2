@@ -10,7 +10,6 @@ import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {FaArrowDown, FaDownload} from "react-icons/fa6";
 import { MdReport } from "react-icons/md";
-import { FaRegCopy } from "react-icons/fa";
 import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
 import {IoMdTrash} from "react-icons/io";
