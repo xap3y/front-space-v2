@@ -414,7 +414,7 @@ export default function HomeProfilePage(): JSX.Element {
                                                     data-tooltip-id="my-tooltip"
                                                     data-tooltip-content={lang.global.click_to_connect}
                                                     data-tooltip-place="top"
-                                                    href={process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL}
+                                                    href={process.env.NEXT_PUBLIC_DISCORD_REGISTER_URL}
                                                 >
                                                     <FaLink className={"lg:text-2xl text-xl"} />
                                                 </a>

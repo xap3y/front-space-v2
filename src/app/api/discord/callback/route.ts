@@ -3,7 +3,6 @@ import {cookies} from "next/headers";
 import {getApiKey, getApiUrl} from "@/lib/core";
 import {DiscordConnection, DiscordTokenData} from "@/types/discord";
 import {authorizeDiscordConnection, authorizeDiscordConnectionRaw} from "@/lib/apiPoster";
-import {setCookie} from "cookies-next/client";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
@@ -11,152 +10,78 @@ export async function GET(req: NextRequest) {
     const code = searchParams.get('code')
 
     if (!code) {
-        return NextResponse.json({ error: 'No code provided' }, { status: 400 })
+        return new NextResponse(null, {
+            status: 301,
+            headers: {
+                Location: process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL!
+            }
+        });
     }
 
     const cookieHeader = (await cookies()).toString();
 
-    const authToken = cookieHeader.split('; ').find(row => row.startsWith('discord='));
+    console.log("COOKIE HEADER: " + cookieHeader)
 
-    if (!authToken) {
-        console.log("ADDING TYPE")
-        const res = await fetch(getApiUrl() + "/v1/auth/me", {
-            method: "GET",
+    //const authToken = cookieHeader.split('; ').find(row => row.startsWith('discord='));
+
+    console.log("LOGIN TYPE")
+    const params = getUrlSearchParams(code);
+
+    try {
+        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
             headers: {
-                Cookie: cookieHeader,
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                credentials: "include"
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-        });
+            body: params.toString(),
+        })
 
-        if (!res.ok) {
-            console.log("Error fetching user data: " + res.statusText);
-            return NextResponse.json({ error: 'Failed to fetch user data: ' + res.status }, { status: res.status })
+        if (!tokenRes.ok) {
+            const error = await tokenRes.text()
+            return NextResponse.json({ error: 'Failed to get token', details: error }, { status: 500 })
         }
 
-        console.log("FETCHED USER DATA: " + res.statusText);
+        const tokenDataJson = await tokenRes.json()
 
-        console.log("RES IS: " + res)
+        const tokenData = tokenDataJson as DiscordTokenData
 
-        const data = await res.json();
+        const response = await authorizeDiscordConnectionRaw(tokenData, getApiKey(), "/v1/discord/login");
+
+        const data = await response.json();
         if (data.error) {
-            console.log("Data presented: " + data);
-            return NextResponse.json({ status: 500 })
-        }
-
-        const apiKey: string = data["message"]?.apiKey;
-
-        console.log("API-KEY IS: " + apiKey);
-
-        if (!apiKey) {
-            return NextResponse.json({ error: 'No API key found' }, { status: 500 })
-        }
-
-        const params = getUrlSearchParams(code);
-
-        console.log("TRYING TO CONNECT DISCORD ACCOUNT")
-        try {
-            const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: params.toString(),
-            })
-
-            if (!tokenRes.ok) {
-                console.log("TRYING TO CONNECT DISCORD ACCOUNT ERR: " + tokenRes.statusText)
-                const error = await tokenRes.text()
-                return NextResponse.json({ error: 'Failed to get token', details: error }, { status: 500 })
-            }
-
-            const tokenDataJson = await tokenRes.json()
-
-            const tokenData = tokenDataJson as DiscordTokenData
-
-            console.log(tokenData)
-
-            const connectedDiscord = await authorizeDiscordConnection(tokenData, apiKey);
-
-            if (!connectedDiscord) {
-                return NextResponse.json({ error: 'Failed to connect Discord account' }, { status: 500 })
-            }
-
-            setCookie('discord', connectedDiscord.discordId)
-
             return new NextResponse(null, {
                 status: 301,
                 headers: {
-                    Location: "/home/profile",
-                    "X-Bypass-Middleware": "true"
+                    Location: "/login?errortoast=discord"
                 }
             });
-        } catch (error) {
-            console.error('Auth error:', error)
-            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
         }
-    } else {
-        console.log("LOGIN TYPE")
-        // Login using Discord
-        const params = getUrlSearchParams(code);
 
-        try {
-            const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: params.toString(),
-            })
+        const setCookie = response.headers.get('set-cookie');
 
-            if (!tokenRes.ok) {
-                const error = await tokenRes.text()
-                return NextResponse.json({ error: 'Failed to get token', details: error }, { status: 500 })
-            }
+        const connectedDiscord = data["message"] as DiscordConnection;
 
-            const tokenDataJson = await tokenRes.json()
-
-            const tokenData = tokenDataJson as DiscordTokenData
-
-            const response = await authorizeDiscordConnectionRaw(tokenData, getApiKey(), "/v1/discord/login");
-
-            const data = await response.json();
-            if (data.error) {
-                return new NextResponse(null, {
-                    status: 301,
-                    headers: {
-                        Location: "/login?errortoast=discord"
-                    }
-                });
-            }
-
-            const setCookie = response.headers.get('set-cookie');
-
-            const connectedDiscord = data["message"] as DiscordConnection;
-
-            if (!connectedDiscord) {
-                return NextResponse.json({ error: 'Failed to connect Discord account' }, { status: 500 })
-            }
-
-            const responseApi = new NextResponse(null, {
-                status: 301,
-                headers: {
-                    Location: "/home/profile"
-                }
-            });
-
-            if (setCookie) {
-                responseApi.headers.set('set-cookie', setCookie);
-            }
-
-            //await revokeUserDiscordConnectionToken(tokenDataJson["access_token"])
-
-            return responseApi;
-        } catch (error) {
-            console.error('Auth error:', error)
-            return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        if (!connectedDiscord) {
+            return NextResponse.json({ error: 'Failed to connect Discord account' }, { status: 500 })
         }
+
+        const responseApi = new NextResponse(null, {
+            status: 301,
+            headers: {
+                Location: "/home/profile"
+            }
+        });
+
+        if (setCookie) {
+            responseApi.headers.set('set-cookie', setCookie);
+        }
+
+        //await revokeUserDiscordConnectionToken(tokenDataJson["access_token"])
+
+        return responseApi;
+    } catch (error) {
+        console.error("Error during Discord OAuth callback:", error);
+        return NextResponse.json({ error: 'Failed to connect Discord account' }, { status: 500 })
     }
 }
 
