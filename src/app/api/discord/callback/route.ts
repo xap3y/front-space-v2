@@ -3,6 +3,7 @@ import {cookies} from "next/headers";
 import {getApiKey, getApiUrl} from "@/lib/core";
 import {DiscordConnection, DiscordTokenData} from "@/types/discord";
 import {authorizeDiscordConnection, authorizeDiscordConnectionRaw} from "@/lib/apiPoster";
+import {setCookie} from "cookies-next/client";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
@@ -29,15 +30,24 @@ export async function GET(req: NextRequest) {
             },
         });
 
+        if (!res.ok) {
+            console.log("Error fetching user data: " + res.statusText);
+            return NextResponse.json({ error: 'Failed to fetch user data: ' + res.status }, { status: res.status })
+        }
+
+        console.log("FETCHED USER DATA: " + res.statusText);
+
+        console.log("RES IS: " + res)
+
         const data = await res.json();
         if (data.error) {
-            console.log(data);
+            console.log("Data presented: " + data);
             return NextResponse.json({ status: 500 })
         }
 
         const apiKey: string = data["message"]?.apiKey;
 
-        console.log(apiKey);
+        console.log("API-KEY IS: " + apiKey);
 
         if (!apiKey) {
             return NextResponse.json({ error: 'No API key found' }, { status: 500 })
@@ -45,6 +55,7 @@ export async function GET(req: NextRequest) {
 
         const params = getUrlSearchParams(code);
 
+        console.log("TRYING TO CONNECT DISCORD ACCOUNT")
         try {
             const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
                 method: 'POST',
@@ -55,6 +66,7 @@ export async function GET(req: NextRequest) {
             })
 
             if (!tokenRes.ok) {
+                console.log("TRYING TO CONNECT DISCORD ACCOUNT ERR: " + tokenRes.statusText)
                 const error = await tokenRes.text()
                 return NextResponse.json({ error: 'Failed to get token', details: error }, { status: 500 })
             }
@@ -70,6 +82,8 @@ export async function GET(req: NextRequest) {
             if (!connectedDiscord) {
                 return NextResponse.json({ error: 'Failed to connect Discord account' }, { status: 500 })
             }
+
+            setCookie('discord', connectedDiscord.discordId)
 
             return new NextResponse(null, {
                 status: 301,
