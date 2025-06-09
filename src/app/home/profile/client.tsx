@@ -11,7 +11,7 @@ import {useTranslation} from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
 import { MdOutlineEmail, MdEdit, MdOutlineStorage, MdFilterList } from "react-icons/md";
 import { FaDiscord, FaShieldAlt, FaSave, FaCalendarAlt } from "react-icons/fa";
-import {FaPhone, FaFilter, FaLink, FaXmark, FaArrowRight} from "react-icons/fa6";
+import {FaPhone, FaFilter, FaLink, FaXmark, FaArrowRight, FaDownload} from "react-icons/fa6";
 import {DateChart} from "@/components/DateChart";
 import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
@@ -25,7 +25,6 @@ import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {ImEmbed2} from "react-icons/im";
 import {ErrorToast} from "@/components/ErrorToast";
-import {UploadedImage} from "@/types/image";
 
 export default function HomeProfilePage(): JSX.Element {
 
@@ -290,20 +289,23 @@ export default function HomeProfilePage(): JSX.Element {
                             </div>
                         </div>
 
-                        <a className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"} href={"/static/config.sxcu"}>
+                        <div className={"flex flex-col p-6 pb-1 border-white rounded-sm border-2 mt-4"}>
                             {/* Add <a> redirect button (to /settings/discord) to discord embed settings with > arrow icon */}
-                            <div className={"flex flex-row justify-between w-full"}>
+                            <div className={"flex flex-row justify-between "}>
                                 <div className={"flex flex-row gap-4 items-center"}>
                                     <ImEmbed2 className={"lg:text-2xl text-lg"} />
                                     <p className={"lg:text-xl text-lg font-bold mr-5"}>Download ShareX config file</p>
                                 </div>
+                            </div>
 
-                                {/* > arrow icon */}
-                                <div className={"flex flex-row lg:gap-6 gap-3 items-center"}>
-                                    <FaArrowRight className={"lg:text-2xl text-lg"} />
+                            <div className={"mx-9 p-2"}>
+                                <div className={"w-auto text-xl justify-between flex items-center bg-secondary rounded-xl px-2 py-2 flex-row gap-4"}>
+                                    <a href={"/static/space-img.sxcu"} className={"duration-300 hover:bg-zinc-800 w-full text-center font-bold p-2 bg-[#0A0A0A] rounded-xl"}>Image</a>
+                                    <a href={"/static/space-text.sxcu"} className={"duration-300 hover:bg-zinc-800 w-full text-center font-bold p-2 bg-[#0A0A0A] rounded-xl"}>Text</a>
+                                    <a href={"/static/space-url.sxcu"} className={"duration-300 hover:bg-zinc-800 w-full text-center font-bold p-2 bg-[#0A0A0A] rounded-xl"}>URL</a>
                                 </div>
                             </div>
-                        </a>
+                        </div>
 
                         <div className={"flex flex-col p-6 items-center border-white rounded-sm border-2 mt-4"}>
                             {/**/}
@@ -409,7 +411,10 @@ export default function HomeProfilePage(): JSX.Element {
                                         <>
                                             <div className={"flex flex-row lg:gap-4 gap-3 items-center mr-2"}>
                                                 <img src={"https://cdn.discordapp.com/avatars/" + discordConnection.discordId + "/" + discordConnection.avatar + ".png"} className={"rounded-full lg:w-10 lg:h-10 w-8 h-8 border-gray-400 border-2"} />
-                                                <span className={"text-3xl font-bold mb-1"}>{discordConnection.username}</span>
+                                                <div className={"flex flex-col items-center"}>
+                                                    <span className={"text-3xl font-bold mb-1"}>{discordConnection.username}</span>
+                                                    <span className={"text-[10px] text-gray-400"}>{ "(" + discordConnection.discordId + ")"}</span>
+                                                </div>
                                                 <FaXmark onClick={revokeDiscordConnection} className={"text-red-500 w-8 h-8 cursor-pointer duration-200 hover:-translate-y-0.5"} />
                                             </div>
                                         </>

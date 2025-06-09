@@ -1,0 +1,13 @@
+﻿{
+  "Version": "17.0.0",
+  "Name": "Space-TEXT",
+  "DestinationType": "TextUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://call.xap3y.tech/v1/paste/create",
+  "Headers": {
+    "X-API-Key": ""
+  },
+  "Body": "JSON",
+  "Data": "{\n  \"text\": \"{input}\"\n}",
+  "URL": "{json:message.urlSet.portalUrl}"
+}

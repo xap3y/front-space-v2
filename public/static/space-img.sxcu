@@ -1,0 +1,13 @@
+﻿{
+  "Version": "16.1.0",
+  "Name": "Space-IMG",
+  "DestinationType": "ImageUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://call.xap3y.tech/v1/image/upload",
+  "Headers": {
+    "X-API-Key": ""
+  },
+  "Body": "MultipartFormData",
+  "FileFormName": "file",
+  "URL": "{json:message.urlSet.portalUrl}"
+}

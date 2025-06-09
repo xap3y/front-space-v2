@@ -112,9 +112,9 @@ export default function RegisterPage() {
                     >
                         <div className="p-3 lg:p-8">
                             <h2 className="text-center text-3xl font-extrabold text-white">
-                                {lang.pages.login.title}
+                                {lang.pages.register.title}
                             </h2>
-                            <p className="mt-4 text-center text-gray-400">{lang.pages.login.under_title}</p>
+                            <p className="mt-4 text-center text-gray-400">{lang.pages.register.under_title}</p>
                             <form autoComplete={"new-password"} method="POST" onSubmit={handleSubmit} className="mt-8 space-y-6">
                                 <div className="rounded-md shadow-sm">
                                     <div>

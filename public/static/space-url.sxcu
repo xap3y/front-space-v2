@@ -1,0 +1,13 @@
+﻿{
+  "Version": "17.0.0",
+  "Name": "Space-URL",
+  "DestinationType": "URLShortener",
+  "RequestMethod": "POST",
+  "RequestURL": "https://call.xap3y.tech/v1/url/create",
+  "Headers": {
+    "X-API-Key": ""
+  },
+  "Body": "JSON",
+  "Data": "{\n\"url\": \"{input}\"\n}",
+  "URL": "{json:message.urlSet.shortUrl}"
+}
