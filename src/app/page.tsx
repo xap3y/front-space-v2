@@ -9,7 +9,7 @@ export default function Home() {
 
     return (
         <>
-            <div className={"overflow-y-hidden custom-cursor flex flex-col justify-center items-center min-h-[90vh] bg-gradient-to-b from-[#0f1123] via-[#10121a] to-black"}>
+            <div className={"overflow-y-hidden custom-cursor flex flex-col justify-center items-center min-h-[90vh] lg:min-h-screen bg-gradient-to-b from-[#0f1123] via-[#10121a] to-black"}>
 
                 <StarsBg />
 
