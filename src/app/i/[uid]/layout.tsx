@@ -4,7 +4,7 @@ import {getImageInfoApi} from "@/lib/apiGetters";
 
 async function fetchImageData(uid: string) {
     const res = await getImageInfoApi(uid + "");
-    if (res == null) throw new Error("Failed to fetch image data");
+    if (res == null) return null;
     return res;
 }
 
@@ -26,6 +26,13 @@ export async function generateMetadata(
 ): Promise<Metadata> {
     const { uid } = await params
     const imageData = await fetchImageData(uid);
+
+    if (!imageData) {
+        return {
+            title: "Image not found",
+            description: "The requested image could not be found.",
+        };
+    }
 
     return {
         title: `${imageData.uniqueId}'s Profile`,

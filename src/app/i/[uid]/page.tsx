@@ -18,7 +18,7 @@ import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {useIsMobile} from "@/hooks/utils";
-import {deleteImageApi, errorToast} from "@/lib/client";
+import {copyToClipboard, deleteImageApi, errorToast} from "@/lib/client";
 
 export default function Page() {
 
@@ -101,16 +101,6 @@ export default function Page() {
         }
         console.log(image)
     }, [uid, setImage]);
-
-    const copyToClipboard = (url: string) => {
-        //console.log(image?.urlSet.shortUrl)
-        //navigator.clipboard.writeText(getApiUrl() + "/v1/image/get/" + uid);
-        navigator.clipboard.writeText(url || "")
-        toast.success(lang.toasts.success.copied_to_clipboard, {
-            autoClose: 500,
-            closeOnClick: true
-        });
-    }
 
     const reportImage = () => {
         toast.error("Not implemented yet!", {
@@ -337,7 +327,7 @@ export default function Page() {
                                                 key={"short"}
                                                 onClick={() => {
                                                     closeDropdown()
-                                                    copyToClipboard(image?.urlSet.shortUrl || "")
+                                                    copyToClipboard(image?.urlSet.shortUrl || "", lang)
                                                 }}
                                                 className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                             >
@@ -350,7 +340,7 @@ export default function Page() {
                                                 key={"portal"}
                                                 onClick={() => {
                                                     closeDropdown()
-                                                    copyToClipboard("https://space.xap3y.tech/i/" + uid)
+                                                    copyToClipboard("https://space.xap3y.tech/i/" + uid, lang)
                                                 }}
                                                 className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                             >
@@ -363,7 +353,7 @@ export default function Page() {
                                                 key={"raw"}
                                                 onClick={() => {
                                                     closeDropdown()
-                                                    copyToClipboard(image?.urlSet.rawUrl || "")
+                                                    copyToClipboard(image?.urlSet.rawUrl || "", lang)
                                                 }}
                                                 className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                             >

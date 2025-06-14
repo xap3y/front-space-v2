@@ -8,6 +8,7 @@ import {useImage} from "@/context/ImageContext";
 import {UploadedImage} from "@/types/image";
 import {errorToast} from "@/lib/client";
 import {useTranslation} from "@/hooks/useTranslation";
+import {ErrorToast} from "@/components/ErrorToast";
 
 export default function ImageFinder() {
 

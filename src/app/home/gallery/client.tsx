@@ -129,7 +129,7 @@ export default function HomeGalleryPage() {
                                     data-tooltip-content={"Click to copy"}
                                     data-tooltip-place="top"
                                     className={"text-xl font-bold text-telegram cursor-pointer hover:underline"}
-                                    onClick={() => copyToClipboard(image.urlSet.rawUrl, lang.toasts.success.copied_to_clipboard)}
+                                    onClick={() => copyToClipboard(image.urlSet.rawUrl, lang)}
                                 >
                                     {image.uniqueId + "." + image.type}
                                 </p>

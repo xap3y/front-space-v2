@@ -23,6 +23,7 @@ import './tweak.css'
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {CallServer} from "@/types/core";
+import {BetaBadge} from "@/components/GlobalComponents";
 
 
 export default function ImageUploader() {
@@ -151,14 +152,6 @@ export default function ImageUploader() {
         submit();
     }
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast.success(lang.toasts.success.copied_to_clipboard, {
-            autoClose: 500,
-            closeOnClick: true
-        });
-    }
-
     useEffect(() => {
         if (!loadingUser && user) {
             setApiKey(user.apiKey);
@@ -245,23 +238,25 @@ export default function ImageUploader() {
 
 
                             <div className={"flex flex-col gap-2 items-start"}>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!uploading) setShowAdvanced(!showAdvanced)
-                                    }}
-                                    className="flex gap-2 items-center pl-2 text-sm text-primary-brighter hover:underline focus:outline-none"
-                                >
-                                    {showAdvanced ? lang.global.hide_advanced_settings : lang.global.show_advanced_settings}
+                                <div className={"flex gap-3"}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (!uploading) setShowAdvanced(!showAdvanced)
+                                        }}
+                                        className="flex gap-2 items-center pl-2 text-sm text-primary-brighter hover:underline focus:outline-none"
+                                    >
+                                        {showAdvanced ? lang.global.hide_advanced_settings : lang.global.show_advanced_settings}
 
-                                    <FaArrowUp
-                                        className={`ml-auto transition-transform duration-500 ${showAdvanced ? "" : "rotate-180"}`}
-                                        size={16}
-                                        color={"white"}
-                                        style={{ strokeWidth: 1.5 }}
-                                    />
-                                </button>
-
+                                        <FaArrowUp
+                                            className={`ml-auto transition-transform duration-500 ${showAdvanced ? "" : "rotate-180"}`}
+                                            size={16}
+                                            color={"white"}
+                                            style={{ strokeWidth: 1.5 }}
+                                        />
+                                    </button>
+                                    <BetaBadge />
+                                </div>
                                 <div
                                     className={`transition-all duration-500 overflow-hidden w-full pl-2 ${showAdvanced ? "max-h-[500px] mt-4" : "max-h-0"}`}
                                 >

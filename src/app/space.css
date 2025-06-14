@@ -1,0 +1,16 @@
+@keyframes star-move {
+    from {
+        transform: translate(0, 0);
+    }
+    to {
+        transform: translate(var(--x, 0), var(--y, 0));
+    }
+}
+.star-move {
+    animation-name: star-move;
+    will-change: transform, opacity;
+}
+
+.custom-cursor {
+    cursor: url('/cursors/cursor3.png') 16 16, pointer;
+}

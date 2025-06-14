@@ -6,6 +6,7 @@ import axios from "axios";
 import {getApiUrl} from "@/lib/core";
 import {CallServer} from "@/types/core";
 import {request} from "node:http";
+import LanguageModel from "@/types/LanguageModel";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -21,9 +22,9 @@ export const okToast = (message: string, delay: number = 1000) => {
     })
 }
 
-export const copyToClipboard = (text: string, successMessage: string, delay: number = 500) => {
+export const copyToClipboard = (text: string, lang: LanguageModel, delay: number = 500) => {
     navigator.clipboard.writeText(text);
-    toast.success(successMessage, {
+    toast.success(lang.toasts.success.copied_to_clipboard, {
         autoClose: delay,
         closeOnClick: true,
     });

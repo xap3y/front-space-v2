@@ -3,7 +3,7 @@
   "Name": "Space-IMG",
   "DestinationType": "ImageUploader",
   "RequestMethod": "POST",
-  "RequestURL": "https://call.xap3y.tech/v1/image/upload",
+  "RequestURL": "https://call.xap3y.fun/v1/image/upload",
   "Headers": {
     "X-API-Key": ""
   },

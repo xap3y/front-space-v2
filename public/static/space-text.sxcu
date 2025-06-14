@@ -3,7 +3,7 @@
   "Name": "Space-TEXT",
   "DestinationType": "TextUploader",
   "RequestMethod": "POST",
-  "RequestURL": "https://call.xap3y.tech/v1/paste/create",
+  "RequestURL": "https://call.xap3y.fun/v1/paste/create",
   "Headers": {
     "X-API-Key": ""
   },
