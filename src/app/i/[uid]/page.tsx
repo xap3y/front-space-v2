@@ -313,7 +313,7 @@ export default function Page() {
                                             className="lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"
                                             onClick={toggleDropdown}
                                         >
-                                            <FaArrowDown />
+                                            <FaArrowDown className={`${open ? "rotate-180" : ""} duration-200`} />
                                             {lang.pages.image_viewer.copy_button_text}
                                         </button>
 

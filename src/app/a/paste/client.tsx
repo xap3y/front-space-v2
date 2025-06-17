@@ -6,6 +6,7 @@ import {useUser} from "@/hooks/useUser";
 import {createPaste} from "@/lib/apiPoster";
 import LoadingPage from "@/components/LoadingPage";
 import {useTranslation} from "@/hooks/useTranslation";
+import {PasteDto} from "@/types/paste";
 
 export default function PortablePasteCreator() {
 
@@ -15,6 +16,7 @@ export default function PortablePasteCreator() {
     const [title, setTitle] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [pasteUrl, setPasteUrl] = useState<string>("");
+    const [uploadedPaste, setUploadedPaste] = useState<PasteDto>();
 
     const lang = useTranslation();
 
@@ -39,6 +41,7 @@ export default function PortablePasteCreator() {
         }
         setPaste("");
         setTitle("");
+        setUploadedPaste(data)
         setPasteUrl(data.urlSet.rawUrl);
         toast.success(lang.pages.portable_paste.paste_created_alert);
     };
@@ -121,11 +124,14 @@ export default function PortablePasteCreator() {
                     </form>
                 </div>
 
-                {(!loading && pasteUrl) && (
+                {(!loading && pasteUrl && uploadedPaste) && (
                     <div>
                         <div className={"mt-4 bg-primary_light border-2 rounded-xl border-secondary p-4 flex flex-col items-center"}>
                             <h1 className={"mb-4 text-xl font-extrabold"}>{lang.pages.portable_paste.view_paste_text}</h1>
-                            <a href={pasteUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{pasteUrl}</a>
+                            {/*<a href={pasteUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{pasteUrl}</a>*/}
+                            <a href={uploadedPaste.urlSet.shortUrl || uploadedPaste.urlSet.webUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{uploadedPaste.urlSet.shortUrl || uploadedPaste.urlSet.webUrl}</a>
+                            <a href={uploadedPaste.urlSet.portalUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{uploadedPaste.urlSet.portalUrl}</a>
+                            <a href={uploadedPaste.urlSet.rawUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{uploadedPaste.urlSet.rawUrl}</a>
                         </div>
                     </div>
                 )}

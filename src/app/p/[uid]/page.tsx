@@ -14,22 +14,25 @@ import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
 import LanguageModel from "@/types/LanguageModel";
 import {useTranslation} from "@/hooks/useTranslation";
+import {useIsMobile} from "@/hooks/utils";
+import {useHoverCard} from "@/hooks/useHoverCard";
 
 export default function Page() {
 
     const { uid } = useParams();
     const [loading, setLoading] = useState(true);
-    const [showCard, setShowCard] = useState(false);
-    const [position, setPosition] = useState({ x: 1060, y: 312 });
     const { paste, setPaste } = usePaste();
     const lang: LanguageModel = useTranslation();
 
-    const handleMouseEnter = () => setShowCard(true);
-    const handleMouseLeave = () => setShowCard(false);
+    const isMobile = useIsMobile();
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        setPosition({ x: e.clientX, y: e.clientY });
-    };
+    const {
+        showCard,
+        position,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleMouseMove,
+    } = useHoverCard(isMobile);
 
     useEffect(() => {
         const fetchPaste = async () => {
@@ -50,6 +53,7 @@ export default function Page() {
 
     useEffect(() => {
         if (paste) {
+            if (paste.title.endsWith(".raw")) return
             hljs.highlightAll();
         }
     })
@@ -65,7 +69,10 @@ export default function Page() {
                 onMouseMove={handleMouseMove}
             >
                 <div className={"flex flex-col gap-2 items-center"}>
-                    <h1 className={"text-3xl font-bold text-white"}>Paste: {paste.uniqueId}</h1>
+                    <span className={"flex flex-col items-center lg:text-3xl text-2xl font-bold text-white"}>
+                        {paste.title}
+                        <p className={"opacity-60 text-xs"}>{"(" + paste.uniqueId + ")"}</p>
+                    </span>
                     <div className={"flex flex-row gap-2 items-center justify-center"}>
                         <p className={"text-lg"}>Pasted by </p>
                         {/*<img src={paste.uploader.avatar} alt={"Uploader Avatar"} className={"rounded-full h-9 w-9"} />*/}
@@ -80,12 +87,13 @@ export default function Page() {
                     <p>Created at: {paste.createdAt}</p>
                 </div>
                 <div className={"p-4 mt-4 border-primary-brighter border-2"}>
-                    <pre className={"max-h-[500px] p-2 overflow-y-scroll"}>
+                    <pre className={"max-h-[500px] max-w-[80vw] lg:text-base text-xs p-2 overflow-y-scroll"}>
                     <code className={""}>
                         {paste.content}
                     </code>
                 </pre>
                 </div>
+                <span>{paste.urlSet.shortUrl}</span>
             </div>
 
             <div

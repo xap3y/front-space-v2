@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/next';
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {ClientRoot} from "@/components/ClientRoot";
 import Head from "next/head";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import {ErrorToast} from "@/components/ErrorToast";
 
 /*const geistSans = Geist({
@@ -58,6 +59,7 @@ export default function RootLayout({
         <ClientRoot>
             {children}
         </ClientRoot>
+        <SpeedInsights />
         <LanguageSwitcher />
         <Analytics />
         <ToastContainer theme={"dark"} />
