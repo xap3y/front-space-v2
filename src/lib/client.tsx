@@ -3,10 +3,10 @@ import {RoleType} from "@/types/user";
 import {JSX} from "react";
 import {UploadedImage} from "@/types/image";
 import axios from "axios";
-import {getApiUrl} from "@/lib/core";
+import {getApiUrl, getValidatedResponse} from "@/lib/core";
 import {CallServer} from "@/types/core";
-import {request} from "node:http";
 import LanguageModel from "@/types/LanguageModel";
+import {Album} from "@/types/album";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -147,6 +147,12 @@ export async function deleteImageApi(imageId: string, apiKey: string): Promise<b
     }
 }
 
+export async function getImageAlbum(uid: string): Promise<Album | null> {
+    const data = await getValidatedResponse('/v1/image/playlist/get/' + uid);
+    if (data.error) return null;
+    console.log(data + " THIS IS DATA")
+    return data["data"] as Album;
+}
 
 export async function pingServer(url: string): Promise<number | null> {
 

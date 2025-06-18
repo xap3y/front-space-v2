@@ -40,6 +40,7 @@ export function ErrorToast({type, message}: Props) {
             <div
                 style={{
                     position: "fixed",
+                    opacity: 0.7,
                     top: 0,
                     left: 0,
                     width: "100vw",
@@ -50,7 +51,7 @@ export function ErrorToast({type, message}: Props) {
                     display: "flex",
                     alignItems: "center",
                     fontWeight: "bold",
-                    fontSize: "0.95rem",
+                    fontSize: "0.6rem",
                     minHeight: "1.6rem",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
                 }}

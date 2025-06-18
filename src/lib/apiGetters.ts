@@ -5,6 +5,7 @@ import {PasteDto} from "@/types/paste";
 import {ShortUrlDto, ShortUrlLog} from "@/types/url";
 import {DefaultResponse} from "@/types/core";
 import {DiscordConnection} from "@/types/discord";
+import {Album} from "@/types/album";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
@@ -82,6 +83,13 @@ export async function getUserShortUrlLogs(uid: string): Promise<ShortUrlLog[] | 
     if (data.error) return {error: true, message: "Failed to get short URL logs"} as DefaultResponse;
     const urlList = data["data"] as ShortUrlLog[];
     return urlList;
+}
+
+export async function getImageAlbumServer(uid: string): Promise<Album | null> {
+    const data = await getValidatedResponse('/v1/image/playlist/get/' + uid);
+    if (data.error) return null;
+    console.log(data + " THIS IS DATA")
+    return data["data"] as Album;
 }
 
 export async function getImageInfoApi(uid: string): Promise<UploadedImage | null> {

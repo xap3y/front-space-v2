@@ -35,7 +35,7 @@ export async function generateMetadata(
     }
 
     return {
-        title: `${imageData.uniqueId}'s Profile`,
+        title: `${imageData.uniqueId}.${imageData.type}`,
         description: `Uploaded by ${imageData.uploader?.username || 'N/A'}`,
         openGraph: {
             title: `${imageData.uniqueId}.${imageData.type}`,

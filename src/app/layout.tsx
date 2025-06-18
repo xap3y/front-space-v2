@@ -54,7 +54,7 @@ export default function RootLayout({
         </Head>
         <body
             cz-shortcut-listen="true"
-            className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code overflow-y-hidden`}
+            className={`dark h-full w-full antialiased bg-primary text-whitesmoke font-source-code`}
         >
         <ClientRoot>
             {children}
