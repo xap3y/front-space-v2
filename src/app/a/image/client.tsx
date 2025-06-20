@@ -24,6 +24,8 @@ import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {CallServer} from "@/types/core";
 import {BetaBadge} from "@/components/GlobalComponents";
+import {getApiUrl} from "@/lib/core";
+import {ErrorToast} from "@/components/ErrorToast";
 
 
 export default function ImageUploader() {
@@ -37,6 +39,7 @@ export default function ImageUploader() {
     //const [expiryDate, setExpiryDate] = useState<string>("");
     const [expiryDate, setExpiryDate] = useState<Date | null>(null);
     const [description, setDescription] = useState<string>("");
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const [hoverServer, setHoverServer] = useState<CallServer | null>(null);
 
     const { user, loadingUser, error } = useUser();
@@ -49,6 +52,7 @@ export default function ImageUploader() {
     const [uploading, setUploading] = useState<boolean>(false);
     const [withDescription, setWithDescription] = useState<boolean>(false);
     const [withPassword, setWithPassword] = useState<boolean>(true);
+    const [isApiUp, setIsApiUp] = useState<boolean>(true);
     const [showAdvanced, setShowAdvanced] = useState(false);
 
     const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -130,6 +134,7 @@ export default function ImageUploader() {
         });
 
         if (!uploadedImg) {
+            setUploadError(uploadedImg)
             toast.error("Failed to upload image");
             resetUpload()
             return;
@@ -172,6 +177,20 @@ export default function ImageUploader() {
         setUploadProgress(0);
     }
 
+    useEffect(() => {
+        const checkApi = async () => {
+            try {
+                console.log("[A] Checking API status...");
+                const res = await fetch(getApiUrl() + "/status", { cache: "no-store" });
+                setIsApiUp(res.ok);
+            } catch {
+                setIsApiUp(false);
+            }
+        };
+
+        checkApi();
+    }, []);
+
     if (loadingUser) {
         return (
             <LoadingPage/>
@@ -200,6 +219,9 @@ export default function ImageUploader() {
 
     return (
         <>
+            { !isApiUp && (
+                <ErrorToast type={"ERROR"} message={"MAIN API SERVER IS DOWN!"} />
+            )}
             {!uploadedImage && (
                 <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-primary bg-opacity-50 select-none`}>
                     <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out p-6 rounded-xl bg-secondary shadow-lg w-full max-w-md xl:min-w-[550px] ${showAdvanced ? "xl:mb-0 mb-44" : ""}`}>
