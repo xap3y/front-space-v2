@@ -7,6 +7,7 @@ import {getApiUrl, getValidatedResponse} from "@/lib/core";
 import {CallServer} from "@/types/core";
 import LanguageModel from "@/types/LanguageModel";
 import {Album} from "@/types/album";
+import {logToServer} from "@/lib/serverFuncs";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -111,10 +112,13 @@ export async function uploadImage(formData: FormData, apiKey: string,  callServe
             return null;
         }
 
+        await logToServer("Response data: ", response.data)
+        await logToServer("Response data.message: ", response.data["message"])
         console.log("Response data: ", response.data);
         console.log("Response data.message: ", response.data["message"]);
         return response.data["message"] as UploadedImage;
     } catch (error) {
+        await logToServer("Upload error: ", error)
         console.error('Upload error:', error);
         return null;
     }

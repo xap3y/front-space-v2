@@ -60,6 +60,8 @@ export default function ImageUploader() {
 
     const { selected, select, isOpen, toggle, status } = useServerDropdown();
 
+    const [customError, setCustomError] = useState<null | string>("test");
+
     const getDot = (url: string) => (
         <span className={`w-2 h-2 rounded-full ${status[url] ? "bg-green-500" : "bg-red-500"}`} />
     );
@@ -134,6 +136,7 @@ export default function ImageUploader() {
         });
 
         if (!uploadedImg) {
+            toast.warn("uploadedImg: " + uploadedImg)
             setUploadError(uploadedImg)
             toast.error("Failed to upload image");
             resetUpload()
