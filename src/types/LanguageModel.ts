@@ -58,6 +58,7 @@ export default interface LanguageModel {
             drag_and_drop_text: string;
             button_text: string;
             image_uploaded_alert: string;
+            upload_progress: string;
         },
         user_finder: {
             title: string;

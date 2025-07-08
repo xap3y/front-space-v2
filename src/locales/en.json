@@ -56,7 +56,8 @@
         "portable_image": {
             "drag_and_drop_text": "Drag & drop an image here or click to select",
             "button_text": "Upload Image",
-            "image_uploaded_alert": "Image uploaded successfully"
+            "image_uploaded_alert": "Image uploaded successfully",
+            "upload_progress": "Upload progress:"
         },
         "user_finder": {
             "title": "User Finder",

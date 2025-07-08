@@ -56,7 +56,8 @@
         "portable_image": {
             "drag_and_drop_text": "Bild hierher ziehen oder klicken, um auszuwählen",
             "button_text": "Bild hochladen",
-            "image_uploaded_alert": "Bild erfolgreich hochgeladen"
+            "image_uploaded_alert": "Bild erfolgreich hochgeladen",
+            "upload_progress": "Hochladen... "
         },
         "user_finder": {
             "title": "Benutzersuche",

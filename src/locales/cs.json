@@ -56,7 +56,8 @@
         "portable_image": {
             "drag_and_drop_text": "Vyberte nebo přetáhněte obrázek sem",
             "button_text": "Nahrát Obrázek",
-            "image_uploaded_alert": "Obrázek byl úspěšně nahrán"
+            "image_uploaded_alert": "Obrázek byl úspěšně nahrán",
+            "upload_progress": "Nahrávání... "
         },
         "user_finder": {
             "title": "Vyhledat Uživatele",

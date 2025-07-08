@@ -56,7 +56,8 @@
         "portable_image": {
             "drag_and_drop_text": "Przeciągnij i upuść obraz tutaj lub kliknij, aby wybrać",
             "button_text": "Prześlij obraz",
-            "image_uploaded_alert": "Obraz przesłany pomyślnie"
+            "image_uploaded_alert": "Obraz przesłany pomyślnie",
+            "upload_progress": "Postęp przesyłania: "
         },
         "user_finder": {
             "title": "Wyszukiwarka użytkowników",

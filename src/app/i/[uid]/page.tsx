@@ -421,7 +421,7 @@ export default function Page() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder={lang.pages.image_viewer.password_placeholder}
-                                className="text-security-disc p-2 rounded text-whitesmoke outline-none bg-secondary shadow-xl border border-dark-grey2 focus:border-blue-500 transition duration-200"
+                                className="text-dots p-2 rounded text-whitesmoke outline-none bg-secondary shadow-xl border border-dark-grey2 focus:border-blue-500 transition duration-200"
                             />
                             <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200">
                                 {lang.pages.image_viewer.view_image_button_placeholder}

@@ -23,7 +23,7 @@ import './tweak.css'
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {CallServer} from "@/types/core";
-import {BetaBadge} from "@/components/GlobalComponents";
+import {BetaBadge, LoadingDot} from "@/components/GlobalComponents";
 import {getApiUrl} from "@/lib/core";
 import {ErrorToast} from "@/components/ErrorToast";
 
@@ -251,14 +251,18 @@ export default function ImageUploader() {
                             )}
                             <input
                                 type="text"
+                                name="uid"
+                                id="uid"
+                                required
+                                autoComplete={"off"}
                                 placeholder={lang.global.api_key_input_placeholder}
                                 value={apiKey}
                                 disabled={!!user}
                                 onChange={(e) => {
-                                    setApiKey(e.target.value)
+                                    setApiKey(e.target.value.toLowerCase())
                                     handleApiKeyChange(e.target.value)
                                 }}
-                                className={`lg:text-base text-xs text-security-disc w-full p-3 border ${!!user ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} rounded bg-transparent focus:outline-none ${uploading ? "disabled":""} ${!!user ? "cursor-not-allowed" : ""}`}
+                                className={`lg:text-base text-xs w-full p-3 border ${!!user ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} rounded bg-transparent focus:outline-none ${uploading ? "disabled":""} ${!!user ? "cursor-not-allowed" : ""}`}
                             />
 
 
@@ -305,7 +309,7 @@ export default function ImageUploader() {
                                             value={password}
                                             disabled={uploading || !withPassword}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className={`xl:text-base text-xs text-security-disc w-full p-3 border rounded bg-transparent focus:outline-none`}
+                                            className={`xl:text-base text-xs text-dots w-full p-3 border rounded bg-transparent focus:outline-none`}
                                         />
                                     </div>
 
@@ -471,21 +475,25 @@ export default function ImageUploader() {
                                     {lang.pages.portable_image.button_text}
                                 </button>) : (
                                 <>
-                                    <div className={"flex items-center justify-center"}>
+                                    {/*<div className={"flex items-center justify-center"}>
                                         <OrbitProgress color="#32cd32" variant={"dotted"} size={"small"} text="" textColor=""/>
-                                    </div>
+                                    </div>*/}
                                 </>
                             )}
 
                             {uploading && (
                                 <div className="mt-4">
                                     <p>Upload Progress: {uploadProgress}%</p>
-                                    <div className="w-full bg-gray-300 rounded h-4">
-                                        <div
-                                            className="bg-blue-500 h-4 rounded"
-                                            style={{ width: `${uploadProgress}%` }}
-                                        />
+                                    <div className={"flex flex-row gap-2"}>
+                                        <div className="w-full bg-gray-300 rounded h-4">
+                                            <div
+                                                className="bg-blue-500 h-4 rounded"
+                                                style={{ width: `${uploadProgress}%` }}
+                                            />
+                                        </div>
+                                        <LoadingDot />
                                     </div>
+
                                 </div>
                             )}
                         </div>

@@ -56,7 +56,8 @@
         "portable_image": {
             "drag_and_drop_text": "Перетягніть зображення сюди або натисніть, щоб вибрати",
             "button_text": "Завантажити зображення",
-            "image_uploaded_alert": "Зображення успішно завантажено"
+            "image_uploaded_alert": "Зображення успішно завантажено",
+            "upload_progress": "Завантаження... "
         },
         "user_finder": {
             "title": "Пошук користувача",
