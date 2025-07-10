@@ -169,7 +169,7 @@
         },
         "/auth/register": {
             "post": {
-                "summary": "Login",
+                "summary": "Register",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -187,6 +187,249 @@
                 },
                 "responses": {
                     "200": { "$ref": "#/components/responses/UploadedResourceShortUrl" }
+                }
+            }
+        },
+        "/user/me/socials": {
+            "patch": {
+                "summary": "Update user's social links",
+                "security": [{ "apiKeyAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "website": { "type": ["string", "null"] },
+                                    "twitter": { "type": ["string", "null"] },
+                                    "github": { "type": ["string", "null"] },
+                                    "gitlab": { "type": ["string", "null"] },
+                                    "discord": { "type": ["string", "null"] },
+                                    "telegram": { "type": ["string", "null"] },
+                                    "vk": { "type": ["string", "null"] },
+                                    "facebook": { "type": ["string", "null"] },
+                                    "instagram": { "type": ["string", "null"] },
+                                    "youtube": { "type": ["string", "null"] },
+                                    "twitch": { "type": ["string", "null"] },
+                                    "steam": { "type": ["string", "null"] },
+                                    "reddit": { "type": ["string", "null"] },
+                                    "linkedin": { "type": ["string", "null"] },
+                                    "tiktok": { "type": ["string", "null"] },
+                                    "snapchat": { "type": ["string", "null"] },
+                                    "whatsapp": { "type": ["string", "null"] },
+                                    "soundcloud": { "type": ["string", "null"] },
+                                    "spotify": { "type": ["string", "null"] },
+                                    "threads": { "type": ["string", "null"] },
+                                    "email": { "type": ["string", "null"] },
+                                    "messenger": { "type": ["string", "null"] }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Socials updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "boolean" },
+                                        "message": { "type": "string" },
+                                        "timestamp": { "type": "string", "format": "date-time" }
+                                    }
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Updated",
+                                    "timestamp": "2025-07-10T20:36:15.699243446"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/get/@me/settings": {
+            "get": {
+                "summary": "Get current user's settings",
+                "security": [{ "apiKeyAuth": [] }],
+                "responses": {
+                    "200": {
+                        "description": "User settings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "boolean" },
+                                        "message": {
+                                            "type": "object",
+                                            "properties": {
+                                                "uid": { "type": "integer" },
+                                                "username": { "type": "string" },
+                                                "webhookSettings": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "enabled": { "type": "boolean" },
+                                                        "color": { "type": ["string", "null"] },
+                                                        "description": { "type": ["string", "null"] },
+                                                        "title": { "type": ["string", "null"] },
+                                                        "timestamp": { "type": "boolean" }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "timestamp": { "type": "string", "format": "date-time" }
+                                    }
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": {
+                                        "uid": 1,
+                                        "username": "xap3y",
+                                        "webhookSettings": {
+                                            "enabled": false,
+                                            "color": null,
+                                            "description": null,
+                                            "title": null,
+                                            "timestamp": false
+                                        }
+                                    },
+                                    "timestamp": "2025-07-10T20:36:30.581624625"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update current user's settings",
+                "security": [{ "apiKeyAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "webhookSettings": {
+                                        "type": "object",
+                                        "properties": {
+                                            "enabled": { "type": "boolean" },
+                                            "color": { "type": ["string", "null"] },
+                                            "description": { "type": ["string", "null"] },
+                                            "title": { "type": ["string", "null"] },
+                                            "timestamp": { "type": "boolean" }
+                                        },
+                                        "additionalProperties": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Settings updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "boolean" },
+                                        "message": { "type": "string" },
+                                        "timestamp": { "type": "string", "format": "date-time" }
+                                    }
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": "Updated",
+                                    "timestamp": "2025-07-10T20:36:30.581624625"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stats/all": {
+            "post": {
+                "summary": "Get all stats for a range of dates",
+                "security": [{ "apiKeyAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "fromDate": { "type": "string", "format": "date" },
+                                    "toDate": { "type": "string", "format": "date" },
+                                    "fillMissing": { "type": "boolean" }
+                                },
+                                "required": ["fromDate", "toDate", "fillMissing"]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Stats for the requested range",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": { "type": "boolean" },
+                                        "message": {
+                                            "type": "object",
+                                            "properties": {
+                                                "totalImages": { "type": "integer" },
+                                                "urlsPerDay": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "pastesPerDay": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "imagesPerDay": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "first": { "type": "string", "format": "date" },
+                                                            "second": { "type": "integer" }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "timestamp": { "type": "string", "format": "date-time" }
+                                    }
+                                },
+                                "example": {
+                                    "error": false,
+                                    "message": {
+                                        "totalImages": 20,
+                                        "urlsPerDay": [],
+                                        "pastesPerDay": [],
+                                        "imagesPerDay": [
+                                            { "first": "2025-03-10", "second": 10 },
+                                            { "first": "2025-03-11", "second": 9 },
+                                            { "first": "2025-03-12", "second": 1 }
+                                        ]
+                                    },
+                                    "timestamp": "2025-07-10T20:33:40.195745915"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -478,5 +721,3 @@
         }
     }
 }
-
-

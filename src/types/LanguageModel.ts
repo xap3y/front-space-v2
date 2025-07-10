@@ -115,6 +115,7 @@ export default interface LanguageModel {
         hide_advanced_settings: string;
         description: string;
         automatic: string;
+        cancel: string;
     },
     toasts: {
         error: {

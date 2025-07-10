@@ -113,7 +113,8 @@
         "show_advanced_settings": "Показать расширенные настройки",
         "hide_advanced_settings": "Скрыть расширенные настройки",
         "description": "Описание",
-        "automatic": "Автоматически"
+        "automatic": "Автоматически",
+        "cancel": "Отмена"
     },
     "toasts": {
         "error": {

@@ -113,7 +113,8 @@
         "show_advanced_settings": "Zobrazit pokročilé nastavení",
         "hide_advanced_settings": "Schovat pokročilé nastavení",
         "description": "Popisek",
-        "automatic": "Automatickty"
+        "automatic": "Automatickty",
+        "cancel": "Zrušit"
     },
     "toasts": {
         "error": {

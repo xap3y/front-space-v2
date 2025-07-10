@@ -1,3 +1,5 @@
 .react-datepicker-wrapper{
     height: 1px;
+    position: absolute;
+    width: 20px;
 }

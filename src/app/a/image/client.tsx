@@ -11,8 +11,7 @@ import {IoMdClipboard, IoMdRefresh} from "react-icons/io";
 import LoadingPage from "@/components/LoadingPage";
 import {ImageUploadModifiers, UploadedImage} from "@/types/image";
 import {useRouter} from "next/navigation";
-import {OrbitProgress} from "react-loading-indicators";
-import {errorToast, uploadImage} from "@/lib/client";
+import {errorToast, infoToast, uploadImage} from "@/lib/client";
 import {FaArrowUp} from "react-icons/fa6";
 import {useServerDropdown} from "@/hooks/useServerDropdown";
 import {callServers} from "@/config/global";
@@ -26,7 +25,6 @@ import {CallServer} from "@/types/core";
 import {BetaBadge, LoadingDot} from "@/components/GlobalComponents";
 import {getApiUrl} from "@/lib/core";
 import {ErrorToast} from "@/components/ErrorToast";
-
 
 export default function ImageUploader() {
 
@@ -49,7 +47,7 @@ export default function ImageUploader() {
 
     const [isPingButtonClicked, setPingButtonClicked] = useState<boolean>(false);
 
-    const [uploading, setUploading] = useState<boolean>(false);
+    const [uploading, setUploading] = useState<boolean>(true);
     const [withDescription, setWithDescription] = useState<boolean>(false);
     const [withPassword, setWithPassword] = useState<boolean>(true);
     const [isApiUp, setIsApiUp] = useState<boolean>(true);
@@ -80,7 +78,14 @@ export default function ImageUploader() {
         handleMouseMove,
     } = useHoverCard(isMobile);
 
-    const cleanText = (text: string) => text.replace(/[^\x20-\x7E]/g, "");
+    const cleanText = (text: string) => cleanVisibleText(text.replace(/[^\x20-\x7E]/g, ""));
+
+    const cleanVisibleText = (text: string) => {
+        if (text.length > 30) {
+            return text.slice(0, 15) + "..." + text.slice(-10);
+        }
+        return text;
+    }
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         accept: {
@@ -92,6 +97,18 @@ export default function ImageUploader() {
             setFile(acceptedFiles[0]);
         },
     });
+
+    const cancelUpload = () => {
+        setFile(null);
+        setDescription("");
+        setPassword("");
+        setCustomUid("");
+        setUploadedImage(null);
+        setUploading(false);
+        setUploadProgress(0);
+        setUploadError(null);
+        infoToast("Upload cancelled");
+    }
 
     const handlePingButtonClick = () => {
         if (isPingButtonClicked) return;
@@ -167,6 +184,12 @@ export default function ImageUploader() {
     }, [loadingUser, user]);
 
     useEffect(() => {
+        if (!showAdvanced && isOpen) {
+            toggle()
+        }
+    }, [showAdvanced, isOpen]);
+
+    useEffect(() => {
         console.log("WITH PASS", withPassword)
     }, [withPassword]);
 
@@ -232,11 +255,11 @@ export default function ImageUploader() {
                             {!file && (
                                 <div
                                     {...getRootProps()}
-                                    className={`border-2 border-dashed p-6 text-center rounded-lg cursor-pointer transition border-blue-500 ${
+                                    className={`border-2 border-dashed p-6 text-center rounded-lg ${uploading ? "cursor-not-allowed" : "cursor-pointer"} transition border-blue-500 ${
                                         isDragActive ? "border-lime-500 bg-primary_light" : "border-gray-300"
                                     }`}
                                 >
-                                    <input {...getInputProps()} />
+                                    <input disabled={uploading} {...getInputProps()} />
                                     <div className="transition-all duration-200 ease-in-out flex flex-col items-center text-gray-300">
                                         <p className={`${isDragActive ? "text-gray-500" : ""} lg:text-base text-xs`}>{lang.pages.portable_image.drag_and_drop_text}</p>
                                         {/*<p className={`${(uploadMaxSize.length == 0) ? "opacity-0" : "opacity-80"} ${isDragActive ? "text-gray-500" : ""} duration-500 transition-all lg:text-base text-xs`}>{uploadMaxSize}</p>*/}
@@ -257,7 +280,7 @@ export default function ImageUploader() {
                                 autoComplete={"off"}
                                 placeholder={lang.global.api_key_input_placeholder}
                                 value={apiKey}
-                                disabled={!!user}
+                                disabled={!!user || uploading}
                                 onChange={(e) => {
                                     setApiKey(e.target.value.toLowerCase())
                                     handleApiKeyChange(e.target.value)
@@ -284,7 +307,6 @@ export default function ImageUploader() {
                                             style={{ strokeWidth: 1.5 }}
                                         />
                                     </button>
-                                    <BetaBadge />
                                 </div>
                                 <div
                                     className={`transition-all duration-500 overflow-hidden w-full pl-2 ${showAdvanced ? "max-h-[500px] mt-4" : "max-h-0"}`}
@@ -343,7 +365,7 @@ export default function ImageUploader() {
                                         id="expiry-date"
                                     />*/}
 
-                                        <div className={`cursor-pointer xl:text-base text-xs border rounded w-full p-3 ${isDatePickerOpened ? "hidden" : ""}`} onClick={() => {
+                                        <div className={`cursor-pointer xl:text-base flex gap-4 text-xs border rounded w-full p-3 ${isDatePickerOpened ? "hidden" : ""}`} onClick={() => {
                                             setDatePickerOpened(!isDatePickerOpened)
                                         }}>
                                             {expiryDate ?
@@ -395,7 +417,12 @@ export default function ImageUploader() {
                                     </div>
 
                                     <div className={"flex justify-center lg:flex-row flex-col items-center lg:gap-2 gap-1 w-full"}>
-                                        <span>Call server:</span>
+
+                                        <div className={"flex flex-row gap-4"}>
+                                            {isMobile && (<BetaBadge />)}
+                                            <span>Call server:</span>
+                                        </div>
+
 
                                         <div className={"flex items-center gap-1"}>
                                             <div className="overflow-visible min-w-52 text-white">
@@ -466,12 +493,13 @@ export default function ImageUploader() {
 
                                             <IoMdRefresh onClick={handlePingButtonClick} className={`w-[25px] h-[25px] cursor-pointer rounded-full ${isPingButtonClicked ? "rotate-180" : ""} ${isMobile ? "" : "hover:bg-white hover:bg-opacity-10"} duration-150`} />
                                         </div>
+                                        {!isMobile && (<BetaBadge />)}
                                     </div>
                                 </div>
                             </div>
 
                             {!uploading ? (
-                                <button type={"submit"} disabled={uploading} className="w-full bg-blue-500 text-white p-2 rounded">
+                                <button type={"submit"} disabled={uploading} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
                                     {lang.pages.portable_image.button_text}
                                 </button>) : (
                                 <>
@@ -481,20 +509,28 @@ export default function ImageUploader() {
                                 </>
                             )}
 
-                            {uploading && (
-                                <div className="mt-4">
-                                    <p>Upload Progress: {uploadProgress}%</p>
-                                    <div className={"flex flex-row gap-2"}>
-                                        <div className="w-full bg-gray-300 rounded h-4">
-                                            <div
-                                                className="bg-blue-500 h-4 rounded"
-                                                style={{ width: `${uploadProgress}%` }}
-                                            />
-                                        </div>
-                                        <LoadingDot />
-                                    </div>
 
-                                </div>
+
+                            {uploading && (
+                                <>
+                                    <div className="mt-4">
+                                        <p>{lang.pages.portable_image.upload_progress} {uploadProgress}%</p>
+                                        <div className={"flex flex-row gap-2"}>
+                                            <div className="w-full bg-gray-300 rounded h-4">
+                                                <div
+                                                    className="bg-blue-500 h-4 rounded"
+                                                    style={{ width: `${uploadProgress}%` }}
+                                                />
+                                            </div>
+                                            <LoadingDot />
+                                        </div>
+                                    </div>
+                                    { uploadProgress < 100 && (
+                                        <button onClick={cancelUpload} type={"submit"} disabled={!uploading} className="w-full duration-200 bg-red-600 hover:bg-red-700 border-red-800 border-2 text-white p-2 rounded">
+                                            {lang.global.cancel || "Cancel"}
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>

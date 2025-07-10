@@ -23,6 +23,13 @@ export const okToast = (message: string, delay: number = 1000) => {
     })
 }
 
+export const infoToast = (message: string, delay: number = 1000) => {
+    return toast.info(message, {
+        autoClose: delay,
+        closeOnClick: true,
+    })
+}
+
 export const copyToClipboard = (text: string, lang: LanguageModel, delay: number = 500) => {
     navigator.clipboard.writeText(text);
     toast.success(lang.toasts.success.copied_to_clipboard, {
