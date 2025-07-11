@@ -47,7 +47,7 @@ export default function ImageUploader() {
 
     const [isPingButtonClicked, setPingButtonClicked] = useState<boolean>(false);
 
-    const [uploading, setUploading] = useState<boolean>(true);
+    const [uploading, setUploading] = useState<boolean>(false);
     const [withDescription, setWithDescription] = useState<boolean>(false);
     const [withPassword, setWithPassword] = useState<boolean>(true);
     const [isApiUp, setIsApiUp] = useState<boolean>(true);
