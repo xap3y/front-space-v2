@@ -103,18 +103,18 @@ export default function HomeGalleryPage() {
 
     const downloadImage = async (img: UploadedImage) => {
         if (!img) return;
-        try {
-            const a = document.createElement("a");
-            a.href = (img.urlSet.rawUrl || "") + "?download=true";
-            a.download = img.uniqueId + "." + img.type;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(img.urlSet.rawUrl||"");
-            document.body.removeChild(a);
-            okToast("Image downloaded successfully", 500);
-        } catch (error) {
-            console.error("Download error:", error);
-        }
+        fetch(img.urlSet.rawUrl || "")
+            .then(res => res.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = img.uniqueId + "." + img.type;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            });
     }
 
     return (

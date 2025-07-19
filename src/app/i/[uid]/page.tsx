@@ -198,7 +198,7 @@ export default function Page() {
         }
     };
 
-    const downloadImage = async () => {
+    /*const downloadImage = async () => {
         if (!image) return;
         try {
             const a = document.createElement("a");
@@ -211,6 +211,22 @@ export default function Page() {
         } catch (error) {
             console.error("Download error:", error);
         }
+    }*/
+
+    function downloadImage() {
+        if (!image) return;
+        fetch(imageUrl || "")
+            .then(res => res.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = image.uniqueId + "." + image.type;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            });
     }
 
     const handleSubmitPassword = async () => {

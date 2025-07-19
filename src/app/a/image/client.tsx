@@ -115,10 +115,12 @@ export default function ImageUploader() {
             const isValid = await validateApiKey(debouncedApiKey);
 
             setIsKeyValid(isValid);
+            setTimeout(() => {
+                setIsKeyValidating(false)
+            }, 100);
         };
 
         validateIt();
-        setIsKeyValidating(false)
     }, [debouncedApiKey]);
 
     const cancelUpload = () => {
@@ -313,7 +315,7 @@ export default function ImageUploader() {
                                 </div>
                             )}
 
-                            <div className={"flex items-center"}>
+                            <div className={"flex items-center transition-all duration-300 ease-in-out"}>
                                 <input
                                     type="text"
                                     name="uid"

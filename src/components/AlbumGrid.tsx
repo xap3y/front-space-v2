@@ -1,5 +1,5 @@
 import {FaExternalLinkAlt} from "react-icons/fa";
-import {Album} from "@/types/album";
+import {Album, ImageItem} from "@/types/album";
 import {isVideoFile} from "@/lib/core";
 import {copyToClipboard, errorToast} from "@/lib/client";
 import {FaArrowDown, FaDownload, FaPlay} from "react-icons/fa6";
@@ -44,6 +44,22 @@ export function AlbumGrid({album}: AlbumGridProps) {
             return prev;
         });
     };
+
+    const downloadImage = (image: ImageItem) => {
+        if (!image) return;
+        fetch(image.urlSet.rawUrl || "")
+            .then(res => res.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = image.uniqueId + "." + image.type;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            });
+    }
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -137,7 +153,7 @@ export function AlbumGrid({album}: AlbumGridProps) {
                             </button>
                             <button
                                 className="w-full justify-center  flex items-center gap-2 bg-green-600 text-white px-2 rounded"
-                                onClick={() => window.open(image.urlSet.rawUrl + "?download=true", "_blank")}
+                                onClick={() => downloadImage(image)}
                             >
                                 <FaDownload />
                             </button>
