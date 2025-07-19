@@ -40,7 +40,7 @@ export async function generateMetadata(
         openGraph: {
             title: `${imageData.uniqueId}.${imageData.type}`,
             description: `Uploaded by ${imageData.uploader?.username || 'N/A'}`,
-            images: [imageData.urlSet.rawUrl],
+            images: [imageData.urlSet.customUrl || imageData.urlSet.rawUrl],
             url: `${imageData.urlSet.portalUrl}`
         },
     };

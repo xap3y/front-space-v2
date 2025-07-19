@@ -94,12 +94,13 @@ export const getUserRoleBadge: (role: RoleType) => JSX.Element = (role: RoleType
     }
 }
 
-export async function uploadImage(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void): Promise<UploadedImage | null> {
+export async function uploadImage(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage | null> {
 
     console.log("Calling uploadImage with CS: " + callServer?.url || "DEFAULT")
 
     /*const data = await postApiForm('/v1/image/upload', formData, apiKey);*/
 
+    const startTime = performance.now()
     try {
         const response = await axios.post(getApiUrl() + "/v1/image/upload", formData, {
             headers: {
@@ -108,9 +109,18 @@ export async function uploadImage(formData: FormData, apiKey: string,  callServe
             },
             timeout: 0,
             onUploadProgress: (progressEvent) => {
-                if (progressEvent.total) {
-                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    if (onProgress) onProgress(percent);
+                const { loaded, total } = progressEvent
+                if (!total) return
+
+                const percent = (loaded / total) * 100
+                onProgress?.(Math.round(percent))
+
+                const elapsedSec = (performance.now() - startTime) / 1000
+                if (elapsedSec > 0) {
+                    const speedBps = loaded / elapsedSec
+                    const realSpeedBps = Math.round(speedBps * 100) / 100
+                    const kbps = Math.round(realSpeedBps / 1024)
+                    onSpeedChange?.(kbps)
                 }
             },
         });
@@ -130,6 +140,119 @@ export async function uploadImage(formData: FormData, apiKey: string,  callServe
         return null;
     }
 }
+
+export async function uploadImageBucket(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage | null> {
+
+    console.log("Calling uploadImageBucket");
+
+    const file = formData.get('file') as File
+    if (!file) return null
+    const startTime = performance.now()
+
+    const type = file.name.split('.').pop()?.toLowerCase() || 'png';
+
+    const uid = generateRandomUniqueId();
+
+    try {
+        // STEP 1: Request a presigned URL from your backend
+        const presignRes = await axios.post('/api/s3/upload', {
+            filename: uid,
+            contentType: file.type,
+            formData: formData
+        }, {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'filename': uid,
+            },
+        })
+
+        const uploadUrl = presignRes.data.url
+
+        console.log("Presigned URL:", uploadUrl)
+
+        // Upload the file directly to R2 (bad idea but fast)
+        await axios.put(uploadUrl, file, {
+            headers: {
+                'Content-Type': file.type,
+            },
+            onUploadProgress: (progressEvent) => {
+                const { loaded, total } = progressEvent
+                if (!total) return
+
+                const percent = (loaded / total) * 100
+                onProgress?.(Math.round(percent))
+
+                const elapsedSec = (performance.now() - startTime) / 1000
+                if (elapsedSec > 0) {
+                    const speedBps = loaded / elapsedSec
+                    const realSpeedBps = Math.round(speedBps * 100) / 100
+                    const kbps = Math.round(realSpeedBps / 1024)
+                    onSpeedChange?.(kbps)
+                }
+            },
+        })
+
+        logToServer("REGISTER TO BACKEND")
+
+        // STEP 3 (optional): register to space-api
+        const spaceFormData = new FormData();
+        spaceFormData.append('uniqueId', uid);
+        spaceFormData.append('fileType', type);
+        spaceFormData.append('size', file.size + "");
+        const response = await axios.post(getApiUrl() + "/v1/image/register", spaceFormData, {
+            headers: {
+                'x-api-key': apiKey,
+                'Content-Type': 'multipart/form-data',
+            },
+            timeout: 0
+        });
+
+        await logToServer("Response data: ", response.data)
+        console.log("Response data: ", response.data);
+        return response.data["message"] as UploadedImage;
+
+    } catch (error) {
+        console.error('Upload to R2 failed:', error)
+        return null
+    }
+}
+
+/*export async function uploadImageBucket(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage | null> {
+
+    console.log("Calling uploadImageBucket");
+
+    /!*const data = await postApiForm('/v1/image/upload', formData, apiKey);*!/
+
+    let startTime: number | null = null
+
+    try {
+        const response = await axios.post('/api/s3/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${apiKey}`,
+                'x-api-key': apiKey,
+            },
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    if (onProgress) onProgress(percent);
+                }
+
+                if (startTime === null) {
+                    startTime = Date.now();
+                } else {
+                    const elapsedTime = (Date.now() - startTime) / 1000;
+                    const speed = progressEvent.loaded / elapsedTime;
+                    if (onSpeedChange) onSpeedChange(speed);
+                }
+            },
+        })
+        return response.data as UploadedImage
+    } catch (error) {
+        console.error('Upload failed:', error)
+        return null
+    }
+}*/
 
 export async function deleteImageApi(imageId: string, apiKey: string): Promise<boolean> {
     console.log("Calling deleteImage with imageId: " + imageId)
@@ -191,5 +314,14 @@ export async function pingServer(url: string): Promise<number | null> {
     } catch (e) {
         return null;
     }
+}
 
+export function generateRandomUniqueId(length: number = 8): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        const idx = Math.floor(Math.random() * chars.length);
+        result += chars[idx];
+    }
+    return result;
 }

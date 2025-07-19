@@ -1,3 +1,5 @@
+import {CallServerEnum} from "@/config/global";
+
 export interface LinkItem {
     label: string;
     href: string;
@@ -52,4 +54,5 @@ export interface CallServer {
     url: string;
     location: string;
     flag: string;
+    type?: CallServerEnum;
 }

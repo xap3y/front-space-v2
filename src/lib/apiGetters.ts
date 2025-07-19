@@ -11,7 +11,7 @@ export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
 
     const data = await getValidatedResponse('/v1/user/get/' + id);
-    //console.log("data is " + data)
+    console.log("data is " + JSON.stringify(data))
     if (data.error) return data;
     /*const user = data["data"] as UserObj;
     user.createdAt = new Date(user.createdAt).toLocaleString()

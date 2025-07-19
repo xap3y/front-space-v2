@@ -10,6 +10,7 @@ export function useServerDropdown() {
 
     useEffect(() => {
         callServers.forEach(server => {
+
             fetch(`${server.url}/status`)
                 .then(res => setStatus(prev => ({ ...prev, [server.url]: res.ok })))
                 .catch(() => setStatus(prev => ({ ...prev, [server.url]: false })));
@@ -18,7 +19,7 @@ export function useServerDropdown() {
 
     const toggle = () => setIsOpen(prev => !prev);
     const select = (server: CallServer) => {
-        if(status[server.url] || server.name == "Automatic") setSelected(server);
+        if(status[server.url] || server.name == "Automatic" || server.name.includes("R2")) setSelected(server);
         else errorToast("Server is offline!")
         setIsOpen(false);
     };

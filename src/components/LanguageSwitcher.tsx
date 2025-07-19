@@ -13,10 +13,10 @@ import {FaHome} from "react-icons/fa";
 const languages = [
     { code: "en", label: "English", flag: "/flags/en.svg" },
     { code: "cs", label: "Čeština", flag: "/flags/cs.svg" },
-    { code: "sk", label: "Slovenština", flag: "/flags/sk.svg" },
+    /*{ code: "sk", label: "Slovenština", flag: "/flags/sk.svg" },*/
     { code: "pl", label: "Polski", flag: "/flags/pl.svg" },
     { code: "ru", label: "Русский", flag: "/flags/ru.svg" },
-    { code: "ua", label: "українська", flag: "/flags/ua.svg" },
+    /*{ code: "ua", label: "українська", flag: "/flags/ua.svg" },*/
     { code: "de", label: "Deutsch", flag: "/flags/de.svg" },
 ];
 

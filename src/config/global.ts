@@ -1,11 +1,26 @@
 import { CallServer } from "@/types/core";
 
+// CALL_server enum
+export enum CallServerEnum {
+    API,
+    S3,
+    UNKNOWN,
+}
+
 export const callServers: CallServer[] = [
     {
         name: "Automatic",
         url: "auto",
         location: "auto",
         flag: "",
+        type: CallServerEnum.UNKNOWN
+    },
+    {
+        name: "(eeur) R2",
+        url: "https://r3.xap3y.space/status.txt",
+        location: "Eastern Europe",
+        flag: "/flags/eu.svg",
+        type: CallServerEnum.S3
     },
     {
         name: "(FR) Paris",

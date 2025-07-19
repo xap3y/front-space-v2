@@ -71,8 +71,8 @@ export default function Page() {
                     setPasswordRequired(true)
                 }
             } else {
-                setImageUrl(imageDto.urlSet.rawUrl);
-                console.log(imageDto.urlSet.rawUrl)
+                setImageUrl(imageDto.urlSet.customUrl || imageDto.urlSet.rawUrl);
+                console.log(imageDto.urlSet.customUrl)
                 setShowImage(true)
             }
             setImage(imageDto);
@@ -95,7 +95,7 @@ export default function Page() {
                 setPasswordRequired(true)
             }
             console.log("Using cached image")
-            setImageUrl(image.urlSet.rawUrl);
+            setImageUrl(image.urlSet.customUrl || image.urlSet.rawUrl);
             setShowImage(true)
             setLoading(false)
         }
@@ -234,6 +234,11 @@ export default function Page() {
         return <div className="text-red-500">{error}</div>;
     }
 
+    // image.size explain:
+    // 145543 == 145.543 KB
+    // 1455430 == 1.455 MB
+    // 1MB = 1048576 bytes
+
     return (
         <>
             {(!passwordRequired && showImage && image.type) ? (
@@ -246,7 +251,7 @@ export default function Page() {
                                     <h1 className={"lg:text-3xl text-xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
 
                                     <span className={"lg:text-lg text-base font-bold text-gray-400"}>
-                                        {image.size > 1024 ? ((image.size / 1024).toFixed(2) + " MB") : (image.size.toFixed(2) + " KB")}
+                                        {image.size < 1048576 ? ((image.size / 1024).toFixed(2) + " KB") : ((image.size / 1024 / 1024).toFixed(2) + " MB")}
                                     </span>
                                 </div>
 

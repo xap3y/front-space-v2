@@ -1,20 +1,20 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import { useDropzone } from "react-dropzone";
+import {useDropzone} from "react-dropzone";
 import {useUser} from "@/hooks/useUser";
 import {useTranslation} from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
 import {toast} from "react-toastify";
-import { MdOutlineDelete } from "react-icons/md";
-import {IoMdClipboard, IoMdRefresh} from "react-icons/io";
+import {MdOutlineDelete} from "react-icons/md";
+import {IoMdRefresh} from "react-icons/io";
 import LoadingPage from "@/components/LoadingPage";
-import {ImageUploadModifiers, UploadedImage} from "@/types/image";
+import {UploadedImage} from "@/types/image";
 import {useRouter} from "next/navigation";
-import {errorToast, infoToast, uploadImage} from "@/lib/client";
+import {errorToast, infoToast, uploadImage, uploadImageBucket} from "@/lib/client";
 import {FaArrowUp} from "react-icons/fa6";
 import {useServerDropdown} from "@/hooks/useServerDropdown";
-import {callServers} from "@/config/global";
+import {CallServerEnum, callServers} from "@/config/global";
 import {useServerPings} from "@/hooks/useServerPings";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css'
@@ -37,6 +37,7 @@ export default function ImageUploader() {
     //const [expiryDate, setExpiryDate] = useState<string>("");
     const [expiryDate, setExpiryDate] = useState<Date | null>(null);
     const [description, setDescription] = useState<string>("");
+    const [uploadSpeed, setUploadSpeed] = useState<number>(0);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [hoverServer, setHoverServer] = useState<CallServer | null>(null);
 
@@ -136,8 +137,6 @@ export default function ImageUploader() {
             return errorToast("Maximum length of Custom UID is 8");
         }
 
-        const callServerSelected = (selected.name == "Automatic") ? null : selected;
-
         setShowAdvanced(false)
         setUploading(true)
         const formData = new FormData();
@@ -148,9 +147,20 @@ export default function ImageUploader() {
         if (description) formData.append("desc", description)
         if (customUid && customUid.length > 5) formData.append("uniqueId", customUid)
 
-        const uploadedImg = await uploadImage(formData, apiKey, callServerSelected, (progress) => {
-            setUploadProgress(progress);
-        });
+        let uploadedImg;
+
+        const selectedCallServer = (selected.type == CallServerEnum.UNKNOWN) ? callServers[1] : selected;
+
+        if (selectedCallServer.type == CallServerEnum.S3) {
+            uploadedImg = await uploadImageBucket(formData, apiKey, selectedCallServer, (progress) => {
+                setUploadProgress(progress);
+            }, (speed) => {setUploadSpeed(speed)});
+        } else {
+            uploadedImg = await uploadImage(formData, apiKey, selectedCallServer, (progress) => {
+                setUploadProgress(progress);
+            }, (speed) => {setUploadSpeed(speed)});
+        }
+
 
         if (!uploadedImg) {
             toast.warn("uploadedImg: " + uploadedImg)
@@ -513,16 +523,21 @@ export default function ImageUploader() {
 
                             {uploading && (
                                 <>
-                                    <div className="mt-4">
-                                        <p>{lang.pages.portable_image.upload_progress} {uploadProgress}%</p>
-                                        <div className={"flex flex-row gap-2"}>
-                                            <div className="w-full bg-gray-300 rounded h-4">
-                                                <div
-                                                    className="bg-blue-500 h-4 rounded"
-                                                    style={{ width: `${uploadProgress}%` }}
-                                                />
+                                    <div className={"mt-4 flex flex-col gap-2"}>
+                                        <span>
+                                            {uploadSpeed + " Kb/s"}
+                                        </span>
+                                        <div className="">
+                                            <p>{lang.pages.portable_image.upload_progress} {uploadProgress}%</p>
+                                            <div className={"flex flex-row gap-2"}>
+                                                <div className="w-full bg-gray-300 rounded h-4">
+                                                    <div
+                                                        className="bg-blue-500 h-4 rounded"
+                                                        style={{ width: `${uploadProgress}%` }}
+                                                    />
+                                                </div>
+                                                <LoadingDot />
                                             </div>
-                                            <LoadingDot />
                                         </div>
                                     </div>
                                     { uploadProgress < 100 && (

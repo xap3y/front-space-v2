@@ -99,9 +99,10 @@ export async function getValidatedResponse(url: string, noAuth: boolean = false)
             headers: getCurlHeaders(getApiKey(), noAuth)
         });
 
+        console.log("DATA ARE " + JSON.stringify(response))
         const data = await response.json();
 
-        console.log("response is " + data.toString())
+        console.log("response2 is " + JSON.stringify(data))
         if (!response.ok) {
             if (response.status.toString().startsWith("4")) {
                 return {error: true, message: "Client error"} as DefaultResponse;
