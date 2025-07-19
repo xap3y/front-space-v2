@@ -18,7 +18,7 @@ import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {useIsMobile} from "@/hooks/utils";
-import {copyToClipboard, deleteImageApi, errorToast} from "@/lib/client";
+import {copyToClipboard, deleteImageApi, errorToast, infoToast} from "@/lib/client";
 
 export default function Page() {
 
@@ -319,10 +319,23 @@ export default function Page() {
 
                                 <div className={"flex flex-row gap-6 mt-4 flex-wrap justify-center w-full lg:text-base text-sm font-bold"}>
 
-                                    <button className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"} onClick={downloadImage}>
+                                    {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"} onClick={downloadImage}>
                                         <FaDownload />
                                         {lang.pages.image_viewer.download_button_text}
-                                    </button>
+                                    </button>*/}
+
+                                    <a
+                                        className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"}
+                                        href={imageUrl + "?download=true" || ""}
+                                        target={"_self"}
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => {
+                                            infoToast("Downloading image")
+                                        }}
+                                    >
+                                        <FaDownload />
+                                        {lang.pages.image_viewer.download_button_text}
+                                    </a>
 
                                     {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"} onClick={copyToClipboard}>
                                         <FaRegCopy />
