@@ -35,6 +35,12 @@ export const callServers: CallServer[] = [
         flag: "/flags/cs.svg"
     },
     {
+        name: "(CZ) Brno",
+        url: "https://call.xap3y.space",
+        location: "Europe",
+        flag: "/flags/cs.svg"
+    },
+    {
         name: "(US) Oregon",
         url: "https://call.xap3y.fun",
         location: "US",

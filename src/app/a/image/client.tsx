@@ -12,7 +12,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {UploadedImage} from "@/types/image";
 import {useRouter} from "next/navigation";
 import {errorToast, infoToast, uploadImage, uploadImageBucket, validateApiKey} from "@/lib/client";
-import {FaArrowUp} from "react-icons/fa6";
+import {FaArrowUp, FaCheck} from "react-icons/fa6";
 import {useServerDropdown} from "@/hooks/useServerDropdown";
 import {CallServerEnum, callServers} from "@/config/global";
 import {useServerPings} from "@/hooks/useServerPings";
@@ -25,12 +25,19 @@ import {CallServer} from "@/types/core";
 import {BetaBadge, LoadingDot} from "@/components/GlobalComponents";
 import {getApiUrl} from "@/lib/core";
 import {ErrorToast} from "@/components/ErrorToast";
+import {useDebounce} from "@/hooks/useDebounce";
 
 export default function ImageUploader() {
 
     const [file, setFile] = useState<File | null>(null);
 
     const [apiKey, setApiKey] = useState<string>("");
+
+    const [isKeyValid, setIsKeyValid] = useState<boolean | null>(null);
+    const [isKeyValidating, setIsKeyValidating] = useState<boolean>(false);
+
+    const debouncedApiKey = useDebounce(apiKey, 400);
+
     const [password, setPassword] = useState<string>("");
     const [customUid, setCustomUid] = useState<string>("");
     const [uploadMaxSize, setUploadMaxSize] = useState<string>("");
@@ -98,6 +105,21 @@ export default function ImageUploader() {
             setFile(acceptedFiles[0]);
         },
     });
+
+    useEffect(() => {
+        if (!debouncedApiKey) return;
+
+        setIsKeyValidating(true)
+
+        const validateIt = async () => {
+            const isValid = await validateApiKey(debouncedApiKey);
+
+            setIsKeyValid(isValid);
+        };
+
+        validateIt();
+        setIsKeyValidating(false)
+    }, [debouncedApiKey]);
 
     const cancelUpload = () => {
         setFile(null);
@@ -241,6 +263,7 @@ export default function ImageUploader() {
     }
 
     const handleApiKeyChange = (key: string) => {
+        setIsKeyValid(null)
         if (key.length == 6) {
             setUploadMaxSize("Maximum size: -1")
         } else {
@@ -289,22 +312,32 @@ export default function ImageUploader() {
                                     <button className={"ml-2"} onClick={handleRemoveFile}> <MdOutlineDelete className={"w-6 h-6 text-red-500"} /> </button>
                                 </div>
                             )}
-                            <input
-                                type="text"
-                                name="uid"
-                                id="uid"
-                                required
-                                autoComplete={"off"}
-                                placeholder={lang.global.api_key_input_placeholder}
-                                value={apiKey}
-                                disabled={!!user || uploading}
-                                onChange={(e) => {
-                                    setApiKey(e.target.value.toLowerCase())
-                                    handleApiKeyChange(e.target.value)
-                                }}
-                                className={`lg:text-base text-xs w-full p-3 border ${!!user ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} rounded bg-transparent focus:outline-none ${uploading ? "disabled":""} ${!!user ? "cursor-not-allowed" : ""}`}
-                            />
 
+                            <div className={"flex items-center"}>
+                                <input
+                                    type="text"
+                                    name="uid"
+                                    id="uid"
+                                    required
+                                    autoComplete={"off"}
+                                    placeholder={lang.global.api_key_input_placeholder}
+                                    value={apiKey}
+                                    disabled={!!user || uploading || isKeyValidating}
+                                    onChange={(e) => {
+                                        setApiKey(e.target.value.toLowerCase())
+                                        handleApiKeyChange(e.target.value)
+                                    }}
+                                    className={`lg:text-base text-xs w-full p-3 border ${(!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} ${(isKeyValid == false) ? "border-red-400 bg-red-400 bg-opacity-5" : ""} rounded bg-transparent focus:outline-none ${uploading ? "disabled":""} ${!!user ? "cursor-not-allowed" : ""}`}
+                                />
+
+                                {isKeyValidating && (
+                                    <LoadingDot size={"w-10"} />
+                                )}
+
+                                {(isKeyValid == true && !isKeyValidating) && (
+                                    <FaCheck className={"ml-2 w-6 h-6 text-lime-400"} />
+                                )}
+                            </div>
 
                             <div className={"flex flex-col gap-2 items-start"}>
                                 <div className={"flex gap-3"}>
@@ -433,7 +466,10 @@ export default function ImageUploader() {
                                         />
                                     </div>
 
-                                    <div className={"flex justify-center lg:flex-row flex-col items-center lg:gap-2 gap-1 w-full"}>
+                                    <div
+                                        className={"flex justify-center lg:flex-row flex-col items-center lg:gap-2 gap-1 w-full"}
+                                        onMouseMove={handleMouseMove}
+                                    >
 
                                         <div className={"flex flex-row gap-4"}>
                                             {isMobile && (<BetaBadge />)}
@@ -469,7 +505,6 @@ export default function ImageUploader() {
                                                     className={`absolute mt-1 min-w-52 bg-zinc-900 rounded border border-zinc-700 shadow-lg z-50 overflow-hidden transform transition-all duration-500 ease-in-out origin-top ${
                                                         isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                                                     }`}
-                                                    onMouseMove={handleMouseMove}
                                                 >
                                                     {callServers.map(server => (
                                                         <button
