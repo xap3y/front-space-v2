@@ -3,7 +3,7 @@ import {RoleType} from "@/types/user";
 import {JSX} from "react";
 import {UploadedImage} from "@/types/image";
 import axios from "axios";
-import {getApiUrl, getValidatedResponse} from "@/lib/core";
+import {getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
 import {CallServer} from "@/types/core";
 import LanguageModel from "@/types/LanguageModel";
 import {Album} from "@/types/album";
@@ -91,6 +91,38 @@ export const getUserRoleBadge: (role: RoleType) => JSX.Element = (role: RoleType
             return <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
                     user
                 </span>
+    }
+}
+
+export async function validateApiKey(apiKey: string): Promise<boolean> {
+    console.log("Calling validateApiKey with key: " + apiKey)
+
+    try {
+
+        const response = await axios.get(getApiUrl() + "/v1/auth/validate", {
+            headers: {
+                'x-api-key': apiKey,
+                'Content-Type': 'multipart/form-data',
+            },
+            timeout: 0,
+        });
+
+        console.log(response)
+
+        if (!response.status.toString().startsWith("2")) {
+            return false;
+        }
+
+        const data = response.data;
+
+        const error: boolean = data["error"];
+        if (error) {
+            console.error("Error validating API key: ", data["message"]);
+            return false;
+        }
+        return true;
+    } catch (error) {
+        return false;
     }
 }
 

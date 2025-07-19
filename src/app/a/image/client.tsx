@@ -11,7 +11,7 @@ import {IoMdRefresh} from "react-icons/io";
 import LoadingPage from "@/components/LoadingPage";
 import {UploadedImage} from "@/types/image";
 import {useRouter} from "next/navigation";
-import {errorToast, infoToast, uploadImage, uploadImageBucket} from "@/lib/client";
+import {errorToast, infoToast, uploadImage, uploadImageBucket, validateApiKey} from "@/lib/client";
 import {FaArrowUp} from "react-icons/fa6";
 import {useServerDropdown} from "@/hooks/useServerDropdown";
 import {CallServerEnum, callServers} from "@/config/global";
@@ -135,6 +135,13 @@ export default function ImageUploader() {
             return errorToast("Minimum length of Custom UID is 5");
         } else if (customUid.length > 0 && customUid.length > 8) {
             return errorToast("Maximum length of Custom UID is 8");
+        }
+
+        console.log("VALIDATING KEY")
+        const isKeyValid = await validateApiKey(apiKey);
+
+        if (!isKeyValid) {
+            return errorToast("Invalid API key");
         }
 
         setShowAdvanced(false)

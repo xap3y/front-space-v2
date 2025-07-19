@@ -1,10 +1,9 @@
 'use server';
+
 import {ShortUrlDto} from "@/types/url";
 import {getApiKey, getApiUrl, getCurlHeaders, postApi} from "@/lib/core";
 import {PasteDto} from "@/types/paste";
-import {UploadedImage} from "@/types/image";
 import {DefaultResponse} from "@/types/core";
-import axios from "axios";
 import {DiscordConnection} from "@/types/discord";
 import defaultPeriodStats, {PeriodStats} from "@/types/stats";
 
