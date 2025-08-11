@@ -60,4 +60,5 @@ export async function getUser(): Promise<UserObj | null> {
 export function logout() {
     deleteCookie("auth_token");
     deleteCookie("session_token");
+    deleteCookie("verify_token")
 }

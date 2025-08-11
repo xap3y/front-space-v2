@@ -15,6 +15,8 @@ import {logApiRes} from "@/lib/logger";
 import { useApiStatusStore } from "@/lib/stores/apiStatusStore";
 import {ErrorPage} from "@/components/ErrorPage";
 import {errorToast} from "@/lib/client";
+import {useAuthCheck} from "@/hooks/useAuthCheck";
+import {AuthChecking} from "@/components/AuthChecking";
 
 export default function LoginPage() {
 
@@ -27,6 +29,13 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(true);
 
     const lang = useTranslation();
+
+    const { checkingAuth, setCheckingAuth } = useAuthCheck({
+        onValid: async () => {
+            setCheckingAuth(true)
+            router.push("/register/verify")
+        },
+    });
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -178,6 +187,8 @@ export default function LoginPage() {
             </>
         )
     }
+
+    if (checkingAuth) return <AuthChecking />
 
     return (
         <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">

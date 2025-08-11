@@ -12,6 +12,8 @@ import {FaLock} from "react-icons/fa6";
 import {getApiUrl} from "@/lib/core";
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {ErrorPage} from "@/components/ErrorPage";
+import {useAuthCheck} from "@/hooks/useAuthCheck";
+import {AuthChecking} from "@/components/AuthChecking";
 
 export default function RegisterPage() {
 
@@ -28,6 +30,13 @@ export default function RegisterPage() {
     const router = useRouter();
 
     const lang = useTranslation();
+
+    const { checkingAuth, setCheckingAuth } = useAuthCheck({
+        onValid: async () => {
+            setCheckingAuth(true)
+            router.push("/register/verify")
+        },
+    });
 
     useEffect(() => {
         async function checkUser() {
@@ -68,6 +77,7 @@ export default function RegisterPage() {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     username: username,
                     email: email,
@@ -88,7 +98,7 @@ export default function RegisterPage() {
             toast.update(toastId, { render: lang.pages.register.success_alert, type: "success", isLoading: false, autoClose: 3000, closeOnClick: true})
             setLoading(true);
             setTimeout(() => {
-                router.push('/login?email=' + email);
+                router.push('register/verify?email=' + email);
             }, 500)
         } catch (e) {
             console.error(e);
@@ -98,9 +108,11 @@ export default function RegisterPage() {
 
     if (loading) return <LoadingPage />
 
-    if (!isApiUp) return <ErrorPage message={"Server error occurred"} lang={lang} callBack={() => {
+    if (!isApiUp && !loading) return <ErrorPage message={"Server error occurred"} lang={lang} callBack={() => {
             router.replace("/")
         }} />
+
+    if (checkingAuth) return <AuthChecking />
 
     return (
         <>

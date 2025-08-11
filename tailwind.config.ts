@@ -22,6 +22,8 @@ export default {
         "telegram-brighter": "#29b1ff",
         "telegram-brightest": "#60beff",
         "primary-brighter": "rgb(120, 120, 120)",
+        danger: "#ef4444",
+        success: "#10b981",
       },
       fontFamily: {
         'source-code': ['SourceCodeVf', 'sans-serif'],

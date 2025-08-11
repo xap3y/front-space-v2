@@ -9,6 +9,8 @@ export async function GET(req: NextRequest) {
 
     const code = searchParams.get('code')
 
+    console.log(code)
+
     if (!code) {
         return new NextResponse(null, {
             status: 301,
@@ -47,6 +49,7 @@ export async function GET(req: NextRequest) {
 
         const response = await authorizeDiscordConnectionRaw(tokenData, getApiKey(), "/v1/discord/login");
 
+        console.log(response)
         const data = await response.json();
         if (data.error) {
             return new NextResponse(null, {
