@@ -3,6 +3,7 @@
 import {deleteCookie} from "cookies-next/client";
 import { UserObj } from "@/types/user";
 import {getApiUrl} from "@/lib/core";
+import {deleteVerifyToken} from "@/lib/client";
 
 export async function getUser(): Promise<UserObj | null> {
 
@@ -60,5 +61,5 @@ export async function getUser(): Promise<UserObj | null> {
 export function logout() {
     deleteCookie("auth_token");
     deleteCookie("session_token");
-    deleteCookie("verify_token")
+    deleteVerifyToken()
 }

@@ -10,6 +10,7 @@ import {PageProvider} from "@/context/PageContext";
 import GalleryPageServer from "@/app/home/gallery/page";
 import GalleryPage from "@/app/home/gallery/client";
 import {Tooltip} from "react-tooltip";
+import {IoMailOutline} from "react-icons/io5";
 
 export default function HomeLayout({
                                         children,
@@ -38,6 +39,7 @@ export default function HomeLayout({
                             {title: lang.comp.sidebar.pastes, icon: <FaPaste className={"w-[30px] h-[30px]"} />, href: "/pastes", page: "pastes"},
                             {title: lang.comp.sidebar.short_urls, icon: <FaLink className={"w-[30px] h-[30px]"} />, href: "/urls", page: "urls"},
                             {title: lang.comp.sidebar.settings, icon: <IoIosSettings className={"w-[30px] h-[30px]"} />, href: "/settings", page: "settings"},
+                            {title: lang.comp.sidebar.settings, icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
                             {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
                         ]} logout_text={lang.comp.sidebar.logout} />
                         {children}

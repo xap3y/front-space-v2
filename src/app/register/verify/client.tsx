@@ -1,9 +1,9 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {getApiUrl} from "@/lib/core";
-import {errorToast, okToast} from "@/lib/client";
+import {deleteVerifyToken, errorToast, okToast} from "@/lib/client";
 import {deleteCookie} from "cookies-next/client";
 import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
@@ -16,38 +16,46 @@ const LS_VERIFY_START = "verifyEmail:startAt";
 const LS_EMAIL_VALUE = "verifyEmail:email";
 const LS_RESEND_AVAILABLE_AT = "verifyEmail:resendAt";
 const LS_TELEGRAM_TOKEN = "verifyEmail:tgToken";
+const LS_VERIFY_METHOD = "verifyEmail:method";
+const LS_EMAIL_DIGITS = "verifyEmail:digits";
+
+const WS_URL = process.env.NEXT_PUBLIC_TELEGRAM_WEBSOCKET_URL || "ws://localhost:8012/ws/verify";
 
 const RESET_WINDOW_ON_RESEND = true;
 
+type VerifyMethod = "none" | "email" | "telegram";
+
 export default function RegistrationVerifyPage() {
-
     const [email, setEmail] = useState("");
+    const [status, setStatus] = useState<"idle" | "waiting" | "verified" | "error">("idle");
+    const [method, setMethod] = useState<VerifyMethod>("none");
 
+    const wsRef = useRef<WebSocket | null>(null);
     const router = useRouter();
 
-    const { checkingAuth, authenticated, setCheckingAuth } = useAuthCheck({
+    const { checkingAuth, setCheckingAuth } = useAuthCheck({
         onInvalid: async ({ response, error }) => {
-            setCheckingAuth(true)
-            router.push("/login")
+            //setCheckingAuth(true);
+            //router.push("/login");
             console.log("Invalid auth:", response?.status, error);
         },
     });
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
-        const emailParam = urlParams.get('email');
+        const emailParam = urlParams.get("email");
         if (emailParam) {
             setEmail(emailParam);
             router.replace("/register/verify", { scroll: false });
             localStorage.setItem(LS_EMAIL_VALUE, emailParam);
         }
-    }, [])
+    }, [router]);
 
     const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""));
     const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
-    const [secondsLeft, setSecondsLeft] = useState(VERIFY_WINDOW_SECONDS); // remaining main window seconds
-    const [resendCooldown, setResendCooldown] = useState(0);               // remaining cooldown seconds
+    const [secondsLeft, setSecondsLeft] = useState(VERIFY_WINDOW_SECONDS);
+    const [resendCooldown, setResendCooldown] = useState(0);
     const [initialized, setInitialized] = useState(false);
 
     const [submitting, setSubmitting] = useState(false);
@@ -69,7 +77,6 @@ export default function RegistrationVerifyPage() {
         // Verification window start
         let startAt = parseInt(localStorage.getItem(LS_VERIFY_START) || "0", 10);
         if (!startAt || isNaN(startAt) || now - startAt >= VERIFY_WINDOW_SECONDS * 1000) {
-            // Either never started or already expired -> start a fresh window
             startAt = now;
             localStorage.setItem(LS_VERIFY_START, String(startAt));
         }
@@ -85,6 +92,15 @@ export default function RegistrationVerifyPage() {
             setResendCooldown(Math.ceil((resendAt - now) / 1000));
         }
 
+        const savedMethod = (localStorage.getItem(LS_VERIFY_METHOD) as VerifyMethod) || "none";
+        setMethod(savedMethod);
+
+        const savedDigits = localStorage.getItem(LS_EMAIL_DIGITS);
+        if (savedDigits) {
+            const arr = savedDigits.replace(/\D/g, "").slice(0, CODE_LENGTH).split("");
+            setDigits([...arr, ...Array(CODE_LENGTH - arr.length).fill("")]);
+        }
+
         setInitialized(true);
     }, []);
 
@@ -98,6 +114,11 @@ export default function RegistrationVerifyPage() {
         return () => clearInterval(t);
     }, [secondsLeft, initialized]);
 
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        localStorage.setItem(LS_VERIFY_METHOD, method);
+    }, [method]);
+
     // Resend cooldown ticking
     useEffect(() => {
         if (!initialized) return;
@@ -107,6 +128,12 @@ export default function RegistrationVerifyPage() {
         }, 1000);
         return () => clearInterval(t);
     }, [resendCooldown, initialized]);
+
+    useEffect(() => {
+        return () => {
+            if (wsRef.current) wsRef.current.close();
+        };
+    }, []);
 
     const handleChange = (index: number, value: string) => {
         if (expired) return;
@@ -120,7 +147,6 @@ export default function RegistrationVerifyPage() {
             return;
         }
         if (v.length > 1) {
-            // Pasted multiple characters
             setDigits((prev) => {
                 const copy = [...prev];
                 const chars = v.split("").slice(0, CODE_LENGTH - index);
@@ -161,6 +187,7 @@ export default function RegistrationVerifyPage() {
         if (typeof window === "undefined") return;
         localStorage.removeItem(LS_VERIFY_START);
         localStorage.removeItem(LS_RESEND_AVAILABLE_AT);
+        localStorage.removeItem(LS_VERIFY_METHOD);
     }, []);
 
     const submit = async () => {
@@ -168,23 +195,14 @@ export default function RegistrationVerifyPage() {
         setSubmitting(true);
         setErrorMsg(null);
         try {
-            // Simulated API
-            //await new Promise((res) => setTimeout(res, 800));
-            // Real call example:
-            // await fetch("/api/auth/verify-email", {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify({ code: fullCode, email }),
-            // });
-
-            const response = await fetch(getApiUrl() + '/v1/auth/verify/email?code=' + fullCode, {
-                method: 'POST',
+            const response = await fetch(getApiUrl() + "/v1/auth/verify/email?code=" + fullCode, {
+                method: "POST",
                 headers: {
                     "Access-Control-Allow-Origin": "*",
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
                 },
-                credentials: 'include'
+                credentials: "include",
             });
 
             if (!response.ok) {
@@ -195,7 +213,7 @@ export default function RegistrationVerifyPage() {
 
             const data = await response.json();
 
-            if (!data || data["error"] == true) {
+            if (!data || data["error"] === true) {
                 errorToast(data["message"] || "Verification failed. Please try again.");
                 setDigits(Array(CODE_LENGTH).fill(""));
                 return;
@@ -204,21 +222,19 @@ export default function RegistrationVerifyPage() {
             if (data["message"]) {
                 okToast(data["message"] || "Email verified successfully!");
             }
+            deleteVerifyToken()
 
-            deleteCookie("verify_token")
-
-            // wait 2 seconds before redirecting
             await new Promise((res) => setTimeout(res, 1000));
             clearPersistence();
-            if (email.length > 0 && email.includes("@") && email.includes(".")) {
-                router.push("/login?email=" + email);
+
+            const emailToUse =
+                (email && email.includes("@") && email.includes(".")) ? email :
+                    (localStorage.getItem(LS_EMAIL_VALUE) || "");
+
+            if (emailToUse && emailToUse.includes("@") && emailToUse.includes(".")) {
+                router.push("/login?email=" + emailToUse);
             } else {
-                const email = localStorage.getItem(LS_EMAIL_VALUE) || "";
-                if (email && email.includes("@") && email.includes(".")) {
-                    router.push("/login?email=" + email);
-                } else {
-                    router.push("/login");
-                }
+                router.push("/login");
             }
         } catch (err: any) {
             setErrorMsg(err?.message || "Verification failed. Please try again.");
@@ -233,12 +249,6 @@ export default function RegistrationVerifyPage() {
         try {
             // Simulate
             await new Promise((res) => setTimeout(res, 500));
-            // Real call:
-            // await fetch("/api/auth/resend-email", {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify({ email }),
-            // });
 
             // Reset code inputs
             setDigits(Array(CODE_LENGTH).fill(""));
@@ -255,34 +265,66 @@ export default function RegistrationVerifyPage() {
                 localStorage.setItem(LS_VERIFY_START, String(now));
                 setSecondsLeft(VERIFY_WINDOW_SECONDS);
             } else if (expired) {
-                // If we do not reset window but we were expired, we still need something sensible:
-                // Provide a new window anyway, otherwise user can never succeed.
                 localStorage.setItem(LS_VERIFY_START, String(now));
                 setSecondsLeft(VERIFY_WINDOW_SECONDS);
             }
         } catch (err: any) {
             setErrorMsg(err?.message || "Failed to resend email.");
         }
-    }, [resendCooldown]);
+    }, [resendCooldown, expired]);
+
+    const connectWs = (channelToken: string) => {
+        const url = `${WS_URL}?telCode=${encodeURIComponent(channelToken)}`;
+        const ws = new WebSocket(url);
+        wsRef.current = ws;
+        ws.onopen = () => {
+            setStatus("waiting");
+        };
+        ws.onmessage = (ev) => {
+            try {
+                const msg = JSON.parse(ev.data);
+                if (msg.type === "verified") {
+                    setStatus("verified");
+                    localStorage.removeItem(LS_VERIFY_METHOD);
+                    localStorage.removeItem(LS_EMAIL_DIGITS);
+                    localStorage.removeItem(LS_TELEGRAM_TOKEN);
+                    setTimeout(() => router.push(msg.redirect || "/login"), 1000);
+                    okToast("Telegram verification successful!", 3000);
+                }
+            } catch (e) {
+                console.error("WS parse error", e);
+            }
+        };
+        ws.onerror = () => {
+            setStatus("error");
+        };
+        ws.onclose = () => {
+            // no-op
+        };
+    };
 
     const startTelegram = async () => {
         if (tgLoading) return;
         setTgLoading(true);
         setErrorMsg(null);
         try {
-            const res = await fetch(getApiUrl() + '/v1/auth/verify/telegram', {
+            const res = await fetch(getApiUrl() + "/v1/auth/verify/telegram", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
             });
 
             if (!res.ok) {
-                throw new Error("Failed to initiate Telegram verification.");
+                errorToast("Failed to initiate Telegram verification.")
+                return;
             }
-            const data: { error: boolean; message: {
-                token: string;
-                botname: string;
-            }} = await res.json();
+            const data: {
+                error: boolean;
+                message: {
+                    token: string;
+                    botname: string;
+                };
+            } = await res.json();
 
             if (data.error) {
                 errorToast("Failed to initiate Telegram verification: " + (data.message || "Unknown error"));
@@ -292,8 +334,12 @@ export default function RegistrationVerifyPage() {
             localStorage.setItem(LS_TELEGRAM_TOKEN, data.message.token);
             setTgLastToken(data.message.token);
 
-            const url = `https://t.me/${encodeURIComponent(data.message.botname)}?start=${encodeURIComponent(data.message.token)}`;
-
+            // Connect WS and open deep link
+            connectWs(data.message.token);
+            setMethod("telegram")
+            const url = `https://t.me/${encodeURIComponent(data.message.botname)}?start=${encodeURIComponent(
+                data.message.token
+            )}`;
             window.open(url, "_blank", "noopener,noreferrer");
         } catch (err: any) {
             setErrorMsg(err?.message || "Could not open Telegram.");
@@ -302,6 +348,30 @@ export default function RegistrationVerifyPage() {
         }
     };
 
+    // When user chooses Telegram on the first screen: immediately start the flow
+    const chooseTelegram = async () => {
+        await startTelegram();
+    };
+
+    const chooseEmail = async () => {
+        try {
+            const res = await fetch(getApiUrl() + "/v1/auth/verify/sendemail", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                credentials: "include",
+            });
+
+            if (!res.ok) {
+                errorToast("Failed to initiate email verification.")
+                return;
+            }
+
+            setMethod("email")
+        } catch (err: any) {
+            setErrorMsg(err?.message || "Could not initiate email verification.");
+        }
+    }
+
     const handlePasteAllFromStart = (e: React.ClipboardEvent<HTMLInputElement>) => {
         e.preventDefault();
         const raw = e.clipboardData.getData("text");
@@ -309,10 +379,8 @@ export default function RegistrationVerifyPage() {
         if (!digitsOnly) return;
 
         const sliced = digitsOnly.slice(0, CODE_LENGTH);
-
         setDigits(sliced.padEnd(CODE_LENGTH, "").split(""));
 
-        // Focus last filled digit or last input if full
         const lastIndex = Math.min(sliced.length - 1, CODE_LENGTH - 1);
         if (lastIndex >= 0) {
             inputsRef.current[lastIndex]?.focus();
@@ -320,9 +388,22 @@ export default function RegistrationVerifyPage() {
     };
 
     const cancel = () => {
-        deleteCookie("verify_token");
+        deleteVerifyToken()
         clearPersistence();
         router.push("/register");
+    };
+
+    const changeMethod = () => {
+        // Clean up Telegram WS if open
+        if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+        setStatus("idle");
+        setTgLastToken(null);
+        setTgLoading(false);
+        setErrorMsg(null);
+        setMethod("none");
     };
 
     const minutes = Math.floor(secondsLeft / 60);
@@ -331,131 +412,248 @@ export default function RegistrationVerifyPage() {
     const resendSecs = resendCooldown % 60;
 
     if (checkingAuth) {
-        return (
-            <AuthChecking />
-        );
+        return <AuthChecking />;
     }
 
+    // Handle global paste only for email method
+    const handleMainPaste: React.ClipboardEventHandler<HTMLElement> = (e) => {
+        if (method !== "email") return;
+        e.preventDefault();
+        const raw = e.clipboardData.getData("text");
+        const digitsOnly = raw.replace(/\D/g, "");
+        if (!digitsOnly) return;
+
+        const sliced = digitsOnly.slice(0, CODE_LENGTH);
+        setDigits(sliced.padEnd(CODE_LENGTH, "").split(""));
+
+        const lastIndex = Math.min(sliced.length - 1, CODE_LENGTH - 1);
+        if (lastIndex >= 0) inputsRef.current[lastIndex]?.focus();
+    };
+
     return (
-        <main
-            className="flex min-h-screen items-center justify-center px-4"
-            onPaste={(e) => {
-                e.preventDefault();
-                const raw = e.clipboardData.getData("text");
-                const digitsOnly = raw.replace(/\D/g, "");
-                if (!digitsOnly) return;
-
-                const sliced = digitsOnly.slice(0, CODE_LENGTH);
-                setDigits(sliced.padEnd(CODE_LENGTH, "").split(""));
-
-                const lastIndex = Math.min(sliced.length - 1, CODE_LENGTH - 1);
-                if (lastIndex >= 0) inputsRef.current[lastIndex]?.focus();
-            }}
-        >
+        <main className="flex min-h-screen items-center justify-center px-4" onPaste={handleMainPaste}>
             <div className="w-full max-w-md rounded-md bg-primary_light/60 backdrop-blur-sm border border-primary_border shadow-card p-8">
-                <h1 className="text-center text-xl font-semibold tracking-wide text-white">
-                    Email Verification
-                </h1>
-                <p className="mt-1 text-center text-xs text-gray-400">
-                    We sent a 6‑digit code to {email || "your email"}. Enter it below.
-                </p>
-
-                {/* Telegram button */}
-                <div className="mt-6">
-                    <button
-                        type="button"
-                        onClick={startTelegram}
-                        disabled={tgLoading}
-                        className="w-full h-10 rounded-md flex items-center justify-center gap-2 bg-[#229ED9] text-sm font-medium text-white transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-[#229ED9]/60 disabled:opacity-60"
-                    >
-                        {tgLoading ? (
-                            <span className="animate-pulse">Opening Telegram...</span>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
-                                    <path fill="#29b6f6" d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z"></path><path fill="#fff" d="M34,15l-3.7,19.1c0,0-0.2,0.9-1.2,0.9c-0.6,0-0.9-0.3-0.9-0.3L20,28l-4-2l-5.1-1.4c0,0-0.9-0.3-0.9-1	c0-0.6,0.9-0.9,0.9-0.9l21.3-8.5c0,0,0.7-0.2,1.1-0.2c0.3,0,0.6,0.1,0.6,0.5C34,14.8,34,15,34,15z"></path><path fill="#b0bec5" d="M23,30.5l-3.4,3.4c0,0-0.1,0.1-0.3,0.1c-0.1,0-0.1,0-0.2,0l1-6L23,30.5z"></path><path fill="#cfd8dc" d="M29.9,18.2c-0.2-0.2-0.5-0.3-0.7-0.1L16,26c0,0,2.1,5.9,2.4,6.9c0.3,1,0.6,1,0.6,1l1-6l9.8-9.1	C30,18.7,30.1,18.4,29.9,18.2z"></path>
-                                </svg>
-                                Verify with Telegram
-                            </>
-                        )}
-                    </button>
-                    {tgLastToken && (
-                        <p className="mt-2 text-[11px] text-gray-500 text-center">
-                            Token requested via Telegram. Enter the 6‑digit code the bot sent you.
+                {/* Method chooser */}
+                {method === "none" && (
+                    <>
+                        <h1 className="text-center text-xl font-semibold tracking-wide text-white">Choose verification method</h1>
+                        <p className="mt-1 text-center text-xs text-gray-400">
+                            Verify your account with email code or Telegram.
                         </p>
-                    )}
-                </div>
 
-                <div className="mt-6 flex justify-center gap-2">
-                    {digits.map((d, i) => (
-                        <input
-                            key={i}
-                            ref={(el) => { inputsRef.current[i] = el; }}
-                            data-index={i}
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            maxLength={1}
-                            value={d}
-                            onPaste={handlePasteAllFromStart}
-                            onChange={(e) => handleChange(i, e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="h-12 w-12 rounded-md border border-primary_border bg-primary_light text-center text-lg font-medium tracking-wider text-white focus:border-telegram focus:outline-none focus:ring-1 focus:ring-telegram disabled:opacity-40"
-                        />
-                    ))}
-                </div>
+                        <div className="mt-6 grid grid-cols-1 gap-3">
+                            <button
+                                type="button"
+                                onClick={chooseEmail}
+                                className="h-11 rounded-md bg-telegram-darker text-sm font-medium text-white transition hover:brightness-110"
+                            >
+                                Verify via Email
+                            </button>
 
-                <div className="mt-4 text-center text-sm text-gray-400">
-                    Time remaining:{" "}
-                    <span className={expired ? "text-danger font-semibold" : "text-gray-200"}>
-            {minutes.toString().padStart(2,"0")}:{secs.toString().padStart(2,"0")}
-          </span>
-                </div>
+                            <button
+                                type="button"
+                                onClick={chooseTelegram}
+                                disabled={tgLoading}
+                                className="h-11 rounded-md flex items-center justify-center gap-2 bg-telegram-darker text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
+                            >
+                                {/* Telegram icon on the first page button */}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    x="0px"
+                                    y="0px"
+                                    width="22"
+                                    height="22"
+                                    viewBox="0 0 48 48"
+                                >
+                                    <path fill="#29b6f6" d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z"></path>
+                                    <path
+                                        fill="#fff"
+                                        d="M34,15l-3.7,19.1c0,0-0.2,0.9-1.2,0.9c-0.6,0-0.9-0.3-0.9-0.3L20,28l-4-2l-5.1-1.4c0,0-0.9-0.3-0.9-1	c0-0.6,0.9-0.9,0.9-0.9l21.3-8.5c0,0,0.7-0.2,1.1-0.2c0.3,0,0.6,0.1,0.6,0.5C34,14.8,34,15,34,15z"
+                                    ></path>
+                                    <path fill="#b0bec5" d="M23,30.5l-3.4,3.4c0,0-0.1,0.1-0.3,0.1c-0.1,0-0.1,0-0.2,0l1-6L23,30.5z"></path>
+                                    <path
+                                        fill="#cfd8dc"
+                                        d="M29.9,18.2c-0.2-0.2-0.5-0.3-0.7-0.1L16,26c0,0,2.1,5.9,2.4,6.9c0.3,1,0.6,1,0.6,1l1-6l9.8-9.1	C30,18.7,30.1,18.4,29.9,18.2z"
+                                    ></path>
+                                </svg>
+                                {tgLoading ? "Starting..." : "Verify via Telegram"}
+                            </button>
+                        </div>
 
-                {errorMsg && (
-                    <div className="mt-4 rounded bg-danger/10 border border-danger/30 px-3 py-2 text-sm text-danger">
-                        {errorMsg}
-                    </div>
+                        <p className="mt-6 text-center text-[11px] text-gray-500">
+                            You can switch methods later if needed.
+                        </p>
+                    </>
                 )}
 
-                {expired && (
-                    <div className="mt-4 rounded bg-yellow-500/10 border border-yellow-500/30 px-3 py-2 text-sm text-yellow-400">
-                        The code expired. Resend a new code to continue.
-                    </div>
+                {/* Email method */}
+                {method === "email" && (
+                    <>
+                        <h1 className="text-center text-xl font-semibold tracking-wide text-white">Email Verification</h1>
+                        <p className="mt-1 text-center text-xs text-gray-400">
+                            We sent a 6‑digit code to {email || "your email"}. Enter it below.
+                        </p>
+
+                        <div className="mt-6 flex justify-center gap-2">
+                            {digits.map((d, i) => (
+                                <input
+                                    key={i}
+                                    ref={(el) => {
+                                        inputsRef.current[i] = el;
+                                    }}
+                                    data-index={i}
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    maxLength={1}
+                                    value={d}
+                                    onPaste={handlePasteAllFromStart}
+                                    onChange={(e) => handleChange(i, e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className="h-12 w-12 rounded-md border border-primary_border bg-primary_light text-center text-lg font-medium tracking-wider text-white focus:border-telegram focus:outline-none focus:ring-1 focus:ring-telegram disabled:opacity-40"
+                                />
+                            ))}
+                        </div>
+
+                        <div className="mt-4 text-center text-sm text-gray-400">
+                            Time remaining:{" "}
+                            <span className={expired ? "text-danger font-semibold" : "text-gray-200"}>
+                {minutes.toString().padStart(2, "0")}:{secs.toString().padStart(2, "0")}
+              </span>
+                        </div>
+
+                        {errorMsg && (
+                            <div className="mt-4 rounded bg-danger/10 border border-danger/30 px-3 py-2 text-sm text-danger">
+                                {errorMsg}
+                            </div>
+                        )}
+
+                        {expired && (
+                            <div className="mt-4 rounded bg-yellow-500/10 border border-yellow-500/30 px-3 py-2 text-sm text-yellow-400">
+                                The code expired. Resend a new code to continue.
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex flex-col gap-3">
+                            <button
+                                onClick={submit}
+                                disabled={!isComplete || submitting || expired}
+                                className="h-10 rounded-md bg-telegram text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-telegram/60 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {submitting ? "Verifying..." : "Continue"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={resend}
+                                disabled={resendCooldown > 0 || expired}
+                                className="h-10 rounded-md border border-primary_border bg-primary_light text-sm font-medium text-gray-200 hover:border-telegram/70 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-telegram/60 disabled:opacity-40"
+                            >
+                                {resendCooldown > 0
+                                    ? `Resend in ${resendMinutes}:${resendSecs.toString().padStart(2, "0")}`
+                                    : "Resend Code"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={changeMethod}
+                                className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
+                            >
+                                Change verification method
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={cancel}
+                                className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+
+                        <p className="mt-6 text-center text-[11px] text-gray-500">
+                            Didn&apos;t receive the email? Check spam or request a new code.
+                        </p>
+                    </>
                 )}
 
-                <div className="mt-6 flex flex-col gap-3">
-                    <button
-                        onClick={submit}
-                        disabled={!isComplete || submitting || expired}
-                        className="h-10 rounded-md bg-telegram text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-telegram/60 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {submitting ? "Verifying..." : "Continue"}
-                    </button>
+                {/* Telegram method */}
+                {method === "telegram" && (
+                    <>
+                        <h1 className="text-center text-xl font-semibold tracking-wide text-white">Telegram Verification</h1>
+                        <p className="mt-1 text-center text-xs text-gray-400">
+                            We will detect your verification automatically after you start the Telegram flow.
+                        </p>
 
-                    <button
-                        type="button"
-                        onClick={resend}
-                        disabled={resendCooldown > 0 || expired}
-                        className="h-10 rounded-md border border-primary_border bg-primary_light text-sm font-medium text-gray-200 hover:border-telegram/70 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-telegram/60 disabled:opacity-40"
-                    >
-                        {resendCooldown > 0
-                            ? `Resend in ${resendMinutes}:${resendSecs.toString().padStart(2,"0")}`
-                            : "Resend Code"}
-                    </button>
+                        <div className="mt-6">
+                            {/* We already started the flow from the first screen. Provide a secondary button to re-open if needed */}
+                            <button
+                                type="button"
+                                onClick={startTelegram}
+                                disabled={tgLoading}
+                                className="w-full h-10 rounded-md flex items-center justify-center gap-2 bg-[#229ED9] text-sm font-medium text-white transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-[#229ED9]/60 disabled:opacity-60"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    x="0px"
+                                    y="0px"
+                                    width="22"
+                                    height="22"
+                                    viewBox="0 0 48 48"
+                                >
+                                    <path fill="#29b6f6" d="M24,4C13,4,4,13,4,24s9,20,20,20s20-9,20-20S35,4,24,4z"></path>
+                                    <path
+                                        fill="#fff"
+                                        d="M34,15l-3.7,19.1c0,0-0.2,0.9-1.2,0.9c-0.6,0-0.9-0.3-0.9-0.3L20,28l-4-2l-5.1-1.4c0,0-0.9-0.3-0.9-1	c0-0.6,0.9-0.9,0.9-0.9l21.3-8.5c0,0,0.7-0.2,1.1-0.2c0.3,0,0.6,0.1,0.6,0.5C34,14.8,34,15,34,15z"
+                                    ></path>
+                                    <path fill="#b0bec5" d="M23,30.5l-3.4,3.4c0,0-0.1,0.1-0.3,0.1c-0.1,0-0.1,0-0.2,0l1-6L23,30.5z"></path>
+                                    <path
+                                        fill="#cfd8dc"
+                                        d="M29.9,18.2c-0.2-0.2-0.5-0.3-0.7-0.1L16,26c0,0,2.1,5.9,2.4,6.9c0.3,1,0.6,1,0.6,1l1-6l9.8-9.1	C30,18.7,30.1,18.4,29.9,18.2z"
+                                    ></path>
+                                </svg>
+                                {tgLoading ? "Opening Telegram..." : "Open Telegram again"}
+                            </button>
 
-                    <button
-                        type="button"
-                        onClick={cancel}
-                        className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
-                    >
-                        Cancel
-                    </button>
-                </div>
+                            <div className={"mt-6"}>
+                                <StatusBlock status={status} />
+                            </div>
 
-                <p className="mt-6 text-center text-[11px] text-gray-500">
-                    Didn&apos;t receive the email? Check spam or request a new code.
-                </p>
+
+                            {/*{tgLastToken && (
+                                <p className="mt-2 text-[11px] text-gray-500 text-center">
+                                    Waiting for Telegram confirmation...
+                                </p>
+                            )}*/}
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3">
+                            <button
+                                type="button"
+                                onClick={changeMethod}
+                                className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
+                            >
+                                Change verification method
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={cancel}
+                                className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
         </main>
     );
+}
+
+function StatusBlock({ status }: { status: string }) {
+    if (status === "idle") return <p className="text-center text-gray-500 text-xs">Not started.</p>;
+    if (status === "waiting") return <p className="text-center text-blue-400 text-xs animate-pulse">Waiting for Telegram confirmation...</p>;
+    if (status === "verified") return <p className="text-center text-green-400 text-xs">Verified! Redirecting...</p>;
+    if (status === "error") return <p className="text-center text-red-400 text-xs">Connection error. Try again.</p>;
+    return null;
 }

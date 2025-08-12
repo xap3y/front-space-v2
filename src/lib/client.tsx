@@ -30,6 +30,10 @@ export const infoToast = (message: string, delay: number = 1000) => {
     })
 }
 
+export async function deleteVerifyToken() {
+    await fetch("/api/auth/clear", { method: "POST", credentials: "include" });
+}
+
 export const copyToClipboard = (text: string, lang: LanguageModel, delay: number = 500) => {
     navigator.clipboard.writeText(text);
     toast.success(lang.toasts.success.copied_to_clipboard, {
