@@ -73,12 +73,12 @@ export default function EmailPage({maxWidth} : Props) {
 
     if (loadingUser) return <></>
 
-    const MAX_WIDTH = maxWidth ?? 1024;
+    const MAX_WIDTH = maxWidth ?? 1920;
 
     return (
         <>
             <div
-                className={`w-full h-auto bg-card border border-white/10 rounded-lg p-6 shadow-xl flex flex-col gap-6`}
+                className={`w-full md:h-auto h-screen bg-card border border-white/10 rounded-lg p-4 sm:p-6 shadow-xl flex flex-col gap-6`}
                 style={{ maxWidth: MAX_WIDTH }}
             >
                 <h1 className="text-xl font-semibold tracking-tight">Temp Mail</h1>

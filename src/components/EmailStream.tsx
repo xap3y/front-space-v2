@@ -32,12 +32,17 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
         [messages, selectedId]
     );
 
-    const HEIGHT = 560;
+    const HEIGHT = 650;
 
     return (
         <div className="grid gap-5 md:flex" style={{ height: `${HEIGHT}px` }}>
             {/* INBOX LIST */}
-            <div className="md:min-w-96 md:col-span-5 flex flex-col rounded-lg border border-white/10 bg-[#181a1f] min-h-[320px] overflow-hidden">
+            <div className="flex flex-col
+          w-full
+          md:w-[250px] md:flex-none
+          rounded-lg border border-white/10 bg-[#181a1f]
+          overflow-hidden
+          min-w-0">
                 <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-[#1e2025]">
                     <span className="font-semibold text-gray-200 select-none">Inbox</span>
                     <span
@@ -90,11 +95,14 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
             </div>
 
             {/* MESSAGE VIEWER */}
-            <div className="md:w-full rounded-lg border border-white/10 bg-[#181a1f] min-h-[320px] flex flex-col overflow-hidden">
+            <div className="flex flex-col w-full
+          rounded-lg border border-white/10 bg-[#181a1f]
+          overflow-hidden
+          min-w-0">
                 <div className="select-none p-3 border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-[#1e2025]">
                     Message
                 </div>
-                <div className="flex-1 overflow-auto p-5 text-sm">
+                <div className="flex-1 overflow-auto text-sm">
                     {!selectedMessage && messages.length > 0 && (
                         <p className="text-gray-500 text-xs">Select a message.</p>
                     )}
@@ -140,8 +148,8 @@ function MessageDetail({ m }: { m: any }) {
     }, [m.html]);
 
     return (
-        <div className="space-y-5">
-            <div className="space-y-1">
+        <div className="space-y-5 md:p-5 p-0 ">
+            <div className="space-y-1 md:p-0 p-5">
                 <p className="font-semibold text-lg leading-tight text-white">
                     {m.subject || '(no subject)'}
                 </p>
@@ -160,7 +168,7 @@ function MessageDetail({ m }: { m: any }) {
 
             {styledHtml ? (
                 <iframe
-                    className="w-full min-h-[400px] bg-[#111418] border border-white/10 rounded-md shadow-inner"
+                    className="w-full min-h-[400px] h-full bg-[#111418] border border-white/10 rounded-md shadow-inner"
                     sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
                     srcDoc={styledHtml}
                     title="html-body"
