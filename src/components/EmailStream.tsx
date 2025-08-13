@@ -2,18 +2,35 @@
 
 import { useEmailWebSocket } from '@/hooks/useEmailWebSocket';
 import { format } from 'date-fns';
-import {useEffect, useMemo, useState} from 'react';
+import { DOMPurify } from 'dompurify';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {FaArrowLeft} from "react-icons/fa6";
+
+let purify: DOMPurify | null = null;
+const SANITIZE_HTML = true;
 
 interface Props {
     email: string;
     apiKey: string;
     forceId: number;
+    desktopHeightPx?: number;
     disconnectBo?: boolean;
 }
 
-export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
+export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560 }: Props) {
     const { messages, connected, disconnect } = useEmailWebSocket(email, apiKey, forceId);
     const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    const isMdUp = useMediaQuery('(min-width: 1280px)');
+    const [mobileMode, setMobileMode] = useState<'list' | 'detail'>('list');
+
+    useEffect(() => {
+        if (SANITIZE_HTML && typeof window !== 'undefined' && !purify) {
+            import('dompurify').then(mod => {
+                purify = mod.default;
+            }).catch(() => { /* ignore */ });
+        }
+    }, []);
 
     useEffect(() => {
         if (disconnectBo) {
@@ -22,27 +39,54 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
     })
 
     useEffect(() => {
-        if (!selectedId && messages.length > 0) {
-            setSelectedId(messages[0].id);
-        }
+
     }, [messages, selectedId]);
+
+    useEffect(() => {
+        if (isMdUp) {
+            setMobileMode(prev => prev); // no-op; you can force 'list' if you prefer
+        } else {
+            if (!selectedId) {
+                setMobileMode('list');
+            }
+        }
+    }, [isMdUp, selectedId]);
 
     const selectedMessage = useMemo(
         () => messages.find(m => m.id === selectedId) || null,
         [messages, selectedId]
     );
 
-    const HEIGHT = 650;
+    const handleSelect = useCallback((id: string) => {
+        setSelectedId(id);
+        if (!isMdUp) {
+            setMobileMode('detail');
+        }
+    }, [isMdUp]);
+
+    const handleBack = useCallback(() => {
+        setSelectedId(null)
+        if (!isMdUp) {
+            setMobileMode('list');
+        }
+    }, [isMdUp, setSelectedId]);
+
 
     return (
-        <div className="grid gap-5 md:flex" style={{ height: `${HEIGHT}px` }}>
+        <div
+            className={` p-0 xl:p-6
+        flex flex-col xl:flex-row gap-5 w-full
+        overflow-x-hidden rounded-b-lg
+      `}
+        >
             {/* INBOX LIST */}
-            <div className="flex flex-col
+            <div className={`flex flex-col
           w-full
-          md:w-[250px] md:flex-none
-          rounded-lg border border-white/10 bg-[#181a1f]
-          overflow-hidden
-          min-w-0">
+          xl:w-[250px] xl:flex-none
+          xl:rounded-lg rounded-none border border-white/10 bg-[#181a1f]
+          overflow-hidden min-h-64
+          ${!isMdUp && mobileMode === 'detail' ? 'hidden' : ''}
+          min-w-0`}>
                 <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-[#1e2025]">
                     <span className="font-semibold text-gray-200 select-none">Inbox</span>
                     <span
@@ -68,15 +112,16 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
                         return (
                             <li
                                 key={m.id}
-                                onClick={() => setSelectedId(m.id)}
+                                /*onClick={() => setSelectedId(m.id)}*/
+                                onClick={() => handleSelect(m.id)}
                                 className={`
                   group cursor-pointer px-4 py-3 text-xs relative
                   transition-colors
-                  ${active ? 'bg-[#272b33]' : 'hover:bg-[#22262d]'}
-                  border-b border-white/20 last:border-b-0
+                  ${active ? 'bg-[#272b33]' : ''}
+                  border-b border-white/20 last:border-b-0 bg-zinc-850 hover:bg-zinc-800
                 `}
                             >
-                                {active && (
+                                {(active && isMdUp) && (
                                     <span className="absolute left-0 top-0 h-full w-[3px] bg-telegram rounded-r-sm" />
                                 )}
                                 <p className="font-medium truncate pr-2 text-gray-100 group-hover:text-white">
@@ -95,12 +140,23 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
             </div>
 
             {/* MESSAGE VIEWER */}
-            <div className="flex flex-col w-full
-          rounded-lg border border-white/10 bg-[#181a1f]
+            <div className={`flex flex-col w-full
+          xl:rounded-lg rounded-none border border-white/10 bg-[#181a1f]
           overflow-hidden
-          min-w-0">
-                <div className="select-none p-3 border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-[#1e2025]">
-                    Message
+          ${!isMdUp && mobileMode === 'list' ? 'hidden' : ''}
+          min-w-0`}>
+                <div className="p-3 gap-4 flex items-center border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-[#1e2025]">
+                    {!isMdUp && (
+                        <button
+                            onClick={handleBack}
+                            className="gap-2 inline-flex items-center text-[10px] px-2 py-1 rounded-md bg-[#24272d] hover:bg-[#2c3036] border border-white/10 text-gray-300"
+                            aria-label="Back to inbox"
+                        >
+                            <FaArrowLeft />
+                            Inbox
+                        </button>
+                    )}
+                    <span className="select-none">Message</span>
                 </div>
                 <div className="flex-1 overflow-auto text-sm">
                     {!selectedMessage && messages.length > 0 && (
@@ -110,7 +166,7 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
                         <p className="text-gray-500 text-xs select-none">No messages yet.</p>
                     )}
                     {selectedMessage && (
-                        <MessageDetail m={selectedMessage} />
+                        <MessageDetail message={selectedMessage} sanitizeHtml={SANITIZE_HTML} />
                     )}
                 </div>
             </div>
@@ -118,66 +174,79 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo }: Props) {
     );
 }
 
-function MessageDetail({ m }: { m: any }) {
-    const styledHtml = useMemo(() => {
-        if (!m.html) return null;
-        const styleBlock = `
-      <style>
-        :root { color-scheme: dark; }
-        body {
-          background: transparent !important;
-          color: #e5e7eb !important;
-          font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Open Sans','Helvetica Neue',sans-serif;
-          font-size: 14px;
-          line-height: 1.5;
-          padding: 8px 12px;
+function MessageDetail({
+                           message,
+                           sanitizeHtml
+                       }: {
+    message: any;
+    sanitizeHtml: boolean;
+}) {
+    const sanitizedHtml = useMemo(() => {
+        const raw = message.html || message.content || message.text || '';
+        if (!raw) return '';
+        if (sanitizeHtml && purify) {
+            return purify.sanitize(raw, {
+                USE_PROFILES: { html: true },
+                FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'link'],
+                FORBID_ATTR: ['onerror', 'onclick', 'onload']
+            });
         }
-        p, td, span, div, li, a, strong, em {
-          color: #e5e7eb !important;
-        }
-        a { color: #38bdf8 !important; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        img { max-width: 100%; height: auto; }
-        pre, code { background: #111418; color: #f1f5f9 !important; padding: 4px 6px; border-radius: 4px; }
-      </style>
-    `;
-        if (/<html/i.test(m.html)) {
-            return m.html.replace(/<head[^>]*>/i, (match: string) => `${match}${styleBlock}`) || (styleBlock + m.html);
-        }
-        return `<!DOCTYPE html><html><head>${styleBlock}</head><body>${m.html}</body></html>`;
-    }, [m.html]);
+        return raw;
+    }, [message.html, message.content, message.text, sanitizeHtml]);
 
     return (
-        <div className="space-y-5 md:p-5 p-0 ">
-            <div className="space-y-1 md:p-0 p-5">
+        <div className="space-y-5 xl:p-5 p-0 ">
+            <div className="space-y-1 xl:p-0 p-5">
                 <p className="font-semibold text-lg leading-tight text-white">
-                    {m.subject || '(no subject)'}
+                    {message.subject || '(no subject)'}
                 </p>
                 <p className="text-xs text-gray-400">
-                    <span className="text-gray-500">From:</span> {m.from}
+                    <span className="text-gray-500">From:</span> {message.from}
                 </p>
-                {m.to && (
+                {message.to && (
                     <p className="text-xs text-gray-400">
-                        <span className="text-gray-500">To:</span> {m.to}
+                        <span className="text-gray-500">To:</span> {message.to}
                     </p>
                 )}
-                {m.date && (
-                    <p className="text-[10px] text-gray-500">{m.date}</p>
+                {message.date && (
+                    <p className="text-[10px] text-gray-500">{message.date}</p>
                 )}
             </div>
 
-            {styledHtml ? (
-                <iframe
+            {sanitizedHtml ? (
+                /*<iframe
                     className="w-full min-h-[400px] h-full bg-[#111418] border border-white/10 rounded-md shadow-inner"
                     sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
                     srcDoc={styledHtml}
                     title="html-body"
-                />
+                />*/
+                <div
+                    className="w-full min-h-[400px] h-full bg-[#111418] xl:border border-none border-white/10 xl:rounded-md rounded-none shadow-inner shrink-0"
+                    dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
             ) : (
                 <pre className="text-xs leading-relaxed whitespace-pre-wrap text-gray-200 bg-[#111418] border border-white/10 rounded-md p-4 shadow-inner">
-          {m.text || m.content || '(empty body)'}
+          {message.text || message.content || '(empty body)'}
         </pre>
             )}
         </div>
     );
+}
+
+function useMediaQuery(query: string): boolean {
+    const [matches, setMatches] = useState<boolean>(() =>
+        typeof window !== 'undefined' ? window.matchMedia(query).matches : false
+    );
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const mq = window.matchMedia(query);
+        const handler = () => setMatches(mq.matches);
+        handler();
+        mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler);
+        return () => {
+            mq.removeEventListener ? mq.removeEventListener('change', handler) : mq.removeListener(handler);
+        };
+    }, [query]);
+
+    return matches;
 }

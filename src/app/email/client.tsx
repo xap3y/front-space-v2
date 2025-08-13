@@ -8,6 +8,8 @@ import {useTranslation} from "@/hooks/useTranslation";
 import {FaRegCopy} from "react-icons/fa";
 import {useUser} from "@/hooks/useUser";
 import {LoadingDot} from "@/components/GlobalComponents";
+import './scroll.css'
+import {useIsMobile} from "@/hooks/utils";
 
 interface Props {
     maxWidth?: number;
@@ -24,6 +26,8 @@ export default function EmailPage({maxWidth} : Props) {
     const { tempMail, createTempMail, resetTempMail, loadFromLocalStorage, setExistingTempMail } = useTempMail();
     const [wsForceRefreshId, setWsForceRefreshId] = useState(0); // bump to re-open socket
     const [reloadFlag, setReloadFlag] = useState(0);
+
+    const isMobile = useIsMobile();
 
     const lang = useTranslation()
 
@@ -78,10 +82,82 @@ export default function EmailPage({maxWidth} : Props) {
     return (
         <>
             <div
-                className={`w-full md:h-auto h-screen bg-card border border-white/10 rounded-lg p-4 sm:p-6 shadow-xl flex flex-col gap-6`}
+                className={`w-full xl:h-auto bg-card border border-white/10 rounded-lg shadow-xl flex flex-col gap-6`}
                 style={{ maxWidth: MAX_WIDTH }}
             >
-                <h1 className="text-xl font-semibold tracking-tight">Temp Mail</h1>
+                <div className={`p-4 sm:p-6`}>
+                    <h1 className="text-3xl tracking-tight select-none text-center font-bold">Temp Mail</h1>
+                    {isMobile && (
+                        <div className={"flex items-center justify-center my-4 gap-4"}>
+                            <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                            <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                        </div>
+                    )}
+                    {tempMail && (
+                        <div className="space-y-5">
+                            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                <div className="space-y-2 w-full">
+                                    <div className="flex items-center gap-3">
+                                    <span className="font-mono text-xl xl:text-2xl font-bold leading-tight text-white break-all select-all">
+                                      {tempMail.email}
+                                    </span>
+                                        <button
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(tempMail.email)
+                                                okToast(lang.toasts.success.copied_to_clipboard)
+                                            }}
+                                            disabled={isRefreshing || isDeleting}
+                                            className="mt-1 inline-flex items-center justify-center h-8 w-8 rounded-md border border-white/15 bg-[#1f1f23] hover:bg-[#242428] text-gray-300 hover:text-white transition-colors"
+                                            title="Copy email"
+                                            aria-label="Copy email"
+                                        >
+                                            <FaRegCopy className="h-4 w-4 pb-1" />
+                                        </button>
+                                    </div>
+                                    <p className="text-[11px] text-gray-500">
+                                        Expires: <span className="text-gray-300">{tempMail.expireAt ? new Date(tempMail.expireAt).toLocaleString() : 'never'}</span>
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-2 flex-wrap xl:justify-end">
+                                    <button
+                                        onClick={handleRefresh}
+                                        disabled={isRefreshing || isDeleting}
+                                        className="flex items-center text-xs bg-[#1f1f23] hover:bg-[#242428] border border-white/10 px-3 py-1.5 rounded-md transition-colors text-gray-200"
+                                    >
+                                        Reconnect
+                                        {isRefreshing &&
+                                            <LoadingDot size={"w-3"} />
+                                        }
+                                    </button>
+                                    <button
+                                        disabled={isRefreshing || isDeleting}
+                                        onClick={handleReset}
+                                        className="flex items-center text-xs bg-telegram hover:bg-telegram-hover text-white px-3 py-1.5 rounded-md font-medium shadow-sm transition-colors"
+                                    >
+                                        New Address
+                                        {isDeleting &&
+                                            <LoadingDot size={"w-4 text-white"} />
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {tempMail && (
+                    <EmailStream
+                        email={tempMail.email}
+                        apiKey={apiKey}
+                        forceId={wsForceRefreshId}
+                        disconnectBo={isRefreshing}
+                    />
+                )}
 
                 {!tempMail && (
                     <div className="space-y-4">
@@ -106,65 +182,6 @@ export default function EmailPage({maxWidth} : Props) {
                         >
                             {creating ? 'Creating...' : 'Create Temp Email'}
                         </button>
-                    </div>
-                )}
-
-                {tempMail && (
-                    <div className="space-y-5">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                            <div className="space-y-2 w-full">
-                                <div className="flex items-center gap-3">
-                <span className="font-mono text-xl md:text-2xl font-bold leading-tight text-white break-all select-all">
-                  {tempMail.email}
-                </span>
-                                    <button
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(tempMail.email)
-                                            okToast(lang.toasts.success.copied_to_clipboard)
-                                        }}
-                                        disabled={isRefreshing || isDeleting}
-                                        className="mt-1 inline-flex items-center justify-center h-8 w-8 rounded-md border border-white/15 bg-[#1f1f23] hover:bg-[#242428] text-gray-300 hover:text-white transition-colors"
-                                        title="Copy email"
-                                        aria-label="Copy email"
-                                    >
-                                        <FaRegCopy className="h-4 w-4 pb-1" />
-                                    </button>
-                                </div>
-                                <p className="text-[11px] text-gray-500">
-                                    Expires: <span className="text-gray-300">{tempMail.expireAt ? new Date(tempMail.expireAt).toLocaleString() : 'never'}</span>
-                                </p>
-                            </div>
-
-                            <div className="flex gap-2 flex-wrap md:justify-end">
-                                <button
-                                    onClick={handleRefresh}
-                                    disabled={isRefreshing || isDeleting}
-                                    className="flex items-center text-xs bg-[#1f1f23] hover:bg-[#242428] border border-white/10 px-3 py-1.5 rounded-md transition-colors text-gray-200"
-                                >
-                                    Reconnect
-                                    {isRefreshing &&
-                                        <LoadingDot size={"w-3"} />
-                                    }
-                                </button>
-                                <button
-                                    disabled={isRefreshing || isDeleting}
-                                    onClick={handleReset}
-                                    className="flex items-center text-xs bg-telegram hover:bg-telegram-hover text-white px-3 py-1.5 rounded-md font-medium shadow-sm transition-colors"
-                                >
-                                    New Address
-                                    {isDeleting &&
-                                        <LoadingDot size={"w-4 text-white"} />
-                                    }
-                                </button>
-                            </div>
-                        </div>
-
-                        <EmailStream
-                            email={tempMail.email}
-                            apiKey={apiKey}
-                            forceId={wsForceRefreshId}
-                            disconnectBo={isRefreshing}
-                        />
                     </div>
                 )}
             </div>
