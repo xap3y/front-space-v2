@@ -222,7 +222,8 @@ function MessageDetail({
                 />*/
                 <div
                     className="w-full min-h-[400px] h-full bg-[#111418] xl:border border-none border-white/10 xl:rounded-md rounded-none shadow-inner shrink-0"
-                    dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+                    dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+                />
             ) : (
                 <pre className="text-xs leading-relaxed whitespace-pre-wrap text-gray-200 bg-[#111418] border border-white/10 rounded-md p-4 shadow-inner">
           {message.text || message.content || '(empty body)'}
