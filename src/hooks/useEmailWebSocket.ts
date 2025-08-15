@@ -1,8 +1,10 @@
 'use client';
 
+import { getApiUrl } from '@/lib/core';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 interface RawWsMessage {
+    messageId?: string;
     from?: string;
     subject?: string;
     text?: string;
@@ -10,11 +12,11 @@ interface RawWsMessage {
     html?: string;
     to?: string;
     date?: string;
-    // ... any other fields your server sends
 }
 
 export interface InboxMessage {
-    id: string;        // local stable id
+    id: string;
+    serverId?: string;
     from: string;
     subject: string;
     text?: string;
@@ -89,42 +91,51 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         const ws = new WebSocket(url);
         wsRef.current = ws;
 
-        ws.onopen = () => setConnected(true);
+        ws.onopen = () => {
+            setConnected(true)
+            console.log('WebSocket connected');
+            console.log("MESSAGES IDS: " + getMessagesId())
+
+            let ids = getMessagesId();
+            if (ids == null || ids.length === 0) {
+                ids = ['']
+            }
+
+            fetch(getApiUrl() + `/v1/email/getmissing`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey
+                },
+                body: JSON.stringify({ mail: email, messageIds: ids })
+            }).then(async (res) => {
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch missing messages: ${res.statusText}`);
+                }
+
+                try {
+                    const response = await res.json();
+                    console.log('Missing messages response:', response);
+
+                    // check if response is an array
+                    if (Array.isArray(response)) {
+                        response.forEach((msg: RawWsMessage) => {
+                            pushNewMessage(msg);
+                        });
+                    } else {
+                        console.warn('Unexpected response format:', response);
+                    }
+                } catch (e) {
+                    // IGNORE
+                }
+            })
+        };
         ws.onclose = () => setConnected(false);
         ws.onerror = () => setConnected(false);
         ws.onmessage = (ev) => {
             try {
                 const raw: RawWsMessage = JSON.parse(ev.data);
-
-                // Build a fingerprint to prevent duplicates if server resends
-                const fpParts = [
-                    raw.from || '',
-                    raw.subject || '',
-                    raw.date || '',
-                    (raw.text || raw.content || raw.html || '').slice(0, 40)
-                ];
-                const fingerprint = fpParts.join('|');
-
-                setMessages(prev => {
-                    if (prev.some(m => m._fp === fingerprint)) {
-                        return prev;
-                    }
-                    const newMsg: InboxMessage = {
-                        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-                        from: raw.from || '(unknown)',
-                        subject: raw.subject || '(no subject)',
-                        text: raw.text || raw.content,
-                        content: raw.content,
-                        html: raw.html,
-                        to: raw.to,
-                        date: raw.date,
-                        _receivedTs: Date.now(),
-                        _fp: fingerprint
-                    };
-                    const updated = [newMsg, ...prev].slice(0, MAX_MESSAGES);
-                    persist(updated);
-                    return updated;
-                });
+                pushNewMessage(raw);
             } catch (e) {
                 console.error('Invalid WS message', e);
             }
@@ -135,6 +146,59 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         };
     }, [email, apiKey, forceId, persist]);
 
+    const pushNewMessage = useCallback((raw: RawWsMessage) => {
+        if (raw.messageId && messages.some(m => m.serverId === raw.messageId)) {
+            console.log('Duplicate WS message received, ignoring:', raw.messageId);
+            return;
+        }
+
+        console.log('Received WS message:', raw);
+
+        // Build a fingerprint to prevent duplicates if server resends
+        const fpParts = [
+            raw.from || '',
+            raw.subject || '',
+            raw.date || '',
+            (raw.text || raw.content || raw.html || '').slice(0, 40)
+        ];
+
+        const fingerprint = fpParts.join('|');
+
+        setMessages(prev => {
+            if (prev.some(m => m._fp === fingerprint)) {
+                return prev;
+            }
+            const newMsg: InboxMessage = {
+                id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+                serverId: raw.messageId,
+                from: raw.from || '(unknown)',
+                subject: raw.subject || '(no subject)',
+                text: raw.text || raw.content,
+                content: raw.content,
+                html: raw.html,
+                to: raw.to,
+                date: raw.date,
+                _receivedTs: Date.now(),
+                _fp: fingerprint
+            };
+            const updated = [newMsg, ...prev].slice(0, MAX_MESSAGES);
+            persist(updated);
+            return updated;
+        });
+    }, [messages, persist]);
+
+    const removeMessage = useCallback((id: string) => {
+        setMessages(prev => {
+            const updated = prev.filter(m => m.id !== id);
+            persist(updated);
+            return updated;
+        });
+    }, [persist]);
+
+    const getMessagesId = useCallback((): string[] => {
+        return messages.map(m => m.serverId || m.id);
+    }, [messages]);
+
     function disconnect() {
         if (wsRef.current) {
             wsRef.current.close();
@@ -142,5 +206,5 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         }
     }
 
-    return { messages, connected, disconnect, clear: () => clearInboxStorage(email) };
+    return { messages, connected, disconnect, removeMessage, getMessagesId, clear: () => clearInboxStorage(email) };
 }

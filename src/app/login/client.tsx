@@ -17,6 +17,7 @@ import {ErrorPage} from "@/components/ErrorPage";
 import {errorToast} from "@/lib/client";
 import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
+import {useUser} from "@/hooks/useUser";
 
 export default function LoginPage() {
 
@@ -27,6 +28,7 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const router = useRouter();
     const [loading, setLoading] = useState(true);
+    const { user, loadingUser } = useUser();
 
     const lang = useTranslation();
 
@@ -36,6 +38,13 @@ export default function LoginPage() {
             router.push("/register/verify")
         },
     });
+
+    useEffect(() => {
+        if (user) {
+            setLoading(true)
+            router.push("/home/profile");
+        }
+    }, [user, loadingUser, router]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -54,18 +63,6 @@ export default function LoginPage() {
         }
 
         if (emailParam || errorParam) router.replace("/login", { scroll: false });
-
-        console.log("USE EFFECT")
-        console.log("Checking user..");
-        async function checkUser() {
-            const user = await getUser()
-            console.log("User is " + user);
-            if (user) {
-                router.push('/home/dashboard/')
-                setError("User already logged in")
-            }
-        }
-        checkUser()
         console.log("Fetching API status..");
         async function fetchData() {
             try {
@@ -172,11 +169,13 @@ export default function LoginPage() {
         }
     };
 
-    if (loading) {
+    if (loading || loadingUser) {
         return (
             <LoadingPage />
         )
     }
+
+    if (checkingAuth) return <AuthChecking />
 
     if (!isApiUp) {
         return (
@@ -187,8 +186,6 @@ export default function LoginPage() {
             </>
         )
     }
-
-    if (checkingAuth) return <AuthChecking />
 
     return (
         <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">

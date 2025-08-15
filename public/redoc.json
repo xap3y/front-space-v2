@@ -2,12 +2,12 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Space API",
-        "description": "- [API](https://call.xap3y.tech)\n- [GitHub Repository](https://github.com/xap3y/space-api)",
+        "description": "- [API](https://call.xap3y.space)\n- [GitHub Repository](https://github.com/xap3y/space-api)",
         "version": "1.0-beta.15"
     },
     "servers": [
         {
-            "url": "https://call.xap3y.tech/v1"
+            "url": "https://call.xap3y.space/v1"
         }
     ],
     "paths": {

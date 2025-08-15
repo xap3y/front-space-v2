@@ -9,7 +9,8 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {ClientRoot} from "@/components/ClientRoot";
 import Head from "next/head";
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import {ErrorToast} from "@/components/ErrorToast";
+import CookieConsent from "@/components/CookieConsent";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 /*const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
         type: "website",
         locale: "en_US",
         siteName: "XAP3Y's space",
-        url: "https://space.xap3y.tech",
+        url: "https://xap3y.space",
     },
     twitter: {
         title: "XAP3Y's space",
@@ -63,6 +64,8 @@ export default function RootLayout({
         <LanguageSwitcher />
         <Analytics />
         <ToastContainer theme={"dark"} />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-J3288JZ3DV"} />
+        <CookieConsent />
         </body>
         </html>
     );

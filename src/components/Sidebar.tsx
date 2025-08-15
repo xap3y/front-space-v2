@@ -1,100 +1,229 @@
 'use client';
 
-import {Sidebar} from "@/types/core";
-import { MdLogout } from "react-icons/md";
-import 'react-tooltip/dist/react-tooltip.css'
-import {usePage} from "@/context/PageContext";
-import {useRouter} from "next/navigation";
-import {useEffect, useState} from "react";
-import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
-import {FaArrowLeft, FaArrowRight} from "react-icons/fa6";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { MdLogout, MdMenu, MdClose } from 'react-icons/md';
+
+type SidebarItem = {
+    title: string;
+    href: string;   // e.g. '/inbox'
+    icon: React.ReactNode;
+    page: string;   // internal page name for your usePage() context
+};
 
 interface Props {
-    sidebar: Sidebar[],
-    logout_text?: string,
+    sidebar: SidebarItem[];
+    logout_text: string;
+    brandTitle?: string; // optional brand text shown on desktop and in the drawer
 }
 
-export function SidebarComp({ sidebar, logout_text }: Props) {
+function useLockBodyScroll(locked: boolean) {
+    useEffect(() => {
+        const { body } = document;
+        if (!body) return;
+        const prev = body.style.overflow;
+        if (locked) body.style.overflow = 'hidden';
+        return () => { body.style.overflow = prev; };
+    }, [locked]);
+}
 
-    const { pageName, setPage } = usePage();
-    const [isVisible, setIsVisible] = useState<boolean>(true);
-    const [isHidden, setIsHidden] = useState<boolean>(false);
-    const router: AppRouterInstance = useRouter()
+export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Props) {
+    // If you have a usePage() context, plug it in here:
+    // const { pageName, setPage } = usePage();
+    const setPage = (name: string) => {};
 
-    console.log({pageName})
+    const router = useRouter();
+    const pathname = usePathname();
+    const [mobileOpen, setMobileOpen] = useState(false);
 
-    const setPage2 = (name: string, href: string)=> {
-        setPage(name);
-        router.push(`/home${href}`)
-    }
+    const handleNavigate = useCallback((item: SidebarItem) => {
+        setPage(item.page);
+        router.push(`/home${item.href}`);
+        setMobileOpen(false);
+    }, [router]);
 
-    const toggleSidebar = () => {
-        setIsVisible(!isVisible);
+    // Route-based highlight as fallback
+    const activePage = useMemo(() => {
+        const match = sidebar.find(i => `/home${i.href}` === pathname);
+        return match?.page;
+    }, [sidebar, pathname]);
 
-        if (!isVisible){
-            setIsHidden(false)
-        } else {
-            setTimeout(() => {
-                setIsHidden(true)
-            }, 200)
-        }
-    }
+    // ESC to close mobile drawer
+    useEffect(() => {
+        if (!mobileOpen) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [mobileOpen]);
+
+    useLockBodyScroll(mobileOpen);
+
+    const NavList = ({ onItemClick }: { onItemClick: (item: SidebarItem) => void }) => (
+        <ul className="divide-y divide-white/5">
+            {sidebar.map((item) => {
+                const isActive = activePage ? item.page === activePage : false;
+                return (
+                    <li key={item.page}>
+                        <button
+                            onClick={() => onItemClick(item)}
+                            aria-current={isActive ? 'page' : undefined}
+                            className={`
+                group relative w-full flex items-center gap-3 px-3 py-2.5
+                text-sm transition-colors duration-200
+                ${isActive ? 'bg-primary_light/25 text-white' : 'text-gray-200 hover:bg-primary_light/15'}
+                rounded-[10px]
+              `}
+                        >
+                            {/* Left accent bar animates in on hover/active */}
+                            <span
+                                className={`
+                  pointer-events-none absolute left-0 top-1/2 -translate-y-1/2
+                  h-5 w-[3px] rounded-full bg-primary_light
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                  ${isActive ? 'opacity-100' : ''}
+                `}
+                            />
+                            {/* Icon with subtle lift on hover */}
+                            <span
+                                className={`
+                  shrink-0 transition-transform duration-200
+                  group-hover:-translate-y-[1px]
+                `}
+                            >
+                {item.icon}
+              </span>
+                            <span className="truncate">{item.title}</span>
+                        </button>
+                    </li>
+                );
+            })}
+        </ul>
+    );
 
     return (
         <>
-            <div className={`fixed w-[70px] min-w-[70px] animate-fadeInLeft duration-150 transition-all h-screen bg-secondary items-center flex z-20 flex-col justify-between py-3 pb-5 pt-5 ${!isVisible ? "-translate-x-full" : ""} ${isHidden ? "hidden" : ""}`}>
-                <div className="flex flex-col items-center">
-                    {sidebar.map(({ title, href, icon, page }) => (
-                        <div
-                            key={page}
-                            data-tooltip-id="my-tooltip" data-tooltip-content={title} data-tooltip-place="right"
-                            className={`flex flex-col`}
-
-                        >
-                            <div className={""}>
-                                <button
-                                    className={`p-3 duration-200 transition-all ${page==pageName ? "rounded-2xl bg-primary_light" : "hover:rounded-2xl hover:bg-primary_light"}`}
-                                    onClick={() => setPage2(page, href)}
-                                >
-                                    {icon}
-                                </button>
-                            </div>
-
-                            {page != "profile" && (
-                                <hr className={"rounded-full border-opacity-50 border-[1px] border-primary-brighter my-2"} />
-                            )}
-                        </div>
-                    ))}
-                </div>
-                {/* Logout at bottom */}
-                <div className={"flex flex-col items-center"}>
-                    <a href={"/logout"} data-tooltip-id="my-tooltip" data-tooltip-content={logout_text}>
-                        <button
-                            className="p-3 rounded-xl hover:bg-red-600 hover:bg-opacity-15 transition-colors"
-                        >
-                            <MdLogout className={"w-[30px] h-[30px]"} />
-                        </button>
-                    </a>
-
-                    <hr className={"w-[50px] rounded-full border-opacity-50 border-[1px] border-primary-brighter my-2"} />
-
-                    <button className={"hover:bg-primary bg-opacity-45 duration-150 p-2 rounded-xl"} onClick={toggleSidebar} >
-                        <FaArrowLeft className={"w-[25px] h-[25px]"} />
+            {/* Mobile top bar */}
+            <div className="xl:hidden sticky top-0 z-30 bg-secondary border-b border-white/10">
+                <div className="h-14 px-3 flex items-center justify-between">
+                    <button
+                        aria-label="Open menu"
+                        className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
+                        onClick={() => setMobileOpen(true)}
+                    >
+                        <MdMenu className="h-6 w-6" />
                     </button>
+                    {/* Center brand text (you can replace with logo) */}
+                    <div className="text-sm font-semibold">{brandTitle}</div>
+                    <div className="w-9" />
                 </div>
             </div>
 
-            {isHidden && (
-                <>
-                    <div className="fixed bottom-4 left-4 z-50 flex">
-                        <div className={`cursor-pointer flex items-center justify-center w-10 h-10 bg-primary_light rounded-xl mr-2`} onClick={toggleSidebar}>
-                            <button className={"hover:bg-secondary bg-opacity-45 duration-150 p-2 rounded-xl"} onClick={toggleSidebar} >
-                                <FaArrowRight className={"w-[25px] h-[25px]"} />
-                            </button>
-                        </div>
+            {/* Desktop sidebar */}
+            <aside
+                className="
+          hidden xl:flex xl:flex-col
+          w-64 shrink-0
+          bg-secondary border-r border-white/10
+          min-h-[100dvh] sticky top-0
+        "
+            >
+                {/* Header with brand + divider */}
+                <div className="px-4 h-16 flex items-center justify-center">
+                    <div className="text-3xl font-semibold tracking-tight">{brandTitle}</div>
+                </div>
+                <div className="border-b border-white/10" />
+
+                {/* Nav */}
+                <div className="flex-1 overflow-y-auto px-3 py-3">
+                    <NavList onItemClick={handleNavigate} />
+                </div>
+
+                {/* Footer / Logout */}
+                <div className="border-t border-white/10 p-3">
+                    <a href="/logout" className="w-full block">
+                        <button
+                            className="
+                w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors
+              "
+                            aria-label={logout_text}
+                            title={logout_text}
+                        >
+                            <MdLogout className="h-5 w-5" />
+                            <span>{logout_text}</span>
+                        </button>
+                    </a>
+                </div>
+            </aside>
+
+            {/* Mobile drawer + backdrop (not full height; inset-y-4 adds margins) */}
+            <div
+                aria-hidden={!mobileOpen}
+                className={`
+          xl:hidden fixed inset-0 z-40
+          ${mobileOpen ? 'pointer-events-auto' : 'pointer-events-none'}
+        `}
+            >
+                {/* Backdrop fade */}
+                <div
+                    className={`
+            absolute inset-0 bg-black/40
+            transition-opacity duration-300 ease-out
+            ${mobileOpen ? 'opacity-100' : 'opacity-0'}
+          `}
+                    onClick={() => setMobileOpen(false)}
+                />
+
+                {/* Drawer panel */}
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    className={`
+            absolute inset-y-4 left-4
+            w-[80vw] max-w-[340px]
+            rounded-2xl overflow-hidden
+            bg-secondary border border-white/10 shadow-2xl
+            transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+            will-change-transform
+            ${mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+1rem)]'}
+            flex flex-col
+          `}
+                >
+                    {/* Drawer header with close and brand */}
+                    <div className="h-14 px-3 flex items-center justify-between border-b border-white/10">
+                        <div className="text-sm font-semibold">{brandTitle}</div>
+                        <button
+                            aria-label="Close menu"
+                            className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
+                            onClick={() => setMobileOpen(false)}
+                        >
+                            <MdClose className="h-6 w-6" />
+                        </button>
                     </div>
-                </>
-            )}
+
+                    {/* Drawer nav (scrolls, with thin separators) */}
+                    <div className="flex-1 overflow-y-auto px-3 py-3">
+                        <NavList onItemClick={handleNavigate} />
+                    </div>
+
+                    {/* Drawer footer */}
+                    <div className="border-t border-white/10 p-3">
+                        <a href="/logout" className="w-full block">
+                            <button
+                                className="
+                  w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm
+                  text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors
+                "
+                                aria-label={logout_text}
+                                title={logout_text}
+                            >
+                                <MdLogout className="h-5 w-5" />
+                                <span>{logout_text}</span>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </>
-    )
+    );
 }

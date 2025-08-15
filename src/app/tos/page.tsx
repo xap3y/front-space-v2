@@ -68,10 +68,10 @@ export default async function Page() {
 
                 <h2>10. Kontakt</h2>
                 <p>V případě dotazů k těmto smluvním podmínkám nás prosím kontaktujte na:<br/>
-                    <strong>Email:</strong> <a href="mailto:support@xap3y.tech">support@xap3y.tech</a></p>
+                    <strong>Email:</strong> <a href="mailto:support@xap3y.space">support@xap3y.space</a></p>
 
                 <p>Pro nahlášení porušení autorských práv (DMCA):<br/>
-                    <strong>Email:</strong> <a href="mailto:dmca@xap3y.fun">dmca@xap3y.fun</a></p>
+                    <strong>Email:</strong> <a href="mailto:dmca@xap3y.space">dmca@xap3y.space</a></p>
             </div>
         </>
     )

@@ -31,19 +31,22 @@ export default function HomeLayout({
     return (
             <>
                 <PageProvider>
-                    <div className={"flex flex-row overflow-x-hidden"}>
-                        <Tooltip id="my-tooltip" />
-                        <SidebarComp sidebar={[
-                            {title: lang.comp.sidebar.home, icon: <FaHome className={"w-[30px] h-[30px]"} />, href: "/dashboard", page: "home"},
-                            {title: lang.comp.sidebar.images, icon: <FaImages className={"w-[30px] h-[30px]"} />, href: "/gallery", page: "gallery"},
-                            {title: lang.comp.sidebar.pastes, icon: <FaPaste className={"w-[30px] h-[30px]"} />, href: "/pastes", page: "pastes"},
-                            {title: lang.comp.sidebar.short_urls, icon: <FaLink className={"w-[30px] h-[30px]"} />, href: "/urls", page: "urls"},
-                            {title: lang.comp.sidebar.settings, icon: <IoIosSettings className={"w-[30px] h-[30px]"} />, href: "/settings", page: "settings"},
-                            {title: lang.comp.sidebar.settings, icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
-                            {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
-                        ]} logout_text={lang.comp.sidebar.logout} />
-                        {children}
-                    </div>
+                    <main className="min-h-screen max-h-screen overflow-x-hidden">
+                        <div className="xl:flex">
+                            <SidebarComp sidebar={[
+                                {title: lang.comp.sidebar.home, icon: <FaHome className={"w-[30px] h-[30px]"} />, href: "/dashboard", page: "home"},
+                                {title: lang.comp.sidebar.images, icon: <FaImages className={"w-[30px] h-[30px]"} />, href: "/gallery", page: "gallery"},
+                                {title: lang.comp.sidebar.pastes, icon: <FaPaste className={"w-[30px] h-[30px]"} />, href: "/pastes", page: "pastes"},
+                                {title: lang.comp.sidebar.short_urls, icon: <FaLink className={"w-[30px] h-[30px]"} />, href: "/urls", page: "urls"},
+                                {title: lang.comp.sidebar.settings, icon: <IoIosSettings className={"w-[30px] h-[30px]"} />, href: "/settings", page: "settings"},
+                                {title: "Temp Mail", icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
+                                {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
+                            ]} logout_text={lang.comp.sidebar.logout} />
+                            <section className="flex-1 min-w-0">
+                                {children}
+                            </section>
+                        </div>
+                    </main>
                 </PageProvider>
             </>
         )

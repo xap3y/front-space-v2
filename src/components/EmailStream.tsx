@@ -4,7 +4,8 @@ import { useEmailWebSocket } from '@/hooks/useEmailWebSocket';
 import { format } from 'date-fns';
 import { DOMPurify } from 'dompurify';
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {FaArrowLeft} from "react-icons/fa6";
+import {FaArrowLeft, FaTrash} from "react-icons/fa6";
+import SwipeableListItem from '@/components/SwipeableItemList';
 
 let purify: DOMPurify | null = null;
 const SANITIZE_HTML = true;
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560 }: Props) {
-    const { messages, connected, disconnect } = useEmailWebSocket(email, apiKey, forceId);
+    const { messages, connected, disconnect, removeMessage } = useEmailWebSocket(email, apiKey, forceId);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     const isMdUp = useMediaQuery('(min-width: 1280px)');
@@ -110,30 +111,24 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
                     {messages.map((m) => {
                         const active = selectedId === m.id;
                         return (
-                            <li
+                            <SwipeableListItem
                                 key={m.id}
-                                /*onClick={() => setSelectedId(m.id)}*/
+                                active={active}
+                                disabled={isMdUp}               // swipe only on mobile
+                                onDelete={() => removeMessage(m.id)}
                                 onClick={() => handleSelect(m.id)}
-                                className={`
-                  group cursor-pointer px-4 py-3 text-xs relative
-                  transition-colors
-                  ${active ? 'bg-[#272b33]' : ''}
-                  border-b border-white/20 last:border-b-0 bg-zinc-850 hover:bg-zinc-800
-                `}
                             >
-                                {(active && isMdUp) && (
+                                {active && isMdUp && (
                                     <span className="absolute left-0 top-0 h-full w-[3px] bg-telegram rounded-r-sm" />
                                 )}
                                 <p className="font-medium truncate pr-2 text-gray-100 group-hover:text-white">
                                     {m.subject || '(no subject)'}
                                 </p>
-                                <p className="text-gray-400 truncate mt-0.5 pr-2">
-                                    {m.from}
-                                </p>
+                                <p className="text-gray-400 truncate mt-0.5 pr-2">{m.from}</p>
                                 <p className="text-[10px] text-gray-500 mt-0.5">
                                     {m.date ? format(new Date(m.date), 'yyyy-MM-dd HH:mm:ss') : ''}
                                 </p>
-                            </li>
+                            </SwipeableListItem>
                         );
                     })}
                 </ul>
@@ -195,9 +190,9 @@ function MessageDetail({
     }, [message.html, message.content, message.text, sanitizeHtml]);
 
     return (
-        <div className="space-y-5 xl:p-5 p-0 ">
+        <div className="space-y-5 xl:p-5 p-0">
             <div className="space-y-1 xl:p-0 p-5">
-                <p className="font-semibold text-lg leading-tight text-white">
+                <p className="font-semibold md:text-lg text-base leading-tight text-white">
                     {message.subject || '(no subject)'}
                 </p>
                 <p className="text-xs text-gray-400">
@@ -221,7 +216,7 @@ function MessageDetail({
                     title="html-body"
                 />*/
                 <div
-                    className="w-full min-h-[400px] h-full bg-[#111418] xl:border border-none border-white/10 xl:rounded-md rounded-none shadow-inner shrink-0"
+                    className="w-full min-h-[200px] text-xs bg-[#111418] xl:border border-none border-white/10 xl:rounded-md rounded-none shadow-inner shrink-0"
                     dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
                 />
             ) : (

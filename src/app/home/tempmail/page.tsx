@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default async function Page() {
     return (
         <>
-            <div className={"w-full min-h-screen flex items-center justify-center p-4"}>
+            <div className={"max-h-screen w-full flex md:py-20 py-2 justify-center p-4"}>
                 <TempMailPage />
             </div>
         </>

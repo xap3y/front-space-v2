@@ -4,7 +4,6 @@ import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {useTranslation} from "@/hooks/useTranslation";
 import LoadingPage from "@/components/LoadingPage";
-import {getUser} from "@/lib/auth";
 import {MdEmail} from "react-icons/md";
 import {FaKey, FaUser} from "react-icons/fa";
 import {toast} from "react-toastify";
@@ -14,6 +13,8 @@ import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {ErrorPage} from "@/components/ErrorPage";
 import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
+import {useUser} from "@/hooks/useUser";
+import Link from "next/link";
 
 export default function RegisterPage() {
 
@@ -26,6 +27,8 @@ export default function RegisterPage() {
     const [inviteCode, setInviteCode] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
+    const { user, loadingUser } = useUser();
+    const [agreed, setAgreed] = useState(false);
 
     const router = useRouter();
 
@@ -39,17 +42,11 @@ export default function RegisterPage() {
     });
 
     useEffect(() => {
-        async function checkUser() {
-            const user = await getUser()
-            if (user) {
-                router.push('/home/dashboard/')
-                setError("User already logged in")
-            }
+        if (user) {
+            setLoading(true)
+            router.push("/home/profile");
         }
-        checkUser()
-
-        setLoading(false);
-    }, [])
+    }, [user, loadingUser, router]);
 
     const handleSubmit = async (e: unknown) => {
         // @ts-expect-error
@@ -210,6 +207,32 @@ export default function RegisterPage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Agree to Terms + Privacy */}
+                                <div className="mt-4">
+                                    <label htmlFor="agree" className="flex items-start gap-3 cursor-pointer select-none">
+                                        <input
+                                            id="agree"
+                                            name="agree"
+                                            type="checkbox"
+                                            className="mt-0.5 h-4 w-4 rounded border border-white/20 bg-primary_light text-telegram focus:ring-2 focus:ring-telegram-brighter"
+                                            checked={agreed}
+                                            onChange={(e) => setAgreed(e.target.checked)}
+                                            required
+                                        />
+                                        <span className="text-xs sm:text-sm text-gray-200">
+                      I have read and agree to the{" "}
+                                            <Link href="/legal/terms" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">
+                        Terms of Service
+                      </Link>{" "}
+                                            and{" "}
+                                            <Link href="/legal/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">
+                        Privacy Policy
+                      </Link>.
+                    </span>
+                                    </label>
+                                </div>
+
 
                                 <div className="flex items-center justify-center mt-4">
 

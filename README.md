@@ -1,5 +1,5 @@
 
 
-[API Docs](https://space.xap3y.tech/docs) <br>
+[API Docs](https://docs.xap3y.space) <br>
 [API Source](https://github.com/xap3y/space-api) <br>
-[Portal](https://space.xap3y.tech/login)
+[Portal](https://xap3y.space)
