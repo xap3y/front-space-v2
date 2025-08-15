@@ -103,13 +103,18 @@ export default function RegisterPage() {
         }
     };
 
-    if (loading) return <LoadingPage />
+    useEffect(() => {
+        setLoading(false);
+    }, []);
+
+    if (loading || loadingUser) return <LoadingPage />
+
+    if (checkingAuth) return <AuthChecking />
 
     if (!isApiUp && !loading) return <ErrorPage message={"Server error occurred"} lang={lang} callBack={() => {
             router.replace("/")
         }} />
 
-    if (checkingAuth) return <AuthChecking />
 
     return (
         <>
