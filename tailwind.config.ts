@@ -9,9 +9,13 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        '3xl': '1930px',
+      },
       colors: {
         primary: "var(--col-primary)",
         secondary: "var(--col-secondary)",
+        third: "var(--col-third)",
         primary_light: "var(--col-primary-light)",
         battleship_gray: "#858585",
         whitesmoke: "var(--col-whitesmoke)",

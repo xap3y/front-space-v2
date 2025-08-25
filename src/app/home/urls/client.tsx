@@ -10,7 +10,7 @@ import {toast} from "react-toastify";
 import { FaRegTrashAlt, FaCopy, FaClipboardList, FaPencilAlt } from "react-icons/fa";
 import {getUserShortUrls} from "@/lib/apiGetters";
 import {ShortUrlPopupCard} from "@/components/ShortUrlPopupCard";
-import {debugLog} from "@/lib/client";
+import {debugLog, errorToast, okToast} from "@/lib/client";
 import {deleteShortUrl} from "@/lib/apiPoster";
 import {DefaultResponse} from "@/types/core";
 import {ErrorPage} from "@/components/ErrorPage";
@@ -49,10 +49,10 @@ export default function HomeUrlsPage() {
 
         // TODO: Locale
         if (res.error) {
-            toast.error(res.message)
+            errorToast(res.message)
         } else {
             setUrls(urls.filter((item) => item.uniqueId !== url.uniqueId));
-            toast.success("Deleted.")
+            okToast("Deleted")
         }
     }
 
@@ -73,7 +73,7 @@ export default function HomeUrlsPage() {
             const shortUrlsFromApi: ShortUrlDto[] | DefaultResponse = await getUserShortUrls(user?.uid + "");
 
             if (!Array.isArray(shortUrlsFromApi)) {
-                toast.error(shortUrlsFromApi.message)
+                errorToast(shortUrlsFromApi.message)
                 setLoading(false)
                 setFetchError(true)
                 return
@@ -114,7 +114,7 @@ export default function HomeUrlsPage() {
                                             className={"xl:text-xl text-md font-bold text-telegram cursor-pointer hover:underline"}
                                             onClick={() => {
                                                 navigator.clipboard.writeText(url.urlSet.rawUrl)
-                                                toast.success(lang.toasts.success.copied_to_clipboard)
+                                                okToast(lang.toasts.success.copied_to_clipboard)
                                             }}
                                         >
                                             {url.urlSet.rawUrl}
@@ -134,7 +134,7 @@ export default function HomeUrlsPage() {
                                     </div>
 
                                     <div className={"cursor-pointer"} onClick={() => {
-                                        toast.error("Not implemented yet")
+                                        errorToast("Not implemented yet")
                                     }}>
                                         <FaPencilAlt className={"w-6 h-6 text-white"} />
                                     </div>
@@ -145,7 +145,7 @@ export default function HomeUrlsPage() {
 
                                     <div className={"cursor-pointer"} onClick={() => {
                                         navigator.clipboard.writeText(url.urlSet.shortUrl || "")
-                                        toast.success(lang.toasts.success.copied_to_clipboard)
+                                        okToast(lang.toasts.success.copied_to_clipboard)
                                     }}>
                                         <FaCopy className={"w-6 h-6 text-telegram-brightest"} />
                                     </div>

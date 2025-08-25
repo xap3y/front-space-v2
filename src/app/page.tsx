@@ -4,6 +4,7 @@ import './space.css';
 import Comet from "@/components/Coment";
 import Link from "next/link";
 import {useEffect} from "react";
+import "./debug.css"
 
 export default function Home() {
 

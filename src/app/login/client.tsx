@@ -169,7 +169,7 @@ export default function LoginPage() {
         }
     };
 
-    if (loading || loadingUser) {
+    if (loading || loadingUser || !isApiUp) {
         return (
             <LoadingPage />
         )

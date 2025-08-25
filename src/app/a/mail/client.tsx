@@ -8,6 +8,7 @@ import LanguageModel from "@/types/LanguageModel";
 import {useTranslation} from "@/hooks/useTranslation";
 import { IoMdRefresh } from "react-icons/io";
 import {useRouter} from "next/navigation";
+import {okToast} from "@/lib/client";
 
 export default function TempMailo() {
 
@@ -52,10 +53,7 @@ export default function TempMailo() {
 
     const copyEmail = () => {
         navigator.clipboard.writeText(mailAddr);
-        toast.success(lang.toasts.success.copied_to_clipboard, {
-            autoClose: 500,
-            closeOnClick: true
-        });
+        okToast(lang.toasts.success.copied_to_clipboard, 500);
     };
 
 

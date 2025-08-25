@@ -9,6 +9,7 @@ import translations, {setLanguage, useTranslation} from "@/hooks/useTranslation"
 import {toast} from "react-toastify";
 import {useRouter} from "next/navigation";
 import {FaHome} from "react-icons/fa";
+import {okToast} from "@/lib/client";
 
 const languages = [
     { code: "en", label: "English", flag: "/flags/en.svg" },
@@ -53,11 +54,7 @@ export default function LanguageSwitcher() {
         setTimeout(() => {
             setDisplayedLocale(newLang);
             setIsChanging(false);
-            toast.success(translations[newLang].toasts.success.language_changed + newLang.toLocaleUpperCase(), {
-                autoClose: 1000,
-                pauseOnHover: false,
-                closeOnClick: true
-            })
+            okToast(translations[newLang].toasts.success.language_changed + newLang.toLocaleUpperCase(), 1000)
         }, 150);
     };
 

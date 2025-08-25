@@ -11,13 +11,13 @@ import {UserPopupCard} from "@/components/UserPopupCard";
 import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
 import {DashboardCard, SplitterLine, StatisticBoxLine} from "@/components/sets/DashboardsComponents";
+import LoadingPage from "@/components/LoadingPage";
 
 export default function HomeDashboardPage() {
 
     const { pageName, setPage } = usePage();
     const { user, loadingUser, error } = useUser();
     const router = useRouter();
-
     //const [ periodStats, setPeriodStats ] = useState<PeriodStats>(defaultPeriodStats)
 
     const [ todayPeriodStats, setTodayPeriodStats ] = useState<PeriodStats>(defaultPeriodStats)
@@ -59,6 +59,8 @@ export default function HomeDashboardPage() {
         fetch()
         setPage("home")
     }, [])
+
+    if (loadingUser || !user) return <LoadingPage/>
 
     return (
         <>

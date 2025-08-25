@@ -15,7 +15,7 @@ export const useServerPings = (servers: CallServer[]) => {
 
     const getServerPing = useCallback(() => {
         resetPings()
-        servers.forEach((server) => {
+        /*servers.forEach((server) => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -43,7 +43,8 @@ export const useServerPings = (servers: CallServer[]) => {
                     setPings((prev) => ({ ...prev, [server.url]: null }));
                 })
                 .finally(() => clearTimeout(timeoutId));
-        });
+        });*/
+        // TODO
     }, [servers]);
 
     useEffect(() => {

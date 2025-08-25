@@ -105,7 +105,7 @@ export async function getValidatedResponse(url: string, noAuth: boolean = false)
         console.log("response2 is " + JSON.stringify(data))
         if (!response.ok) {
             if (response.status.toString().startsWith("4")) {
-                return {error: true, message: "Client error"} as DefaultResponse;
+                return {error: true, message: data.message || "client error"} as DefaultResponse;
             } else {
                 return {error: true, message: "Server error"} as DefaultResponse;
             }

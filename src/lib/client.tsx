@@ -36,10 +36,7 @@ export async function deleteVerifyToken() {
 
 export const copyToClipboard = (text: string, lang: LanguageModel, delay: number = 500) => {
     navigator.clipboard.writeText(text);
-    toast.success(lang.toasts.success.copied_to_clipboard, {
-        autoClose: delay,
-        closeOnClick: true,
-    });
+    okToast(lang.toasts.success.copied_to_clipboard, delay);
 };
 
 export const debugLog = (text: string, text2?: any) => {

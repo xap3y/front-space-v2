@@ -24,7 +24,7 @@ export default function SwipeableListItem({
                 onClick={onClick}
                 className={`
           group cursor-pointer px-4 py-3 text-xs relative transition-colors
-          ${active ? 'bg-[#272b33]' : 'bg-[#1d2025] hover:bg-zinc-800'}
+          ${active ? 'bg-zinc-950/50' : 'bg-primary hover:bg-zinc-950/50'}
           border-b border-white/20 last:border-b-0
         `}
             >

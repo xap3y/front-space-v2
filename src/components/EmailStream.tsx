@@ -35,13 +35,10 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
 
     useEffect(() => {
         if (disconnectBo) {
+            console.log("DISCONNECT BO", disconnectBo)
             disconnect()
         }
     })
-
-    useEffect(() => {
-
-    }, [messages, selectedId]);
 
     useEffect(() => {
         if (isMdUp) {
@@ -72,6 +69,10 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
         }
     }, [isMdUp, setSelectedId]);
 
+    useEffect(() => {
+        console.log("connected changed", connected)
+    }, [connected])
+
 
     return (
         <div
@@ -84,11 +85,11 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
             <div className={`flex flex-col
           w-full
           xl:w-[250px] xl:flex-none
-          xl:rounded-lg rounded-none border border-white/10 bg-[#181a1f]
+          xl:rounded-lg rounded-none border border-white/10 bg-secondary
           overflow-hidden min-h-64
           ${!isMdUp && mobileMode === 'detail' ? 'hidden' : ''}
           min-w-0`}>
-                <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-[#1e2025]">
+                <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-primary">
                     <span className="font-semibold text-gray-200 select-none">Inbox</span>
                     <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-medium select-none ${
@@ -136,11 +137,11 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
 
             {/* MESSAGE VIEWER */}
             <div className={`flex flex-col w-full
-          xl:rounded-lg rounded-none border border-white/10 bg-[#181a1f]
+          xl:rounded-lg rounded-none border border-white/10 bg-secondary
           overflow-hidden
           ${!isMdUp && mobileMode === 'list' ? 'hidden' : ''}
           min-w-0`}>
-                <div className="p-3 gap-4 flex items-center border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-[#1e2025]">
+                <div className="p-3 gap-4 flex items-center border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-primary">
                     {!isMdUp && (
                         <button
                             onClick={handleBack}

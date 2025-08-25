@@ -9,12 +9,12 @@ export function useServerDropdown() {
     const [status, setStatus] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
-        callServers.forEach(server => {
+        /*callServers.forEach(server => {
 
             fetch(`${server.url}/status`)
                 .then(res => setStatus(prev => ({ ...prev, [server.url]: res.ok })))
                 .catch(() => setStatus(prev => ({ ...prev, [server.url]: false })));
-        });
+        });*/
     }, []);
 
     const toggle = () => setIsOpen(prev => !prev);

@@ -36,7 +36,7 @@ export default function ImageUploader() {
     const [isKeyValid, setIsKeyValid] = useState<boolean | null>(null);
     const [isKeyValidating, setIsKeyValidating] = useState<boolean>(false);
 
-    const debouncedApiKey = useDebounce(apiKey, 400);
+    const debouncedApiKey = useDebounce(apiKey, 1000);
 
     const [password, setPassword] = useState<string>("");
     const [customUid, setCustomUid] = useState<string>("");
@@ -51,12 +51,12 @@ export default function ImageUploader() {
     const { user, loadingUser, error } = useUser();
     const lang: LanguageModel = useTranslation();
 
-    const [isDatePickerOpened, setDatePickerOpened] = useState<boolean>(false);
+    //const [isDatePickerOpened, setDatePickerOpened] = useState<boolean>(false);
 
     const [isPingButtonClicked, setPingButtonClicked] = useState<boolean>(false);
 
     const [uploading, setUploading] = useState<boolean>(false);
-    const [withDescription, setWithDescription] = useState<boolean>(false);
+    //const [withDescription, setWithDescription] = useState<boolean>(false);
     const [withPassword, setWithPassword] = useState<boolean>(true);
     const [isApiUp, setIsApiUp] = useState<boolean>(true);
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -66,7 +66,7 @@ export default function ImageUploader() {
 
     const { selected, select, isOpen, toggle, status } = useServerDropdown();
 
-    const [customError, setCustomError] = useState<null | string>("test");
+    //const [customError, setCustomError] = useState<null | string>("test");
 
     const getDot = (url: string) => (
         <span className={`w-2 h-2 rounded-full ${status[url] ? "bg-green-500" : "bg-red-500"}`} />
@@ -94,6 +94,9 @@ export default function ImageUploader() {
         }
         return text;
     }
+    useEffect(() => {
+        console.log("Expiry date changed:", expiryDate);
+    }, [expiryDate])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         accept: {
@@ -258,12 +261,6 @@ export default function ImageUploader() {
         checkApi();
     }, []);
 
-    if (loadingUser) {
-        return (
-            <LoadingPage/>
-        )
-    }
-
     const handleApiKeyChange = (key: string) => {
         setIsKeyValid(null)
         if (key.length == 6) {
@@ -285,9 +282,28 @@ export default function ImageUploader() {
         }
     }
 
+    function formatDateToInputValue(d: Date | null): string {
+        if (!d) return "";
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const year = d.getFullYear();
+        const month = pad(d.getMonth() + 1);
+        const day = pad(d.getDate());
+        const hours = pad(d.getHours());
+        const minutes = pad(d.getMinutes());
+        return `${year}-${month}-${day}T${hours}:${minutes}`; // "2025-08-19T18:55"
+    }
+
+    function parseInputValueToDate(v: string): Date | null {
+        if (!v) return null;
+        // new Date("YYYY-MM-DDTHH:MM") is interpreted as local time
+        return new Date(v);
+    }
+
+    if (loadingUser) return <LoadingPage/>
+
     return (
         <>
-            { !isApiUp && (
+            {!isApiUp && (
                 <ErrorToast type={"ERROR"} message={"MAIN API SERVER IS DOWN!"} />
             )}
             {!uploadedImage && (
@@ -387,6 +403,20 @@ export default function ImageUploader() {
                                         />
                                     </div>
 
+                                    <div className="mb-4 flex justify-between items-center gap-4">
+                                        <input
+                                            type="datetime-local"
+                                            value={formatDateToInputValue(expiryDate)}
+                                            onChange={(e) => {
+                                                const d = parseInputValueToDate(e.target.value);
+                                                setExpiryDate(d);
+                                            }}
+                                            min={formatDateToInputValue(new Date())}
+                                            className={`xl:text-base text-xs w-full p-3 border rounded bg-transparent focus:outline-none`}
+                                            placeholder="Expiry date"
+                                        />
+                                    </div>
+
                                     <div className="mb-4 w-full">
                                         {/*<span>Expiry date</span>*/}
                                         {/*<input
@@ -417,7 +447,7 @@ export default function ImageUploader() {
                                         id="expiry-date"
                                     />*/}
 
-                                        <div className={`cursor-pointer xl:text-base flex gap-4 text-xs border rounded w-full p-3 ${isDatePickerOpened ? "hidden" : ""}`} onClick={() => {
+                                        {/*<div className={`cursor-pointer xl:text-base flex gap-4 text-xs border rounded w-full p-3 ${isDatePickerOpened ? "hidden" : ""}`} onClick={() => {
                                             setDatePickerOpened(!isDatePickerOpened)
                                         }}>
                                             {expiryDate ?
@@ -453,7 +483,7 @@ export default function ImageUploader() {
                                                     wrapperClassName={"w-full hidden"}
                                                 />
                                             )
-                                        }
+                                        }*/}
 
                                     </div>
 

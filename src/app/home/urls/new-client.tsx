@@ -9,6 +9,7 @@ import {getUserShortUrls} from "@/lib/apiGetters";
 import {toast} from "react-toastify";
 import {deleteShortUrl} from "@/lib/apiPoster";
 import {FaExternalLinkAlt} from "react-icons/fa";
+import {errorToast} from "@/lib/client";
 
 type DefaultResponse = { error: boolean; message: string };
 
@@ -30,7 +31,8 @@ export default function UrlsPage() {
             const res: ShortUrlDto[] | DefaultResponse = await getUserShortUrls(String(user.uid));
             if (isErrorResponse(res)) {
                 if (res.error) {
-                    toast.error(res.message || 'Failed to load URLs');
+                    if (res.message.includes("No short urls found")) return
+                    errorToast(res.message || 'Failed to load URLs');
                     setUrls([]);
                 } else {
                     setUrls([]);
@@ -39,7 +41,7 @@ export default function UrlsPage() {
                 setUrls(res || []);
             }
         } catch (e) {
-            toast.error('Failed to load URLs');
+            errorToast('Failed to load URLs');
             setUrls([]);
         } finally {
             setLoading(false);
@@ -52,7 +54,7 @@ export default function UrlsPage() {
 
     const handleCopy = async (shortUrl: string) => {
         if (!shortUrl) {
-            toast.error('No short URL to copy');
+            errorToast('No short URL to copy');
             return;
         }
         try {
@@ -71,7 +73,7 @@ export default function UrlsPage() {
                 document.body.removeChild(ta);
                 toast.success('Copied', { closeOnClick: true});
             } catch {
-                toast.error('Copy failed');
+                errorToast('Copy failed');
             }
         }
     };
@@ -82,14 +84,14 @@ export default function UrlsPage() {
             const res = await deleteShortUrl(url, user.apiKey);
             if (isErrorResponse(res)) {
                 if (res.error) {
-                    toast.error(res.message);
+                    errorToast(res.message);
                     return;
                 }
             }
             setUrls(prev => prev.filter((item) => item.uniqueId !== url.uniqueId));
             toast.success('Deleted.');
         } catch {
-            toast.error('Delete failed');
+            errorToast('Delete failed');
         }
     };
 
@@ -97,11 +99,11 @@ export default function UrlsPage() {
         <section className="flex-1 min-w-0 md:pt-0 pt-14 px-3 md:px-6">
             <div className="max-w-5xl mx-auto w-full space-y-4">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between lg:pt-5 pt-10">
                     <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Short URLs</h1>
                     <button
                         onClick={fetchUrls}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-secondary hover:bg-white/10 transition-colors text-sm"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"
                         disabled={loading}
                         aria-label="Refresh list"
                         title="Refresh"
@@ -112,7 +114,7 @@ export default function UrlsPage() {
                 </div>
 
                 {/* Card */}
-                <div className="rounded-xl border border-white/10 bg-[#181a1f] overflow-hidden">
+                <div className="rounded-xl border border-white/10 bg-secondary overflow-hidden">
                     {/* Table header */}
                     <div className="hidden md:grid grid-cols-[1fr,220px,140px] items-center px-4 py-3 text-xs uppercase tracking-wide text-gray-400 border-b border-white/10">
                         <div>URL</div>

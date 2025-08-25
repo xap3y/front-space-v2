@@ -130,8 +130,14 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
                 }
             })
         };
-        ws.onclose = () => setConnected(false);
-        ws.onerror = () => setConnected(false);
+        ws.onclose = () => {
+            console.log('WebSocket disconnected??');
+            setConnected(false);
+        }
+        ws.onerror = (e) => {
+            console.error('WebSocket error', e);
+            setConnected(false);
+        }
         ws.onmessage = (ev) => {
             try {
                 const raw: RawWsMessage = JSON.parse(ev.data);

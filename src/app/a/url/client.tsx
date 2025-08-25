@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import {useUser} from "@/hooks/useUser";
 import {createShortUrl} from "@/lib/apiPoster";
 import LoadingPage from "@/components/LoadingPage";
+import {okToast} from "@/lib/client";
 
 export default function UrlShortener() {
 
@@ -33,7 +34,7 @@ export default function UrlShortener() {
         setApiKey("");
         setUrl("");
         setShortUrl(data.urlSet.rawUrl);
-        toast.success("URL Shortened!");
+        okToast("URL Shortened!");
     };
 
     useEffect(() => {

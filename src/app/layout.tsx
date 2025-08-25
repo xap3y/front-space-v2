@@ -61,10 +61,7 @@ export default function RootLayout({
             {children}
         </ClientRoot>
         <SpeedInsights />
-        <LanguageSwitcher />
-        <Analytics />
         <ToastContainer theme={"dark"} />
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-J3288JZ3DV"} />
         <CookieConsent />
         </body>
         </html>
