@@ -41,14 +41,14 @@ export default function HomeGalleryPage() {
         }
 
         const fetchImages = async () => {
-            const imagesFromApi: UploadedImage[] | null = await getUserImages(user?.uid + "");
+            /*const imagesFromApi: UploadedImage[] | null = await getUserImages(user?.uid + "");
             if (imagesFromApi != null) {
                 setImages(imagesFromApi);
                 console.log(imagesFromApi)
             } else {
                 setFetchError(true);
             }
-            setLoading(false)
+            setLoading(false)*/
         };
         fetchImages()
     }, [user, loadingUser, error])
