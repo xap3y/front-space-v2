@@ -92,7 +92,6 @@ export function validateResponse(data: any): boolean {
 }
 
 export async function getValidatedResponse(url: string, noAuth: boolean = false): Promise<DefaultResponse> {
-
     try {
         const response = await fetch(getApiUrl() + url, {
             method: 'GET',
@@ -102,7 +101,7 @@ export async function getValidatedResponse(url: string, noAuth: boolean = false)
         console.log("DATA ARE " + JSON.stringify(response))
         const data = await response.json();
 
-        console.log("response2 is " + JSON.stringify(data))
+        //console.log("response2 is " + JSON.stringify(data))
         if (!response.ok) {
             if (response.status.toString().startsWith("4")) {
                 return {error: true, message: data.message || "client error"} as DefaultResponse;
@@ -117,7 +116,7 @@ export async function getValidatedResponse(url: string, noAuth: boolean = false)
             return {error: true, message: "Failed to validate data"} as DefaultResponse;
         }
 
-        return {error: false, message: "OK", data: data["message"]} as DefaultResponse;
+        return {error: false, message: "OK", data: data["message"], count: data["count"]} as DefaultResponse;
         //return data["message"];
     } catch (e) {
         return {error: true, message: "Server error"} as DefaultResponse;

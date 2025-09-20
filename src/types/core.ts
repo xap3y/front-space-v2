@@ -47,6 +47,7 @@ export interface DefaultResponse {
     message: any;
     timestamp: string;
     data?: any;
+    count: number
 }
 
 export interface CallServer {

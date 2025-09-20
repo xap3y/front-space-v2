@@ -63,12 +63,13 @@ export async function revokeUserDiscordConnection(apiKey: string): Promise<boole
     }
 }
 
-export async function getUserImages(uid: string): Promise<UploadedImage[] | null> {
+export async function getUserImages(uid: string, from: number = 0, limit: number = 20): Promise<DefaultResponse | null> {
 
-    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/images");
+    console.log("Fetching images for user " + uid + " from " + from + " limit " + limit)
+    const timeFilter = from > 0 ? "&to=" + from : "";
+    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/images?limit=" + limit + timeFilter);
     if (!data) return null;
-    const images = data["data"] as UploadedImage[];
-    return images;
+    return data;
 }
 
 export async function getUserShortUrls(uid: string): Promise<ShortUrlDto[] | DefaultResponse> {

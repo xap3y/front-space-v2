@@ -11,6 +11,7 @@ import {isVideoFile} from "@/lib/core";
 import LoadingPage from "@/components/LoadingPage";
 import {useRouter} from "next/navigation";
 import {useGalleryRows} from "@/hooks/useGalleryRow";
+import {from} from "stylis";
 
 type DefaultResponse = { error: boolean; message: string };
 
@@ -22,7 +23,10 @@ export default function GalleryPage() {
     const { user, loadingUser, error: userError } = useUser();
     const [items, setItems] = useState<UploadedImage[]>([]);
     const [loading, setLoading] = useState(true);
+    const [fromDate, setFromDate] = useState<number>(0);
+    const [totalItems, setTotalItems] = useState<number>(0);
     const [page, setPage] = useState(1);
+    const [usedPages, setUsedPages] = useState<number[]>([]);
 
     const canLoad = !!user?.uid && !loadingUser;
 
@@ -38,7 +42,7 @@ export default function GalleryPage() {
 
     const router = useRouter()
 
-    const fetchImages = useCallback(async () => {
+    /*const fetchImages2 = useCallback(async () => {
         if (!user?.uid) return;
         try {
             const res = await getUserImages(String(user.uid));
@@ -50,7 +54,7 @@ export default function GalleryPage() {
                     setItems([]);
                 }
             } else {
-                setItems(res || []);
+                setItems(res?.data as UploadedImage[] || []);
             }
         } catch {
             errorToast('Failed to load images');
@@ -58,11 +62,90 @@ export default function GalleryPage() {
         } finally {
             setLoading(false);
         }
-    }, [user?.uid]);
+    }, [user?.uid]);*/
+
+    const addToImages = useCallback((newImages: UploadedImage[]) => {
+        setItems(prev => {
+            const existingIds = new Set(prev.map(img => img.uniqueId));
+            const filteredNewImages = newImages.filter(img => !existingIds.has(img.uniqueId));
+            // log out dupes
+            if (filteredNewImages.length < newImages.length) {
+                console.log(`Filtered out ${newImages.length - filteredNewImages.length} duplicate images`);
+                // loop and log duped ids
+                newImages.forEach(img => {
+                    if (existingIds.has(img.uniqueId)) {
+                        console.log(`Duplicate image id: ${img.uniqueId}`);
+                    }
+                });
+            }
+            return [...prev, ...filteredNewImages];
+        });
+    }, []);
+
+    async function fetchImages(direction: "next" | "prev" | "first" = "first") {
+        if (!user?.uid) return;
+        console.log("-------------START--------------")
+        console.log(imagesPerPage + " < imagesPerPage")
+        if (usedPages.includes(page+1)) {
+            console.log("Page " + page + " already used, not fetching")
+            return;
+        }
+        setLoading(true);
+
+        if (direction === "prev") return;
+
+        if (direction === "first") {
+            setUsedPages([1])
+        }
+
+        const actualFromDate = (direction === "first") ? 0 : (fromDate != null ? fromDate : 0);
+        console.log("Fetching images for user " + user.uid + " from date " + actualFromDate + " direction " + direction)
+        console.log("AC DATE: " + actualFromDate)
+
+        try {
+            const res = await getUserImages(String(user.uid), actualFromDate, imagesPerPage);
+            if (res?.error == true) {
+                errorToast(res.message || 'Failed to load images');
+                setItems([]);
+            }
+            console.log("data count is " + res?.count)
+            const images = res?.data as UploadedImage[]
+            if (res && images.length > 0) {
+
+                console.log("Got " + images.length + " images, total is " + (res?.count || 0))
+                // miliseconds to seconds
+
+                console.log("AC UID: " + images[images.length - 1].uniqueId + " DATE " + images[images.length - 1].uploadedAt)
+
+                const mili = new Date(images[images.length - 1].uploadedAt).getTime() - 1;
+                console.log("last image date is " + images[images.length - 1].uploadedAt + " which is " + mili + " in miliseconds")
+                // first
+                console.log("first image date is " + images[0].uploadedAt + " which is " + new Date(images[0].uploadedAt).getTime() + " in miliseconds" + " and " + Math.floor(new Date(images[0].uploadedAt).getTime() / 1000) + " in seconds")
+                setFromDate(mili);
+                console.log("AC SET TO " + mili)
+                console.log("AC REAL " + new Date(images[images.length - 1].uploadedAt))
+                addToImages(images)
+                setTotalItems(res?.count || 0);
+            }
+        } catch {
+            setItems([]);
+        } finally {
+            setLoading(false);
+            console.log("-------------DONE--------------")
+        }
+    }
 
     useEffect(() => {
-        if (canLoad) fetchImages();
-    }, [canLoad, fetchImages]);
+        if (canLoad) {
+            console.log("Can load, fetching images")
+            fetchImages();
+        }
+    }, [canLoad]);
+
+    useEffect(() => {
+        console.log("Items changed, total is " + items.length)
+        console.log("Items changed, total is " + items.length)
+    }, [items]);
 
     useEffect(() => {
         if (loadingUser) return
@@ -87,17 +170,40 @@ export default function GalleryPage() {
         }
     }, [user?.apiKey]);
 
-    const totalItems = items.length;
     const totalPages = Math.max(1, Math.ceil(totalItems / imagesPerPage));
     const pagedItems = useMemo(() => {
+        console.log("Calculating paged items for page " + page)
+        console.log("Items size " + items.length)
+        if (items.length === 0) return [];
+        if (page < 1) return [];
+        if (page > totalPages) return [];
         const start = (page - 1) * imagesPerPage;
-        return items.slice(start, start + imagesPerPage);
-    }, [items, page, imagesPerPage]);
+        const end = page * imagesPerPage;
+        console.log("Slicing items from " + start + " to " + end)
+        setLoading(false)
+        return items.slice(start, end);
+    }, [items, page, totalPages]);
 
     // Reset page if items change and page is out of range
     useEffect(() => {
         if (page > totalPages) setPage(totalPages);
     }, [totalPages, page]);
+
+
+    const goToNextPage = () => {
+        if (pagedItems.length < imagesPerPage) return errorToast("No more pages");
+        setPage(page + 1);
+        setUsedPages(prev => [...prev, page+1]);
+        //fetchImages("next");
+        fetchImages("next");
+    };
+
+    const goToPrevPage = () => {
+        setPage(page - 1);
+        setUsedPages(prev => [...prev, page-1]);
+        console.log("Going to prev page, current page is " + page)
+        fetchImages("prev");
+    };
 
     if (loadingUser) {
         return (
@@ -113,7 +219,7 @@ export default function GalleryPage() {
                 <div className="flex items-center justify-between px-2 sm:pt-10 pt-5">
                     <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Your uploads</h1>
                     <button
-                        onClick={fetchImages}
+                        onClick={() => {}}
                         className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-secondary hover:bg-white/10 transition-colors text-sm"
                         disabled={loading}
                         aria-label="Refresh list"
@@ -169,7 +275,7 @@ export default function GalleryPage() {
                     {/* Paginator: always sticks to bottom */}
                     <div className="border-t border-white/10 pt-3 pb-1 flex justify-center items-center gap-4 bg-black/0 mt-4 min-h-[56px]">
                         <button
-                            onClick={() => setPage(page - 1)}
+                            onClick={goToPrevPage}
                             disabled={page <= 1}
                             className="rounded-lg border border-white/10 px-2 py-2 bg-secondary hover:bg-white/10 transition-colors text-sm flex items-center justify-center disabled:opacity-40"
                             aria-label="Previous page"
@@ -180,7 +286,7 @@ export default function GalleryPage() {
           Page <span className="font-semibold text-white">{page}</span> of <span className="font-semibold text-white">{totalPages}</span>
         </span>
                         <button
-                            onClick={() => setPage(page + 1)}
+                            onClick={goToNextPage}
                             disabled={page >= totalPages}
                             className="rounded-lg border border-white/10 px-2 py-2 bg-secondary hover:bg-white/10 transition-colors text-sm flex items-center justify-center disabled:opacity-40"
                             aria-label="Next page"
