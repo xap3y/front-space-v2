@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import {CallServer} from "@/types/core";
-import {callServers} from "@/config/global";
+import {CallServerEnum, callServers} from "@/config/global";
 import {errorToast} from "@/lib/client";
 
 export function useServerDropdown() {
@@ -19,7 +19,7 @@ export function useServerDropdown() {
 
     const toggle = () => setIsOpen(prev => !prev);
     const select = (server: CallServer) => {
-        if(status[server.url] || server.name == "Automatic" || server.name.includes("R2")) setSelected(server);
+        if(status[server.url] || server.name == "Automatic" || server.name.includes("R2") || server.type == CallServerEnum.ALLOWED) setSelected(server);
         else errorToast("Server is offline!")
         setIsOpen(false);
     };

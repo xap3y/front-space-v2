@@ -1,5 +1,6 @@
 import {CallServer, UrlSet} from "@/types/core";
 import {UserObjShort} from "@/types/user";
+import {ImageWebhookSettings} from "@/types/configs";
 
 
 export interface UploadedImage {
@@ -13,6 +14,7 @@ export interface UploadedImage {
     isPublic: boolean;
     description: string;
     expiresAt?: string;
+    webhookSettings?: ImageWebhookSettings | null;
 }
 
 

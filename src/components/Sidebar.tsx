@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { MdLogout, MdMenu, MdClose } from 'react-icons/md';
+import {MdLogout, MdMenu, MdClose, MdOutlineAdminPanelSettings} from 'react-icons/md';
+import {useUser} from "@/hooks/useUser";
 
 type SidebarItem = {
     title: string;
@@ -31,6 +32,8 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
     // If you have a usePage() context, plug it in here:
     // const { pageName, setPage } = usePage();
     const setPage = (name: string) => {};
+
+    const { user, loadingUser, error } = useUser();
 
     const router = useRouter();
     const pathname = usePathname();
@@ -100,6 +103,8 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
         </ul>
     );
 
+    if (loadingUser || !user) return null;
+
     return (
         <>
             {/* Mobile top bar */}
@@ -140,6 +145,21 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
 
                 {/* Footer / Logout */}
                 <div className="border-t border-white/10 p-3">
+                    {user.role === "OWNER" && (
+                        <a href="/admin" className="w-full block">
+                            <button
+                                className="
+                w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                text-gray-200 hover:bg-cyan-600/15 hover:text-white transition-colors
+              "
+                                aria-label={"Admin"}
+                                title={"Admin"}
+                            >
+                                <MdOutlineAdminPanelSettings className="h-5 w-5" />
+                                <span>Admin</span>
+                            </button>
+                        </a>
+                    )}
                     <a href="/logout" className="w-full block">
                         <button
                             className="

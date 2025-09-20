@@ -12,6 +12,7 @@ import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
 import {DashboardCard, SplitterLine, StatisticBoxLine} from "@/components/sets/DashboardsComponents";
 import LoadingPage from "@/components/LoadingPage";
+import {BuildingInProgressPage} from "@/components/GlobalComponents";
 
 export default function HomeDashboardPage() {
 
@@ -171,6 +172,8 @@ export default function HomeDashboardPage() {
                     </div>
                 </div>
             </div>
+
+            <BuildingInProgressPage/>
 
             {
                 monthPeriodStats.image.bestUploader && (

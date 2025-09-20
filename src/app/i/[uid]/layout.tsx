@@ -34,7 +34,7 @@ export async function generateMetadata(
         };
     }
 
-    return {
+    /*const metadataBuilder = {
         title: `${imageData.uniqueId}.${imageData.type}`,
         description: `Uploaded by ${imageData.uploader?.username || 'N/A'}`,
         openGraph: {
@@ -43,5 +43,50 @@ export async function generateMetadata(
             images: [imageData.urlSet.customUrl || imageData.urlSet.rawUrl],
             url: `${imageData.urlSet.portalUrl}`
         },
+    }*/
+
+    const metadataBuilder: any = {
+        title: `${imageData.uniqueId}.${imageData.type}`,
+        description: `Uploaded by ${imageData.uploader?.username || 'N/A'}`,
     };
+
+    const webhookSettings = imageData.webhookSettings;
+
+    console.log("Webhook settings: " + JSON.stringify(webhookSettings));
+    console.log("Webhook settings desc: " + JSON.stringify(webhookSettings));
+
+    if (webhookSettings && webhookSettings.enabled) {
+        const newTitle = (webhookSettings.title || metadataBuilder.title)
+            .replaceAll("{uid}", imageData.uniqueId)
+            .replaceAll("{size}", `${imageData.size}`)
+            .replaceAll("{filetype}", imageData.type);
+
+        const newDescription = (webhookSettings.description || metadataBuilder.description)
+            .replaceAll("{uid}", imageData.uniqueId)
+            .replaceAll("{size}", `${imageData.size}`)
+            .replaceAll("{filetype}", imageData.type)
+            .replaceAll("{uploader}", imageData.uploader?.username || 'N/A');
+
+        metadataBuilder.title = newTitle;
+        metadataBuilder.description = newDescription;
+
+        if (webhookSettings.color) {
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(webhookSettings.color)) {
+                metadataBuilder.themeColor = webhookSettings.color;
+            } else if (webhookSettings.color.toLowerCase() === "random") {
+                metadataBuilder.themeColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            }
+        }
+
+        metadataBuilder.openGraph = {
+            title: newTitle,
+            description: newDescription,
+            images: [imageData.urlSet.customUrl || imageData.urlSet.rawUrl],
+            url: `${imageData.urlSet.portalUrl}`,
+        };
+    }
+
+    console.log("Generated metadata: ", metadataBuilder);
+
+    return metadataBuilder;
 }

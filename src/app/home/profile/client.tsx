@@ -175,7 +175,7 @@ export default function HomeProfilePage(): JSX.Element {
     return (
         <>
 
-            <ErrorToast type={"WARN"} message={`This page is in BETA`} />
+            {/*<ErrorToast type={"WARN"} message={`This page is in BETA`} />*/}
 
             <main className={"flex max-h-screen overflow-y-scroll flex-col xl:ml-[70px] ml-0 w-full xl:pt-12 xl:px-12 lg:px-32 px-2 pt-10"}>
 

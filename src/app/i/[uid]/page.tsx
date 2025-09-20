@@ -374,7 +374,7 @@ export default function Page() {
                                                 key={"portal"}
                                                 onClick={() => {
                                                     closeDropdown()
-                                                    copyToClipboard("https://xap3y.space/i/" + uid, lang)
+                                                    copyToClipboard(image?.urlSet.portalUrl || "https://xap3y.space/i/" + uid, lang)
                                                 }}
                                                 className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                             >

@@ -5,6 +5,7 @@ export enum CallServerEnum {
     API,
     S3,
     UNKNOWN,
+    ALLOWED
 }
 
 export const callServers: CallServer[] = [
@@ -50,7 +51,8 @@ export const callServers: CallServer[] = [
         name: "(-) 127.0.0.1",
         url: "http://localhost:8012",
         location: "Europe",
-        flag: "/flags/unknown.svg"
+        flag: "/flags/unknown.svg",
+        type: CallServerEnum.ALLOWED
     }
 
 ]
