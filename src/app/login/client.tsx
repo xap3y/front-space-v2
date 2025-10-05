@@ -194,7 +194,7 @@ export default function LoginPage() {
 
             <div className="max-w-lg w-full mx-3">
                 <div
-                    className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
+                    className="bg-primary2 border-2 border-primary0 rounded-lg shadow-xl overflow-hidden"
                 >
                     <div className="p-3 lg:p-8">
                         <h2 className="text-center text-3xl font-extrabold text-white">
@@ -217,12 +217,12 @@ export default function LoginPage() {
                             </div>
 
                             <div className={"flex my-4 gap-4"}>
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary-brighter"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
                             </div>
                         </div>
 
@@ -233,7 +233,7 @@ export default function LoginPage() {
                                         < MdEmail className="w-8 h-8 mr-2" />
                                         <input
                                             placeholder={lang.pages.login.email_placeholder}
-                                            className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                            className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                             required
                                             autoComplete="new-password"
                                             type="email"
@@ -249,7 +249,7 @@ export default function LoginPage() {
                                         < FaKey className="w-8 h-8 mr-2" />
                                         <input
                                             placeholder={lang.pages.login.password_placeholder}
-                                            className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                            className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                             required
                                             autoComplete="new-password"
                                             type="password"
@@ -286,7 +286,7 @@ export default function LoginPage() {
                     <div className="px-8 py-4 bg-primary-bright text-center">
                         <button
                             className="font-normal text-telegram hover:text-telegram-brightest"
-                            onClick={() => toast.error('Feature disabled!')}
+                            onClick={() => errorToast('Feature disabled!')}
                         >
                             {lang.pages.login.forgot_password}
                         </button>

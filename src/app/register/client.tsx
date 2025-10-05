@@ -122,7 +122,7 @@ export default function RegisterPage() {
 
                 <div className="max-w-lg w-full mx-3">
                     <div
-                        className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
+                        className="bg-primary2 border-2 border-primary0 rounded-lg shadow-xl overflow-hidden"
                     >
                         <div className="p-3 lg:p-8">
                             <h2 className="text-center text-3xl font-extrabold text-white">
@@ -136,7 +136,7 @@ export default function RegisterPage() {
                                             < FaUser className="w-8 h-8 mr-2" />
                                             <input
                                                 placeholder={"username"}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
                                                 autoComplete="new-password"
                                                 type="text"
@@ -152,7 +152,7 @@ export default function RegisterPage() {
                                             < MdEmail className="w-8 h-8 mr-2" />
                                             <input
                                                 placeholder={lang.pages.login.email_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
                                                 autoComplete="new-password"
                                                 type="email"
@@ -168,7 +168,7 @@ export default function RegisterPage() {
                                             < FaLock className="w-8 h-8 mr-2" />
                                             <input
                                                 placeholder={lang.pages.login.password_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
                                                 autoComplete="new-password"
                                                 type="password"
@@ -184,7 +184,7 @@ export default function RegisterPage() {
                                             < FaLock className="w-8 h-8 mr-2" />
                                             <input
                                                 placeholder={lang.pages.register.confirm_password_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
                                                 autoComplete="new-password"
                                                 type="password"
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                                             < FaKey className="w-8 h-8 mr-2" />
                                             <input
                                                 placeholder={lang.pages.register.invite_code_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
                                                 autoComplete="new-password"
                                                 type="text"

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock } from 'react-icons/fa';
-import { FaRotateRight } from 'react-icons/fa6';
+import {FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle} from 'react-icons/fa';
+import {FaInfo, FaRotateRight} from 'react-icons/fa6';
 import {copyToClipboard, deleteImageApi as apiDeleteImage, errorToast, okToast} from "@/lib/client";
 import {getUserImages} from "@/lib/apiGetters";
 import {UploadedImage} from "@/types/image";
@@ -11,7 +11,10 @@ import {isVideoFile} from "@/lib/core";
 import LoadingPage from "@/components/LoadingPage";
 import {useRouter} from "next/navigation";
 import {useGalleryRows} from "@/hooks/useGalleryRow";
-import {from} from "stylis";
+import {useTranslation} from "@/hooks/useTranslation";
+import LanguageModel from "@/types/LanguageModel";
+import {useIsMobile} from "@/hooks/utils";
+import {useHoverCard} from "@/hooks/useHoverCard";
 
 type DefaultResponse = { error: boolean; message: string };
 
@@ -27,6 +30,8 @@ export default function GalleryPage() {
     const [totalItems, setTotalItems] = useState<number>(0);
     const [page, setPage] = useState(1);
     const [usedPages, setUsedPages] = useState<number[]>([]);
+
+    const lang = useTranslation();
 
     const canLoad = !!user?.uid && !loadingUser;
 
@@ -90,9 +95,11 @@ export default function GalleryPage() {
             console.log("Page " + page + " already used, not fetching")
             return;
         }
-        setLoading(true);
 
         if (direction === "prev") return;
+
+        setLoading(true);
+
 
         if (direction === "first") {
             setUsedPages([1])
@@ -130,7 +137,9 @@ export default function GalleryPage() {
         } catch {
             setItems([]);
         } finally {
-            setLoading(false);
+            setTimeout(() => {
+                setLoading(false);
+            }, 200)
             console.log("-------------DONE--------------")
         }
     }
@@ -164,11 +173,13 @@ export default function GalleryPage() {
                 return;
             }
             setItems(prev => prev.filter(i => i.uniqueId !== img.uniqueId));
+            setTotalItems(prev => Math.max(0, (prev || 0) - 1));
+            setUsedPages(prev => prev.filter(p => p !== (page + 1)));
             okToast('Deleted.');
         } catch {
             errorToast('Delete failed');
         }
-    }, [user?.apiKey]);
+    }, [user?.apiKey, page]);
 
     const totalPages = Math.max(1, Math.ceil(totalItems / imagesPerPage));
     const pagedItems = useMemo(() => {
@@ -180,15 +191,32 @@ export default function GalleryPage() {
         const start = (page - 1) * imagesPerPage;
         const end = page * imagesPerPage;
         console.log("Slicing items from " + start + " to " + end)
-        setLoading(false)
+        //setLoading(false)
         return items.slice(start, end);
     }, [items, page, totalPages]);
 
-    // Reset page if items change and page is out of range
-    useEffect(() => {
-        if (page > totalPages) setPage(totalPages);
-    }, [totalPages, page]);
 
+    useEffect(() => {
+        if (!loading && pagedItems.length === 0 && page > 1) {
+            setPage(page - 1);
+        }
+        if (page > totalPages) {
+            setPage(totalPages);
+        }
+        console.log("Paged items changed, length is " + pagedItems.length + " for page " + page + " total pages " + totalPages + " loading is " + loading)
+        if (pagedItems.length < 1) {
+            setPage(1);
+        }
+    }, [items, pagedItems.length, page, totalPages, loading]);
+
+    useEffect(() => {
+        const needFill = pagedItems.length < imagesPerPage;
+        const haveMoreServer = totalItems > items.length;
+        if (!loading && needFill && haveMoreServer && canLoad) {
+            setUsedPages(prev => prev.filter(p => p !== (page + 1)));
+            fetchImages("next");
+        }
+    }, [pagedItems.length, imagesPerPage, totalItems, items.length, loading, canLoad, page]);
 
     const goToNextPage = () => {
         if (pagedItems.length < imagesPerPage) return errorToast("No more pages");
@@ -217,9 +245,23 @@ export default function GalleryPage() {
             <div className="w-full mx-auto space-y-4">
                 {/* Header */}
                 <div className="flex items-center justify-between px-2 sm:pt-10 pt-5">
-                    <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Your uploads</h1>
+                    <div className={"flex flex-col"}>
+                        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Your uploads</h1>
+
+                        {/* New upload button, keep vercel style like */}
+                        <div className="mt-1 text-sm text-gray-400">
+                            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                        </div>
+                    </div>
                     <button
-                        onClick={() => {}}
+                        onClick={() => {
+                            setLoading(true)
+                            // timeout to show loading
+                            setTimeout(() => {
+                                errorToast("Not implemented yet") // TODO
+                                setLoading(false)
+                            }, 500);
+                        }}
                         className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-secondary hover:bg-white/10 transition-colors text-sm"
                         disabled={loading}
                         aria-label="Refresh list"
@@ -238,9 +280,9 @@ export default function GalleryPage() {
                     {/* Grid card area */}
                     <div className="flex-1 flex items-stretch">
                         {loading && (
-                            <ul className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3 md:gap-4`}>
+                            <ul className={`w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3 md:gap-4`}>
                                 {Array.from({ length: imagesPerPage }).map((_, i) => (
-                                    <li key={i} className="rounded-md overflow-hidden border border-white/10 bg-[#1b1f26]">
+                                    <li key={i} className="min-w-[150px] rounded-md overflow-hidden border border-white/10 bg-primary hover:bg-secondary">
                                         <div className="w-full aspect-[4/3] bg-white/5 animate-pulse" />
                                         <div className="p-2 space-y-1">
                                             <div className="h-4 w-2/3 bg-white/10 rounded animate-pulse" />
@@ -265,6 +307,7 @@ export default function GalleryPage() {
                                         <MediaCard
                                             item={img}
                                             onDelete={() => handleDelete(img)}
+                                            lang={lang}
                                         />
                                     </li>
                                 ))}
@@ -300,18 +343,28 @@ export default function GalleryPage() {
     );
 }
 
-function MediaCard({ item, onDelete }: { item: UploadedImage; onDelete: () => void }) {
+function MediaCard({ item, onDelete, lang }: { item: UploadedImage; onDelete: () => void, lang: LanguageModel }) {
     const isVideo = isVideoFile(item.type || '');
     const urls = normalizeUrls(item);
     const title = deriveTitle(item, urls.original);
     const size = formatBytes(item.size || 0);
+
+    const isMobile: boolean = useIsMobile();
+
+    const {
+        showCard,
+        position,
+        handleMouseEnter,
+        handleMouseLeave,
+        handleMouseMove,
+    } = useHoverCard(isMobile);
 
     const [imgFailed, setImgFailed] = useState(false);
 
     const showPlaceholder = imgFailed || !urls.original || item.size === 0;
 
     return (
-        <div className="group rounded-md border border-white/10 bg-primary hover:bg-secondary transition-colors">
+        <div onMouseMove={handleMouseMove} className="group rounded-md border border-white/10 bg-primary hover:bg-secondary transition-colors">
             {/* Preview */}
             <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-md bg-black" style={{ minHeight: 0 }}>
                 {showPlaceholder ? (
@@ -324,7 +377,8 @@ function MediaCard({ item, onDelete }: { item: UploadedImage; onDelete: () => vo
                 ) : isVideo ? (
                     <video
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                        preload="metadata"
+                        preload={item.urlSet.posterUrl ? 'metadata' : 'none'}
+                        poster={item.urlSet.posterUrl ?? undefined}
                         controls={true}
                         style={{ minHeight: 0 }}
                     >
@@ -354,14 +408,29 @@ function MediaCard({ item, onDelete }: { item: UploadedImage; onDelete: () => vo
 
                 {/* Top-right badges */}
                 <div className="absolute right-1 top-1 flex items-center gap-1 z-10">
+                    <span
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        className="inline-flex items-center gap-1 bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
+                          <FaInfoCircle className="h-3 w-3" />
+                    </span>
+                    <span onClick={(event) => {
+                        // check if user is holding shift
+                        let copyText = item.urlSet.userPreferences || item.urlSet.rawUrl || urls.original;
+                        if (event.shiftKey) copyText = item.urlSet.portalUrl
+                        else if (event.ctrlKey) copyText = item.urlSet.rawUrl
+                        copyToClipboard(copyText, lang);
+                    }} className="cursor-pointer inline-flex items-center gap-1 bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
+                          <FaCopy className="h-3 w-3" />
+                    </span>
                     {item.requiresPassword && (
                         <span className="inline-flex items-center gap-1 bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
-          <FaLock className="h-3 w-3" />
-        </span>
+                          <FaLock className="h-3 w-3" />
+                        </span>
                     )}
                     <span className="inline-flex items-center bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
-        {isVideo ? 'Video' : 'Image'}
-      </span>
+                        {isVideo ? 'Video' : 'Image'}
+                    </span>
                 </div>
             </div>
 
@@ -404,6 +473,27 @@ function MediaCard({ item, onDelete }: { item: UploadedImage; onDelete: () => vo
                     >
                         <FaRegTrashAlt className="h-4 w-4" />
                     </button>
+                </div>
+            </div>
+
+            <div className={`pointer-events-none transition-all duration-200 ease-out transform ${
+                showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            } absolute bg-secondary shadow-lg rounded-lg p-2 z-50 flex flex-row gap-4`} style={{ top: position.y + 10, left: position.x + 15 }}>
+                <div className={"flex gap-1 flex-col text-sm text-zinc-300"}>
+                    <span className={"flex gap-2 flex-row"}>
+                        <p>Uploaded at:</p>
+                        <p>{new Date(item.uploadedAt).toLocaleString()}</p>
+                    </span>
+
+                    <span className={"flex gap-2 flex-row"}>
+                        <p>File type:</p>
+                        <p>{item.type}</p>
+                    </span>
+
+                    <span className={"flex gap-2 flex-row"}>
+                        <p>Location:</p>
+                        <p>{item.location}</p>
+                    </span>
                 </div>
             </div>
         </div>

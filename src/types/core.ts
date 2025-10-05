@@ -18,6 +18,8 @@ export interface UrlSet {
     shortUrl?: string | null;
     customUrl?: string | null;
     custom?: Map<string, string> | null;
+    posterUrl?: string | null;
+    userPreferences?: string | null;
 }
 
 export interface Quote {

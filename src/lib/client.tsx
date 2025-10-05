@@ -1,3 +1,5 @@
+"use client";
+
 import {toast} from "react-toastify";
 import {RoleType} from "@/types/user";
 import {JSX} from "react";
@@ -8,6 +10,7 @@ import {CallServer} from "@/types/core";
 import LanguageModel from "@/types/LanguageModel";
 import {Album} from "@/types/album";
 import {logToServer} from "@/lib/serverFuncs";
+import {EmbedSettings, UrlPreferences} from "@/types/configs";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -99,7 +102,6 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
     console.log("Calling validateApiKey with key: " + apiKey)
 
     try {
-
         const response = await axios.get(getApiUrl() + "/v1/auth/validate", {
             headers: {
                 'x-api-key': apiKey,
@@ -124,6 +126,87 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
         return true;
     } catch (error) {
         return false;
+    }
+}
+
+export async function saveUserEmbedSettings(apiKey: string, settings: EmbedSettings): Promise<boolean> {
+    console.log("Calling saveUserEmbedSettings with key: " + apiKey)
+
+    try {
+        const response = await axios.patch(getApiUrl() + "/v1/user/get/@me/settings/webhook", settings, {
+            headers: {
+                'x-api-key': apiKey
+            },
+            timeout: 10000,
+        });
+
+        console.log("returned " + response.status)
+
+        return !(!response.status.toString().startsWith("204"));
+    } catch (e) {
+        return false;
+    }
+}
+
+export async function saveUserUrlPreferencesSettings(apiKey: string, settings: UrlPreferences): Promise<boolean> {
+    console.log("Calling saveUserUrlPreferencesSettings with key: " + apiKey)
+
+    try {
+        const response = await axios.patch(getApiUrl() + "/v1/user/get/@me/settings/url", settings, {
+            headers: {
+                'x-api-key': apiKey
+            },
+            timeout: 10000,
+        });
+
+        return !(!response.status.toString().startsWith("204"));
+    } catch (e) {
+        return false;
+    }
+}
+
+export async function getUserUrlPreferencesSettings(apiKey: string): Promise<UrlPreferences | null> {
+    console.log("Calling getUserUrlPreferencesSettings with key: " + apiKey)
+
+    try {
+        const response = await axios.get(getApiUrl() + "/v1/user/get/@me/settings/url", {
+            headers: {
+                'x-api-key': apiKey
+            },
+            timeout: 6000,
+        });
+        if (!response.status.toString().startsWith("2") || !response.data) return null
+
+        const data = response.data;
+        const error: boolean = data["error"];
+        if (error) return null;
+
+        return data["message"] as UrlPreferences;
+    } catch (e) {
+        return null;
+    }
+}
+
+export async function getUserEmbedSettings(apiKey: string): Promise<EmbedSettings | null> {
+    console.log("Calling getUserEmbedSettings with key: " + apiKey)
+
+    try {
+        const response = await axios.get(getApiUrl() + "/v1/user/get/@me/settings/webhook", {
+            headers: {
+                'x-api-key': apiKey
+            },
+            timeout: 6000,
+        });
+
+        if (!response.status.toString().startsWith("2") || !response.data) return null
+
+        const data = response.data;
+        const error: boolean = data["error"];
+        if (error) return null;
+
+        return data["message"] as EmbedSettings;
+    } catch (e) {
+        return null;
     }
 }
 

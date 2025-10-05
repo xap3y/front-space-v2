@@ -19,6 +19,7 @@
     "cookies-next": "^5.1.0",
     "core-js": "^3.40.0",
     "date-fns": "^4.1.0",
+    "embed-visualizer": "^1.4.1",
     "highlight.js": "^11.11.1",
     "mobx": "^6.13.6",
     "next": "15.1.6",

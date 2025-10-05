@@ -15,6 +15,15 @@ export function useServerDropdown() {
                 .then(res => setStatus(prev => ({ ...prev, [server.url]: res.ok })))
                 .catch(() => setStatus(prev => ({ ...prev, [server.url]: false })));
         });*/
+        callServers.forEach(server => {
+            if (server.type == CallServerEnum.UNKNOWN || server.type == CallServerEnum.S3) {
+                setStatus(prev => ({ ...prev, [server.url]: true }));
+            } else if (server.type == CallServerEnum.ALLOWED) {
+                fetch(`${server.url}/status`)
+                    .then(res => setStatus(prev => ({ ...prev, [server.url]: res.ok })))
+                    .catch(() => setStatus(prev => ({ ...prev, [server.url]: false })));
+            }
+        });
     }, []);
 
     const toggle = () => setIsOpen(prev => !prev);

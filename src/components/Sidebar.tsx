@@ -128,7 +128,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 className="
           hidden xl:flex xl:flex-col
           w-64 shrink-0
-          bg-secondary border-r border-white/10
+          bg-primary1 border-r border-white/10
           min-h-[100dvh] sticky top-0
         "
             >

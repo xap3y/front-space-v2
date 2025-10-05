@@ -42,7 +42,7 @@ export default function HomeLayout({
                                 {title: "Temp Mail", icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
                                 {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
                             ]} logout_text={lang.comp.sidebar.logout} />
-                            <section className="flex-1 min-w-0 bg-primaryDottedSize bg-primaryDotted">
+                            <section className="flex-1 min-w-0 bg-primary1 bg-primaryDottedSize bg-primaryDotted">
                                 {children}
                             </section>
                         </div>

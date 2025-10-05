@@ -25,6 +25,7 @@ import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {ImEmbed2} from "react-icons/im";
 import {ErrorToast} from "@/components/ErrorToast";
+import {DateChartNew} from "@/components/DateChartComponent";
 
 export default function HomeProfilePage(): JSX.Element {
 
@@ -481,9 +482,9 @@ export default function HomeProfilePage(): JSX.Element {
                                 </div>
                             </div>
 
-                            <div className={"p-2 bg-secondary rounded-xl w-full mt-4 lg:h-80 h-[200px]"}>
+                            <div className={"p-2 bg-[#0A0A0A] rounded-xl w-full mt-4 lg:h-80 h-[200px]"}>
                                 {/* Chart component */}
-                                <DateChart data={{
+                                <DateChartNew data={{
                                     labels: graphDataLabels,
                                     datasets: [
                                         {

@@ -16,7 +16,6 @@ import {FaArrowUp, FaCheck} from "react-icons/fa6";
 import {useServerDropdown} from "@/hooks/useServerDropdown";
 import {CallServerEnum, callServers} from "@/config/global";
 import {useServerPings} from "@/hooks/useServerPings";
-import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css'
 import './tweak.css'
 import {useIsMobile} from "@/hooks/utils";
@@ -180,10 +179,23 @@ export default function ImageUploader() {
         if (withPassword && password.length > 2) formData.append("password", password)
         if (description) formData.append("desc", description)
         if (customUid && customUid.length > 5) formData.append("uniqueId", customUid)
+        // check if expirYDate is after date.now()
+        if (expiryDate && expiryDate.getTime() > Date.now()) formData.append("expiryDate", expiryDate.getTime() + "");
 
         let uploadedImg;
 
-        const selectedCallServer = (selected.type == CallServerEnum.UNKNOWN) ? callServers[1] : selected;
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+        let selectedCallServer;
+
+        if ((fileExtension == "dng" || fileExtension == "heic" || fileExtension == "heif") && selected.type == CallServerEnum.UNKNOWN) {
+            selectedCallServer = callServers[callServers.length-1];
+            infoToast("Using API call server for this file type", 500)
+        } else if (selected.type == CallServerEnum.UNKNOWN) {
+            selectedCallServer = callServers[1];
+        } else {
+            selectedCallServer = selected;
+        }
 
         if (selectedCallServer.type == CallServerEnum.S3) {
             uploadedImg = await uploadImageBucket(formData, apiKey, selectedCallServer, (progress) => {

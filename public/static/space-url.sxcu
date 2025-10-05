@@ -3,7 +3,7 @@
   "Name": "Space-URL",
   "DestinationType": "URLShortener",
   "RequestMethod": "POST",
-  "RequestURL": "https://call.xap3y.fun/v1/url/create",
+  "RequestURL": "https://call.xap3y.space/v1/url/create",
   "Headers": {
     "X-API-Key": ""
   },

@@ -114,7 +114,7 @@ export default function UrlsPage() {
                 </div>
 
                 {/* Card */}
-                <div className="rounded-xl border border-white/10 bg-secondary overflow-hidden">
+                <div className="rounded-xl border border-white/10 bg-primary2 overflow-hidden">
                     {/* Table header */}
                     <div className="hidden md:grid grid-cols-[1fr,220px,140px] items-center px-4 py-3 text-xs uppercase tracking-wide text-gray-400 border-b border-white/10">
                         <div>URL</div>
@@ -210,7 +210,7 @@ function UrlRow({
                 <div className="flex items-center gap-2 justify-self-end">
                     <button
                         onClick={onCopy}
-                        className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs border border-white/10 bg-[#1f232a] hover:bg-[#272c34] transition-colors"
+                        className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors"
                         aria-label="Copy short URL"
                         title="Copy short URL"
                     >

@@ -14,6 +14,9 @@ export default {
       },
       colors: {
         primary: "var(--col-primary)",
+        primary1: "#0A0A0A",
+        primary2: "#101010",
+        primary0: "#1A1A1A",
         secondary: "var(--col-secondary)",
         third: "var(--col-third)",
         primary_light: "var(--col-primary-light)",
@@ -42,7 +45,7 @@ export default {
         fadeInLeft: 'fadeInLeft .2s ease-out',
       },
       backgroundImage: {
-        primaryDotted: "radial-gradient(#242424 1px, #171717 1px)",
+        primaryDotted: "radial-gradient(#1A1A1A 1px, #0A0A0A 1px)",
         primaryDottedFooter: "radial-gradient(#D5D5B8 1px, #ECECE2 1px)",
       },
       backgroundSize: {

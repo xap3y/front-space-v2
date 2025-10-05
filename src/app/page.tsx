@@ -54,6 +54,14 @@ export default function Home() {
                                 Login
                             </button>
                         </Link>
+                        <Link href="/home/profile" passHref>
+                            <button
+                                className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-md border border-gray-700 bg-neutral-800 text-gray-200 font-medium shadow-sm hover:bg-neutral-700 hover:border-gray-500 hover:text-white active:bg-neutral-900 transition-colors duration-150 focus:outline-none text-sm sm:text-base"
+                                type="button"
+                            >
+                                Portal
+                            </button>
+                        </Link>
                         <Link href="https://docs.xap3y.space" passHref>
                             <button
                                 className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-md border border-gray-700 bg-neutral-800 text-gray-200 font-medium shadow-sm hover:bg-neutral-700 hover:border-gray-500 hover:text-white active:bg-neutral-900 transition-colors duration-150 focus:outline-none text-sm sm:text-base"

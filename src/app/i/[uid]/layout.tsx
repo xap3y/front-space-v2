@@ -82,7 +82,8 @@ export async function generateMetadata(
             title: newTitle,
             description: newDescription,
             images: [imageData.urlSet.customUrl || imageData.urlSet.rawUrl],
-            url: `${imageData.urlSet.portalUrl}`,
+            url: webhookSettings.titleUrl || `${imageData.urlSet.portalUrl}`,
+            siteName: webhookSettings.authorName || ""
         };
     }
 

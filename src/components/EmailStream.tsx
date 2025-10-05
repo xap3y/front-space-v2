@@ -89,7 +89,7 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
           overflow-hidden min-h-64
           ${!isMdUp && mobileMode === 'detail' ? 'hidden' : ''}
           min-w-0`}>
-                <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-primary">
+                <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-primary1">
                     <span className="font-semibold text-gray-200 select-none">Inbox</span>
                     <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-medium select-none ${
@@ -103,7 +103,7 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
             {connected ? 'LIVE' : 'OFFLINE'}
           </span>
                 </div>
-                <ul className="flex-1 overflow-auto">
+                <ul className="flex-1 overflow-auto bg-primary0">
                     {messages.length === 0 && (
                         <li className="p-6 text-xs text-gray-500 text-center select-none">
                             Waiting for messages...
@@ -137,11 +137,11 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
 
             {/* MESSAGE VIEWER */}
             <div className={`flex flex-col w-full
-          xl:rounded-lg rounded-none border border-white/10 bg-secondary
+          xl:rounded-lg rounded-none border border-white/10 bg-primary0
           overflow-hidden
           ${!isMdUp && mobileMode === 'list' ? 'hidden' : ''}
           min-w-0`}>
-                <div className="p-3 gap-4 flex items-center border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-primary">
+                <div className="p-3 gap-4 flex items-center border-b border-white/10 text-xs uppercase tracking-wide font-semibold text-gray-200 bg-primary1">
                     {!isMdUp && (
                         <button
                             onClick={handleBack}
@@ -159,7 +159,7 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
                         <p className="text-gray-500 text-xs">Select a message.</p>
                     )}
                     {messages.length === 0 && (
-                        <p className="text-gray-500 text-xs select-none">No messages yet.</p>
+                        <p className="text-gray-500 text-xs select-none p-6">Empty</p>
                     )}
                     {selectedMessage && (
                         <MessageDetail message={selectedMessage} sanitizeHtml={SANITIZE_HTML} />

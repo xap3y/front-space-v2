@@ -6,7 +6,7 @@ import {ShortUrlDto, ShortUrlLog} from "@/types/url";
 import {DefaultResponse} from "@/types/core";
 import {DiscordConnection} from "@/types/discord";
 import {Album} from "@/types/album";
-import {ImageWebhookSettings} from "@/types/configs";
+import {EmbedSettings} from "@/types/configs";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)

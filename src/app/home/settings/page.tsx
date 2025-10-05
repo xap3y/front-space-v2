@@ -10,7 +10,7 @@ export default async function Page() {
     return (
         <>
             <HomeSettingsPage />
-            <BuildingInProgressPage/>
+            {/*<BuildingInProgressPage/>*/}
         </>
     )
 }
