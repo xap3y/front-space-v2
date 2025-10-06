@@ -181,7 +181,7 @@ const KIND_OPTIONS: Kind[] = ["nouns", "adjectives", "collocations"];
             }
         } else {
             const c = q.item;
-            fb["missing"] = normalize(inputsRef.current.missing || "") === normalize(c.missing);
+            fb["latin"] = normalize(inputsRef.current.latin || "") === normalize(c.latin);
         }
 
         setFeedback(fb);
@@ -570,15 +570,15 @@ const KIND_OPTIONS: Kind[] = ["nouns", "adjectives", "collocations"];
                                     <LabeledRow label="Missing Latin word:">
                                         <input
                                             key={`${qid}-coll-missing`}
-                                            ref={setNode("missing")}
+                                            ref={setNode("latin")}
                                             data-name="missing"
-                                            className={cls("missing")}
+                                            className={cls("latin")}
                                             defaultValue=""
-                                            onChange={(e) => (inputsRef.current.missing = e.target.value)}
+                                            onChange={(e) => (inputsRef.current.latin = e.target.value)}
                                             placeholder="full word (e.g., auditiva)"
                                         />
-                                        {checked && feedback["missing"] === false && (
-                                            <p className="mt-1 text-xs text-red-400">Correct: {q.item.missing}</p>
+                                        {checked && feedback["latin"] === false && (
+                                            <p className="mt-1 text-xs text-red-400">Correct: {q.item.latin}</p>
                                         )}
                                     </LabeledRow>
                                 </div>
