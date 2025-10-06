@@ -230,8 +230,8 @@ const KIND_OPTIONS: Kind[] = ["nouns", "adjectives", "collocations"];
         <div className="min-h-screen bg-primary1 bg-primaryDottedSize bg-primaryDotted text-white">
             <div className="mx-auto w-full max-w-screen-sm px-4 py-6">
                 <header className="mb-4">
-                    <h1 className="text-2xl font-semibold">Latin Vocab Trainer</h1>
-                    <p className="text-sm text-gray-400">Weeks 1–3 • One-by-one • Mobile-first</p>
+                    <h1 className="text-2xl font-semibold">Latin Vocab Exam</h1>
+                    <p className="text-sm text-gray-400">Weeks 1–3 • Mobile-first</p>
                 </header>
 
                 {!started ? (
