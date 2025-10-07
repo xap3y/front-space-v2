@@ -9,7 +9,7 @@ export default function LegalPage({
                                       title,
                                       updatedAt,
                                       children,
-                                      backHref = '/home/dashboard',
+                                      backHref = '/',
                                       brand = "XAP3Y's Space",
                                       toc = [],
                                   }: {
