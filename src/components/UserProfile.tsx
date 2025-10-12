@@ -47,7 +47,7 @@ export function UserProfile({ user }: Props) {
 
     return (
         <div
-            className="flex flex-col items-center w-full max-w-lg lg:mb-0 mb-20 lg:mx-auto mx-3 p-6 bg-primary_light text-gray-200 rounded-lg shadow-lg">
+            className="flex flex-col items-center w-full max-w-lg lg:mb-0 mb-20 lg:mx-auto mx-3 p-6 bg-primary2 border-4 border-primary0 border text-gray-200 rounded-lg shadow-lg">
 
             {/* Profile Picture */}
             <img

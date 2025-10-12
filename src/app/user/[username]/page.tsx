@@ -11,6 +11,7 @@ import {UserObj} from "@/types/user";
 import {DefaultResponse} from "@/types/core";
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
+import "@/app/debug.css"
 
 export default function Page() {
 
@@ -46,7 +47,7 @@ export default function Page() {
             )}
 
             {user && (
-                <div className="min-h-screen overflow-y-scroll flex items-center justify-center bg-dark-grey2 mt-2">
+                <div className="min-h-screen overflow-y-hidden flex items-center justify-center bg-dark-grey2">
                     <UserProfile user={user} />
                 </div>
             )}

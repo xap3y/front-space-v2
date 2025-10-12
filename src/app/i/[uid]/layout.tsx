@@ -1,6 +1,7 @@
 import type {Metadata, ResolvingMetadata} from "next";
 import {getImageInfoApi} from "@/lib/apiGetters";
 
+export const dynamic = "force-dynamic";
 
 async function fetchImageData(uid: string) {
     const res = await getImageInfoApi(uid + "");
@@ -85,6 +86,7 @@ export async function generateMetadata(
             url: webhookSettings.titleUrl || `${imageData.urlSet.portalUrl}`,
             siteName: webhookSettings.authorName || ""
         };
+
     }
 
     console.log("Generated metadata: ", metadataBuilder);
