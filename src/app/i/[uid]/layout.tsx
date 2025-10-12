@@ -68,6 +68,9 @@ export async function generateMetadata(
             .replaceAll("{filetype}", imageData.type)
             .replaceAll("{uploader}", imageData.uploader?.username || 'N/A');
 
+        const titleUrl = (webhookSettings.titleUrl || imageData.urlSet.portalUrl || "")
+            .replaceAll("{uid}", imageData.uniqueId)
+
         metadataBuilder.title = newTitle;
         metadataBuilder.description = newDescription;
 
@@ -82,8 +85,8 @@ export async function generateMetadata(
         metadataBuilder.openGraph = {
             title: newTitle,
             description: newDescription,
-            images: [imageData.urlSet.customUrl || imageData.urlSet.rawUrl],
-            url: webhookSettings.titleUrl || `${imageData.urlSet.portalUrl}`,
+            images: imageData.urlSet.rawUrl,
+            url: titleUrl,
             siteName: webhookSettings.authorName || ""
         };
 

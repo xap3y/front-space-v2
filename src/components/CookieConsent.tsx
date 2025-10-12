@@ -36,7 +36,7 @@ export default function CookieConsent() {
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-[60] px-3 pb-3 print:hidden">
-            <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[#12161c] shadow-2xl overflow-hidden">
+            <div className="mx-auto max-w-3xl rounded-2xl border bg-primary2 border-4 border-primary0 shadow-2xl overflow-hidden">
                 <div className="p-4 md:p-5">
                     <div className="flex flex-col md:flex-row md:items-center md:gap-4">
                         <div className="flex-1">
@@ -53,13 +53,13 @@ export default function CookieConsent() {
                         <div className="flex gap-2 mt-3 md:mt-0">
                             <button
                                 onClick={decline}
-                                className="px-3 py-2 rounded-md text-sm border border-white/15 bg-[#161b22] hover:bg-[#1b212a] transition-colors"
+                                className="px-3 py-2 rounded-md text-sm border border-white/10 bg-primary hover:bg-[#1b212a] transition-colors"
                             >
                                 Pouze nezbytné
                             </button>
                             <button
                                 onClick={accept}
-                                className="px-3 py-2 rounded-md text-sm bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                                className="px-3 py-2 rounded-md text-sm border border-green-950 bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
                             >
                                 Povolit Analytics
                             </button>
