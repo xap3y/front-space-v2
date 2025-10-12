@@ -13,7 +13,7 @@ export default function ImageLayour({
 }) {
     return (
         <>
-            <ErrorToast type={"WARN"} message={`This page is in BETA`} />
+            {/*<ErrorToast type={"WARN"} message={`This page is in BETA`} />*/}
             <ImageProvider>
                 {children}
             </ImageProvider>

@@ -8,7 +8,7 @@ import NotFound from "next/dist/client/components/not-found-error";
 import {useImage} from "@/context/ImageContext";
 import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
-import {FaArrowDown, FaDownload} from "react-icons/fa6";
+import {FaArrowDown, FaDownload, FaLock} from "react-icons/fa6";
 import { MdReport } from "react-icons/md";
 import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
@@ -19,6 +19,7 @@ import {UserObj} from "@/types/user";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {useIsMobile} from "@/hooks/utils";
 import {copyToClipboard, deleteImageApi, errorToast, infoToast} from "@/lib/client";
+import {FaEye, FaEyeSlash} from "react-icons/fa";
 
 export default function Page() {
 
@@ -32,9 +33,10 @@ export default function Page() {
     const [passwordRequired, setPasswordRequired] = useState(false);
     const [showImage, setShowImage] = useState(false);
     const [error, setError] = useState("");
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [imageUrl, setimageUrl] = useState<string | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const [open, setOpen] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const toggleDropdown = () => setOpen(!open);
     const closeDropdown = () => setOpen(false);
@@ -71,7 +73,7 @@ export default function Page() {
                     setPasswordRequired(true)
                 }
             } else {
-                setImageUrl(imageDto.urlSet.customUrl || imageDto.urlSet.rawUrl);
+                setimageUrl(imageDto.urlSet.customUrl || imageDto.urlSet.rawUrl);
                 console.log(imageDto.urlSet.customUrl)
                 setShowImage(true)
             }
@@ -95,7 +97,7 @@ export default function Page() {
                 setPasswordRequired(true)
             }
             console.log("Using cached image")
-            setImageUrl(image.urlSet.customUrl || image.urlSet.rawUrl);
+            setimageUrl(image.urlSet.customUrl || image.urlSet.rawUrl);
             setShowImage(true)
             setLoading(false)
         }
@@ -181,7 +183,7 @@ export default function Page() {
             console.log("RES: ", res)
             const blob = await res.blob();
             const url = URL.createObjectURL(blob);
-            setImageUrl(url);
+            setimageUrl(url);
             setShowImage(true);
             setPasswordRequired(false);
             toast.update(toastId, {
@@ -259,10 +261,10 @@ export default function Page() {
         <>
             {(!passwordRequired && showImage && image.type) ? (
                 <>
-                    <div className={"max-h-screen overflow-y-scroll overflow-x-hidden"}>
+                    <div className={"overflow-y-scroll overflow-x-hidden"}>
 
-                        <div className={"flex items-center justify-center lg:mb-0 pb-56"}>
-                            <div className={"p-4 mt-2 lg:mt-20 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-secondary"} onMouseMove={handleMouseMove}>
+                        <div className={"flex min-h-screen w-full items-center justify-center lg:mb-0 pb-56"}>
+                            <div className={"p-4 mt-2 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-primary2 border-4 border-primary0"} onMouseMove={handleMouseMove}>
                                 <div className={"flex flex-col items-center justify-center p-2"}>
                                     <h1 className={"lg:text-3xl text-xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
 
@@ -317,7 +319,7 @@ export default function Page() {
                                 </div>
 
 
-                                <div className={"flex flex-row gap-6 mt-4 flex-wrap justify-center w-full lg:text-base text-sm font-bold"}>
+                                <div className={"flex flex-row gap-4 mt-4 flex-wrap justify-center w-full lg:text-base text-sm font-bold"}>
 
                                     {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"} onClick={downloadImage}>
                                         <FaDownload />
@@ -325,15 +327,15 @@ export default function Page() {
                                     </button>*/}
 
                                     <a
-                                        className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"}
-                                        href={imageUrl + "?download=true" || ""}
+                                        className={"lg:h-11 h-9 flex items-center gap-2 text-white px-2 rounded border border-white/10 bg-primary hover:bg-secondary"}
+                                        href={image.urlSet.rawUrl + "?download=true&password="+password || ""}
                                         target={"_self"}
                                         rel="noopener noreferrer"
                                         onClick={(e) => {
                                             infoToast("Downloading image")
                                         }}
                                     >
-                                        <FaDownload />
+                                        <FaDownload className="h-4 w-4" />
                                         {lang.pages.image_viewer.download_button_text}
                                     </a>
 
@@ -344,10 +346,10 @@ export default function Page() {
 
                                     <div className="relative inline-block text-left">
                                         <button
-                                            className="lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"
+                                            className="lg:h-11 h-9 flex items-center gap-2 border text-white px-2 rounded border-white/10 bg-primary hover:bg-secondary"
                                             onClick={toggleDropdown}
                                         >
-                                            <FaArrowDown className={`${open ? "rotate-180" : ""} duration-200`} />
+                                            <FaArrowDown className={`h-4 w-4 ${open ? "rotate-180" : ""} duration-200`} />
                                             {lang.pages.image_viewer.copy_button_text}
                                         </button>
 
@@ -396,10 +398,10 @@ export default function Page() {
                                         </div>
                                     </div>
 
-                                    <button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-600 text-white px-2 rounded"} onClick={reportImage} >
+                                    {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-600 text-white px-2 rounded"} onClick={reportImage} >
                                         <MdReport />
                                         {lang.pages.image_viewer.report_button_text}
-                                    </button>
+                                    </button>*/}
 
                                     {/* TODO - DELETE */}
                                     {(user && image.uploader && user.uid == image.uploader.uid) && (
@@ -431,38 +433,87 @@ export default function Page() {
                 </>
             ) : passwordRequired ? (
                 <>
-                    <div className="flex h-screen justify-center items-center flex-col gap-2">
-                        <p className={"xl:text-3xl text-2xl font-bold mb-4 text-center"}>
-                            {lang.pages.image_viewer.password_required}
-                        </p>
-                        <form
-                            autoComplete="off"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                handleSubmitPassword();
-                            }}
-                            className="flex flex-col gap-2"
-                        >
-                            <input
-                                type="text"
-                                name={"new-adwd-field-unique"}
+                    <section className="min-h-screen w-full flex items-center justify-center px-4 py-8">
+                        <div className="w-full max-w-md bg-primary2 border-4 border-primary0 rounded-2xl shadow-xl p-5 sm:p-6">
+                            {/* Header */}
+                            <div className="flex items-center gap-3 mb-4">
+                                <h1 className="text-base sm:text-xl font-bold leading-tight text-whitesmoke">
+                                    {lang?.pages?.image_viewer?.password_required}
+                                </h1>
+                            </div>
+
+                            {/* Form */}
+                            <form
                                 autoComplete="off"
-                                readOnly={isReadOnly}
-                                onClick={() => {
-                                    setIsReadOnly(false);
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSubmitPassword();
                                 }}
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder={lang.pages.image_viewer.password_placeholder}
-                                className="text-dots p-2 rounded text-whitesmoke outline-none bg-secondary shadow-xl border border-dark-grey2 focus:border-blue-500 transition duration-200"
-                            />
-                            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200">
-                                {lang.pages.image_viewer.view_image_button_placeholder}
-                            </button>
-                            {error && <p className="text-red-500">{error}</p>}
-                        </form>
-                    </div>
+                                className="space-y-3"
+                                noValidate
+                            >
+                                <label className="block text-sm font-medium text-gray-300">
+                                    {lang?.pages?.image_viewer?.password_placeholder}
+                                </label>
+
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="image-password"
+                                        id={"new-password"}
+                                        autoComplete="off"
+                                        readOnly={isReadOnly}
+                                        onFocus={() => setIsReadOnly(false)}
+                                        onClick={() => setIsReadOnly(false)}
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder={lang?.pages?.image_viewer?.password_placeholder}
+                                        aria-invalid={!!error}
+                                        className={[
+                                            "block w-full p-3 pr-11 rounded-lg",
+                                            "bg-primary2 text-whitesmoke placeholder:text-gray-400",
+                                            "border-2 border-primary focus:border-secondary",
+                                            "outline-none focus:ring-1 focus:ring-primary0",
+                                            "transition duration-200",
+                                        ].join(" ")}
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((s) => !s)}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                        tabIndex={-1}
+                                    >
+                                        {showPassword ? (
+                                            <FaEyeSlash className="h-5 w-5" />
+                                        ) : (
+                                            <FaEye className="h-5 w-5" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                {error ? (
+                                    <div className="bg-red-500/10 border border-red-500/40 text-red-300 rounded-md p-2 text-sm">
+                                        {error}
+                                    </div>
+                                ) : (
+                                    /*<p className="text-xs text-gray-400">
+                                        {lang?.pages?.image_viewer?.view_image_button_placeholder}
+                                    </p>*/
+                                    <></>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    className="w-full bg-blue-500 text-white px-4 py-2.5 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500/30 transition"
+                                >
+                                    {lang?.pages?.image_viewer?.view_image_button_placeholder}
+                                </button>
+                            </form>
+                        </div>
+                    </section>
                 </>
             ) : null}
 

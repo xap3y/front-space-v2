@@ -45,7 +45,7 @@ export default {
         fadeInLeft: 'fadeInLeft .2s ease-out',
       },
       backgroundImage: {
-        primaryDotted: "radial-gradient(#1A1A1A 1px, #0A0A0A 1px)",
+        primaryDotted: "radial-gradient(#262626 1px, #0A0A0A 1px)",
         primaryDottedFooter: "radial-gradient(#D5D5B8 1px, #ECECE2 1px)",
       },
       backgroundSize: {

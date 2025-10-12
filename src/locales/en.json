@@ -74,7 +74,7 @@
             "copy_button_text": "Copy",
             "report_button_text": "Report",
             "download_alert": "Downloading...",
-            "password_required": "This image is password protected",
+            "password_required": "This resource is password protected",
             "password_placeholder": "Enter password",
             "view_image_button_placeholder": "View Image"
         },

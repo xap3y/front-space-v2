@@ -319,7 +319,7 @@ export default function ImageUploader() {
                 <ErrorToast type={"ERROR"} message={"MAIN API SERVER IS DOWN!"} />
             )}
             {!uploadedImage && (
-                <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-primary bg-opacity-50 select-none`}>
+                <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-opacity-50 select-none`}>
                     <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out p-6 rounded-xl bg-secondary shadow-lg w-full max-w-md xl:min-w-[550px] ${showAdvanced ? "xl:mb-0 mb-44" : ""}`}>
                         <div className="space-y-6">
                             {!file && (
