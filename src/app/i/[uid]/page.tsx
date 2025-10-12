@@ -459,9 +459,9 @@ export default function Page() {
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
-                                        name="image-password"
-                                        id={"new-password"}
-                                        autoComplete="off"
+                                        name="image-psw"
+                                        id={"img-psw"}
+                                        autoComplete="new-password"
                                         readOnly={isReadOnly}
                                         onFocus={() => setIsReadOnly(false)}
                                         onClick={() => setIsReadOnly(false)}
