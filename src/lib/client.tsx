@@ -314,6 +314,7 @@ export async function uploadImageBucket(formData: FormData, apiKey: string,  cal
         const spaceFormData = new FormData();
         spaceFormData.append('uniqueId', uid);
         spaceFormData.append('fileType', type);
+        spaceFormData.append('source', "PORTAL");
         spaceFormData.append('size', file.size + "");
         const response = await axios.post(getApiUrl() + "/v1/image/register", spaceFormData, {
             headers: {

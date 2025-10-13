@@ -16,9 +16,10 @@ interface Props {
     forceId: number;
     desktopHeightPx?: number;
     disconnectBo?: boolean;
+    isExpired?: boolean;
 }
 
-export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560 }: Props) {
+export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560, isExpired = false }: Props) {
     const { messages, connected, disconnect, removeMessage } = useEmailWebSocket(email, apiKey, forceId);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -73,7 +74,6 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
         console.log("connected changed", connected)
     }, [connected])
 
-
     return (
         <div
             className={` p-0 xl:p-6
@@ -95,12 +95,14 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
                         className={`text-[10px] px-2 py-0.5 rounded-full font-medium select-none ${
                             connected
                                 ? 'bg-green-500/15 text-green-400 border border-green-400/30'
-                                : 'bg-gray-500/15 text-gray-400 border border-gray-400/20'
+                                : isExpired ?
+                                    'bg-red-500/15 text-red-400 border border-red-400/30':
+                                    'bg-gray-500/15 text-gray-400 border border-gray-400/20'
                         }`}
 
                         data-tooltip-id="my-tooltip" data-tooltip-content={connected ? 'New emails will display automatically, no need to refresh ' : 'Reconnect to receive new emails'}
                     >
-            {connected ? 'LIVE' : 'OFFLINE'}
+            {connected ? 'LIVE' : isExpired ? 'EXPIRED' : 'OFFLINE'}
           </span>
                 </div>
                 <ul className="flex-1 overflow-auto bg-primary0">

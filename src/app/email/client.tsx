@@ -79,10 +79,12 @@ export default function EmailPage({maxWidth} : Props) {
 
     const MAX_WIDTH = maxWidth ?? 1920;
 
+    const isExpired = tempMail?.expireAt ? new Date(tempMail.expireAt) < new Date() : false;
+
     return (
         <>
             <div
-                className={`w-full xl:h-auto bg-card border border-white/10 rounded-lg shadow-xl flex flex-col gap-6`}
+                className={`w-full xl:h-auto bg-card box-primary shadow-xl flex flex-col gap-6`}
                 style={{ maxWidth: MAX_WIDTH }}
             >
                 <div className={`p-4 sm:p-6`}>
@@ -119,7 +121,7 @@ export default function EmailPage({maxWidth} : Props) {
                                         </button>
                                     </div>
                                     <p className="text-[11px] text-gray-500">
-                                        Expires: <span className="text-gray-300">{tempMail.expireAt ? new Date(tempMail.expireAt).toLocaleString() : 'never'}</span>
+                                        Expires: <span className={`${isExpired ? "text-red-600" : "text-gray-300"}`}>{tempMail.expireAt ? new Date(tempMail.expireAt).toLocaleString() : 'never'}</span>
                                     </p>
                                 </div>
 
@@ -156,6 +158,7 @@ export default function EmailPage({maxWidth} : Props) {
                         apiKey={apiKey}
                         forceId={wsForceRefreshId}
                         disconnectBo={isRefreshing}
+                        isExpired={isExpired}
                     />
                 )}
 

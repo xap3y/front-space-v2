@@ -34,6 +34,7 @@ export default {
       },
       fontFamily: {
         'source-code': ['SourceCodeVf', 'sans-serif'],
+        'source-code-bold': ['SourceCodeVfBold', 'sans-serif'],
       },
       keyframes: {
         fadeInLeft: {
@@ -51,6 +52,7 @@ export default {
       backgroundSize: {
         primaryDottedSize: "15px 15px",
       },
+
     },
   },
   plugins: [],

@@ -432,7 +432,7 @@ export default function RegistrationVerifyPage() {
 
     return (
         <main className="flex min-h-screen items-center justify-center px-4" onPaste={handleMainPaste}>
-            <div className="w-full max-w-md rounded-md bg-primary_light/60 backdrop-blur-sm border border-primary_border shadow-card p-8">
+            <div className="w-full max-w-md backdrop-blur-sm box-primary shadow-card p-8">
                 {/* Method chooser */}
                 {method === "none" && (
                     <>

@@ -194,7 +194,7 @@ export default function LoginPage() {
 
             <div className="max-w-lg w-full mx-3">
                 <div
-                    className="bg-primary2 border-2 border-primary0 rounded-lg shadow-xl overflow-hidden"
+                    className="box-primary shadow-xl overflow-hidden"
                 >
                     <div className="p-3 lg:p-8">
                         <h2 className="text-center text-3xl font-extrabold text-white">

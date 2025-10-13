@@ -175,6 +175,7 @@ export default function ImageUploader() {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("apiKey", apiKey);
+        formData.append("source", "PORTAL");
 
         if (withPassword && password.length > 2) formData.append("password", password)
         if (description) formData.append("desc", description)
@@ -320,7 +321,7 @@ export default function ImageUploader() {
             )}
             {!uploadedImage && (
                 <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-opacity-50 select-none`}>
-                    <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out p-6 rounded-xl bg-secondary shadow-lg w-full max-w-md xl:min-w-[550px] ${showAdvanced ? "xl:mb-0 mb-44" : ""}`}>
+                    <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px] ${showAdvanced ? "xl:mb-0 mb-44" : ""}`}>
                         <div className="space-y-6">
                             {!file && (
                                 <div

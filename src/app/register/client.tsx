@@ -7,7 +7,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {MdEmail} from "react-icons/md";
 import {FaKey, FaUser} from "react-icons/fa";
 import {toast} from "react-toastify";
-import {FaLock} from "react-icons/fa6";
+import {FaCheck, FaLock} from "react-icons/fa6";
 import {getApiUrl} from "@/lib/core";
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {ErrorPage} from "@/components/ErrorPage";
@@ -122,10 +122,10 @@ export default function RegisterPage() {
 
                 <div className="max-w-lg w-full mx-3">
                     <div
-                        className="bg-primary2 border-2 border-primary0 rounded-lg shadow-xl overflow-hidden"
+                        className="box-primary shadow-xl overflow-hidden"
                     >
                         <div className="p-3 lg:p-8">
-                            <h2 className="text-center text-3xl font-extrabold text-white">
+                            <h2 className="text-center text-3xl font-extrabold font-source-code-bold text-white">
                                 {lang.pages.register.title}
                             </h2>
                             <p className="mt-4 text-center text-gray-400">{lang.pages.register.under_title}</p>
@@ -215,23 +215,35 @@ export default function RegisterPage() {
 
                                 {/* Agree to Terms + Privacy */}
                                 <div className="mt-4">
-                                    <label htmlFor="agree" className="flex items-start gap-3 cursor-pointer select-none">
+                                    <label
+                                        htmlFor="agree"
+                                        className="flex flex-row items-center gap-2.5 dark:text-white light:text-black"
+                                    >
                                         <input
                                             id="agree"
-                                            name="agree"
+                                            name={"agree"}
                                             type="checkbox"
-                                            className="mt-0.5 h-4 w-4 rounded border border-white/20 bg-primary_light text-telegram focus:ring-2 focus:ring-telegram-brighter"
+                                            className="peer hidden"
+                                            required
                                             checked={agreed}
                                             onChange={(e) => setAgreed(e.target.checked)}
-                                            required
                                         />
+                                        <div
+                                            className="flex rounded-md border border-[#a2a1a833] light:bg-[#e8e8e8] dark:bg-[#212121] peer-checked:bg-telegram transition duration-200"
+                                        >
+                                            <div className={"h-6 w-6 flex items-center justify-center"}>
+                                                <FaCheck className={`transition-all duration-150 w-4 h-4 ${!agreed ? "w-0 h-0" : ""}`} />
+                                            </div>
+                                        </div>
                                         <span className="text-xs sm:text-sm text-gray-200">
                       I have read and agree to the{" "}
-                                            <Link href="/legal/terms" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">
+                                            <Link href="/legal/terms" target="_blank" rel="noopener noreferrer"
+                                                  className="underline decoration-white/30 hover:text-white">
                         Terms of Service
                       </Link>{" "}
                                             and{" "}
-                                            <Link href="/legal/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-white/30 hover:text-white">
+                                            <Link href="/legal/privacy" target="_blank" rel="noopener noreferrer"
+                                                  className="underline decoration-white/30 hover:text-white">
                         Privacy Policy
                       </Link>.
                     </span>
@@ -242,7 +254,8 @@ export default function RegisterPage() {
                                 <div className="flex items-center justify-center mt-4">
 
                                     <div className="text-sm font-bold flex">
-                                        <span className="text-gray-400 mr-1">{lang.pages.register.already_have_account}</span>
+                                        <span
+                                            className="text-gray-400 mr-1">{lang.pages.register.already_have_account}</span>
                                         <p className="font-bold text-telegram hover:text-telegram-bright cursor-pointer"
                                            onClick={() => router.push('/login')}
                                         >{lang.pages.register.login_text}</p>

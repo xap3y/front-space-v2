@@ -264,7 +264,7 @@ export default function Page() {
                     <div className={"overflow-y-scroll overflow-x-hidden"}>
 
                         <div className={"flex min-h-screen w-full items-center justify-center lg:mb-0 pb-56"}>
-                            <div className={"p-4 mt-2 mx-4 lg:mx-0 rounded-lg shadow-sm flex flex-col items-center bg-primary2 border-4 border-primary0"} onMouseMove={handleMouseMove}>
+                            <div className={"p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary"} onMouseMove={handleMouseMove}>
                                 <div className={"flex flex-col items-center justify-center p-2"}>
                                     <h1 className={"lg:text-3xl text-xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
 
@@ -434,7 +434,7 @@ export default function Page() {
             ) : passwordRequired ? (
                 <>
                     <section className="min-h-screen w-full flex items-center justify-center px-4 py-8">
-                        <div className="w-full max-w-md bg-primary2 border-4 border-primary0 rounded-2xl shadow-xl p-5 sm:p-6">
+                        <div className="w-full max-w-md box-primary rounded-2xl shadow-xl p-5 sm:p-6">
                             {/* Header */}
                             <div className="flex items-center gap-3 mb-4">
                                 <h1 className="text-base sm:text-xl font-bold leading-tight text-whitesmoke">
@@ -459,12 +459,9 @@ export default function Page() {
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
-                                        name="image-psw"
-                                        id={"img-psw"}
-                                        autoComplete="new-password"
-                                        readOnly={isReadOnly}
-                                        onFocus={() => setIsReadOnly(false)}
-                                        onClick={() => setIsReadOnly(false)}
+                                        name="image-password"
+                                        id={"new-password"}
+                                        autoComplete="off"
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}

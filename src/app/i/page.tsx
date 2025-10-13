@@ -50,7 +50,7 @@ export default function ImageFinder() {
                 <main className="flex overflow-y-hidden mt-40 lg:mt-0 lg:items-center justify-center lg:min-h-screen">
                     <div className="overflow-y-hidden max-w-lg w-full mx-3">
                         <div
-                            className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
+                            className="box-primary shadow-xl overflow-hidden"
                         >
                             <div className="p-4">
                                 <h1 className="text-3xl font-bold text-center text-white">{lang.pages.image_finder.title}</h1>

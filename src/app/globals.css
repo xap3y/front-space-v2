@@ -2,10 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+    .box-primary {
+        @apply bg-primary2 border-4 border-primary0 rounded-lg;
+    }
+}
+
+
 @font-face {
     font-family: 'SourceCodeVf';
     src: url('/fonts/SourceCodePro.ttf') format('truetype');
     font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SourceCodeVfBold';
+    src: url('/fonts/SourceCodeProSemiBold.ttf') format('truetype');
+    font-weight: 600;
     font-style: normal;
     font-display: swap;
 }
