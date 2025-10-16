@@ -10,6 +10,8 @@ import {toast} from "react-toastify";
 import {deleteShortUrl} from "@/lib/apiPoster";
 import {FaExternalLinkAlt} from "react-icons/fa";
 import {errorToast} from "@/lib/client";
+import LoadingPage from "@/components/LoadingPage";
+import {useRouter} from "next/navigation";
 
 type DefaultResponse = { error: boolean; message: string };
 
@@ -23,6 +25,8 @@ export default function UrlsPage() {
     const [loading, setLoading] = useState(false);
 
     const canLoad = !!user?.uid && !loadingUser;
+
+    const router = useRouter();
 
     const fetchUrls = useCallback(async () => {
         if (!user?.uid) return;
@@ -51,6 +55,12 @@ export default function UrlsPage() {
     useEffect(() => {
         if (canLoad) fetchUrls();
     }, [canLoad, fetchUrls]);
+
+    useEffect(() => {
+        if (!loadingUser && !user) {
+            router.push("/login");
+        }
+    }, [user, loadingUser])
 
     const handleCopy = async (shortUrl: string) => {
         if (!shortUrl) {
@@ -94,6 +104,8 @@ export default function UrlsPage() {
             errorToast('Delete failed');
         }
     };
+
+    if (loadingUser || !user) return <LoadingPage />;
 
     return (
         <section className="flex-1 min-w-0 md:pt-0 pt-14 px-3 md:px-6">

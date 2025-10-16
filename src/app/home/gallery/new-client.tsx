@@ -233,7 +233,7 @@ export default function GalleryPage() {
         fetchImages("prev");
     };
 
-    if (loadingUser) {
+    if (loadingUser || !user) {
         return (
             <LoadingPage />
         )

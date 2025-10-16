@@ -1,6 +1,5 @@
 import type {Metadata} from "next";
-import HomeDashboardPage from "@/app/home/dashboard/client";
-import {BuildingInProgressPage} from "@/components/GlobalComponents";
+import HomeDashboardPageTemp from "@/app/home/dashboard/building";
 
 export const metadata: Metadata = {
     title: "Space - Home (dashboard)",
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 export default function Page() {
     return (
         <>
-            <BuildingInProgressPage/>
+            <HomeDashboardPageTemp/>
             {/*<HomeDashboardPage />*/}
         </>
     )

@@ -232,7 +232,7 @@ export default function RegisterPage() {
                                             className="flex rounded-md border border-[#a2a1a833] light:bg-[#e8e8e8] dark:bg-[#212121] peer-checked:bg-telegram transition duration-200"
                                         >
                                             <div className={"h-6 w-6 flex items-center justify-center"}>
-                                                <FaCheck className={`transition-all duration-150 w-4 h-4 ${!agreed ? "w-0 h-0" : ""}`} />
+                                                <FaCheck className={`transition-all duration-150 w-0 h-0 ${agreed ? "w-4 h-4" : ""}`} />
                                             </div>
                                         </div>
                                         <span className="text-xs sm:text-sm text-gray-200">

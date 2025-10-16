@@ -24,6 +24,12 @@ export default function HomeSettingsEmbed() {
         setPage("settings");
     }, []);
 
+    useEffect(() => {
+        if (!loadingUser && !user) {
+            router.push("/login");
+        }
+    }, [user, loadingUser, error])
+
     // Tab state
     const [activeTab, setActiveTab] = useState(TABS[0].key);
 
@@ -45,6 +51,8 @@ export default function HomeSettingsEmbed() {
                 return null;
         }
     }
+
+    if (loadingUser || !user) return <LoadingPage />;
 
     return (
         <section className="flex-1 min-w-0 pt-0 px-1 md:px-12">

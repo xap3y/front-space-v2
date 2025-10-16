@@ -206,8 +206,8 @@ export default function LoginPage() {
                         <div className={"w-full flex flex-col items-center justify-center"}>
                             <div className="mt-4 text-center cursor-pointer">
                                 <a
-                                    className="w-full max-w-xs flex items-center justify-center gap-3 px-6 py-2
-                                 bg-[#5865F2] border-4 border-[#404EED] text-white rounded-2xl
+                                    className="w-full max-w-xs flex items-center justify-center gap-3 px-3 py-2
+                                 bg-[#5865F2] border-4 border-[#404EED] text-white rounded-lg
                                  font-semibold text-md hover:bg-[#4752C4] transition-all duration-200"
                                     href={process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL}
                                 >
@@ -216,13 +216,13 @@ export default function LoginPage() {
                                 </a>
                             </div>
 
-                            <div className={"flex my-4 gap-4"}>
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-primary-brighter bg-primary0"} />
+                            <div className={"flex my-4 gap-5"}>
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
                             </div>
                         </div>
 

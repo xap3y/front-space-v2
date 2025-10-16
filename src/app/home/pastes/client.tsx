@@ -4,6 +4,7 @@ import {usePage} from "@/context/PageContext";
 import {useEffect} from "react";
 import {useUser} from "@/hooks/useUser";
 import {useRouter} from "next/navigation";
+import LoadingPage from "@/components/LoadingPage";
 
 export default function HomePastesPage() {
 
@@ -23,6 +24,8 @@ export default function HomePastesPage() {
     useEffect(() => {
         setPage("pastes")
     }, [])
+
+    if (loadingUser || !user) return <LoadingPage />;
 
     return (
         <>
