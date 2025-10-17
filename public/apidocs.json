@@ -3,7 +3,7 @@
     "info": {
         "title": "Space API",
         "description": "- [API](https://call.xap3y.space)\n- [GitHub Repository](https://github.com/xap3y/space-api)",
-        "version": "1.0-beta.23"
+        "version": "1.0-beta.15"
     },
     "servers": [
         {
@@ -66,6 +66,35 @@
                 }
             }
         },
+        "/image/generate-upload-url": {
+            "post": {
+                "summary": "Generate a presigned PUT URL for direct upload",
+                "tags": ["Image"],
+                "security": [{ "apiKeyAuth": [] }],
+                "parameters": [
+                    { "name": "contentType", "in": "query", "required": false, "schema": { "type": "string" } }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Presigned URL generated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "uid": { "type": "string" },
+                                        "url": { "type": "string", "format": "uri" },
+                                        "method": { "type": "string", "enum": ["PUT"] }
+                                    },
+                                    "required": ["uid", "url", "method"]
+                                }
+                            }
+                        }
+                    },
+                    "401": { "$ref": "#/components/responses/Unauthorized" }
+                }
+            }
+        },
         "/image/upload/cloud": {
             "post": {
                 "summary": "Upload image directly to cloud storage (S3-compatible)",
@@ -98,35 +127,6 @@
                 }
             }
         },
-        "/image/generate-upload-url": {
-            "post": {
-                "summary": "Generate a presigned PUT URL for direct upload",
-                "tags": ["Image"],
-                "security": [{ "apiKeyAuth": [] }],
-                "parameters": [
-                    { "name": "contentType", "in": "query", "required": false, "schema": { "type": "string" } }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Presigned URL generated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "uid": { "type": "string" },
-                                        "url": { "type": "string", "format": "uri" },
-                                        "method": { "type": "string", "enum": ["PUT"] }
-                                    },
-                                    "required": ["uid", "url", "method"]
-                                }
-                            }
-                        }
-                    },
-                    "401": { "$ref": "#/components/responses/Unauthorized" }
-                }
-            }
-        },
         "/image/upload": {
             "post": {
                 "summary": "Upload an image",
@@ -156,6 +156,17 @@
                     "400": { "$ref": "#/components/responses/BadRequest" },
                     "401": { "$ref": "#/components/responses/Unauthorized" },
                     "500": { "$ref": "#/components/responses/InternalError" }
+                }
+            }
+        },
+        "/image/info/{uniqueId}": {
+            "get": {
+                "summary": "Get image metadata by unique ID",
+                "tags": ["Image"],
+                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                "responses": {
+                    "200": { "$ref": "#/components/responses/UploadedResource" },
+                    "404": { "$ref": "#/components/responses/NotFound" }
                 }
             }
         },
@@ -193,31 +204,15 @@
                     "404": { "$ref": "#/components/responses/NotFound" }
                 }
             },
-            "delete": {
-                "summary": "Delete an image by unique ID",
-                "tags": ["Image"],
-                "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
-                "security": [{ "apiKeyAuth": [] }],
-                "responses": {
-                    "200": { "$ref": "#/components/responses/StandardResponse" },
-                    "401": { "$ref": "#/components/responses/Unauthorized" },
-                    "404": { "$ref": "#/components/responses/NotFound" }
-                }
-            },
             "post": {
-                "summary": "Get protected image info/data (with password or api key)",
+                "summary": "Get protected image info/data (with password or API key)",
                 "tags": ["Image"],
                 "security": [{ "apiKeyAuth": [] }],
                 "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "requestBody": {
                     "required": false,
                     "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": { "password": { "type": "string" } }
-                            }
-                        }
+                        "application/json": { "schema": { "type": "object", "properties": { "password": { "type": "string" } } } }
                     }
                 },
                 "responses": {
@@ -226,15 +221,15 @@
                     "401": { "$ref": "#/components/responses/Unauthorized" },
                     "403": { "$ref": "#/components/responses/Forbidden" }
                 }
-            }
-        },
-        "/image/info/{uniqueId}": {
-            "get": {
-                "summary": "Get image metadata by unique ID",
+            },
+            "delete": {
+                "summary": "Delete an image by unique ID",
                 "tags": ["Image"],
+                "security": [{ "apiKeyAuth": [] }],
                 "parameters": [{ "name": "uniqueId", "in": "path", "required": true, "schema": { "type": "string" } }],
                 "responses": {
-                    "200": { "$ref": "#/components/responses/UploadedResource" },
+                    "200": { "$ref": "#/components/responses/StandardResponse" },
+                    "401": { "$ref": "#/components/responses/Unauthorized" },
                     "404": { "$ref": "#/components/responses/NotFound" }
                 }
             }
@@ -328,7 +323,7 @@
 
         "/paste/create": {
             "post": {
-                "summary": "Create a paste (multipart)",
+                "summary": "Create a paste (multipart or JSON)",
                 "tags": ["Paste"],
                 "security": [{ "apiKeyAuth": [] }],
                 "requestBody": {
@@ -336,25 +331,10 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": { "type": "object", "properties": { "file": { "type": "string", "format": "binary" } }, "required": ["file"] }
+                        },
+                        "application/json": {
+                            "schema": { "type": "object", "properties": { "title": { "type": "string" }, "text": { "type": "string" } }, "required": ["text"] }
                         }
-                    }
-                },
-                "responses": {
-                    "200": { "$ref": "#/components/responses/UploadedResourcePaste" },
-                    "400": { "$ref": "#/components/responses/BadRequest" }
-                }
-            }
-        },
-        "/paste/create#json": {
-            "post": {
-                "summary": "Create a paste (JSON body)",
-                "tags": ["Paste"],
-                "operationId": "pasteCreateJson",
-                "security": [{ "apiKeyAuth": [] }],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": { "schema": { "type": "object", "properties": { "title": { "type": "string" }, "text": { "type": "string" } }, "required": ["text"] } }
                     }
                 },
                 "responses": {
@@ -478,6 +458,7 @@
             "get": {
                 "summary": "Get current user via session cookie",
                 "tags": ["Auth"],
+                "security": [{ "sessionCookieAuth": [] }],
                 "responses": {
                     "200": { "$ref": "#/components/responses/LoggedUser" },
                     "401": { "$ref": "#/components/responses/Unauthorized" }
@@ -518,6 +499,7 @@
             "post": {
                 "summary": "Logout and invalidate session",
                 "tags": ["Auth"],
+                "security": [{ "sessionCookieAuth": [] }],
                 "responses": {
                     "200": { "$ref": "#/components/responses/StandardResponse" },
                     "400": { "$ref": "#/components/responses/BadRequest" }
@@ -526,8 +508,9 @@
         },
         "/auth/verify/telegram": {
             "post": {
-                "summary": "Get Telegram verification data (using verify_token cookie)",
+                "summary": "Get Telegram verification data (uses verify_token cookie)",
                 "tags": ["Auth"],
+                "security": [{ "verifyCookieAuth": [] }],
                 "responses": {
                     "200": { "$ref": "#/components/responses/StandardResponse" },
                     "400": { "$ref": "#/components/responses/BadRequest" },
@@ -539,6 +522,7 @@
             "post": {
                 "summary": "Validate verify token state",
                 "tags": ["Auth"],
+                "security": [{ "verifyCookieAuth": [] }],
                 "responses": {
                     "200": { "$ref": "#/components/responses/StandardResponse" },
                     "400": { "$ref": "#/components/responses/BadRequest" }
@@ -547,8 +531,9 @@
         },
         "/auth/verify/resendemail": {
             "post": {
-                "summary": "Resend verification email",
+                "summary": "Resend verification email (requires verify_token and new_email cookies)",
                 "tags": ["Auth"],
+                "security": [{ "verifyCookieAuth": [], "newEmailCookie": [] }],
                 "responses": {
                     "200": { "$ref": "#/components/responses/StandardResponse" },
                     "400": { "$ref": "#/components/responses/BadRequest" }
@@ -568,6 +553,7 @@
             "post": {
                 "summary": "Verify email code",
                 "tags": ["Auth"],
+                "security": [{ "verifyCookieAuth": [] }],
                 "parameters": [{ "name": "code", "in": "query", "required": true, "schema": { "type": "string" } }],
                 "responses": {
                     "200": { "$ref": "#/components/responses/StandardResponse" },
@@ -1026,15 +1012,6 @@
                 "responses": { "202": { "$ref": "#/components/responses/StandardResponse" }, "400": { "$ref": "#/components/responses/BadRequest" } }
             }
         },
-
-        "/web/xap3y/render/{id}": {
-            "get": {
-                "summary": "Debug render (non-API test route)",
-                "tags": ["Basic"],
-                "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-                "responses": { "500": { "$ref": "#/components/responses/InternalError" } }
-            }
-        },
         "/": {
             "get": {
                 "summary": "Root service status",
@@ -1051,17 +1028,6 @@
                 "responses": { "200": { "description": "Status JSON" } }
             }
         },
-        "/.env": {
-            "get": {
-                "summary": "Fake env (honeypot)",
-                "tags": ["Basic"],
-                "responses": { "200": { "description": "Fake env JSON" } }
-            }
-        },
-        "/test-csrf": {
-            "get": { "summary": "CSRF test (GET)", "tags": ["Basic"], "responses": { "200": { "$ref": "#/components/responses/StandardResponse" } } },
-            "post": { "summary": "CSRF test (POST)", "tags": ["Basic"], "responses": { "200": { "$ref": "#/components/responses/StandardResponse" } } }
-        },
         "/r/{id}": {
             "get": {
                 "summary": "Host-based redirect",
@@ -1070,21 +1036,6 @@
                 "responses": { "301": { "description": "Redirect" }, "404": { "$ref": "#/components/responses/NotFound" } }
             }
         },
-        "/error": {
-            "get": { "summary": "Error endpoint", "tags": ["Basic"], "responses": { "404": { "$ref": "#/components/responses/NotFound" } } }
-        },
-        "/metrics": {
-            "get": {
-                "summary": "Service metrics snapshot",
-                "tags": ["Basic"],
-                "responses": { "200": { "description": "Metrics JSON" } }
-            }
-        },
-
-        "/web/error400": { "get": { "summary": "400 page", "tags": ["Web"], "responses": { "302": { "description": "Redirect" }, "200": { "description": "HTML", "content": { "text/html": { "schema": { "type": "string" } } } } } } },
-        "/web/apidocs": { "get": { "summary": "API docs page", "tags": ["Web"], "responses": { "200": { "description": "HTML", "content": { "text/html": { "schema": { "type": "string" } } } } } } },
-        "/web/error404": { "get": { "summary": "404 page", "tags": ["Web"], "responses": { "200": { "description": "HTML", "content": { "text/html": { "schema": { "type": "string" } } } } } } },
-        "/web/error500": { "get": { "summary": "500 page", "tags": ["Web"], "responses": { "200": { "description": "HTML", "content": { "text/html": { "schema": { "type": "string" } } } } } } },
         "/web/image-upload": { "get": { "summary": "Image upload page", "tags": ["Web"], "responses": { "200": { "description": "HTML", "content": { "text/html": { "schema": { "type": "string" } } } } } } },
         "/web/image-render/{id}": {
             "get": {
@@ -1120,7 +1071,25 @@
                 "type": "apiKey",
                 "in": "header",
                 "name": "X-API-Key",
-                "description": "Provide your API key in the X-API-Key header."
+                "description": "Provide your API key in the X-API-Key header. Only endpoints annotated with RequiresApiKey/RequiresSpecialApiKey/OptionalApiKey require this."
+            },
+            "sessionCookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "session_token",
+                "description": "Session cookie for authentication (used by /auth/me and /auth/logout)."
+            },
+            "verifyCookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "verify_token",
+                "description": "Verification cookie used by /auth/verify/* endpoints."
+            },
+            "newEmailCookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "new_email",
+                "description": "Cookie containing new email address (used with verify_token for /auth/verify/resendemail)."
             }
         },
         "responses": {
@@ -1263,7 +1232,7 @@
                 "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StandardResponseEnvelope" } } }
             },
             "Unauthorized": {
-                "description": "Unauthorized or invalid API key",
+                "description": "Unauthorized or invalid API key/cookie",
                 "content": { "application/json": { "schema": { "$ref": "#/components/schemas/StandardResponseEnvelope" } } }
             },
             "Forbidden": {
@@ -1322,9 +1291,6 @@
             }
         }
     },
-    "security": [
-        { "apiKeyAuth": [] }
-    ],
     "tags": [
         { "name": "Image" },
         { "name": "ImagePlaylist" },
