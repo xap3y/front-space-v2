@@ -86,7 +86,7 @@ export async function middleware(req: NextRequest) {
     const ua = req.headers.get("user-agent") || "unknown";
     const route = req.nextUrl.pathname + req.nextUrl.search;
 
-    if (!validateUserAgent(ua).validFormat) {
+    if (!validateUserAgent(ua).validFormat && !ua.includes("Uptime-Kuma")) {
         console.log(`[Middleware] Forbidden UA: ${ua} on route ${route}`);
         return new NextResponse("Blocked UA", {status: 403});
     }
