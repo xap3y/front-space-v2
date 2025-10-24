@@ -5,6 +5,7 @@ import { getCookie, deleteCookie } from 'cookies-next/server';
 import {UserObj} from "@/types/user";
 import supportedLocales, {getDefaultLocale} from "@/lib/core";
 import {toast} from "react-toastify";
+import {validateUserAgent} from "@/lib/uaValidator";
 
 function languageMiddleware(req: NextRequest, res: NextResponse) {
     const cookieLocale = req.cookies.get('locale')?.value;
@@ -76,6 +77,21 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 }
 
 export async function middleware(req: NextRequest) {
+
+    const ip =
+        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        req.headers.get("cf-connecting-ip") ||
+        "unknown";
+
+    const ua = req.headers.get("user-agent") || "unknown";
+    const route = req.nextUrl.pathname + req.nextUrl.search;
+
+    if (!validateUserAgent(ua).validFormat) {
+        console.log(`[Middleware] Forbidden UA: ${ua} on route ${route}`);
+        return new NextResponse("Blocked UA", {status: 403});
+    }
+
+    console.log(`[Middleware] Req from IP: ${ip}, UA: ${ua}, Route: ${route}`);
 
     const res = NextResponse.next();
 
