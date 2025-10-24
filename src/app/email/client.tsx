@@ -68,10 +68,11 @@ export default function EmailPage({maxWidth} : Props) {
     useEffect(() => {
         if (user) {
             setApiKey(user.apiKey)
-            const temp: TempMail | null = loadFromLocalStorage()
-            if (temp) {
-                setExistingTempMail(temp)
-            }
+            loadFromLocalStorage().then((value) => {
+                if (value) {
+                    setExistingTempMail(value)
+                }
+            })
         }
     }, [user, loadingUser])
 
@@ -128,8 +129,10 @@ export default function EmailPage({maxWidth} : Props) {
                                 <div className="flex gap-2 flex-wrap xl:justify-end">
                                     <button
                                         onClick={handleRefresh}
-                                        disabled={isRefreshing || isDeleting}
-                                        className="flex items-center text-xs bg-[#1f1f23] hover:bg-[#242428] border border-white/10 px-3 py-1.5 rounded-md transition-colors text-gray-200"
+                                        data-tooltip-id="my-tooltip"
+                                        data-tooltip-content={isExpired ? 'Email is expired, create new one!' : ''}
+                                        disabled={isRefreshing || isDeleting || isExpired}
+                                        className={`${isExpired ? "cursor-not-allowed" : "cursor-pointer"} flex items-center text-xs bg-[#1f1f23] hover:bg-[#242428] border border-white/10 px-3 py-1.5 rounded-md transition-colors text-gray-200`}
                                     >
                                         Reconnect
                                         {isRefreshing &&

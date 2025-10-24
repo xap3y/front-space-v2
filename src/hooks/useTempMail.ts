@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {getApiUrl} from "@/lib/core";
-
+import {getEmailInfo} from "@/lib/apiGetters";
 export interface TempMail {
     email: string;
     createdBy: string;
@@ -52,11 +52,23 @@ export function useTempMail() {
         }
     }
 
-    function loadFromLocalStorage(): TempMail | null {
+    async function loadFromLocalStorage(): Promise<TempMail | null> {
         try {
             const raw = localStorage.getItem('lastTempMail');
             if (raw) {
-                return JSON.parse(raw) as TempMail;
+                const email = JSON.parse(raw) as TempMail;
+                const updatedMail = await getEmailInfo(email.email);
+                if (updatedMail && !updatedMail.error) {
+                    const mail: TempMail = {
+                        email: updatedMail.message.email,
+                        createdBy: updatedMail.message.createdBy,
+                        expireAt: updatedMail.message.expireAt === 'never' ? null : updatedMail.message.expireAt
+                    };
+                    setTempMail(mail);
+                    return mail;
+                } else {
+                    localStorage.removeItem('lastTempMail');
+                }
             }
         } catch (e) {
             console.error('Failed to load temp mail from localStorage:', e);

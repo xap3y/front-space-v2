@@ -20,7 +20,7 @@ interface Props {
 }
 
 export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560, isExpired = false }: Props) {
-    const { messages, connected, disconnect, removeMessage } = useEmailWebSocket(email, apiKey, forceId);
+    const { messages, connected, disconnect, removeMessage, isWsExpired } = useEmailWebSocket(email, apiKey, forceId);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     const isMdUp = useMediaQuery('(min-width: 1280px)');
@@ -95,14 +95,14 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
                         className={`text-[10px] px-2 py-0.5 rounded-full font-medium select-none ${
                             connected
                                 ? 'bg-green-500/15 text-green-400 border border-green-400/30'
-                                : isExpired ?
+                                : (isExpired || isWsExpired) ?
                                     'bg-red-500/15 text-red-400 border border-red-400/30':
                                     'bg-gray-500/15 text-gray-400 border border-gray-400/20'
                         }`}
 
                         data-tooltip-id="my-tooltip" data-tooltip-content={connected ? 'New emails will display automatically, no need to refresh ' : 'Reconnect to receive new emails'}
                     >
-            {connected ? 'LIVE' : isExpired ? 'EXPIRED' : 'OFFLINE'}
+            {connected ? 'LIVE' : (isExpired || isWsExpired) ? 'EXPIRED' : 'OFFLINE'}
           </span>
                 </div>
                 <ul className="flex-1 overflow-auto bg-primary0">
@@ -219,11 +219,11 @@ function MessageDetail({
                     title="html-body"
                 />*/
                 <div
-                    className="w-full min-h-[200px] text-xs bg-[#111418] xl:border border-none border-white/10 xl:rounded-md rounded-none shadow-inner shrink-0"
+                    className="w-full min-h-[200px] text-xs bg-primary2 p-2 xl:border border-none border-white/10 xl:rounded-md rounded-none shadow-inner shrink-0"
                     dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
                 />
             ) : (
-                <pre className="text-xs leading-relaxed whitespace-pre-wrap text-gray-200 bg-[#111418] border border-white/10 rounded-md p-4 shadow-inner">
+                <pre className="text-xs leading-relaxed whitespace-pre-wrap text-gray-200 bg-primary2 border border-white/10 rounded-md p-4 shadow-inner">
           {message.text || message.content || '(empty body)'}
         </pre>
             )}

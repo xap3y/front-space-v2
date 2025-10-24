@@ -1,5 +1,5 @@
 'use server';
-import {getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
+import {getApiKey, getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {PasteDto} from "@/types/paste";
 import {ShortUrlDto, ShortUrlLog} from "@/types/url";
@@ -7,6 +7,7 @@ import {DefaultResponse} from "@/types/core";
 import {DiscordConnection} from "@/types/discord";
 import {Album} from "@/types/album";
 import {EmbedSettings} from "@/types/configs";
+import axios from "axios";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
@@ -119,6 +120,27 @@ export async function getPasteApi(uid: string): Promise<PasteDto | null> {
     pasteDto.createdAt = new Date(pasteDto.createdAt).toLocaleString()
 
     return pasteDto;
+}
+
+export async function getEmailInfo(email: string): Promise<DefaultResponse | null> {
+    console.log("Calling getEmailInfo with email: " + email)
+
+    try {
+        const response = await axios.get(getApiUrl() + "/v1/email/getinfo?email=" + email, {
+            headers: {
+                'x-api-key': getApiKey(),
+                'Content-Type': 'application/json',
+            },
+            timeout: 6000,
+        });
+        if (!response.status.toString().startsWith("2") || !response.data) {
+            return null;
+        }
+
+        return response.data as DefaultResponse;
+    } catch (error) {
+        return null;
+    }
 }
 
 export async function getImageCountStatsOnDate(start: string, end: string, apiKey: string): Promise<any|null> {

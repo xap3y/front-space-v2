@@ -45,6 +45,7 @@ export function clearInboxStorage(email: string) {
 export function useEmailWebSocket(email: string, apiKey: string, forceId: number) {
     const [messages, setMessages] = useState<InboxMessage[]>([]);
     const [connected, setConnected] = useState(false);
+    const [isWsExpired, setIsWsExpired] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -85,6 +86,7 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
 
         const base = process.env.NEXT_PUBLIC_EMAIL_WEBSOCKET_URL
         const url = `${base}?email=${encodeURIComponent(email)}&apiKey=${encodeURIComponent(apiKey)}`;
+        //const url = `${base}?email=${encodeURIComponent(email)}`;
 
         console.log('Connecting to WS:', url);
 
@@ -130,8 +132,12 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
                 }
             })
         };
-        ws.onclose = () => {
+        ws.onclose = (e) => {
             console.log('WebSocket disconnected??');
+            console.log(e.reason)
+            if (e.reason.includes("expired")) {
+                setIsWsExpired(true);
+            }
             setConnected(false);
         }
         ws.onerror = (e) => {
@@ -140,6 +146,7 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         }
         ws.onmessage = (ev) => {
             try {
+                //console.log(ev.data);
                 const raw: RawWsMessage = JSON.parse(ev.data);
                 pushNewMessage(raw);
             } catch (e) {
@@ -212,5 +219,5 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         }
     }
 
-    return { messages, connected, disconnect, removeMessage, getMessagesId, clear: () => clearInboxStorage(email) };
+    return { messages, connected, disconnect, isWsExpired, removeMessage, getMessagesId, clear: () => clearInboxStorage(email) };
 }
