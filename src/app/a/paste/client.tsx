@@ -1,141 +1,202 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
-import { toast } from "react-toastify";
-import {useUser} from "@/hooks/useUser";
-import {createPaste} from "@/lib/apiPoster";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/hooks/useUser";
+import { useTranslation } from "@/hooks/useTranslation";
 import LoadingPage from "@/components/LoadingPage";
-import {useTranslation} from "@/hooks/useTranslation";
-import {PasteDto} from "@/types/paste";
+import {errorToast, infoToast, okToast, validateApiKey} from "@/lib/client";
+import { getApiUrl } from "@/lib/core";
+import { ErrorToast } from "@/components/ErrorToast";
+import { LoadingDot } from "@/components/GlobalComponents";
+import { FaCheck } from "react-icons/fa6";
+import { useDebounce } from "@/hooks/useDebounce";
+import {FaKey} from "react-icons/fa";
+import MainStringInput from "@/components/MainStringInput";
 
-export default function PortablePasteCreator() {
-
-    const { user, loadingUser, error } = useUser();
-    const [paste, setPaste] = useState<string>("");
-    const [apiKey, setApiKey] = useState<string>("");
-    const [title, setTitle] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-    const [pasteUrl, setPasteUrl] = useState<string>("");
-    const [uploadedPaste, setUploadedPaste] = useState<PasteDto>();
-
+export default function PasteCreator() {
+    const router = useRouter();
+    const { user, loadingUser } = useUser();
     const lang = useTranslation();
 
-    const submit: () => void = async () => {
-        if (!apiKey || !paste || !title) {
-            return toast.error("Please fill all required fields!");
-        }
-        else if (apiKey.length < 5) {
-            return toast.error(lang.global.bad_api_key_alert);
-        } else if (paste.length < 5) {
-            return toast.error(lang.pages.portable_paste.invalid_paste_length_alert);
-        } else if (title.length < 4) {
-            return toast.error(lang.pages.portable_paste.invalid_title_length_alert);
-        }
+    const [isApiUp, setIsApiUp] = useState(true);
 
-        setLoading(true);
-        const data = await createPaste(title, paste, apiKey);
-        setLoading(false)
-        if (!data) {
-            setPasteUrl("");
-            return toast.error("Failed to create Paste");
-        }
-        setPaste("");
-        setTitle("");
-        setUploadedPaste(data)
-        setPasteUrl(data.urlSet.rawUrl);
-        toast.success(lang.pages.portable_paste.paste_created_alert);
-    };
+    const [apiKey, setApiKey] = useState("");
+    const [isKeyValid, setIsKeyValid] = useState<boolean | null>(null);
+    const [isKeyValidating, setIsKeyValidating] = useState(false);
+    const debouncedApiKey = useDebounce(apiKey, 800);
+
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+
+    const [creating, setCreating] = useState(false);
 
     useEffect(() => {
-        if (!loadingUser && user) {
+        if (!loadingUser && user?.apiKey) {
             setApiKey(user.apiKey);
+            setIsKeyValid(true);
         }
     }, [loadingUser, user]);
+
+    useEffect(() => {
+        const checkApi = async () => {
+            try {
+                const res = await fetch(getApiUrl() + "/status", { cache: "no-store" });
+                setIsApiUp(res.ok);
+            } catch {
+                setIsApiUp(false);
+            }
+        };
+        checkApi();
+    }, []);
+
+    useEffect(() => {
+        if (!debouncedApiKey || user?.apiKey) return;
+        setIsKeyValidating(true);
+        const validate = async () => {
+            try {
+                const ok = await validateApiKey(debouncedApiKey);
+                setIsKeyValid(ok);
+            } finally {
+                setTimeout(() => setIsKeyValidating(false), 100);
+            }
+        };
+        validate();
+    }, [debouncedApiKey, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         submit();
-    }
+    };
 
-    if (loadingUser) {
-        return (
-            <LoadingPage/>
-        )
-    }
+    const submit = async () => {
+        const effectiveKey = user?.apiKey || apiKey?.trim();
+
+        if (!title.trim() || !content.trim()) {
+            return errorToast("Please provide both title and content.", 2000);
+        }
+        if (!effectiveKey) {
+            return errorToast("API key is required.", 2000);
+        }
+
+        // Re-validate key right before creating
+        const keyOk = await validateApiKey(effectiveKey);
+        if (!keyOk) {
+            setIsKeyValid(false);
+            return errorToast("Invalid API key.");
+        }
+
+        setCreating(true);
+
+        try {
+            const res = await fetch(getApiUrl() + "/v1/paste/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                cache: "no-store",
+                credentials: "include",
+                body: JSON.stringify({
+                    title: title.trim(),
+                    text: content.trim(),
+                    apiKey: effectiveKey,
+                    source: "PORTAL",
+                }),
+            });
+
+            if (!res.ok) {
+                const errText = await res.text().catch(() => "Failed to create paste.");
+                throw new Error(errText || "Failed to create paste.");
+            }
+
+            const data = await res.json();
+            const uniqueId =
+                data?.uniqueId ||
+                data?.uid ||
+                data?.id ||
+                data?.paste?.uniqueId ||
+                data?.result?.uniqueId;
+
+            if (!uniqueId) {
+                throw new Error("Paste created, but uniqueId was not returned.");
+            }
+
+            okToast("Paste created successfully!", 1200);
+            router.push(`/p/${uniqueId}`);
+        } catch (err: any) {
+            errorToast(err?.message || "Failed to create paste.");
+            setCreating(false);
+        }
+    };
+
+    if (loadingUser) return <LoadingPage />;
 
     return (
         <>
-            <main className={"w-full flex flex-col justify-center items-center"}>
-                <div className={"mt-52"}>
+            {!isApiUp && <ErrorToast type="ERROR" message="MAIN API SERVER IS DOWN!" />}
 
-                </div>
+            <form onSubmit={handleSubmit} className="flex items-center justify-center bg-opacity-50 select-none">
+                <div className={`xl:mt-40 mt-28 transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]`}>
+                    <div className="space-y-6">
 
-                <div className={"mt-10 bg-primary_light border-2 rounded-xl border-secondary p-4 flex flex-col items-center"}>
-                    <h1 className={"mb-12 text-xl font-extrabold"}>{lang.pages.portable_paste.title}</h1>
+                        <h1 className="text-2xl font-bold text-center">
+                            {"Create a New Paste"}
+                        </h1>
 
-                    <form onSubmit={handleSubmit} className={"flex flex-col gap-4"}>
-
-                        <input
-                            className={"bg-primary px-4 py-3 outline-none text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
-                            name="title"
-                            required
-                            placeholder={lang.pages.portable_paste.title_input_placeholder}
-                            type="text"
-                            value={title}
-                            autoComplete={"new-password"}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-
-                        <textarea
-                            className={"bg-primary h-44 px-4 py-3 outline-none lg:w-[500px] w-[300px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
-                            name="text"
-                            required
-                            placeholder={lang.pages.portable_paste.paste_input_placeholder}
-                            value={paste}
-                            autoComplete={"new-password"}
-                            onChange={(e) => setPaste(e.target.value)}
-                        />
-
-                        <input
-                            className={`bg-primary px-4 py-3 outline-none text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040] ${!!user ? "cursor-not-allowed" : ""} `}
-                            name="text"
-                            required
-                            placeholder={lang.global.api_key_input_placeholder}
-                            type="password"
-                            value={apiKey}
-                            id="api-key"
-                            disabled={!!user}
-                            autoComplete={"new-password"}
-                            onChange={(e) => setApiKey(e.target.value)}
-                        />
-
-                        <button
-                            className="group/button relative inline-flex items-center justify-center overflow-hidden rounded-md bg-primary/30 backdrop-blur-lg px-6 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:shadow-xl hover:shadow-gray-600/5 border border-white/20"
-                            disabled={!!pasteUrl}
-                            type="submit"
-                        >
-                            <span className="text-lg">{loading ? lang.global.processing_button_text : lang.pages.portable_paste.button_text}</span>
-                            <div
-                                className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]"
-                            >
-                                <div className="relative h-full w-10 bg-white/20"></div>
-                            </div>
-                        </button>
-                    </form>
-                </div>
-
-                {(!loading && pasteUrl && uploadedPaste) && (
-                    <div>
-                        <div className={"mt-4 bg-primary_light border-2 rounded-xl border-secondary p-4 flex flex-col items-center"}>
-                            <h1 className={"mb-4 text-xl font-extrabold"}>{lang.pages.portable_paste.view_paste_text}</h1>
-                            {/*<a href={pasteUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{pasteUrl}</a>*/}
-                            <a href={uploadedPaste.urlSet.shortUrl || uploadedPaste.urlSet.webUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{uploadedPaste.urlSet.shortUrl || uploadedPaste.urlSet.webUrl}</a>
-                            <a href={uploadedPaste.urlSet.portalUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{uploadedPaste.urlSet.portalUrl}</a>
-                            <a href={uploadedPaste.urlSet.rawUrl} target="_blank" rel="noreferrer" className={"text-telegram"}>{uploadedPaste.urlSet.rawUrl}</a>
+                        {/* Title */}
+                        <div>
+                            <MainStringInput
+                                placeholder={"Title"}
+                                value={title}
+                                disabled={creating}
+                                onChange={(value) => setTitle(value)}
+                                className="xl:text-base text-xs w-full"
+                            />
                         </div>
+
+                        {/* Content */}
+                        <div>
+              <textarea
+                  placeholder={"Content"}
+                  value={content}
+                  disabled={creating}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={12}
+                  className="xl:text-base text-xs w-full in-primary"
+              />
+                        </div>
+
+                        {/* API Key */}
+                        <div className="flex items-center">
+
+                            <MainStringInput
+                                placeholder={lang?.global?.api_key_input_placeholder || "API key"}
+                                value={apiKey}
+                                disabled={!!user || creating || isKeyValidating}
+                                onChange={(value) => {
+                                    setIsKeyValid(null);
+                                    setApiKey(value.toLowerCase());
+                                }}
+                                className={`lg:text-base text-xs w-full in-primary p-0 ${
+                                    (!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""
+                                } ${isKeyValid === false ? "border-red-400 bg-red-400 bg-opacity-5" : ""} ${creating ? "disabled" : ""} ${!!user ? "cursor-not-allowed" : ""}`}
+                            />
+                            {isKeyValidating && <LoadingDot size="w-10" />}
+                            {isKeyValid === true && !isKeyValidating && <FaCheck className="ml-2 w-6 h-6 text-lime-400" />}
+                        </div>
+
+                        {/* Create button */}
+                        {!creating ? (
+                            <button type="submit" disabled={creating} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
+                                {"Create"}
+                            </button>
+                        ) : (
+                            <div className="w-full flex items-center justify-center gap-3 border-2 border-blue-600 bg-blue-500 text-white p-2 rounded">
+                                <LoadingDot />
+                                <span>{"Creating..."}</span>
+                            </div>
+                        )}
                     </div>
-                )}
-            </main>
+                </div>
+            </form>
         </>
-    )
+    );
 }

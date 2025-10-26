@@ -1,4 +1,4 @@
-import PortablePasteCreator from "@/app/a/paste/client";
+import PasteCreator from "@/app/a/paste/client";
 import type {Metadata} from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default async function Page() {
     return (
         <>
-            <PortablePasteCreator />
+            <PasteCreator />
         </>
     )
 }

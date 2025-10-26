@@ -4,7 +4,15 @@
 
 @layer components {
     .box-primary {
-        @apply bg-primary2 border-4 border-primary0 rounded-lg;
+        @apply bg-primary1 border-4 border-primary0 rounded-lg;
+    }
+
+    .in-primary {
+        @apply border-2 border-primary0 rounded p-3 focus:outline-none bg-transparent;
+    }
+
+    .in-shadow {
+        box-shadow: 0 0 0 4px rgb(26, 26, 26);
     }
 }
 
@@ -23,6 +31,13 @@
     font-weight: 600;
     font-style: normal;
     font-display: swap;
+}
+
+:root {
+    --bg-point1: #272727;
+    --bg-point2: #000000;
+    --bg-point01: #262626;
+    --bg-point02: #0A0A0A;
 }
 
 .dark {
@@ -60,4 +75,16 @@
 
 html {
     -webkit-text-size-adjust: 100%;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    select,
+    textarea,
+    input {
+        font-size: 16px;
+    }
+}
+
+:-webkit-autofill {
+    transition-delay: 9999s
 }

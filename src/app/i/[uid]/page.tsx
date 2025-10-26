@@ -20,6 +20,7 @@ import {useHoverCard} from "@/hooks/useHoverCard";
 import {useIsMobile} from "@/hooks/utils";
 import {copyToClipboard, deleteImageApi, errorToast, infoToast} from "@/lib/client";
 import {FaEye, FaEyeSlash} from "react-icons/fa";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function Page() {
 
@@ -36,6 +37,7 @@ export default function Page() {
     const [imageUrl, setimageUrl] = useState<string | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const [open, setOpen] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const toggleDropdown = () => setOpen(!open);
@@ -457,23 +459,20 @@ export default function Page() {
                                 </label>
 
                                 <div className="relative">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        name="image-password"
-                                        id={"new-password"}
-                                        autoComplete="off"
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                    <MainStringInput
                                         placeholder={lang?.pages?.image_viewer?.password_placeholder}
+                                        className={`w-full sm:text-sm text-xs ${(isFocused && !showPassword) ? "text-dots" : ""}`}
+                                        required
+                                        autoComplete="off"
+                                        type="text"
+                                        name="image"
+                                        onFocus={() => {
+                                            setTimeout(() => setIsFocused(true), 100);
+                                        }}
+                                        id="image"
+                                        value={password}
                                         aria-invalid={!!error}
-                                        className={[
-                                            "block w-full p-3 pr-11 rounded-lg",
-                                            "bg-primary2 text-whitesmoke placeholder:text-gray-400",
-                                            "border-2 border-primary focus:border-secondary",
-                                            "outline-none focus:ring-1 focus:ring-primary0",
-                                            "transition duration-200",
-                                        ].join(" ")}
+                                        onChange={(e) => setPassword(e)}
                                     />
 
                                     <button

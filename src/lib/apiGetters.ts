@@ -75,7 +75,7 @@ export async function getUserImages(uid: string, from: number = 0, limit: number
 
 export async function getUserShortUrls(uid: string): Promise<ShortUrlDto[] | DefaultResponse> {
     const data = await getValidatedResponse('/v1/admin/user/' + uid + "/urls");
-    console.log("DATA IS " + JSON.stringify(data))
+    //console.log("DATA IS " + JSON.stringify(data))
     if (data.error) return {error: true, message: data.message} as DefaultResponse;
     const urlList = data["data"] as ShortUrlDto[];
     return urlList;

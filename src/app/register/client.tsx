@@ -15,6 +15,7 @@ import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
 import {useUser} from "@/hooks/useUser";
 import Link from "next/link";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function RegisterPage() {
 
@@ -29,6 +30,9 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(true);
     const { user, loadingUser } = useUser();
     const [agreed, setAgreed] = useState(false);
+
+    const [isFocusedPass, setIsFocusedPass] = useState(false);
+    const [isFocusedSecondPass, setIsFocusedSecondPass] = useState(false);
 
     const router = useRouter();
 
@@ -129,85 +133,75 @@ export default function RegisterPage() {
                                 {lang.pages.register.title}
                             </h2>
                             <p className="mt-4 text-center text-gray-400">{lang.pages.register.under_title}</p>
-                            <form autoComplete={"new-password"} method="POST" onSubmit={handleSubmit} className="mt-8 space-y-6">
+                            <form autoComplete={"off"} method="POST" onSubmit={handleSubmit} className="mt-8 space-y-6">
                                 <div className="rounded-md shadow-sm">
                                     <div>
                                         <div className="flex items-center">
                                             < FaUser className="w-8 h-8 mr-2" />
-                                            <input
+                                            <MainStringInput
                                                 placeholder={"username"}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
-                                                autoComplete="new-password"
-                                                type="text"
-                                                name="username"
-                                                id="username"
                                                 value={username}
-                                                onChange={(e) => setUsername(e.target.value)}
+                                                onChange={(e) => setUsername(e)}
+                                                className={"w-full"}
                                             />
                                         </div>
                                     </div>
                                     <div className="mt-4">
                                         <div className="flex items-center">
                                             < MdEmail className="w-8 h-8 mr-2" />
-                                            <input
+                                            <MainStringInput
+                                                type={"email"}
+                                                autoComplete="off"
                                                 placeholder={lang.pages.login.email_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
                                                 required
-                                                autoComplete="new-password"
-                                                type="email"
-                                                name="email"
-                                                id="email"
                                                 value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
+                                                onChange={(e) => setEmail(e)}
+                                                className={"w-full"}
                                             />
                                         </div>
                                     </div>
                                     <div className="mt-4">
                                         <div className="flex items-center">
                                             < FaLock className="w-8 h-8 mr-2" />
-                                            <input
+                                            <MainStringInput
                                                 placeholder={lang.pages.login.password_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className={`w-full sm:text-sm text-xs ${isFocusedPass ? "text-dots" : ""}`}
+                                                onFocus={() => {
+                                                    setTimeout(() => setIsFocusedPass(true), 100);
+                                                }}
                                                 required
-                                                autoComplete="new-password"
-                                                type="password"
-                                                name="password"
-                                                id="password"
+                                                autoComplete="off"
                                                 value={password}
-                                                onChange={(e) => setPassword(e.target.value)}
+                                                onChange={(e) => setPassword(e)}
                                             />
                                         </div>
                                     </div>
                                     <div className="mt-4">
                                         <div className="flex items-center">
                                             < FaLock className="w-8 h-8 mr-2" />
-                                            <input
+                                            <MainStringInput
                                                 placeholder={lang.pages.register.confirm_password_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className={`w-full sm:text-sm text-xs ${isFocusedSecondPass ? "text-dots" : ""}`}
+                                                onFocus={() => {
+                                                    setTimeout(() => setIsFocusedSecondPass(true), 100);
+                                                }}
                                                 required
-                                                autoComplete="new-password"
-                                                type="password"
-                                                name="confirmPass"
-                                                id="confirmPass"
+                                                autoComplete="off"
                                                 value={confirmPass}
-                                                onChange={(e) => setConfirmPass(e.target.value)}
+                                                onChange={(e) => setConfirmPass(e)}
                                             />
                                         </div>
                                     </div>
                                     <div className="mt-4">
                                         <div className="flex items-center">
                                             < FaKey className="w-8 h-8 mr-2" />
-                                            <input
+                                            <MainStringInput
                                                 placeholder={lang.pages.register.invite_code_placeholder}
-                                                className="appearance-none relative block w-full px-3 py-3 border border-primary0 bg-primary2 text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm text-xs"
+                                                className={"w-full"}
                                                 required
-                                                autoComplete="new-password"
-                                                type="text"
-                                                name="inviteCode"
-                                                id="inviteCode"
                                                 value={inviteCode}
-                                                onChange={(e) => setInviteCode(e.target.value)}
+                                                onChange={(e) => setInviteCode(e)}
                                             />
                                         </div>
                                     </div>

@@ -25,6 +25,7 @@ import {BetaBadge, LoadingDot} from "@/components/GlobalComponents";
 import {getApiUrl} from "@/lib/core";
 import {ErrorToast} from "@/components/ErrorToast";
 import {useDebounce} from "@/hooks/useDebounce";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function ImageUploader() {
 
@@ -323,6 +324,9 @@ export default function ImageUploader() {
                 <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-opacity-50 select-none`}>
                     <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px] ${showAdvanced ? "xl:mb-0 mb-44" : ""}`}>
                         <div className="space-y-6">
+                            <h1 className="text-2xl font-bold text-center">
+                                {"Upload a Image"}
+                            </h1>
                             {!file && (
                                 <div
                                     {...getRootProps()}
@@ -345,20 +349,15 @@ export default function ImageUploader() {
                             )}
 
                             <div className={"flex items-center transition-all duration-300 ease-in-out"}>
-                                <input
-                                    type="text"
-                                    name="uid"
-                                    id="uid"
-                                    required
-                                    autoComplete={"off"}
+                                <MainStringInput
                                     placeholder={lang.global.api_key_input_placeholder}
                                     value={apiKey}
                                     disabled={!!user || uploading || isKeyValidating}
-                                    onChange={(e) => {
-                                        setApiKey(e.target.value.toLowerCase())
-                                        handleApiKeyChange(e.target.value)
+                                    onChange={(value) => {
+                                        setApiKey(value.toLowerCase());
+                                        handleApiKeyChange(value);
                                     }}
-                                    className={`lg:text-base text-xs w-full p-3 border ${(!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} ${(isKeyValid == false) ? "border-red-400 bg-red-400 bg-opacity-5" : ""} rounded bg-transparent focus:outline-none ${uploading ? "disabled":""} ${!!user ? "cursor-not-allowed" : ""}`}
+                                    className={`lg:text-base text-xs w-full p-0 ${(!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} ${(isKeyValid === false) ? "border-red-400 bg-red-400 bg-opacity-5" : ""} ${uploading ? "disabled" : ""} ${!!user ? "cursor-not-allowed" : ""}`}
                                 />
 
                                 {isKeyValidating && (
@@ -395,39 +394,39 @@ export default function ImageUploader() {
                                     {/* TODO: LOCALE */}
                                     <span className={"text-gray-500 italic text-xs"}>Following fields are optional</span>
                                     <div className="flex gap-4 items-center mb-4 mt-2">
-                                        <input
+                                        <MainStringInput
                                             type="text"
                                             placeholder={lang.global.description}
                                             disabled={uploading}
                                             value={description}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            className="xl:text-base text-xs w-full p-3 border rounded bg-transparent focus:outline-none"
+                                            onChange={(e) => setDescription(e)}
+                                            className="xl:text-base text-xs w-full"
                                         />
                                     </div>
 
                                     <div className="mb-4 flex justify-between items-center gap-4">
-                                        <input
-                                            type="text"
+                                        <MainStringInput
                                             placeholder={lang.pages.login.password_placeholder}
-                                            value={password}
-                                            disabled={uploading || !withPassword}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            className={`xl:text-base text-xs text-dots w-full p-3 border rounded bg-transparent focus:outline-none`}
+                                            type={withPassword ? "text" : "password"}
+                                            value={withPassword ? password : ""}
+                                            disabled={uploading}
+                                            onChange={(e) => setPassword(e)}
+                                            className={`xl:text-base text-xs w-full`}
                                         />
                                     </div>
 
                                     <div className="mb-4 flex justify-between items-center gap-4">
-                                        <input
+                                        <MainStringInput
                                             type="datetime-local"
+                                            placeholder="Expiry Date"
                                             value={formatDateToInputValue(expiryDate)}
                                             onChange={(e) => {
-                                                const d = parseInputValueToDate(e.target.value);
+                                                const d = parseInputValueToDate(e);
                                                 setExpiryDate(d);
                                             }}
+                                            disabled={uploading}
                                             min={formatDateToInputValue(new Date())}
-                                            className={`xl:text-base text-xs w-full p-3 border rounded bg-transparent focus:outline-none`}
-                                            placeholder="Expiry date"
-                                        />
+                                            className="xl:text-base text-xs w-full" />
                                     </div>
 
                                     <div className="mb-4 w-full">
@@ -501,13 +500,13 @@ export default function ImageUploader() {
                                     </div>
 
                                     <div className="mb-4 flex justify-between items-center gap-4">
-                                        <input
+                                        <MainStringInput
                                             type="text"
                                             placeholder="Custom UID"
                                             value={customUid}
                                             disabled={uploading}
-                                            onChange={(e) => setCustomUid(e.target.value)}
-                                            className="xl:text-base text-xs w-full p-3 border rounded bg-transparent focus:outline-none"
+                                            onChange={(e) => setCustomUid(e)}
+                                            className="xl:text-base text-xs w-full"
                                         />
                                     </div>
 

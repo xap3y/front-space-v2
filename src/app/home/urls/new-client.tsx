@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser'; // adjust to your actual path
-import { FaRegCopy, FaTrash, FaRotateRight } from 'react-icons/fa6';
+import {FaRegCopy, FaTrash, FaRotateRight, FaPlus} from 'react-icons/fa6';
 import { format } from 'date-fns';
 import {ShortUrlDto} from "@/types/url";
 import {getUserShortUrls} from "@/lib/apiGetters";
@@ -113,16 +113,27 @@ export default function UrlsPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between lg:pt-5 pt-10">
                     <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Short URLs</h1>
-                    <button
-                        onClick={fetchUrls}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"
-                        disabled={loading}
-                        aria-label="Refresh list"
-                        title="Refresh"
-                    >
-                        <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">{loading ? 'Refreshing...' : 'Refresh'}</span>
-                    </button>
+                    <div className={"space-x-4"}>
+                        <button
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"
+                            disabled={loading}
+                            aria-label="Refresh list"
+                            title="New"
+                        >
+                            <FaPlus className={"h-4 w-4"} />
+                            <span className="hidden sm:inline">New</span>
+                        </button>
+                        <button
+                            onClick={fetchUrls}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"
+                            disabled={loading}
+                            aria-label="Refresh list"
+                            title="Refresh"
+                        >
+                            <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:inline">{loading ? 'Refreshing...' : 'Refresh'}</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Card */}
