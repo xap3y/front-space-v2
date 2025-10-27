@@ -6,7 +6,7 @@ type ApiStatusStore = {
 };
 
 const useStore = create<ApiStatusStore>((set) => ({
-    isApiUp: false,
+    isApiUp: true,
     setIsApiUp: (status) => set({ isApiUp: status }),
 }));
 

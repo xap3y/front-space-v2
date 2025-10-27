@@ -98,7 +98,7 @@ export async function getValidatedResponse(url: string, noAuth: boolean = false)
             headers: getCurlHeaders(getApiKey(), noAuth)
         });
 
-        console.log("DATA ARE " + JSON.stringify(response))
+        //console.log("DATA ARE " + JSON.stringify(response))
         const data = await response.json();
 
         //console.log("response2 is " + JSON.stringify(data))

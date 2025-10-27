@@ -53,8 +53,8 @@ export async function generateMetadata(
 
     const webhookSettings = imageData.webhookSettings;
 
-    console.log("Webhook settings: " + JSON.stringify(webhookSettings));
-    console.log("Webhook settings desc: " + JSON.stringify(webhookSettings));
+    //console.log("Webhook settings: " + JSON.stringify(webhookSettings));
+    //console.log("Webhook settings desc: " + JSON.stringify(webhookSettings));
 
     if (webhookSettings && webhookSettings.enabled) {
         const newTitle = (webhookSettings.title || metadataBuilder.title)
@@ -76,9 +76,9 @@ export async function generateMetadata(
 
         if (webhookSettings.color) {
             if (/^#([0-9A-F]{3}){1,2}$/i.test(webhookSettings.color)) {
-                metadataBuilder.themeColor = webhookSettings.color;
+                metadataBuilder.other = { "theme-color": webhookSettings.color};
             } else if (webhookSettings.color.toLowerCase() === "random") {
-                metadataBuilder.themeColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+                metadataBuilder.other = { "theme-color": '#' + Math.floor(Math.random() * 16777215).toString(16)};
             }
         }
 
@@ -92,7 +92,7 @@ export async function generateMetadata(
 
     }
 
-    console.log("Generated metadata: ", metadataBuilder);
+    //console.log("Generated metadata: ", metadataBuilder);
 
     return metadataBuilder;
 }

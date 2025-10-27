@@ -19,7 +19,7 @@ export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
     return (
         <>
             <Tooltip id="my-tooltip" />
-            <HeartbeatChecker />
+            {/*<HeartbeatChecker />*/}
             {debug && <LanguageSwitcher />}
             {cookies && (
                 <>

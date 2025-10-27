@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
 import {FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle} from 'react-icons/fa';
-import {FaInfo, FaRotateRight} from 'react-icons/fa6';
+import {FaRotateRight} from 'react-icons/fa6';
 import {copyToClipboard, deleteImageApi as apiDeleteImage, errorToast, okToast} from "@/lib/client";
 import {getUserImages} from "@/lib/apiGetters";
 import {UploadedImage} from "@/types/image";
@@ -363,6 +363,8 @@ function MediaCard({ item, onDelete, lang }: { item: UploadedImage; onDelete: ()
 
     const showPlaceholder = imgFailed || !urls.original || item.size === 0;
 
+    const rawUrl = (item.location === "LOCAL" && (!item.isPublic || item.requiresPassword)) ? "/api/images/" + item.uniqueId : item.urlSet.rawUrl
+
     return (
         <div onMouseMove={handleMouseMove} className="group rounded-md border border-white/10 bg-primary hover:bg-secondary transition-colors">
             {/* Preview */}
@@ -386,7 +388,7 @@ function MediaCard({ item, onDelete, lang }: { item: UploadedImage; onDelete: ()
                     </video>
                 ) : (
                     <img
-                        src={urls.thumb || urls.original}
+                        src={rawUrl}
                         alt={title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                         loading="lazy"
@@ -447,7 +449,7 @@ function MediaCard({ item, onDelete, lang }: { item: UploadedImage; onDelete: ()
                 <div className="mt-2 flex items-center justify-between gap-1">
                     <div className="flex items-center gap-1 flex-shrink-0">
                         <a
-                            href={urls.original}
+                            href={item.urlSet.portalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-2 py-1 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary transition-colors"

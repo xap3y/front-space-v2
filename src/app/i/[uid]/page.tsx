@@ -9,7 +9,6 @@ import {useImage} from "@/context/ImageContext";
 import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {FaArrowDown, FaDownload, FaLock} from "react-icons/fa6";
-import { MdReport } from "react-icons/md";
 import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
 import {IoMdTrash} from "react-icons/io";
@@ -62,31 +61,40 @@ export default function Page() {
 
         const fetchImage = async () => {
             const imageDto: UploadedImage | null = await getImageInfoApi(uid + "");
-            console.log("IMGAGE DTO: ", imageDto)
-            if (imageDto?.requiresPassword || !imageDto?.isPublic) {
-                console.log("SETTINGS PASSWORD REQUIRED")
+            //console.log("IMGAGE DTO: ", imageDto)
+            if ((imageDto?.requiresPassword || !imageDto?.isPublic)) {
+                if (user && imageDto?.uploader?.uid == user.uid) {
+                    console.log("USER IS UPLOADER, NO PASS NEEDED")
+                    const url = imageDto.location == "LOCAL" ? `/api/images/` + imageDto.uniqueId : imageDto.urlSet.rawUrl;
+                    setimageUrl(url);
+                    setShowImage(true);
+                    setImage(imageDto);
+                    setLoading(false)
+                    return;
+                }
+                //console.log("SETTINGS PASSWORD REQUIRED")
                 if (savedPassword) {
                     setPassword(savedPassword);
                     setPasswordRequired(false);
                     setShowImage(true)
-                    console.log("GETTING WITH SAVED PASS")
+                    //console.log("GETTING WITH SAVED PASS")
                     await fetchImageBlob(savedPassword);
                 } else {
                     setPasswordRequired(true)
                 }
             } else {
                 setimageUrl(imageDto.urlSet.customUrl || imageDto.urlSet.rawUrl);
-                console.log(imageDto.urlSet.customUrl)
+                //console.log(imageDto.urlSet.customUrl)
                 setShowImage(true)
             }
             setImage(imageDto);
             setLoading(false)
         };
 
-        if (!image) {
+        if (!image && !loadingUser) {
             console.log("Fetching new image")
             fetchImage();
-        } else {
+        } else if (image) {
             if (image.requiresPassword || !image.isPublic) {
                 if (savedPassword) {
                     setPassword(savedPassword);
@@ -103,8 +111,8 @@ export default function Page() {
             setShowImage(true)
             setLoading(false)
         }
-        console.log(image)
-    }, [uid, setImage]);
+        //console.log(image)
+    }, [uid, setImage, loadingUser]);
 
     const reportImage = () => {
         toast.error("Not implemented yet!", {
@@ -182,7 +190,7 @@ export default function Page() {
                 setPassword("")
                 return;
             }
-            console.log("RES: ", res)
+            //console.log("RES: ", res)
             const blob = await res.blob();
             const url = URL.createObjectURL(blob);
             setimageUrl(url);
@@ -201,21 +209,6 @@ export default function Page() {
             setLoading(false)
         }
     };
-
-    /*const downloadImage = async () => {
-        if (!image) return;
-        try {
-            const a = document.createElement("a");
-            a.href = (imageUrl || "") + "?download=true";
-            a.download = image.uniqueId + "." + image.type;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(imageUrl||"");
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error("Download error:", error);
-        }
-    }*/
 
     function downloadImage() {
         if (!image) return;

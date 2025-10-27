@@ -98,8 +98,8 @@ export async function getImageAlbumServer(uid: string): Promise<Album | null> {
 export async function getImageInfoApi(uid: string): Promise<UploadedImage | null> {
     console.log("Calling getImageInfoApi with uid: " + uid)
 
-    const data = await getValidatedResponse('/v1/image/info/' + uid, true);
-    console.log(data);
+    const data = await getValidatedResponse('/v1/image/info/' + uid, false);
+    //console.log(data);
     if (data.error) return null;
     const img = data["data"] as UploadedImage;
     if (img.uploader) img.uploader.createdAt = new Date(img.uploader.createdAt).toLocaleString()
