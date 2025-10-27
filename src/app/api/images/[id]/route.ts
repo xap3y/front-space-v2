@@ -9,10 +9,11 @@ function isSafeId(id: string) {
 }
 
 export async function GET(
-    _req: NextRequest,
-    { params }: { params: { id: string } }
+    req: NextRequest,
 ) {
-    const id = (await params)?.id;
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+
     if (!id || !isSafeId(id)) {
         return new Response("Invalid id", { status: 400 });
     }
