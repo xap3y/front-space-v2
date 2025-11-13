@@ -9,6 +9,10 @@ export default async function Page() {
             <NestedLinktree links={
                 [
                     {
+                        label: "Image",
+                        href: "/a/image"
+                    },
+                    {
                         label: "Url",
                         href: "/a/url"
                     },
@@ -17,12 +21,8 @@ export default async function Page() {
                         href: "/a/paste"
                     },
                     {
-                        label: "Image",
-                        href: "/a/image"
-                    },
-                    {
-                        label: "Mail",
-                        href: "/a/mail"
+                        label: "Temp Email",
+                        href: "/email"
                     }
                 ]
             } />

@@ -6,6 +6,7 @@ import {useUser} from "@/hooks/useUser";
 import {createShortUrl} from "@/lib/apiPoster";
 import LoadingPage from "@/components/LoadingPage";
 import {okToast} from "@/lib/client";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function UrlShortener() {
 
@@ -61,24 +62,22 @@ export default function UrlShortener() {
 
                 </div>
 
-                <div className={"mt-10 bg-primary_light border-2 rounded-xl border-secondary p-4 flex flex-col items-center"}>
+                <div className={"mt-10 box-primary p-4 flex flex-col items-center"}>
                     <h1 className={"mb-12 text-xl font-extrabold"}>URL Shortener</h1>
 
                     <form onSubmit={handleSubmit} className={"flex flex-col gap-4"}>
 
-                        <input
-                            className={"bg-primary px-4 py-3 outline-none sm:w-[400px] w-[200px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
+                        <MainStringInput
                             name="text"
                             required
                             placeholder="Original URL"
                             type="text"
                             value={url}
                             autoComplete={"new-password"}
-                            onChange={(e) => setUrl(e.target.value)}
+                            onChange={(e) => setUrl(e)}
                         />
 
-                        <input
-                            className={"bg-primary px-4 py-3 outline-none sm:w-[400px] w-[200px] text-white rounded-lg border-2 transition-colors duration-100 border-solid focus:border-[#596A95] border-[#2B3040]"}
+                        <MainStringInput
                             name="text"
                             required
                             placeholder="API Key"
@@ -87,7 +86,7 @@ export default function UrlShortener() {
                             id="api-key"
                             disabled={!!user}
                             autoComplete={"new-password"}
-                            onChange={(e) => setApiKey(e.target.value)}
+                            onChange={(e) => setApiKey(e)}
                         />
 
                         <button

@@ -11,7 +11,7 @@ export function SocialLinkButton({ children, href }: Props) {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={"text-gray-200 hover:text-gray-400 transition-all hover:-translate-y-1 transform-gpu duration-300"}
+                className={"text-gray-200 hover:text-gray-400 transition-all hover:-translate-y-1 transform-gpu duration-300 z-50"}
             >
                 {children}
             </a>

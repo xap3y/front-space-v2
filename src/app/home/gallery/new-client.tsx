@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
 import {FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle} from 'react-icons/fa';
-import {FaRotateRight} from 'react-icons/fa6';
+import {FaPlus, FaRotateRight} from 'react-icons/fa6';
 import {copyToClipboard, deleteImageApi as apiDeleteImage, errorToast, okToast} from "@/lib/client";
 import {getUserImages} from "@/lib/apiGetters";
 import {UploadedImage} from "@/types/image";
@@ -253,23 +253,38 @@ export default function GalleryPage() {
                             {totalItems} {totalItems === 1 ? 'item' : 'items'}
                         </div>
                     </div>
-                    <button
-                        onClick={() => {
-                            setLoading(true)
-                            // timeout to show loading
-                            setTimeout(() => {
-                                errorToast("Not implemented yet") // TODO
-                                setLoading(false)
-                            }, 500);
-                        }}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-secondary hover:bg-white/10 transition-colors text-sm"
-                        disabled={loading}
-                        aria-label="Refresh list"
-                        title="Refresh"
-                    >
-                        <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">{loading ? 'Refreshing...' : 'Refresh'}</span>
-                    </button>
+
+                    <div className={"space-x-4"}>
+                        <a href={"/a/new"}>
+                            <button
+                                className="inline-flex items-center gap-2 px-3 py-2 box-primary transition-colors text-sm"
+                                aria-label="New upload"
+                                title="New"
+                            >
+                                <FaPlus className={`h-4 w-4`} />
+                                <span className="hidden sm:inline">New</span>
+                            </button>
+                        </a>
+
+
+                        <button
+                            onClick={() => {
+                                setLoading(true)
+                                // timeout to show loading
+                                setTimeout(() => {
+                                    errorToast("Not implemented yet") // TODO
+                                    setLoading(false)
+                                }, 500);
+                            }}
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg box-primary transition-colors text-sm"
+                            disabled={loading}
+                            aria-label="Refresh list"
+                            title="Refresh"
+                        >
+                            <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                            <span className="hidden sm:inline">{loading ? 'Refreshing...' : 'Refresh'}</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Grid card area */}

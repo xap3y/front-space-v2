@@ -9,6 +9,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
 import {DefaultResponse} from "@/types/core";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function UserFinder() {
 
@@ -58,7 +59,7 @@ export default function UserFinder() {
                 <main className="flex items-center justify-center min-h-screen">
                     <div className="max-w-lg w-full mx-3">
                         <form onSubmit={handleSubmit}
-                            className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
+                            className="box-primary shadow-xl overflow-hidden"
                         >
                             <div className="p-4">
                                 <h1 className="text-3xl font-bold text-center text-white">{lang.pages.user_finder.title}</h1>
@@ -66,16 +67,14 @@ export default function UserFinder() {
                             </div>
                             <div className="p-4">
                                 <div className="mb-4">
-                                    <input
+                                    <MainStringInput
                                         placeholder={lang.pages.user_finder.input_placeholder}
-                                        className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
                                         required
-                                        autoComplete="new-password"
                                         type="text"
                                         name="username"
                                         id="username"
                                         value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        onChange={(e) => setUsername(e)}
                                     />
                                 </div>
                                 <div className="mb-4">

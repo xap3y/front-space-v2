@@ -114,15 +114,17 @@ export default function UrlsPage() {
                 <div className="flex items-center justify-between lg:pt-5 pt-10">
                     <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Short URLs</h1>
                     <div className={"space-x-4"}>
-                        <button
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"
-                            disabled={loading}
-                            aria-label="Refresh list"
-                            title="New"
-                        >
-                            <FaPlus className={"h-4 w-4"} />
-                            <span className="hidden sm:inline">New</span>
-                        </button>
+                        <a href={"/a/url"}>
+                            <button
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"
+                                disabled={loading}
+                                aria-label="Refresh list"
+                                title="New"
+                            >
+                                <FaPlus className={"h-4 w-4"} />
+                                <span className="hidden sm:inline">New</span>
+                            </button>
+                        </a>
                         <button
                             onClick={fetchUrls}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-sm"

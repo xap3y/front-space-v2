@@ -114,7 +114,7 @@ export function UserProfile({ user }: Props) {
             {/* Social Links */}
             {
                 user.socials && (
-                    <div className="flex flex-wrap justify-center gap-4 mt-6">
+                    <div className="flex flex-wrap justify-center gap-4 pt-6">
 
                         {user.socials.website && (
                             <SocialLinkButton href={user.socials.website}>

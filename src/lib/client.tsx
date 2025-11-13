@@ -11,6 +11,7 @@ import LanguageModel from "@/types/LanguageModel";
 import {Album} from "@/types/album";
 import {logToServer} from "@/lib/serverFuncs";
 import {EmbedSettings, UrlPreferences} from "@/types/configs";
+import translations from "@/hooks/useTranslation";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -37,10 +38,32 @@ export async function deleteVerifyToken() {
     await fetch("/api/auth/clear", { method: "POST", credentials: "include" });
 }
 
-export const copyToClipboard = (text: string, lang: LanguageModel, delay: number = 500) => {
+export const copyToClipboard = (text: string, lang: LanguageModel | null = null, delay: number = 500) => {
     navigator.clipboard.writeText(text);
-    okToast(lang.toasts.success.copied_to_clipboard, delay);
+    infoToast(lang ? lang.toasts.success.copied_to_clipboard : "Copied to clipboard", delay);
 };
+
+export function secondsToHuman(seconds: number): string {
+    if (!seconds || seconds <= 0) return "Permanent";
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const parts: string[] = [];
+    if (d) parts.push(`${d}d`);
+    if (h) parts.push(`${h}h`);
+    if (m) parts.push(`${m}m`);
+    return parts.length ? parts.join(" ") : `${seconds}s`;
+}
+
+export function isValidDurationExpr(expr: string): boolean {
+    if (!expr) return false;
+    const s = expr.trim();
+    const re = /^[+-]?\s*(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?\s*(?:(\d+)\s*s)?\s*$/i;
+    const m = s.match(re);
+    if (!m) return false;
+    const hasAny = (m[1] && m[1] !== "0") || (m[2] && m[2] !== "0") || (m[3] && m[3] !== "0");
+    return !!hasAny;
+}
 
 export const debugLog = (text: string, text2?: any) => {
     if (process.env.NODE_ENV === "development") {
