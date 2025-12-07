@@ -91,13 +91,15 @@ export default function PasteCreator() {
         try {
             const res = await fetch(getApiUrl() + "/v1/paste/create", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Api-Key": effectiveKey
+                },
                 cache: "no-store",
                 credentials: "include",
                 body: JSON.stringify({
                     title: title.trim(),
                     text: content.trim(),
-                    apiKey: effectiveKey,
                     source: "PORTAL",
                 }),
             });

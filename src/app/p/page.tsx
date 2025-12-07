@@ -7,6 +7,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {getPasteApi} from "@/lib/apiGetters";
 import {usePaste} from "@/context/PasteContext";
 import {PasteDto} from "@/types/paste";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function PasteFinder() {
 
@@ -47,7 +48,7 @@ export default function PasteFinder() {
                 <main className="flex items-center justify-center min-h-screen">
                     <div className="max-w-lg w-full mx-3">
                         <div
-                            className="bg-primary_light rounded-lg shadow-xl overflow-hidden"
+                            className="box-primary overflow-hidden"
                         >
                             <div className="p-4">
                                 <h1 className="text-3xl font-bold text-center text-white">Paste Finder</h1>
@@ -55,16 +56,15 @@ export default function PasteFinder() {
                             </div>
                             <form onSubmit={handleSubmit} className="p-4" >
                                 <div className="mb-4">
-                                    <input
+                                    <MainStringInput
                                         placeholder= "Paste Unique ID"
-                                        className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
-                                        required
+                                        required={true}
                                         autoComplete="new-password"
                                         type="text"
                                         name="uid"
                                         id="uid"
                                         value={uid}
-                                        onChange={(e) => setUid(e.target.value)}
+                                        onChange={(e) => setUid(e)}
                                     />
                                 </div>
                                 <div className="mb-4">

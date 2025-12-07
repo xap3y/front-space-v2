@@ -5,7 +5,6 @@ import {notFound, useParams} from "next/navigation";
 import {UserProfile} from "@/components/UserProfile";
 import { useUser } from '@/context/UserContext';
 import {useEffect, useState} from "react";
-import NotFound from "next/dist/client/components/not-found-error";
 import LoadingPage from "@/components/LoadingPage";
 import {UserObj} from "@/types/user";
 import {DefaultResponse} from "@/types/core";
@@ -43,7 +42,7 @@ export default function Page() {
             )}
 
             {(!user && !loading) && (
-                <NotFound/>
+                notFound()
             )}
 
             {user && (

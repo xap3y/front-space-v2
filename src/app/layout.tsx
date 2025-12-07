@@ -62,7 +62,7 @@ export default function RootLayout({
         </ClientRoot>
         <SpeedInsights />
         <ToastContainer theme={"dark"} />
-        <CookieConsent />
+        {/*<CookieConsent />*/}
         </body>
         </html>
     );

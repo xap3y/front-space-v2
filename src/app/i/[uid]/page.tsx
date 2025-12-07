@@ -1,10 +1,9 @@
 'use client';
 
-import {useParams, useRouter} from "next/navigation";
+import {notFound, useParams, useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import LoadingPage from "@/components/LoadingPage";
-import NotFound from "next/dist/client/components/not-found-error";
 import {useImage} from "@/context/ImageContext";
 import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
@@ -236,11 +235,11 @@ export default function Page() {
     }
 
     if (!image && !loading) {
-        return <NotFound />;
+        return notFound();
     }
 
     if (!image) {
-        return <NotFound />;
+        return notFound();
     }
 
     if (error) {
