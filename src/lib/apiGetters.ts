@@ -21,6 +21,18 @@ export async function getUserApi(id: string): Promise<DefaultResponse> {
     return data;
 }
 
+export async function getInviteCodes(url: string, used?: boolean): Promise<DefaultResponse> {
+    console.log("Calling getInviteCodes ?used: " + used)
+
+    const data = await getValidatedResponse(url);
+    //console.log("data is " + JSON.stringify(data))
+    if (data.error) return data;
+    /*const user = data["data"] as UserObj;
+    user.createdAt = new Date(user.createdAt).toLocaleString()
+    console.log("user is " + user)*/
+    return data;
+}
+
 export async function getUserDiscordConnection(apiKey: string): Promise<DiscordConnection | null> {
     try {
         const url = '/v1/discord/get/@me';

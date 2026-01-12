@@ -1,34 +1,22 @@
-'use client';
-
-import {useUser} from "@/hooks/useUser";
-import {useRouter} from "next/navigation";
-import {useEffect} from "react";
-import LoadingPage from "@/components/LoadingPage";
-import {BuildingInProgressPage} from "@/components/GlobalComponents";
+"use client";
 
 export default function AdminPage() {
 
-    const { user, loadingUser, error } = useUser();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (loadingUser) return;
-        else if (!user || user.role !== 'OWNER') {
-            return router.push("/login");
-        }
-    }, [user, loadingUser, error])
-
-    if (loadingUser || !user || user.role !== 'OWNER') {
-        return <LoadingPage/>
-    }
-
     return (
-        <>
-            <h1 className="text-3xl font-bold underline">
-                Admin Page
-            </h1>
+        <div className="flex">
 
-            <BuildingInProgressPage/>
-        </>
-    )
+            <main className="flex-1 p-4 xl:p-6">
+                <div className="box-primary p-4">
+                    <h1 className="text-xl font-semibold">Admin</h1>
+                    <p className="text-sm text-gray-300 mt-2">
+                        Welcome to the admin panel.
+                    </p>
+
+                    <div className="mt-4 box-primary p-4">
+                        Nothing here yet.
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
 }

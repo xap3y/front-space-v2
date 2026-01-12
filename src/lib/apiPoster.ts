@@ -41,6 +41,24 @@ export async function deleteShortUrl(shortUrl: ShortUrlDto, apikey: string): Pro
 
 }
 
+export async function createInvites(count: number, prefix?: string, creator?: number): Promise<DefaultResponse> {
+    console.debug("Calling createInvites with count: " + count)
+
+    try {
+        const response = await fetch(getApiUrl() + "/v1/admin/invite/create?amount=" + count + ((prefix !== undefined) ? "&prefix=" + prefix : ""), {
+            method: "POST",
+            headers: getCurlHeaders()
+        })
+
+        if (!response) return {error: true, message: "Failed to create codes!"} as DefaultResponse;
+
+        return (await response.json()) as DefaultResponse;
+    } catch (e) {
+        return {error: true, message: "Server error"} as DefaultResponse;
+    }
+
+}
+
 export async function createPaste(title: string, paste: string, apikey: string): Promise<PasteDto | null> {
     console.log("Calling createPaste with paste: " + paste.substring(0, 15) + "...")
 
