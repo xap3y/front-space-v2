@@ -21,6 +21,30 @@ export async function getUserApi(id: string): Promise<DefaultResponse> {
     return data;
 }
 
+export async function getSystemMetrics(): Promise<DefaultResponse> {
+    console.log("Calling getMetrics")
+
+    const data = await getValidatedResponse("/v1/admin/system/metrics");
+    if (data.error) return data;
+    return data;
+}
+
+export async function getUsers(): Promise<DefaultResponse> {
+    console.log("Calling getUsers")
+
+    const data = await getValidatedResponse('/v1/admin/user/get');
+    if (data.error) return data;
+    return data;
+}
+
+export async function getAuditLogs(): Promise<DefaultResponse> {
+    console.log("Calling getAuditLog")
+
+    const data = await getValidatedResponse('/v1/admin/system/auditlog');
+    if (data.error) return data;
+    return data;
+}
+
 export async function getInviteCodes(url: string, used?: boolean): Promise<DefaultResponse> {
     console.log("Calling getInviteCodes ?used: " + used)
 

@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { usePage } from "@/context/PageContext";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import EmbedTabContent from "@/app/home/settings/pages/embed";
 import LoadingPage from "@/components/LoadingPage";
 import UrlPreferencesTabContent from "@/app/home/settings/pages/url";
+import { PiPaintBrushBold, PiPlugsBold, PiLinkSimpleBold, PiGearBold } from "react-icons/pi";
 
 const TABS = [
-    { key: "webhook", label: "Embed" },
-    { key: "url", label: "URL Preferences" },
-    { key: "appearance", label: "Appearance" },
-    { key: "advanced", label: "Advanced" },
+    { key: "webhook", label: "Embed", icon: <PiPlugsBold /> },
+    { key: "url", label: "URL Preferences", icon: <PiLinkSimpleBold /> },
+    { key: "appearance", label: "Appearance", icon: <PiPaintBrushBold /> },
+    { key: "advanced", label: "Advanced", icon: <PiGearBold /> },
 ];
 
 export default function HomeSettingsEmbed() {
@@ -22,20 +23,17 @@ export default function HomeSettingsEmbed() {
 
     useEffect(() => {
         setPage("settings");
-    }, []);
+    }, [setPage]);
 
     useEffect(() => {
         if (!loadingUser && !user) {
             router.push("/login");
         }
-    }, [user, loadingUser, error])
+    }, [user, loadingUser, error, router]);
 
-    // Tab state
     const [activeTab, setActiveTab] = useState(TABS[0].key);
 
-    // Tab content renderers
-    function renderTabContent() {
-
+    const tabContent = useMemo(() => {
         if (loadingUser || user == null) return <LoadingPage />;
 
         switch (activeTab) {
@@ -44,57 +42,59 @@ export default function HomeSettingsEmbed() {
             case "url":
                 return <UrlPreferencesTabContent user={user} />;
             case "appearance":
-                return <></>;
+                return <div className="text-sm text-gray-400">Appearance settings coming soon.</div>;
             case "advanced":
-                return <></>;
+                return <div className="text-sm text-gray-400">Advanced settings coming soon.</div>;
             default:
                 return null;
         }
-    }
+    }, [activeTab, loadingUser, user]);
 
     if (loadingUser || !user) return <LoadingPage />;
 
     return (
         <section className="flex-1 min-w-0 pt-0 px-1 md:px-12">
-            <div className="max-w-6xl mx-auto w-full md:space-y-8 space-y-4">
+            <div className="w-full md:space-y-8 space-y-4 md:mt-10 mt-2 p-5 box-primary">
                 {/* Header */}
-                <div className="flex items-center md:justify-between justify-center md:pt-10 pt-2 pb-2">
+                <div className="flex items-center md:justify-between justify-center pb-2">
                     <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
                 </div>
 
                 {/* Tab bar */}
                 <nav className="relative -m-5 px-2 mx-1">
-                    <ul
-                        className="flex gap-2 overflow-x-auto scrollbar-hide rounded-lg bg-primary/30 p-1 md:flex-wrap flex-nowrap"
-                        role="tablist"
-                    >
-                        {TABS.map(tab => (
-                            <li key={tab.key} className="flex-shrink-0 md:flex-1 min-w-[90px] md:min-w-[120px]">
-                                <button
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={activeTab === tab.key}
-                                    aria-controls={`tab-panel-${tab.key}`}
-                                    id={`tab-${tab.key}`}
-                                    onClick={() => setActiveTab(tab.key)}
-                                    className={`w-full px-3 py-2 rounded-lg font-semibold text-sm transition-colors duration-200
-            ${activeTab === tab.key
-                                        ? "bg-secondary text-sky-400 shadow-md"
-                                        : "text-gray-400 hover:text-sky-300 hover:bg-white/5"
-                                    }
-          `}
-                                    style={{
-                                        transition: "box-shadow 0.2s, color 0.2s",
-                                        minWidth: "90px",
-                                        whiteSpace: "nowrap",
-                                        flex: "0 0 auto",
-                                    }}
-                                >
-                                    {tab.label}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="p-2 box-primary">
+                        <ul className="flex gap-2 overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap" role="tablist">
+                            {TABS.map((tab) => {
+                                const isActive = activeTab === tab.key;
+                                return (
+                                    <li key={tab.key} className="flex-shrink-0 md:flex-1 min-w-[110px] md:min-w-[140px]">
+                                        <button
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={isActive}
+                                            aria-controls={`tab-panel-${tab.key}`}
+                                            id={`tab-${tab.key}`}
+                                            onClick={() => setActiveTab(tab.key)}
+                                            className={`
+                        group w-full px-3 py-3 rounded-xl font-semibold text-sm transition-all duration-200
+                        border border-transparent flex items-center justify-center gap-2
+                        ${isActive
+                                                ? "bg-primary0 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+                                                : "text-gray-300 hover:text-white hover:bg-white/5"
+                                            }
+                      `}
+                                        >
+                      <span className={`text-base ${isActive ? "text-sky-300" : "text-gray-400"}`}>
+                        {tab.icon}
+                      </span>
+                                            <span className="truncate">{tab.label}</span>
+                                            {isActive && <span className="h-1 w-10 rounded-full bg-sky-300/80 absolute bottom-1" />}
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
                 </nav>
 
                 {/* Tab content */}
@@ -104,29 +104,30 @@ export default function HomeSettingsEmbed() {
                     id={`tab-panel-${activeTab}`}
                     aria-labelledby={`tab-${activeTab}`}
                 >
-                    {renderTabContent()}
+                    {tabContent}
                 </div>
             </div>
 
-            {/* Animate fade-in (use Tailwind or add in global CSS) */}
             <style jsx global>{`
                 .animate-fade-in {
                     animation: fadeIn 0.25s;
                 }
                 @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(8px); }
-                    to { opacity: 1; transform: none; }
+                    from {
+                        opacity: 0;
+                        transform: translateY(8px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: none;
+                    }
                 }
-                .scrollbar-hide::-webkit-scrollbar { display: none; }
-                .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-                @media (max-width: 600px) {
-                    nav ul {
-                        gap: 0.75rem;
-                    }
-                    nav ul li button {
-                        font-size: 1rem;
-                        padding: 0.75rem 1rem;
-                    }
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
             `}</style>
         </section>

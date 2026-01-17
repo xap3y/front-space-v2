@@ -11,6 +11,8 @@ import {EmbedSettings} from "@/types/configs";
 import {errorToast, getUserEmbedSettings, okToast, saveUserEmbedSettings} from "@/lib/client";
 import {AnimatedCheckbox} from "@/components/sets/GlobalComponentSet";
 import {useRouter} from "next/navigation";
+import MainStringInput from "@/components/MainStringInput";
+import {SaveButton} from "@/components/SaveButton";
 
 function hexToInt(hex: string) {
     if (hex.startsWith("#")) {
@@ -20,6 +22,8 @@ function hexToInt(hex: string) {
 }
 
 export default function EmbedTabContent({ user }: { user: UserObj }) {
+
+    const [saving, setSaving] = useState(false);
 
     const router = useRouter();
 
@@ -68,11 +72,15 @@ export default function EmbedTabContent({ user }: { user: UserObj }) {
     }
 
     const handleSave = () => {
+        setSaving(true);
         const save = async () => {
             const res = await saveUserEmbedSettings(user!.apiKey, embedSettings);
             if (res) okToast("Saved")
             else errorToast("Failed to save")
             router.refresh()
+            setTimeout(() => {
+                setSaving(false)
+            }, 500);
         }
         save();
     };
@@ -92,51 +100,48 @@ export default function EmbedTabContent({ user }: { user: UserObj }) {
                     </div>
                     {embedSettings.enabled && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-2">
                                 <label className="text-sm text-gray-400 font-medium flex items-center gap-2">
                                     <FaRegFileAlt /> Title
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="text"
-                                    className="px-3 py-2 rounded-lg border border-white/10 bg-primary text-sm focus:outline-none"
                                     value={embedSettings.title}
-                                    onChange={e => handleEmbedChange("title", e.target.value)}
+                                    onChange={e => handleEmbedChange("title", e)}
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-2">
                                 <label className="text-sm text-gray-400 font-medium flex items-center gap-2">
                                     <FaRegCommentDots /> Description
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="text"
-                                    className="px-3 py-2 rounded-lg border border-white/10 bg-primary text-sm focus:outline-none"
                                     value={embedSettings.description}
-                                    onChange={e => handleEmbedChange("description", e.target.value)}
+                                    onChange={e => handleEmbedChange("description", e)}
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-2">
                                 <label className="text-sm text-gray-400 font-medium flex items-center gap-2">
                                     <FaUser /> Title URL
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="text"
-                                    className="px-3 py-2 rounded-lg border border-white/10 bg-primary text-sm focus:outline-none"
                                     value={embedSettings.titleUrl}
-                                    onChange={e => handleEmbedChange("titleUrl", e.target.value)}
+                                    onChange={e => handleEmbedChange("titleUrl", e)}
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-2">
                                 <label className="text-sm text-gray-400 font-medium flex items-center gap-2">
                                     <FaUser /> Author Label
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="text"
-                                    className="px-3 py-2 rounded-lg border border-white/10 bg-primary text-sm focus:outline-none"
+                                    placeholder={"e.g. Uploaded by " + user.username}
                                     value={embedSettings.authorName}
-                                    onChange={e => handleEmbedChange("authorName", e.target.value)}
+                                    onChange={e => handleEmbedChange("authorName", e)}
                                 />
                             </div>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-2">
                                 <label className="text-sm text-gray-400 font-medium flex items-center gap-2">
                                     <FaPalette /> Color
                                 </label>
@@ -151,12 +156,7 @@ export default function EmbedTabContent({ user }: { user: UserObj }) {
                     )}
                     {/* Save button */}
                     <div className="flex justify-end mt-8">
-                        <button
-                            onClick={handleSave}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border-green-950 bg-green-600 hover:bg-green-700 transition-colors text-sm font-semibold shadow-md duration-200 text-white"
-                        >
-                            Save
-                        </button>
+                        <SaveButton loading={saving} onClick={handleSave} />
                     </div>
                 </div>
                 {/* Divider */}

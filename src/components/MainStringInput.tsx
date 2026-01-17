@@ -89,7 +89,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={cx(
-                        "w-full p-3 bg-transparent rounded outline-none",
+                        "p-3 w-full bg-transparent rounded outline-none",
                         disabled && "pointer-events-none",
                         inputClassName
                     )}

@@ -10,9 +10,9 @@ export default function Home() {
 
     return (
         <>
-            <div className={"overflow-y-hidden custom-cursor flex flex-col justify-center items-center min-h-[90vh] lg:min-h-screen bg-gradient-to-b from-[#0f1123] via-[#10121a] to-black"}>
+            <div className={"overflow-y-hidden custom-cursor flex flex-col justify-center items-center min-h-[90vh] lg:min-h-screen {/*bg-gradient-to-b from-[#0f1123] via-[#10121a] to-black*/}"}>
 
-                <StarsBg />
+                {/*<StarsBg />*/}
 
                 {/*<Comet />*/}
 
@@ -48,7 +48,7 @@ export default function Home() {
                     <div className="flex flex-row gap-2 sm:gap-4 w-full max-w-lg justify-center items-center">
                         <Link href="/login" passHref>
                             <button
-                                className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-md border border-gray-700 bg-neutral-800 text-gray-200 font-medium shadow-sm hover:bg-neutral-700 hover:border-gray-500 hover:text-white active:bg-neutral-900 transition-colors duration-150 focus:outline-none text-sm sm:text-base"
+                                className="box-primary p-3"
                                 type="button"
                             >
                                 Login
@@ -56,7 +56,7 @@ export default function Home() {
                         </Link>
                         <Link href="/home/profile" passHref>
                             <button
-                                className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-md border border-gray-700 bg-neutral-800 text-gray-200 font-medium shadow-sm hover:bg-neutral-700 hover:border-gray-500 hover:text-white active:bg-neutral-900 transition-colors duration-150 focus:outline-none text-sm sm:text-base"
+                                className="box-primary p-3"
                                 type="button"
                             >
                                 Portal
@@ -64,7 +64,7 @@ export default function Home() {
                         </Link>
                         <Link href="https://docs.xap3y.space" passHref>
                             <button
-                                className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-md border border-gray-700 bg-neutral-800 text-gray-200 font-medium shadow-sm hover:bg-neutral-700 hover:border-gray-500 hover:text-white active:bg-neutral-900 transition-colors duration-150 focus:outline-none text-sm sm:text-base"
+                                className="box-primary p-3"
                                 type="button"
                             >
                                 Docs
@@ -72,7 +72,7 @@ export default function Home() {
                         </Link>
                         <Link href="/i" passHref className={"outline-none"}>
                             <button
-                                className="px-3 py-1.5 sm:px-5 sm:py-2 rounded-md border border-gray-700 bg-neutral-800 text-gray-200 font-medium shadow-sm hover:bg-neutral-700 hover:border-gray-500 hover:text-white active:bg-neutral-900 transition-colors duration-150 focus:outline-none text-sm sm:text-base"
+                                className="box-primary p-3"
                                 type="button"
                             >
                                 Img Finder

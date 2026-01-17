@@ -9,6 +9,7 @@ import {UploadedImage} from "@/types/image";
 import {errorToast} from "@/lib/client";
 import {useTranslation} from "@/hooks/useTranslation";
 import {ErrorToast} from "@/components/ErrorToast";
+import MainStringInput from "@/components/MainStringInput";
 
 export default function ImageFinder() {
 
@@ -58,15 +59,15 @@ export default function ImageFinder() {
                             </div>
                             <form onSubmit={handleSubmit} className="p-4" >
                                 <div className="mb-4">
-                                    <input
+                                    <MainStringInput
                                         placeholder={lang.pages.image_finder.input_placeholder}
-                                        className="appearance-none relative block w-full px-3 py-3 border border-primary bg-primary_light text-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-telegram focus:z-10 sm:text-sm"
+                                        className="w-full sm:text-sm text-xs"
                                         required
                                         type="text"
                                         name="uid"
                                         id="uid"
                                         value={uid}
-                                        onChange={(e) => setUid(e.target.value)}
+                                        onChange={(e) => setUid(e)}
                                     />
                                 </div>
                                 <div className="mb-2 flex flex-col items-center gap-4">

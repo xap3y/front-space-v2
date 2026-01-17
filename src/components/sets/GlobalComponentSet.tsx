@@ -22,7 +22,7 @@ export function AnimatedCheckbox({ checked, onChange, label, id }: {
                     aria-hidden="true"
                 />
             </span>
-            <span className="text-sm text-gray-300">{label}</span>
+            <span className="text-base text-gray-300">{label}</span>
         </label>
     );
 }

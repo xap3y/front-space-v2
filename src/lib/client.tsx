@@ -73,53 +73,108 @@ export const debugLog = (text: string, text2?: any) => {
     }
 }
 
-export const getUserRoleBadge: (role: RoleType) => JSX.Element = (role: RoleType) => {
+type RoleType =
+    | "OWNER"
+    | "ADMIN"
+    | "MODERATOR"
+    | "USER"
+    | "GUEST"
+    | "BANNED"
+    | "DELETED"
+    | "TESTER";
+
+type BadgeSize = "xs" | "sm" | "md";
+
+type BadgeOptions = {
+    size?: BadgeSize;
+    uppercase?: boolean;
+    labelOverride?: string;
+    className?: string;
+};
+
+
+export const getUserRoleBadge = (
+    role: RoleType,
+    opts?: { size?: "xs" | "sm" | "md" }
+): JSX.Element => {
+    const size = opts?.size ?? "sm";
+
+    const sizeClass =
+        size === "xs"
+            ? "text-[10px] px-2 py-0.5"
+            : size === "md"
+                ? "text-sm px-3 py-1"
+                : "text-xs px-2.5 py-0.5";
+
+    // Keep your "border same" vibe: not too rounded, consistent border, slightly cleaner typography
+    const base = `inline-flex items-center border border-white/10 rounded-md font-semibold tracking-wide leading-none ${sizeClass}`;
+
     switch (role) {
         case "OWNER":
-            return <span className="text-xs font-medium px-2.5 py-0.5 rounded bg-yellow-900 text-yellow-300">
-                    owner
-                </span>
-        case "ADMIN":
-            return <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                    admin
-                </span>
-        case "MODERATOR":
-            return <span className="bg-blue-500 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    moderator
-                </span>
-        case "USER":
-            return <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                    user
-                </span>
-        case "GUEST":
-            return <span className="bg-primary-darker text-white text-xs font-medium px-2.5 py-0.5 rounded">
-                    guest
-                </span>
-        case "BANNED":
-            return <span className="bg-red-600 text-gray-800 text-xs px-2.5 py-0.5 rounded font-parkinsans font-bold">
-                    BANNED
-                </span>
-        case "DELETED":
-            return <span className="bg-red-600 text-gray-800 text-xs px-2.5 py-0.5 rounded font-parkinsans font-bold">
-                    DELETED
-                </span>
-        case "TESTER":
-            return <span className={"flex gap-3"}>
-                    <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                        tester
-                    </span>
+            return (
+                <span className={`${base} bg-yellow-900/80 text-yellow-200`}>
+          owner
+        </span>
+            );
 
-                    <span
-                        className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                        admin
-                    </span>
-                </span>
+        case "ADMIN":
+            return (
+                <span className={`${base} bg-red-900/70 text-red-200`}>
+          admin
+        </span>
+            );
+
+        case "MODERATOR":
+            return (
+                <span className={`${base} bg-blue-500/20 text-blue-200`}>
+          moderator
+        </span>
+            );
+
+        case "USER":
+            return (
+                <span className={`${base} bg-gray-700/40 text-gray-200`}>
+          user
+        </span>
+            );
+
+        case "GUEST":
+            return (
+                <span className={`${base} bg-primary-darker/70 text-white`}>
+          guest
+        </span>
+            );
+
+        case "BANNED":
+            return (
+                <span className={`${base} bg-red-600/70 text-white font-bold`}>
+          BANNED
+        </span>
+            );
+
+        case "DELETED":
+            return (
+                <span className={`${base} bg-red-600/70 text-white font-bold`}>
+          DELETED
+        </span>
+            );
+
+        case "TESTER":
+            return (
+                <span className="inline-flex items-center gap-2">
+          <span className={`${base} bg-gray-700/40 text-gray-200`}>tester</span>
+          <span className={`${base} bg-red-900/70 text-red-200`}>admin</span>
+        </span>
+            );
+
         default:
-            return <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
-                    user
-                </span>
+            return (
+                <span className={`${base} bg-gray-700/40 text-gray-200`}>
+          user
+        </span>
+            );
     }
-}
+};
 
 export async function validateApiKey(apiKey: string): Promise<boolean> {
     console.log("Calling validateApiKey with key: " + apiKey)
