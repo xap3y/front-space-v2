@@ -1,4 +1,3 @@
-import LogsPage from "@/app/admin/logs/client";
 import {DefaultResponse} from "@/types/core";
 import {AuditLog} from "@/types/auditLog";
 import {getAuditLogs} from "@/lib/apiGetters";

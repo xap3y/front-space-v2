@@ -400,7 +400,6 @@ export default function UsersClient({
                             {u.email ?? "—"}
                           </span>
                           <div
-                              type="button"
                               onClick={(e) => {
                                   e.stopPropagation();
                                   toggleEmail(u.uid);

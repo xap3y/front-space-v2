@@ -6,9 +6,6 @@ import AdminNavBar, { type AdminNavItem } from "@/app/admin/AdminNavBar";
 
 type Props = {
     children: ReactNode;
-    user: {
-        role: string;
-    };
 };
 
 export default function AdminShell({ children }: Props) {

@@ -73,16 +73,6 @@ export const debugLog = (text: string, text2?: any) => {
     }
 }
 
-type RoleType =
-    | "OWNER"
-    | "ADMIN"
-    | "MODERATOR"
-    | "USER"
-    | "GUEST"
-    | "BANNED"
-    | "DELETED"
-    | "TESTER";
-
 type BadgeSize = "xs" | "sm" | "md";
 
 type BadgeOptions = {
