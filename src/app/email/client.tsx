@@ -84,7 +84,7 @@ export default function EmailPage({maxWidth} : Props) {
     const MAX_WIDTH = maxWidth ?? 1920;
 
     const isExpired = tempMail?.expireAt ? new Date(tempMail.expireAt) < new Date() : false;
-    const isSuspended = tempMail?.status == "SUSPENDED" ?? false;
+    const isSuspended = tempMail?.status == "SUSPENDED";
 
     return (
         <>
