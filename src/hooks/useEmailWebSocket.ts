@@ -42,7 +42,7 @@ export function clearInboxStorage(email: string) {
     }
 }
 
-export function useEmailWebSocket(email: string, apiKey: string, forceId: number) {
+export function useEmailWebSocket(email: string, apiKey: string, forceId: number, refetchCallback?: () => void) {
     const [messages, setMessages] = useState<InboxMessage[]>([]);
     const [connected, setConnected] = useState(false);
     const [isWsExpired, setIsWsExpired] = useState(false);
@@ -147,6 +147,12 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         ws.onmessage = (ev) => {
             try {
                 //console.log(ev.data);
+                if (JSON.parse(ev.data).error === true && JSON.parse(ev.data).close == true && refetchCallback != null) {
+                    setTimeout(() => {
+                        refetchCallback();
+                    }, 400);
+                    return;
+                }
                 const raw: RawWsMessage = JSON.parse(ev.data);
                 pushNewMessage(raw);
             } catch (e) {

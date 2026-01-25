@@ -108,11 +108,11 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
     return (
         <>
             {/* Mobile top bar */}
-            <div className="xl:hidden sticky top-0 z-30 bg-secondary border-b border-white/10">
+            <div className="xl:hidden sticky top-0 z-30 bg-primary1 border-b border-white/10">
                 <div className="h-14 px-3 flex items-center justify-between">
                     <button
                         aria-label="Open menu"
-                        className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
+                        className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-primary0 transition-colors"
                         onClick={() => setMobileOpen(true)}
                     >
                         <MdMenu className="h-6 w-6" />
@@ -201,8 +201,8 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     className={`
             absolute inset-y-4 left-4
             w-[80vw] max-w-[340px]
-            rounded-2xl overflow-hidden
-            bg-secondary border border-white/10 shadow-2xl
+            overflow-hidden
+            box-primary
             transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
             will-change-transform
             ${mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+1rem)]'}

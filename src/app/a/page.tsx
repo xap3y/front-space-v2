@@ -19,10 +19,6 @@ export default async function Page() {
                     {
                         label: "Paste",
                         href: "/a/paste"
-                    },
-                    {
-                        label: "Temp Email",
-                        href: "/email"
                     }
                 ]
             } />

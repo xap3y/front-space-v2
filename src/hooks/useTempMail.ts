@@ -5,6 +5,7 @@ import {getApiUrl} from "@/lib/core";
 import {getEmailInfo} from "@/lib/apiGetters";
 export interface TempMail {
     email: string;
+    status: string;
     createdBy: string;
     expireAt: string | null;
 }
@@ -29,6 +30,7 @@ export function useTempMail() {
         const mail: TempMail = {
             email: data.message.email,
             createdBy: data.message.createdBy,
+            status: "OPEN",
             expireAt: data.message.expireAt === 'never' ? null : data.message.expireAt
         };
         setTempMail(mail);
@@ -52,6 +54,22 @@ export function useTempMail() {
         }
     }
 
+    async function refetchTempMailInfo(email: string): Promise<TempMail | null> {
+        const updatedMail = await getEmailInfo(email);
+        if (updatedMail && !updatedMail.error) {
+            const mail: TempMail = {
+                email: updatedMail.message.email,
+                createdBy: updatedMail.message.createdBy,
+                status: updatedMail.message.status,
+                expireAt: updatedMail.message.expireAt === 'never' ? null : updatedMail.message.expireAt
+            };
+            setTempMail(mail);
+            storeInLocalStorage(mail);
+            return mail;
+        }
+        return null;
+    }
+
     async function loadFromLocalStorage(): Promise<TempMail | null> {
         try {
             const raw = localStorage.getItem('lastTempMail');
@@ -62,6 +80,7 @@ export function useTempMail() {
                     const mail: TempMail = {
                         email: updatedMail.message.email,
                         createdBy: updatedMail.message.createdBy,
+                        status: updatedMail.message.status,
                         expireAt: updatedMail.message.expireAt === 'never' ? null : updatedMail.message.expireAt
                     };
                     setTempMail(mail);
@@ -76,5 +95,5 @@ export function useTempMail() {
         return null;
     }
 
-    return { tempMail, createTempMail, resetTempMail, loadFromLocalStorage, setExistingTempMail };
+    return { tempMail, createTempMail, resetTempMail, loadFromLocalStorage, setExistingTempMail, refetchTempMailInfo };
 }

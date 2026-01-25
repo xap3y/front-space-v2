@@ -55,7 +55,7 @@ export default function RootLayout({
         </Head>
         <body
             cz-shortcut-listen="true"
-            className={`dark h-full w-full antialiased bg-primary1 bg-primaryDottedSize bg-primaryDotted text-whitesmoke font-source-code`}
+            className={`dark h-full w-full antialiased bg-primary1 bg-primaryDottedSize bg-primaryDotted text-whitesmoke !font-source-code`}
         >
         <ClientRoot>
             {children}

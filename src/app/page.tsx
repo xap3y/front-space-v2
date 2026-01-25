@@ -38,7 +38,7 @@ export default function Home() {
 
                 <div className="flex flex-col items-center justify-center w-full px-4 ">
                     <h1
-                        className="text-white text-4xl sm:text-5xl font-source-code md:text-6xl font-extrabold text-center mb-10"
+                        className="text-white text-4xl sm:text-5xl md:text-6xl font-extrabold text-center mb-10"
                         style={{
                             textShadow: "0 2px 16px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.2)"
                         }}

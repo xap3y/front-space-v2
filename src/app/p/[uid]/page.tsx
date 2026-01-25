@@ -15,8 +15,22 @@ import { infoToast } from "@/lib/client";
 import { FaCopy } from "react-icons/fa";
 import { UserObj } from "@/types/user";
 import { UserPopupCard } from "@/components/UserPopupCard";
+import {BundledTheme} from "shiki/themes";
 
 const zoomOptions = [75, 90, 100, 110, 125, 150];
+
+const themeOptions: BundledTheme[] = [
+    "github-dark",
+    "github-light",
+    "nord",
+    "dracula",
+    "solarized-dark",
+    "solarized-light",
+    "aurora-x",
+    "monokai",
+    "rose-pine",
+    "tokyo-night",
+];
 
 function transformLogHtml(html: string) {
     const withTimes = html.replace(/\b(\d{2}:\d{2}:\d{2}\.\d{3})\b/g, '<span class="log-time">$1</span>');
@@ -41,6 +55,8 @@ export default function Page() {
     const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
     const { paste, setPaste } = usePaste();
     const [zoom, setZoom] = useState(100);
+    const [theme, setTheme] = useState<BundledTheme>("github-dark");
+    const [themeOpen, setThemeOpen] = useState(false);
     const [zoomOpen, setZoomOpen] = useState(false);
     const [wrap, setWrap] = useState(true);
     const [selectionAnchor, setSelectionAnchor] = useState<number | null>(null);
@@ -48,6 +64,7 @@ export default function Page() {
     const lang: LanguageModel = useTranslation();
     const isMobile = useIsMobile();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const dropdownRefTheme = useRef<HTMLDivElement | null>(null);
     const initialMobileZoomSet = useRef(false);
 
     const {
@@ -121,7 +138,7 @@ export default function Page() {
                 const langKey =
                     guessedLanguage in bundledLanguages ? guessedLanguage : "plaintext";
                 const themeKey =
-                    "github-dark" in bundledThemes ? "github-dark" : "nord";
+                    theme in bundledThemes ? theme : "nord";
 
                 /** @type {import("shiki").BundledLanguage | "plaintext"} */
                 const safeLang = langKey as any;
@@ -150,7 +167,7 @@ export default function Page() {
         return () => {
             cancelled = true;
         };
-    }, [paste, guessedLanguage]);
+    }, [paste, guessedLanguage, theme]);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -276,12 +293,11 @@ export default function Page() {
         <>
             <div
                 className="min-h-screen w-full text-gray-100 px-3 py-6 flex justify-center relative"
-                onMouseMove={handleMouseMove}
             >
                 <div className="w-full max-w-6xl flex flex-col gap-6">
                     {/* Header */}
                     <div className="bg-dark-grey3/70 backdrop-blur box-primary p-5 shadow-lg rounded-2xl">
-                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4" onMouseMove={handleMouseMove}>
                             <div className="flex flex-row items-center gap-3 min-w-0">
                                 <h1 className="text-2xl sm:text-3xl font-semibold leading-tight break-words break-all">
                                     {paste.title}
@@ -348,6 +364,37 @@ export default function Page() {
                                 className="flex flex-wrap items-center gap-2 sm:gap-3"
                                 ref={dropdownRef}
                             >
+                                {/* Theme */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setThemeOpen((v) => !v)}
+                                        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs box-primary transition"
+                                    >
+                                        Theme: {theme}
+                                        <span className={`transition-transform ${themeOpen ? "rotate-180" : ""}`}>
+                                          <FaArrowDown />
+                                        </span>
+                                    </button>
+                                    {themeOpen && (
+                                        <div className="absolute right-0 mt-2 w-32 rounded-xl bg-dark-grey3/90 box-primary shadow-xl overflow-hidden z-10">
+                                            {themeOptions.map((z, idx) => (
+                                                <button
+                                                    key={z}
+                                                    onClick={() => {
+                                                        setTheme(z);
+                                                        setThemeOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 text-xs hover:bg-white/10 transition ${
+                                                        idx !== themeOptions.length - 1 ? "border-b border-white/5" : ""
+                                                    } ${z === theme ? "bg-white/10 text-white" : "text-white/80"}`}
+                                                >
+                                                    {z}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Zoom */}
                                 <div className="relative">
                                     <button
@@ -356,8 +403,8 @@ export default function Page() {
                                     >
                                         Zoom: {zoom}%
                                         <span className={`transition-transform ${zoomOpen ? "rotate-180" : ""}`}>
-          <FaArrowDown />
-        </span>
+                                          <FaArrowDown />
+                                        </span>
                                     </button>
                                     {zoomOpen && (
                                         <div className="absolute right-0 mt-2 w-32 rounded-xl bg-dark-grey3/90 box-primary shadow-xl overflow-hidden z-10">

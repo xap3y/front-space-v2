@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decrypt } from "@/lib/crypto";
-import { getCookie, deleteCookie } from 'cookies-next/server';
+import { deleteCookie } from 'cookies-next/server';
 import {UserObj} from "@/types/user";
 import supportedLocales, {getDefaultLocale} from "@/lib/core";
-import {toast} from "react-toastify";
 import {validateUserAgent} from "@/lib/uaValidator";
 
 function languageMiddleware(req: NextRequest, res: NextResponse) {
@@ -106,6 +105,6 @@ export async function middleware(req: NextRequest) {
 export const config = {
     matcher: [
         '/((?!api|_next|.*\\..*).*)', // Apply language middleware to all pages
-        '/home/dashboard/:path*', // Apply authentication only to /home/dashboard routes
+        '/home/:path*', // Apply authentication only to /home routes
     ],
 };

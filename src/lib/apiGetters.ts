@@ -6,7 +6,6 @@ import {ShortUrlDto, ShortUrlLog} from "@/types/url";
 import {DefaultResponse} from "@/types/core";
 import {DiscordConnection} from "@/types/discord";
 import {Album} from "@/types/album";
-import {EmbedSettings} from "@/types/configs";
 import axios from "axios";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
@@ -113,8 +112,13 @@ export async function getUserShortUrls(uid: string): Promise<ShortUrlDto[] | Def
     const data = await getValidatedResponse('/v1/admin/user/' + uid + "/urls");
     //console.log("DATA IS " + JSON.stringify(data))
     if (data.error) return {error: true, message: data.message} as DefaultResponse;
-    const urlList = data["data"] as ShortUrlDto[];
-    return urlList;
+    return data["data"] as ShortUrlDto[];
+}
+
+export async function getUserPastes(uid: string): Promise<PasteDto[] | DefaultResponse> {
+    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/pastes");
+    if (data.error) return {error: true, message: data.message} as DefaultResponse;
+    return data["data"] as PasteDto[];
 }
 
 export async function getUserShortUrlLogs(uid: string): Promise<ShortUrlLog[] | DefaultResponse> {

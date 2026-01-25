@@ -1,9 +1,9 @@
 "use client";
 
-import React, {useEffect, useState, useTransition} from "react";
-import {TempMail, useTempMail} from "@/hooks/useTempMail";
+import React, {useEffect, useState} from "react";
+import {useTempMail} from "@/hooks/useTempMail";
 import {EmailStream} from "@/components/EmailStream";
-import {okToast} from "@/lib/client";
+import {infoToast, okToast} from "@/lib/client";
 import {useTranslation} from "@/hooks/useTranslation";
 import {FaRegCopy} from "react-icons/fa";
 import {useUser} from "@/hooks/useUser";
@@ -23,7 +23,7 @@ export default function EmailPage({maxWidth} : Props) {
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const { tempMail, createTempMail, resetTempMail, loadFromLocalStorage, setExistingTempMail } = useTempMail();
+    const { tempMail, createTempMail, refetchTempMailInfo, loadFromLocalStorage, setExistingTempMail } = useTempMail();
     const [wsForceRefreshId, setWsForceRefreshId] = useState(0); // bump to re-open socket
     const [reloadFlag, setReloadFlag] = useState(0);
 
@@ -58,11 +58,14 @@ export default function EmailPage({maxWidth} : Props) {
         if (!tempMail) return;
         if (isRefreshing) return;
         setIsRefreshing(true);
-        setTimeout(() => {
+        refetchTempMailInfo(tempMail.email).then(() => {
+            infoToast("Refreshed");
             setIsRefreshing(false);
             setWsForceRefreshId(v => v + 1);
             setReloadFlag(v => v + 1);
-        }, 300);
+        }).catch(() => {
+            setIsRefreshing(false);
+        });
     }
 
     useEffect(() => {
@@ -81,6 +84,7 @@ export default function EmailPage({maxWidth} : Props) {
     const MAX_WIDTH = maxWidth ?? 1920;
 
     const isExpired = tempMail?.expireAt ? new Date(tempMail.expireAt) < new Date() : false;
+    const isSuspended = tempMail?.status == "SUSPENDED" ?? false;
 
     return (
         <>
@@ -105,12 +109,12 @@ export default function EmailPage({maxWidth} : Props) {
                             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                                 <div className="space-y-2 w-full">
                                     <div className="flex items-center gap-3">
-                                    <span className="font-mono text-xl xl:text-2xl font-bold leading-tight text-white break-all select-all">
+                                    <span className={`font-mono text-xl xl:text-2xl font-bold leading-tight ${isSuspended ? "text-red-800 line-through" : "text-white"} break-all select-all`}>
                                       {tempMail.email}
                                     </span>
                                         <button
                                             onClick={() => {
-                                                navigator.clipboard.writeText(tempMail.email)
+                                                navigator.clipboard.writeText(tempMail?.email || "");
                                                 okToast(lang.toasts.success.copied_to_clipboard)
                                             }}
                                             disabled={isRefreshing || isDeleting}
@@ -157,11 +161,12 @@ export default function EmailPage({maxWidth} : Props) {
 
                 {tempMail && (
                     <EmailStream
-                        email={tempMail.email}
+                        email={tempMail}
                         apiKey={apiKey}
                         forceId={wsForceRefreshId}
                         disconnectBo={isRefreshing}
                         isExpired={isExpired}
+                        refetchCallback={handleRefresh}
                     />
                 )}
 

@@ -17,7 +17,6 @@ import {useServerDropdown} from "@/hooks/useServerDropdown";
 import {CallServerEnum, callServers} from "@/config/global";
 import {useServerPings} from "@/hooks/useServerPings";
 import 'react-datepicker/dist/react-datepicker.css'
-import './tweak.css'
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {CallServer} from "@/types/core";

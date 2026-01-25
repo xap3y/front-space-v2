@@ -6,21 +6,23 @@ import { DOMPurify } from 'dompurify';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {FaArrowLeft, FaTrash} from "react-icons/fa6";
 import SwipeableListItem from '@/components/SwipeableItemList';
+import {TempMail} from "@/hooks/useTempMail";
 
 let purify: DOMPurify | null = null;
 const SANITIZE_HTML = true;
 
 interface Props {
-    email: string;
+    email: TempMail;
     apiKey: string;
     forceId: number;
     desktopHeightPx?: number;
     disconnectBo?: boolean;
     isExpired?: boolean;
+    refetchCallback?: () => void;
 }
 
-export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560, isExpired = false }: Props) {
-    const { messages, connected, disconnect, removeMessage, isWsExpired } = useEmailWebSocket(email, apiKey, forceId);
+export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeightPx = 560, isExpired = false, refetchCallback }: Props) {
+    const { messages, connected, disconnect, removeMessage, isWsExpired } = useEmailWebSocket(email.email, apiKey, forceId, refetchCallback);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     const isMdUp = useMediaQuery('(min-width: 1280px)');
@@ -39,7 +41,7 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
             console.log("DISCONNECT BO", disconnectBo)
             disconnect()
         }
-    })
+    }, [])
 
     useEffect(() => {
         if (isMdUp) {
@@ -74,6 +76,8 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
         console.log("connected changed", connected)
     }, [connected])
 
+    const tooltipText = connected ? "New emails will display automatically, no need to refresh " : email.status == "OPEN" ? "Reconnect to receive new emails" : "Cannot receive emails in current status";
+
     return (
         <div
             className={` p-0 xl:p-6
@@ -83,29 +87,30 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
         >
             {/* INBOX LIST */}
             <div className={`flex flex-col
-          w-full
-          xl:w-[250px] xl:flex-none
-          xl:rounded-lg rounded-none border border-white/10 bg-secondary
-          overflow-hidden min-h-64
-          ${!isMdUp && mobileMode === 'detail' ? 'hidden' : ''}
-          min-w-0`}>
+                  w-full
+                  xl:w-[250px] xl:flex-none
+                  border-t-2 border-primary0 md:box-primary md:rounded-lg rounded-none
+                  overflow-hidden min-h-64
+                  ${!isMdUp && mobileMode === 'detail' ? 'hidden' : ''}
+                  min-w-0`} style={{ height: isMdUp ? desktopHeightPx : 'auto' }}
+            >
                 <div className="p-3 border-b border-white/10 flex items-center justify-between text-xs uppercase tracking-wide bg-primary1">
                     <span className="font-semibold text-gray-200 select-none">Inbox</span>
                     <span
                         className={`text-[10px] px-2 py-0.5 rounded-full font-medium select-none ${
                             connected
                                 ? 'bg-green-500/15 text-green-400 border border-green-400/30'
-                                : (isExpired || isWsExpired) ?
+                                : (isExpired || isWsExpired || email.status == "SUSPENDED") ?
                                     'bg-red-500/15 text-red-400 border border-red-400/30':
                                     'bg-gray-500/15 text-gray-400 border border-gray-400/20'
                         }`}
 
-                        data-tooltip-id="my-tooltip" data-tooltip-content={connected ? 'New emails will display automatically, no need to refresh ' : 'Reconnect to receive new emails'}
+                        data-tooltip-id="my-tooltip" data-tooltip-content={tooltipText}
                     >
-            {connected ? 'LIVE' : (isExpired || isWsExpired) ? 'EXPIRED' : 'OFFLINE'}
+            {connected ? 'LIVE' : (isExpired || isWsExpired) ? 'EXPIRED' : (email.status != "OPEN") ? email.status : 'OFFLINE'}
           </span>
                 </div>
-                <ul className="flex-1 overflow-auto bg-primary0">
+                <ul className="flex-1 overflow-auto">
                     {messages.length === 0 && (
                         <li className="p-6 text-xs text-gray-500 text-center select-none">
                             Waiting for messages...
@@ -139,7 +144,7 @@ export function EmailStream({ email, apiKey, forceId, disconnectBo, desktopHeigh
 
             {/* MESSAGE VIEWER */}
             <div className={`flex flex-col w-full
-          xl:rounded-lg rounded-none border border-white/10 bg-primary0
+          box-primary
           overflow-hidden
           ${!isMdUp && mobileMode === 'list' ? 'hidden' : ''}
           min-w-0`}>

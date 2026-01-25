@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useUser } from '@/hooks/useUser'; // adjust to your actual path
+import { useEffect, useState, useCallback } from 'react';
+import { useUser } from '@/hooks/useUser';
 import {FaRegCopy, FaTrash, FaRotateRight, FaPlus} from 'react-icons/fa6';
 import { format } from 'date-fns';
 import {ShortUrlDto} from "@/types/url";
@@ -108,7 +108,7 @@ export default function UrlsPage() {
     if (loadingUser || !user) return <LoadingPage />;
 
     return (
-        <section className="flex-1 min-w-0 md:pt-0 pt-14 px-3 md:px-6">
+        <section className="flex-1 min-w-0 pt-0 px-3 md:px-6">
             <div className="max-w-5xl mx-auto w-full space-y-4">
                 {/* Header */}
                 <div className="flex items-center justify-between lg:pt-5 pt-10">
@@ -139,7 +139,7 @@ export default function UrlsPage() {
                 </div>
 
                 {/* Card */}
-                <div className="rounded-xl border border-white/10 bg-primary2 overflow-hidden">
+                <div className="box-primary overflow-hidden">
                     {/* Table header */}
                     <div className="hidden md:grid grid-cols-[1fr,220px,140px] items-center px-4 py-3 text-xs uppercase tracking-wide text-gray-400 border-b border-white/10">
                         <div>URL</div>

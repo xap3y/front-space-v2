@@ -129,7 +129,7 @@ export default function RegisterPage() {
                         className="box-primary shadow-xl overflow-hidden"
                     >
                         <div className="p-3 lg:p-8">
-                            <h2 className="text-center text-3xl font-extrabold font-source-code-bold text-white">
+                            <h2 className="text-center text-3xl font-extrabold text-white">
                                 {lang.pages.register.title}
                             </h2>
                             <p className="mt-4 text-center text-gray-400">{lang.pages.register.under_title}</p>
