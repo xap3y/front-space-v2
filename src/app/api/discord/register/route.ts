@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
         return new NextResponse(null, {
             status: 301,
             headers: {
-                Location: "/home/profile",
+                Location: "/home/connections",
                 "X-Bypass-Middleware": "true",
                 "Set-Cookie": `discord=${connectedDiscord.discordId}; Path=/; HttpOnly; Secure; SameSite=Strict`
             }

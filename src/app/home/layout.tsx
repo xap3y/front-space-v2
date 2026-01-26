@@ -10,7 +10,9 @@ import {PageProvider} from "@/context/PageContext";
 import GalleryPageServer from "@/app/home/gallery/page";
 import GalleryPage from "@/app/home/gallery/client";
 import {Tooltip} from "react-tooltip";
-import {IoMailOutline} from "react-icons/io5";
+import {IoLink, IoMailOutline} from "react-icons/io5";
+import {RiLinkM} from "react-icons/ri";
+import {PiLinkSimpleBold} from "react-icons/pi";
 
 export default function HomeLayout({
                                         children,
@@ -41,6 +43,7 @@ export default function HomeLayout({
                                 {title: lang.comp.sidebar.settings, icon: <IoIosSettings className={"w-[30px] h-[30px]"} />, href: "/settings", page: "settings"},
                                 {title: "Temp Mail", icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
                                 {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
+                                {title: "Connections", icon: <PiLinkSimpleBold className={"w-[30px] h-[30px]"} />, href: "/connections", page: "connections"},
                             ]} logout_text={lang.comp.sidebar.logout} />
                             <section className="flex-1 min-w-0 bg-primary1 bg-primaryDottedSize bg-primaryDotted">
                                 {children}

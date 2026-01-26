@@ -416,12 +416,12 @@ export default function HomeProfilePage(): JSX.Element {
                                                 className="rounded-full w-8 h-8 sm:w-10 sm:h-10 border border-white/20"
                                             />
                                             <div className="flex flex-col">
-                        <span className="text-lg md:text-xl font-bold">
-                          {discordConnection.username}
-                        </span>
-                                                <span className="text-[10px] text-gray-400">
-                          {"(" + discordConnection.discordId + ")"}
-                        </span>
+                                                <span className="text-lg md:text-xl font-bold">
+                                                  {discordConnection.username}
+                                                </span>
+                                                                        <span className="text-[10px] text-gray-400">
+                                                  {"(" + discordConnection.discordId + ")"}
+                                                </span>
                                             </div>
                                             <FaXmark
                                                 onClick={revokeDiscordConnectionHandler}
@@ -440,7 +440,7 @@ export default function HomeProfilePage(): JSX.Element {
                                                 data-tooltip-id="my-tooltip"
                                                 data-tooltip-content={lang.global.click_to_connect}
                                                 data-tooltip-place="top"
-                                                href={process.env.NEXT_PUBLIC_DISCORD_REGISTER_URL}
+                                                href={"/home/connections"}
                                             >
                                                 <FaLink className="text-xl" />
                                             </a>

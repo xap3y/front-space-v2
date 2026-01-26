@@ -21,6 +21,7 @@ import {
     FiImage,
 } from "react-icons/fi";
 import {IoIosArrowDown} from "react-icons/io";
+import {FaTelegram} from "react-icons/fa";
 
 type SortMode = "time_desc" | "time_asc";
 
@@ -40,7 +41,7 @@ function parseDateMs(iso?: string | null) {
 function Avatar({ src, username }: { src: string | null | undefined; username: string }) {
     if (!src) {
         return (
-            <div className="h-9 w-9 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center text-xs text-gray-300">
+            <div className="h-8 w-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs text-gray-300">
                 {username?.slice?.(0, 2)?.toUpperCase?.() ?? "U"}
             </div>
         );
@@ -50,7 +51,7 @@ function Avatar({ src, username }: { src: string | null | undefined; username: s
         <img
             src={src}
             alt={username}
-            className="h-9 w-9 rounded-lg border border-white/10 object-cover"
+            className="h-8 w-8 rounded-full border border-white/10 object-cover"
         />
     );
 }
@@ -75,11 +76,14 @@ const TYPE_OPTIONS: AuditLogType[] = [
     "EMAIL_CREATE",
     "EMAIL_DELETE",
     "EMAIL_RECEIVE",
+    "TELEGRAM_CONNECTED",
+    "TELEGRAM_REVOKED",
+    "TELEGRAM_BOT_COMMAND"
 ];
 
 const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
-    USER_LOGIN: <FiLogIn />,
-    USER_LOGOUT: <FiLogOut />,
+    USER_LOGIN: <FiLogIn className={"text-green-400"} />,
+    USER_LOGOUT: <FiLogOut className={"text-red-400"} />,
     USER_REGISTER: <FiUserPlus />,
     USER_UPDATE_PROFILE: <FiEdit />,
     USER_SETTINGS_CHANGE: <FiSettings />,
@@ -88,15 +92,18 @@ const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
     INVITE_CODE_USE: <FiKey />,
     PASSWORD_RESET_REQUEST: <FiKey />,
     PASSWORD_RESET_COMPLETE: <FiKey />,
-    IMAGE_UPLOAD: <FiImage />,
-    IMAGE_DELETE: <FiTrash2 />,
+    IMAGE_UPLOAD: <FiImage className={"text-blue-400"} />,
+    IMAGE_DELETE: <FiTrash2 className={"text-red-400"} />,
     PASTE_CREATE: <FiClipboard />,
-    PASTE_DELETE: <FiTrash2 />,
+    PASTE_DELETE: <FiTrash2 className={"text-red-400"} />,
     URL_CREATE: <FiLink />,
     URL_DELETE: <FiTrash2 />,
     EMAIL_CREATE: <FiMail />,
-    EMAIL_DELETE: <FiTrash2 />,
+    EMAIL_DELETE: <FiTrash2 className={"text-red-400"} />,
     EMAIL_RECEIVE: <FiMail />,
+    TELEGRAM_CONNECTED: <FiUserPlus className={"text-green-400"} />,
+    TELEGRAM_REVOKED: <FiUserX className={"text-red-400"} />,
+    TELEGRAM_BOT_COMMAND: <FiSettings />,
 };
 
 const hasViewButton = (t: AuditLogType) => t === "IMAGE_UPLOAD";
@@ -381,15 +388,18 @@ export default function LogsClient({
                                         </div>
                                         <div className="flex flex-col flex-1 min-w-0">
                                             <div className="flex items-center flex-wrap gap-2 min-w-0">
+                                                {log.type.includes("TELEGRAM") && (
+                                                    <FaTelegram className={"text-blue-400 w-5 h-5"} />
+                                                )}
                                                 <span className="text-sm font-semibold text-white truncate">{log.type}</span>
-                                                <div className="flex items-center gap-2 min-w-0">
+                                                <div className="flex items-center gap-2 min-w-0 ml-1">
                                                     <Avatar src={log.user?.avatar} username={log.user?.username ?? "?"} />
                                                     <span className="text-sm text-gray-100 truncate">
-                            {log.user?.username ?? "Unknown"}{" "}
+                                                        {log.user?.username ?? "Unknown"}{" "}
                                                         {log.user?.uid ? (
                                                             <span className="text-gray-400">(#{log.user.uid})</span>
                                                         ) : null}
-                          </span>
+                                                    </span>
                                                     {log.user?.role
                                                         ? getUserRoleBadge(log.user.role as any, { size: "xs" })
                                                         : null}

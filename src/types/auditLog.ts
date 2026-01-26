@@ -29,4 +29,7 @@ export type AuditLogType =
     "URL_DELETE" |
     "EMAIL_CREATE" |
     "EMAIL_DELETE" |
-    "EMAIL_RECEIVE"
+    "EMAIL_RECEIVE" |
+    "TELEGRAM_CONNECTED" |
+    "TELEGRAM_REVOKED" |
+    "TELEGRAM_BOT_COMMAND"
