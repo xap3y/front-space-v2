@@ -4,7 +4,6 @@ import { logout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import LoadingPage from "@/components/LoadingPage";
 import { useUser } from "@/hooks/useUser";
-import {toast} from "react-toastify";
 import {useEffect} from "react";
 import {getApiUrl} from "@/lib/core";
 import {logApiRes} from "@/lib/logger";

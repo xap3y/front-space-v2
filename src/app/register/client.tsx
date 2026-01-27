@@ -16,6 +16,7 @@ import {AuthChecking} from "@/components/AuthChecking";
 import {useUser} from "@/hooks/useUser";
 import Link from "next/link";
 import MainStringInput from "@/components/MainStringInput";
+import {errorToast} from "@/lib/client";
 
 export default function RegisterPage() {
 
@@ -57,10 +58,10 @@ export default function RegisterPage() {
         e.preventDefault();
 
         if (password.length < 5) {
-            return toast.error(lang.pages.login.short_password);
+            return errorToast(lang.pages.login.short_password);
         }
         else if (!email.includes('@')) {
-            return toast.error('Invalid email');
+            return errorToast('Invalid email');
         }
 
         const toastId = toast.info("Registering...", {

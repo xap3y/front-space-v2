@@ -11,7 +11,7 @@ import {IoMdRefresh} from "react-icons/io";
 import LoadingPage from "@/components/LoadingPage";
 import {UploadedImage} from "@/types/image";
 import {useRouter} from "next/navigation";
-import {errorToast, infoToast, uploadImage, uploadImageBucket, validateApiKey} from "@/lib/client";
+import {errorToast, infoToast, okToast, uploadImage, uploadImageBucket, validateApiKey} from "@/lib/client";
 import {FaArrowUp, FaCheck} from "react-icons/fa6";
 import {useServerDropdown} from "@/hooks/useServerDropdown";
 import {CallServerEnum, callServers} from "@/config/global";
@@ -25,6 +25,7 @@ import {getApiUrl} from "@/lib/core";
 import {ErrorToast} from "@/components/ErrorToast";
 import {useDebounce} from "@/hooks/useDebounce";
 import MainStringInput from "@/components/MainStringInput";
+import {UserObjShort} from "@/types/user";
 
 export default function ImageUploader() {
 
@@ -34,6 +35,7 @@ export default function ImageUploader() {
 
     const [isKeyValid, setIsKeyValid] = useState<boolean | null>(null);
     const [isKeyValidating, setIsKeyValidating] = useState<boolean>(false);
+    const [apiKeyUser, setApiKeyUser] = useState<UserObjShort | null>(null);
 
     const debouncedApiKey = useDebounce(apiKey, 1000);
 
@@ -59,6 +61,8 @@ export default function ImageUploader() {
     const [withPassword, setWithPassword] = useState<boolean>(true);
     const [isApiUp, setIsApiUp] = useState<boolean>(true);
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const [isFocusedPass, setIsFocusedPass] = useState(false);
 
     const [uploadProgress, setUploadProgress] = useState<number>(0);
     const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
@@ -109,14 +113,24 @@ export default function ImageUploader() {
     });
 
     useEffect(() => {
-        if (!debouncedApiKey) return;
+        if (!debouncedApiKey) {
+            setApiKeyUser(null);
+            return;
+        }
 
         setIsKeyValidating(true)
 
         const validateIt = async () => {
             const isValid = await validateApiKey(debouncedApiKey);
 
-            setIsKeyValid(isValid);
+            if (typeof isValid == "boolean" && !isValid) {
+                setIsKeyValid(false);
+                setApiKeyUser(null);
+            } else {
+                setIsKeyValid(true);
+                setApiKeyUser(isValid);
+            }
+
             setTimeout(() => {
                 setIsKeyValidating(false)
             }, 100);
@@ -172,7 +186,7 @@ export default function ImageUploader() {
 
         setShowAdvanced(false)
         setUploading(true)
-        const formData = new FormData();
+        const formData: FormData = new FormData() as FormData;
         formData.append("file", file);
         formData.append("apiKey", apiKey);
         formData.append("source", "PORTAL");
@@ -212,7 +226,7 @@ export default function ImageUploader() {
         if (!uploadedImg) {
             toast.warn("uploadedImg: " + uploadedImg)
             setUploadError(uploadedImg)
-            toast.error("Failed to upload image");
+            errorToast("Failed to upload image");
             resetUpload()
             return;
         }
@@ -224,7 +238,7 @@ export default function ImageUploader() {
         console.log(uploadedImage)
         //setUploadedImage(uploadedImg);
 
-        toast.success(lang.pages.portable_image.image_uploaded_alert);
+        okToast(lang.pages.portable_image.image_uploaded_alert);
 
         router.push(uploadedImg.urlSet.portalUrl)
     };
@@ -314,14 +328,17 @@ export default function ImageUploader() {
 
     if (loadingUser) return <LoadingPage/>
 
+    const finalUserRole = apiKeyUser ? apiKeyUser.role : user ? user.role : "GUEST";
+    const isAdmin = finalUserRole == "ADMIN" || finalUserRole == "OWNER";
+
     return (
         <>
             {!isApiUp && (
                 <ErrorToast type={"ERROR"} message={"MAIN API SERVER IS DOWN!"} />
             )}
             {!uploadedImage && (
-                <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-opacity-50 select-none`}>
-                    <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px] ${showAdvanced ? "xl:mb-0 mb-44" : ""}`}>
+                <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-opacity-50 select-none md:px-0 px-1`}>
+                    <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out md:p-6 p-2 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]`}>
                         <div className="space-y-6">
                             <h1 className="text-2xl font-bold text-center">
                                 {"Upload a Image"}
@@ -347,7 +364,7 @@ export default function ImageUploader() {
                                 </div>
                             )}
 
-                            <div className={"flex items-center transition-all duration-300 ease-in-out"}>
+                            <div className={`flex items-center transition-all duration-300 ease-in-out ${!!user ? "hidden" : ""}`}>
                                 <MainStringInput
                                     placeholder={lang.global.api_key_input_placeholder}
                                     value={apiKey}
@@ -356,7 +373,10 @@ export default function ImageUploader() {
                                         setApiKey(value.toLowerCase());
                                         handleApiKeyChange(value);
                                     }}
-                                    className={`lg:text-base text-xs w-full p-0 ${(!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""} ${(isKeyValid === false) ? "border-red-400 bg-red-400 bg-opacity-5" : ""} ${uploading ? "disabled" : ""} ${!!user ? "cursor-not-allowed" : ""}`}
+                                    onFocus={() => {
+                                        setTimeout(() => setIsFocused(true), 100);
+                                    }}
+                                    className={`lg:text-base text-xs w-full p-0 ${isFocused ? "text-dots" : ""} ${(!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10 text-dots" : ""} ${(isKeyValid === false) ? "border-red-400 bg-red-400 bg-opacity-5" : ""} ${uploading ? "disabled" : ""} ${!!user ? "cursor-not-allowed" : ""}`}
                                 />
 
                                 {isKeyValidating && (
@@ -388,7 +408,7 @@ export default function ImageUploader() {
                                     </button>
                                 </div>
                                 <div
-                                    className={`transition-all duration-500 overflow-hidden w-full pl-2 ${showAdvanced ? "max-h-[500px] mt-4" : "max-h-0"}`}
+                                    className={`transition-all duration-500 overflow-hidden w-full md:pl-2 pl-0 ${showAdvanced ? "max-h-[500px] mt-4" : "max-h-0"}`}
                                 >
                                     {/* TODO: LOCALE */}
                                     <span className={"text-gray-500 italic text-xs"}>Following fields are optional</span>
@@ -410,22 +430,11 @@ export default function ImageUploader() {
                                             value={withPassword ? password : ""}
                                             disabled={uploading}
                                             onChange={(e) => setPassword(e)}
-                                            className={`xl:text-base text-xs w-full`}
-                                        />
-                                    </div>
-
-                                    <div className="mb-4 flex justify-between items-center gap-4">
-                                        <MainStringInput
-                                            type="datetime-local"
-                                            placeholder="Expiry Date"
-                                            value={formatDateToInputValue(expiryDate)}
-                                            onChange={(e) => {
-                                                const d = parseInputValueToDate(e);
-                                                setExpiryDate(d);
+                                            onFocus={() => {
+                                                setTimeout(() => setIsFocusedPass(true), 100);
                                             }}
-                                            disabled={uploading}
-                                            min={formatDateToInputValue(new Date())}
-                                            className="xl:text-base text-xs w-full" />
+                                            className={`xl:text-base text-xs w-full ${isFocusedPass ? "text-dots" : ""}`}
+                                        />
                                     </div>
 
                                     <div className="mb-4 w-full">
@@ -498,15 +507,30 @@ export default function ImageUploader() {
 
                                     </div>
 
-                                    <div className="mb-4 flex justify-between items-center gap-4">
+                                    <div className={`mb-4 flex justify-between items-center gap-4 ${isAdmin ? "" : "hidden"}`}>
                                         <MainStringInput
                                             type="text"
                                             placeholder="Custom UID"
                                             value={customUid}
                                             disabled={uploading}
                                             onChange={(e) => setCustomUid(e)}
-                                            className="xl:text-base text-xs w-full"
+                                            className={`xl:text-base text-xs w-full`}
                                         />
+                                    </div>
+
+                                    <div className="mb-4 flex flex-col justify-between">
+                                        <p className={"opacity-40 pl-0.5 italic text-xs"}>Expiration date:</p>
+                                        <MainStringInput
+                                            type="datetime-local"
+                                            placeholder="Expiry Date"
+                                            value={formatDateToInputValue(expiryDate)}
+                                            onChange={(e) => {
+                                                const d = parseInputValueToDate(e);
+                                                setExpiryDate(d);
+                                            }}
+                                            disabled={uploading}
+                                            min={formatDateToInputValue(new Date())}
+                                            className="xl:text-base text-xs w-full" />
                                     </div>
 
                                     <div
@@ -527,7 +551,7 @@ export default function ImageUploader() {
                                                     onClick={() => {
                                                         if (!uploading) toggle()
                                                     }}
-                                                    className="w-full flex items-center justify-between px-2 py-2 text-xs bg-zinc-800 border border-zinc-700 rounded"
+                                                    className="w-full flex items-center justify-between px-2 py-2 text-xs box-primary"
                                                 >
                                                     <div className="flex items-center gap-2 truncate">
                                                         {selected.flag && <img src={selected.flag} alt={""} className="w-4 h-3" />}
@@ -545,7 +569,7 @@ export default function ImageUploader() {
                                                 </button>
 
                                                 <div
-                                                    className={`absolute mt-1 min-w-52 bg-zinc-900 rounded border border-zinc-700 shadow-lg z-50 overflow-hidden transform transition-all duration-500 ease-in-out origin-top ${
+                                                    className={`absolute mt-1 min-w-52 box-primary z-50 overflow-hidden transform transition-all duration-500 ease-in-out origin-top ${
                                                         isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                                                     }`}
                                                 >

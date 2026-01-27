@@ -11,7 +11,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/utils";
 import { useHoverCard } from "@/hooks/useHoverCard";
 import { FaArrowDown } from "react-icons/fa6";
-import { infoToast } from "@/lib/client";
+import { infoToast, okToast } from "@/lib/client";
 import { FaCopy } from "react-icons/fa";
 import { UserObj } from "@/types/user";
 import { UserPopupCard } from "@/components/UserPopupCard";
@@ -137,6 +137,7 @@ export default function Page() {
 
                 const langKey =
                     guessedLanguage in bundledLanguages ? guessedLanguage : "plaintext";
+
                 const themeKey =
                     theme in bundledThemes ? theme : "nord";
 
@@ -223,13 +224,56 @@ export default function Page() {
     }, [highlightedHtml]);
 
     const plainLines = useMemo(() => (paste?.content || "").split("\n"), [paste?.content]);
+    const safeContent = paste?.content || "";
+
+    // Global Ctrl/C (or Cmd/C on macOS) handler to copy selected lines or full content when nothing is selected
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const isMac = () =>
+            typeof navigator !== "undefined" &&
+            /mac/i.test(navigator.platform || navigator.userAgent);
+
+        const onKeyDown = async (e: KeyboardEvent) => {
+            const combo = isMac() ? e.metaKey : e.ctrlKey;
+            if (!combo || e.key.toLowerCase() !== "c") return;
+
+            const target = e.target as HTMLElement | null;
+            if (target) {
+                const tag = target.tagName?.toLowerCase();
+                if (tag === "input" || tag === "textarea" || target.isContentEditable) return;
+            }
+
+            const domSelection = window.getSelection();
+            if (domSelection && domSelection.toString().trim()) return;
+
+            const selectedText =
+                selectedRange
+                    ? plainLines
+                        .slice(selectedRange.start - 1, selectedRange.end)
+                        .join("\n")
+                    : "";
+
+            const textToCopy = selectedText || safeContent;
+            if (!textToCopy) return;
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                infoToast(selectedText ? "Selected lines copied" : "Paste copied");
+            } catch (err) {
+                console.error("Copy failed", err);
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [plainLines, selectedRange, safeContent]);
 
     if (loading) return <LoadingPage />;
     if (!paste) return notFound();
 
     const showRaw = paste.title.endsWith(".raw");
     const createdAt = new Date(paste.createdAt).toLocaleString();
-    const safeContent = paste?.content || "";
     const shortUrl = paste.urlSet?.shortUrl || "";
     const fontSizePx = 13 * (zoom / 100);
 
@@ -240,16 +284,32 @@ export default function Page() {
         }
     };
 
+    const clearHash = () => {
+        if (typeof window !== "undefined") {
+            window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+    }
+
     const handleLineClick = (lineNumber: number, event: React.MouseEvent) => {
         if (event.shiftKey && selectionAnchor) {
             const start = Math.min(selectionAnchor, lineNumber);
             const end = Math.max(selectionAnchor, lineNumber);
-            setSelectedRange({ start, end });
+            setSelectedRange({start, end});
             setHashRange(start, end);
+        } else if (event.ctrlKey) {
+            setSelectionAnchor(null);
+            setSelectedRange(null);
+            clearHash();
         } else {
-            setSelectionAnchor(lineNumber);
-            setSelectedRange({ start: lineNumber, end: lineNumber });
-            setHashRange(lineNumber, lineNumber);
+            if (isSelected(lineNumber) && (selectedRange == null || selectedRange.start == selectedRange.end)) {
+                setSelectionAnchor(null);
+                setSelectedRange(null);
+                clearHash();
+            } else {
+                setSelectionAnchor(lineNumber);
+                setSelectedRange({ start: lineNumber, end: lineNumber });
+                setHashRange(lineNumber, lineNumber);
+            }
         }
     };
 
@@ -349,13 +409,13 @@ export default function Page() {
                         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-start lg:items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 bg-dark-grey3/60">
                             {/* Left label */}
                             <div className="flex items-center gap-3 text-sm text-white/70">
-    <span className="font-mono uppercase tracking-[0.12em] text-[11px] text-white/50">
-      Snippet
-    </span>
+                                <span className="font-mono uppercase tracking-[0.12em] text-[11px] text-white/50">
+                                  Snippet
+                                </span>
                                 {!showRaw && (
                                     <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs border border-white/10">
-        {guessedLanguage}
-      </span>
+                                        {guessedLanguage}
+                                    </span>
                                 )}
                             </div>
 

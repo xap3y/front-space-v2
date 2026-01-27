@@ -1,7 +1,7 @@
 "use client";
 
 import {toast} from "react-toastify";
-import {RoleType} from "@/types/user";
+import {RoleType, UserObjShort} from "@/types/user";
 import {JSX} from "react";
 import {UploadedImage} from "@/types/image";
 import axios from "axios";
@@ -166,7 +166,7 @@ export const getUserRoleBadge = (
     }
 };
 
-export async function validateApiKey(apiKey: string): Promise<boolean> {
+export async function validateApiKey(apiKey: string): Promise<UserObjShort | false> {
     console.log("Calling validateApiKey with key: " + apiKey)
 
     try {
@@ -191,7 +191,7 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
             console.error("Error validating API key: ", data["message"]);
             return false;
         }
-        return true;
+        return data["message"] as UserObjShort;
     } catch (error) {
         return false;
     }

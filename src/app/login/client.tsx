@@ -83,16 +83,13 @@ export default function LoginPage() {
             } catch (error) {
                 // @ts-expect-error
                 if (error.message.includes("NetworkError")) {
-                    toast.error('API is offline!');
+                    errorToast('API is offline!');
                     console.debug("[GET] " + getApiUrl() + "/status -> NetworkError");
                     return;
                 }
                 // @ts-expect-error
                 setError(error.message);
-                toast.error('API error!', {
-                    autoClose: 600,
-                    closeOnClick: true
-                });
+                errorToast('API error!');
                 console.log("[GET] " + getApiUrl() + "/status " + error);
             }
         }
@@ -112,10 +109,10 @@ export default function LoginPage() {
         e.preventDefault();
 
         if (password.length < 5) {
-            return toast.error(lang.pages.login.short_password);
+            return errorToast(lang.pages.login.short_password);
         }
         else if (!email.includes('@')) {
-            return toast.error('Invalid email');
+            return errorToast('Invalid email');
         }
 
         const toastId = toast.info("Logging in...", {

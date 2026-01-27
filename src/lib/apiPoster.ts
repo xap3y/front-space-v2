@@ -8,10 +8,10 @@ import {DiscordConnection} from "@/types/discord";
 import defaultPeriodStats, {PeriodStats} from "@/types/stats";
 
 
-export async function createShortUrl(url: string, apikey: string): Promise<ShortUrlDto | null> {
+export async function createShortUrl(url: string, apikey: string, uniqueId: string | null): Promise<ShortUrlDto | null> {
     console.log("Calling createShortUrl with url: " + url)
 
-    const data = await postApi('/v1/url/create', {url: url}, apikey);
+    const data = await postApi('/v1/url/create', {url: url, uniqueId: uniqueId}, apikey);
 
     if (!data) return null;
 

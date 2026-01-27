@@ -32,6 +32,10 @@ export const linktree: LinkItem[] = [
                     {
                         label: "Short URLs",
                         href: "/home/short-urls"
+                    },
+                    {
+                        label: "Connections",
+                        href: "/home/connections"
                     }
                 ]
             },
@@ -105,81 +109,81 @@ export const linktree: LinkItem[] = [
     },
     {
         label: "API #1",
-        href: "https://call.xap3y.tech",
+        href: "https://call.xap3y.space",
         links: [
             {
                 label: "Image-upload (WEB)",
-                href: "https://call.xap3y.tech/web/image-upload",
+                href: "https://call.xap3y.space/web/image-upload",
             },
             {
                 label: "Image-render (WEB)",
-                href: "https://call.xap3y.tech/web/image-render"
+                href: "https://call.xap3y.space/web/image-render"
             },
             {
                 label: "Paste-create (WEB)",
-                href: "https://call.xap3y.tech/web/paste-create",
+                href: "https://call.xap3y.space/web/paste-create",
             },
             {
                 label: "Short URL (WEB)",
-                href: "https://call.xap3y.tech/web/url-create",
+                href: "https://call.xap3y.space/web/url-create",
             },
             {
                 label: "Metrics (JSON)",
-                href: "https://call.xap3y.tech/metrics"
+                href: "https://call.xap3y.space/metrics"
             },
             {
                 label: "Redirect-image",
-                href: "https://i.xap3y.tech/"
+                href: "https://i.xap3y.space/"
             },
             {
                 label: "Redirect-paste",
-                href: "https://p.xap3y.tech/"
+                href: "https://p.xap3y.space/"
             },
             {
                 label: "Redirect-url",
-                href: "https://r.xap3y.tech/"
+                href: "https://r.xap3y.space/"
             }
         ]
     },
     {
         label: "API #2 (OFFLINE)",
-        href: "https://api.xap3y.tech",
+        href: "https://api.xap3y.space",
         links: [
             {
                 label: "Redirect-image",
-                href: "https://i0.xap3y.tech/"
+                href: "https://i0.xap3y.space/"
             },
             {
                 label: "Redirect-paste",
-                href: "https://p0.xap3y.tech/"
+                href: "https://p0.xap3y.space/"
             },
             {
                 label: "Redirect-url",
-                href: "https://r0.xap3y.tech/"
+                href: "https://r0.xap3y.space/"
             }
         ]
     },
     {
         label: "API #3 (OFFLINE)",
-        href: "https://ext.space.xap3y.tech",
+        href: "https://ext.space.xap3y.space",
         links: [
             {
                 label: "Redirect-image",
-                href: "https://i1.xap3y.tech/"
+                href: "https://i1.xap3y.space/"
             },
             {
                 label: "Redirect-paste",
-                href: "https://p1.xap3y.tech/"
+                href: "https://p1.xap3y.space/"
             },
             {
                 label: "Redirect-url",
-                href: "https://r1.xap3y.tech/"
+                href: "https://r1.xap3y.space/"
             }
         ]
     },
     {
         label: "XAP3Y's space v1",
-        href: "https://s.xap3y.tech/login"
+        href: "https://xap3y.space"
     },
     {
         label: "XAP3Y's space v2",
