@@ -112,7 +112,7 @@ export default function RegisterPage() {
         setLoading(false);
     }, []);
 
-    if (loading || loadingUser) return <LoadingPage />
+    if (loading || loadingUser || user) return <LoadingPage />
 
     if (checkingAuth) return <AuthChecking />
 

@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+    images: {
+        remotePatterns: [new URL('https://r3.xap3y.space/**')],
+    },
 };
 
 export default nextConfig;

@@ -4,7 +4,6 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {getApiUrl} from "@/lib/core";
 import {deleteVerifyToken, errorToast, okToast} from "@/lib/client";
-import {deleteCookie} from "cookies-next/client";
 import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
 

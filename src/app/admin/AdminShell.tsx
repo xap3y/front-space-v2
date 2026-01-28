@@ -1,14 +1,18 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import {useEffect, useMemo} from "react";
 import AdminNavBar, { type AdminNavItem } from "@/app/admin/AdminNavBar";
+import {useUser} from "@/hooks/useUser";
+import LoadingPage from "@/components/LoadingPage";
+import {useRouter} from "next/navigation";
 
 type Props = {
     children: ReactNode;
 };
 
 export default function AdminShell({ children }: Props) {
+    const router = useRouter();
     const navItems: AdminNavItem[] = useMemo(
         () => [
             { title: "Overview", href: "/admin", page: "overview" },
@@ -23,6 +27,18 @@ export default function AdminShell({ children }: Props) {
         ],
         []
     );
+
+    const { user, loadingUser } = useUser();
+
+    useEffect(() => {
+        if (!user && !loadingUser || (user && (user.role != "OWNER" && user.role != "ADMIN") && !loadingUser)) {
+            router.replace("/login");
+        }
+    }, [user, loadingUser, router]);
+
+    if (loadingUser || !user || (user.role != "OWNER" && user.role != "ADMIN")) {
+        return <LoadingPage />;
+    }
 
     return (
         <div
