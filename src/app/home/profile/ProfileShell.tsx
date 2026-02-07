@@ -1,9 +1,7 @@
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import {getUserRoleBadge} from "@/lib/client";
 import {getUserRoleBadgeServer} from "@/lib/server";
-import {AdminNavItem} from "@/app/admin/AdminNavBar";
-import {RoleType, UserObj, UserObjShort} from "@/types/user";
+import {RoleType, UserObj} from "@/types/user";
 import {DiscordConnection} from "@/types/discord";
 
 
