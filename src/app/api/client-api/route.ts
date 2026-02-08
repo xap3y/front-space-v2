@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
-export async function getIpFromHeaders(): Promise<string | null> {
+async function getIpFromHeaders(): Promise<string | null> {
     const h = await headers();
 
     // Common when behind proxies/load balancers/CDNs
@@ -60,16 +60,9 @@ function xorBytes(data: Uint8Array, key: Uint8Array): Uint8Array {
     return out;
 }
 
-export function xorEncodeToBase64Url(plainText: string, secret: string): string {
+function xorEncodeToBase64Url(plainText: string, secret: string): string {
     const data = toUtf8Bytes(plainText);
     const key = toUtf8Bytes(secret);
     const x = xorBytes(data, key);
     return b64urlEncode(x);
-}
-
-export function xorDecodeFromBase64Url(token: string, secret: string): string {
-    const x = b64urlDecode(token);
-    const key = toUtf8Bytes(secret);
-    const data = xorBytes(x, key);
-    return fromUtf8Bytes(data);
 }

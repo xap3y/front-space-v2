@@ -2,7 +2,7 @@
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
 import {getCookie} from "cookies-next/client";
-import {getApiKey, getApiUrl, getSecretKey} from "@/lib/core";
+import {getApiKey, getApiUrl} from "@/lib/core";
 import {NestedLinktree} from "@/components/NestedLinktree";
 import {dashLinkTree} from "@/config/dashLinkTree";
 import {usePage} from "@/context/PageContext";
@@ -48,7 +48,6 @@ export default function DashboardPage() {
 
                 <p>LOGGED AS {user ? JSON.stringify(user) : "NULL"}</p>
                 <p>COOKIES_AUTH_TOKEN: {getCookie("auth_token")}</p>
-                <p>SECRET_KEY: {getSecretKey()}</p>
                 <p>IV: {getIv()}</p>
                 <p>API_KEY: {getApiKey()}</p>
                 <p>API_URL: {getApiUrl()}</p>
