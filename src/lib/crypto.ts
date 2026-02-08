@@ -2,11 +2,13 @@
 
 // Ensure the secret key is available
 // Convert the secret key to a CryptoKey
-import {getSecretKey} from "@/lib/core";
+
+
+import {getSecretKey} from "@/lib/serverFuncs";
 
 async function getCryptoKey(): Promise<CryptoKey> {
     const encoder = new TextEncoder();
-    const key = getSecretKey()
+    const key = await getSecretKey()
     const keyData = encoder.encode(key);
     if (keyData.length !== 32) {
         throw new Error("SECRET_KEY must be a 32-character string.");

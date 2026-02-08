@@ -4,7 +4,7 @@ import {ShortUrlDto} from "@/types/url";
 import {getApiKey, getApiUrl, getCurlHeaders, postApi} from "@/lib/core";
 import {PasteDto} from "@/types/paste";
 import {DefaultResponse} from "@/types/core";
-import {DiscordConnection} from "@/types/discord";
+import {DiscordConnection, KeyRequest} from "@/types/discord";
 import defaultPeriodStats, {PeriodStats} from "@/types/stats";
 
 
@@ -38,7 +38,30 @@ export async function deleteShortUrl(shortUrl: ShortUrlDto, apikey: string): Pro
     } catch (e) {
         return {error: true, message: "Server error"} as DefaultResponse;
     }
+}
 
+export async function createMinecraftServerApiKey(req: KeyRequest): Promise<DefaultResponse> {
+    console.debug("Calling createMinecraftServerApiKey with name: " + req.name)
+
+    try {
+        const response = await fetch(getApiUrl() + "/v1/discord/transcript/create", {
+            method: "POST",
+            body: JSON.stringify({
+                serverName: req.name,
+                serverIp: req.address,
+                ownerEmail: req.email,
+                ownerIp: req.ip,
+                token: req.token
+            }),
+            headers: getCurlHeaders()
+        })
+
+        if (!response) return {error: true, message: "Failed to create api key"} as DefaultResponse;
+
+        return (await response.json()) as DefaultResponse;
+    } catch (e) {
+        return {error: true, message: "Server error"} as DefaultResponse;
+    }
 }
 
 export async function createInvites(count: number, prefix?: string, creator?: number): Promise<DefaultResponse> {

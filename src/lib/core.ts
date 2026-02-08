@@ -11,10 +11,6 @@ export function getApiUrl() {
     return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8012";
 }
 
-export function getSecretKey() {
-    return process.env.SECRET_KEY || "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6";
-}
-
 export function getDefaultLocale(): string {
     const locale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 

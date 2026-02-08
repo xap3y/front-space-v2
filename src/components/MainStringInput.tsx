@@ -23,6 +23,7 @@ export interface MainStringInputProps
     required?: boolean;
     type?: InputTypes;
     placeholder?: string;
+    borderColor?: string;
     className?: string;
     inputClassName?: string;
 }
@@ -41,6 +42,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             required = false,
             type = "text",
             placeholder = "in-primary",
+            borderColor = "border-primary0",
             className,
             inputClassName,
             onFocus,

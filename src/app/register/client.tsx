@@ -17,6 +17,7 @@ import {useUser} from "@/hooks/useUser";
 import Link from "next/link";
 import MainStringInput from "@/components/MainStringInput";
 import {errorToast} from "@/lib/client";
+import {isValidEmail, toAsciiAlnumEmail, toAsciiAlnumName, toAsciiAlnumPassword} from "@/lib/clientFuncs";
 
 export default function RegisterPage() {
 
@@ -72,6 +73,11 @@ export default function RegisterPage() {
             /*setPassword('');*/
             console.log("API URL: " + getApiUrl() + '/v1/auth/register');
 
+            if (password !== confirmPass) {
+                toast.update(toastId, { render: "Confirm password doesn't match your password!", type: "error", isLoading: false, autoClose: 3000, closeOnClick: true})
+                return;
+            }
+
             const response = await fetch(getApiUrl() + '/v1/auth/register', {
                 method: 'POST',
                 headers: {
@@ -120,6 +126,9 @@ export default function RegisterPage() {
             router.replace("/")
         }} />
 
+    const confirmPassMatch: boolean = (typeof confirmPass != "undefined") && (confirmPass != password)
+
+    const isMailValid: boolean = email == "" || isValidEmail(email)
 
     return (
         <>
@@ -143,12 +152,21 @@ export default function RegisterPage() {
                                                 placeholder={"username"}
                                                 required
                                                 value={username}
-                                                onChange={(e) => setUsername(e)}
+                                                onChange={(e) => setUsername(toAsciiAlnumName(e))}
                                                 className={"w-full"}
                                             />
                                         </div>
                                     </div>
-                                    <div className="mt-4">
+                                    <div className="mt-2">
+                                        <div
+                                            className={`text-red-500 text-xs italic mb-2 pl-8 transition-[max-height,opacity,transform] duration-500 ease-in-out ${
+                                                !isMailValid
+                                                    ? "max-h-32 opacity-100 translate-y-0"
+                                                    : "max-h-0 opacity-0 -translate-y-2"
+                                            }`}
+                                        >
+                                            Invalid email address
+                                        </div>
                                         <div className="flex items-center">
                                             < MdEmail className="w-8 h-8 mr-2" />
                                             <MainStringInput
@@ -157,8 +175,8 @@ export default function RegisterPage() {
                                                 placeholder={lang.pages.login.email_placeholder}
                                                 required
                                                 value={email}
-                                                onChange={(e) => setEmail(e)}
-                                                className={"w-full"}
+                                                onChange={(e) => setEmail(toAsciiAlnumEmail(e))}
+                                                className={`${(!isMailValid) ? "!border-red-600 hover:border-red-500 " : ""} w-full`}
                                             />
                                         </div>
                                     </div>
@@ -174,23 +192,32 @@ export default function RegisterPage() {
                                                 required
                                                 autoComplete="off"
                                                 value={password}
-                                                onChange={(e) => setPassword(e)}
+                                                onChange={(e) => setPassword(toAsciiAlnumPassword(e))}
                                             />
                                         </div>
                                     </div>
-                                    <div className="mt-4">
+                                    <div className="mt-2 transition-all duration-500 ease-in-out">
+                                        <div
+                                            className={`text-red-500 text-xs italic mb-2 pl-8 transition-[max-height,opacity,transform] duration-500 ease-in-out ${
+                                                confirmPassMatch
+                                                    ? "max-h-32 opacity-100 translate-y-0"
+                                                    : "max-h-0 opacity-0 -translate-y-2"
+                                            }`}
+                                        >
+                                            Password doesn't match
+                                        </div>
                                         <div className="flex items-center">
                                             < FaLock className="w-8 h-8 mr-2" />
                                             <MainStringInput
                                                 placeholder={lang.pages.register.confirm_password_placeholder}
-                                                className={`w-full sm:text-sm text-xs ${isFocusedSecondPass ? "text-dots" : ""}`}
+                                                className={`${(confirmPassMatch) ? "!border-red-600 hover:border-red-500 " : ""} w-full sm:text-sm text-xs ${isFocusedSecondPass ? "text-dots" : ""}`}
                                                 onFocus={() => {
                                                     setTimeout(() => setIsFocusedSecondPass(true), 100);
                                                 }}
                                                 required
                                                 autoComplete="off"
                                                 value={confirmPass}
-                                                onChange={(e) => setConfirmPass(e)}
+                                                onChange={(e) => setConfirmPass(toAsciiAlnumPassword(e))}
                                             />
                                         </div>
                                     </div>
@@ -231,17 +258,17 @@ export default function RegisterPage() {
                                             </div>
                                         </div>
                                         <span className="text-xs sm:text-sm text-gray-200">
-                      I have read and agree to the{" "}
+                                            I have read and agree to the{" "}
                                             <Link href="/legal/terms" target="_blank" rel="noopener noreferrer"
                                                   className="underline decoration-white/30 hover:text-white">
-                        Terms of Service
-                      </Link>{" "}
+                                                Terms of Service
+                                            </Link>{" "}
                                             and{" "}
                                             <Link href="/legal/privacy" target="_blank" rel="noopener noreferrer"
                                                   className="underline decoration-white/30 hover:text-white">
-                        Privacy Policy
-                      </Link>.
-                    </span>
+                                                Privacy Policy
+                                            </Link>.
+                                        </span>
                                     </label>
                                 </div>
 
@@ -260,8 +287,9 @@ export default function RegisterPage() {
 
                                 <div>
                                     <button
-                                        className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                        className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                         type="submit"
+                                        disabled={!isValidEmail(email) || password.length < 5 || !confirmPass || !agreed || !inviteCode}
                                     >
                                         {lang.pages.register.button_text}
                                     </button>

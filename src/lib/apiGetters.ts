@@ -4,9 +4,9 @@ import {UploadedImage} from "@/types/image";
 import {PasteDto} from "@/types/paste";
 import {ShortUrlDto, ShortUrlLog} from "@/types/url";
 import {DefaultResponse} from "@/types/core";
-import {DiscordConnection} from "@/types/discord";
 import {Album} from "@/types/album";
 import axios from "axios";
+import {DiscordConnection} from "@/types/discord";
 
 export async function getUserApi(id: string): Promise<DefaultResponse> {
     console.log("Calling getUserApi with id: " + id)
