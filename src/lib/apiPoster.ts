@@ -51,7 +51,8 @@ export async function createMinecraftServerApiKey(req: KeyRequest): Promise<Defa
                 serverIp: req.address,
                 ownerEmail: req.email,
                 ownerIp: req.ip,
-                token: req.token
+                token: req.token,
+                password: req.password
             }),
             headers: getCurlHeaders()
         })

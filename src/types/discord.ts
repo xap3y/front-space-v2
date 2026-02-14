@@ -92,4 +92,5 @@ export interface KeyRequest {
     address: string | null;
     ip: string | null;
     token: string | null;
+    password: string;
 }

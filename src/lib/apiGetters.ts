@@ -108,7 +108,7 @@ export async function getUserImages(uid: string, from: number = 0, limit: number
     return data;
 }
 
-export async function getDiscordTranscript(uid: string): Promise<DefaultResponse | null> {
+export async function getDiscordTranscript(uid: string, apiKey: string): Promise<DefaultResponse | null> {
     console.log("getDiscordTranscript " + uid)
     const data = await getValidatedResponse('/v1/discord/transcript/get/' + uid);
     if (!data) return null;

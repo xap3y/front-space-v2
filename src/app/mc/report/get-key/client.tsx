@@ -9,13 +9,21 @@ import { KeyRequest } from "@/types/discord";
 import { createMinecraftServerApiKey } from "@/lib/apiPoster";
 import { useTurnstile } from "react-turnstile";
 import HoverDiv from "@/components/HoverDiv";
-import {isValidEmail, toAsciiAlnumEmail, toAsciiAlnumIp, toAsciiAlnumName} from "@/lib/clientFuncs";
+import {
+    isValidEmail,
+    toAsciiAlnumEmail,
+    toAsciiAlnumIp,
+    toAsciiAlnumName,
+    toAsciiAlnumPassword
+} from "@/lib/clientFuncs";
 
 const STORAGE_KEY = "minecraft_server_api_key_v1";
 const TTL_MS = 60 * 60 * 1000;
 
-const MIN_NAME_LENGTH = 4;
-const MAX_NAME_LENGTH = 60;
+export const MIN_NAME_LENGTH = 4;
+export const MIN_PASS_LENGTH = 6;
+export const MAX_PASS_LENGTH = 40;
+export const MAX_NAME_LENGTH = 30;
 
 type StoredKeyPayload = {
     apiKey: string;
@@ -31,6 +39,8 @@ export default function ReportGetApiKey() {
     const [serverName, setServerName] = useState("");
     const [serverIp, setServerIp] = useState("");
     const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isFocusedPass, setIsFocusedPass] = useState(false);
 
     // turnstile token
     const [token, setToken] = useState("");
@@ -110,6 +120,7 @@ export default function ReportGetApiKey() {
         e.preventDefault();
 
         if (!serverName.trim()) return errorToast("Server name is required");
+        if (!password.trim()) return errorToast("Password is required");
 
         if (email.trim() && !isValidEmail(email)) return errorToast("Invalid email address");
 
@@ -121,7 +132,8 @@ export default function ReportGetApiKey() {
                 address: serverIp.trim() || null,
                 email: email.trim() || null,
                 ip: ip,
-                token: token
+                token: token,
+                password: password.trim(),
             };
 
             const res = await createMinecraftServerApiKey(body);
@@ -160,6 +172,7 @@ export default function ReportGetApiKey() {
 
     const isMailValid: boolean = email == "" || isValidEmail(email)
     const isNameValid: boolean = serverName == "" || serverName.trim().length >= MIN_NAME_LENGTH && serverName.trim().length <= MAX_NAME_LENGTH;
+    const isPassValid: boolean = password == "" || password.trim().length >= MIN_PASS_LENGTH && password.trim().length <= MAX_PASS_LENGTH;
 
     // If key exists, show ONLY the key view (hide whole form)
     if (apiKey) {
@@ -225,9 +238,13 @@ export default function ReportGetApiKey() {
                         <h2 className="text-center text-3xl font-extrabold text-white">
                             Generate API Key
                         </h2>
-                        <p className="mt-4 text-center text-gray-400">
+                        <div className="mt-4 text-base text-center text-gray-400 gap-2 flex flex-col">
                             Create an API key for your Minecraft server.
-                        </p>
+                            <p className={"text-xs italic"}>
+                                You can use your username and password to view your report transcripts on
+                                <a href={"/mc/report/login"} className={"text-blue-500 ml-1"}>this page</a> later.
+                            </p>
+                        </div>
 
                         <form
                             autoComplete="off"
@@ -238,7 +255,7 @@ export default function ReportGetApiKey() {
                             <div className="rounded-md shadow-sm">
                                 <div className="mt-0">
                                     <div className="text-xs text-gray-300 flex pb-1 gap-2">
-                                        <span>Server name *</span>
+                                        <span>Username *</span>
                                         <div
                                             className={`text-red-500 text-xs italic transition-[max-height,opacity,transform] duration-500 ease-in-out ${
                                                 !isNameValid
@@ -251,15 +268,48 @@ export default function ReportGetApiKey() {
                                     </div>
                                     <MainStringInput
                                         value={serverName}
-                                        onChange={(e) => setServerName(toAsciiAlnumName(e))}
+                                        onChange={(e) => {
+                                            if (e.length > MAX_NAME_LENGTH + 2) return;
+                                            setServerName(toAsciiAlnumName(e))
+                                        }}
                                         required
                                         disabled={generating}
-                                        placeholder="Minecraft server name"
+                                        placeholder="Username"
                                         className={`${(!isNameValid) ? "!border-red-600 hover:border-red-500 " : ""} mt-1`}
                                     />
                                 </div>
 
-                                <div className="mt-4">
+                                <div className="mt-3">
+                                    <div className="text-xs text-gray-300 flex pb-1 gap-2">
+                                        <span>Password *</span>
+                                        <div
+                                            className={`text-red-500 text-xs italic transition-[max-height,opacity,transform] duration-500 ease-in-out ${
+                                                !isPassValid
+                                                    ? "max-h-32 opacity-100 translate-y-0"
+                                                    : "max-h-0 opacity-0 -translate-x-2"
+                                            }`}
+                                        >
+                                            Must be {MIN_PASS_LENGTH}-{MAX_PASS_LENGTH} characters
+                                        </div>
+                                    </div>
+                                    <MainStringInput
+                                        value={password}
+                                        onFocus={() => {
+                                            setTimeout(() => setIsFocusedPass(true), 100);
+                                        }}
+                                        onChange={(e) => {
+                                                if (e.length > MAX_PASS_LENGTH + 2) return;
+                                            setPassword(toAsciiAlnumPassword(e))
+                                        }}
+                                        required
+                                        disabled={generating}
+                                        placeholder="Password"
+                                        autoComplete={"off"}
+                                        className={`${(!isPassValid) ? "!border-red-600 hover:border-red-500 " : ""} mt-1 ${isFocusedPass ? "text-dots" : ""}`}
+                                    />
+                                </div>
+
+                                <div className="mt-3">
                                     <label className="text-xs text-gray-300">
                                         Server IP (optional)
                                     </label>

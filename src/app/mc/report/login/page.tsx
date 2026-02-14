@@ -1,8 +1,8 @@
 import type {Metadata} from "next";
-import ReportGetApiKey from "@/app/mc/report/get-key/client";
+import TranscriptsLoginPage from "@/app/mc/report/login/client";
 
 export const metadata: Metadata = {
-    title: "Space - Transcripts Get Key",
+    title: "Space - Transcripts Login",
     robots: { index: false, follow: false },
 };
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function Page() {
     return (
         <>
-            <ReportGetApiKey />
+            <TranscriptsLoginPage />
         </>
     )
 }

@@ -4,15 +4,17 @@
 import { EmbedVisualizer } from 'embed-visualizer';
 import 'embed-visualizer/dist/index.css';
 
-import { useParams } from 'next/navigation';
+import {useParams, useRouter} from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { getDiscordTranscript } from '@/lib/apiGetters';
 import {DiscordTranscript, DiscordMessage, DiscordAttachment, StickerEntry} from '@/types/discord';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ReportFinder from "@/app/mc/report/client";
 import {hexToInt} from "@/lib/clientFuncs";
+import {useTrUser} from "@/hooks/useTrUser";
+import {getDiscordTranscriptClient} from "@/lib/client";
+import LoadingPage from "@/components/LoadingPage";
 
 // --- Components ---
 
@@ -143,18 +145,27 @@ export default function ReportPageClient() {
     const [data, setData] = useState<DiscordTranscript | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
+    const { user, loadingUser } = useTrUser();
 
     useEffect(() => {
         if (!uid) return;
-        setLoading(true);
-        getDiscordTranscript(uid)
+        if (!user || loadingUser) return;
+        getDiscordTranscriptClient(uid, user.apiKey)
             .then((res) => {
                 if (!res) setError('Transcript not found');
-                else setData(res.data as DiscordTranscript);
+                else setData(res.message as DiscordTranscript);
             })
             .catch((e) => setError(e?.message || 'Failed to load transcript'))
             .finally(() => setLoading(false));
-    }, [uid]);
+    }, [uid, user, loadingUser]);
+
+    useEffect(() => {
+        if (!loadingUser && !user) {
+            router.replace('/mc/report/login?errortoast=no-login&after=' + uid);
+        }
+    }, [user, loadingUser]);
 
     // Grouping & Sorting Logic
     const groupedMessages = useMemo(() => {
@@ -181,7 +192,7 @@ export default function ReportPageClient() {
         }, []);
     }, [data]);
 
-    if (loading) return <div className="p-10 text-xl text-center text-zinc-400">Loading transcript...</div>;
+    if (loading || loadingUser || !user) return <LoadingPage />;
     if (error) return (
         <>
             <div className="p-10 text-center text-red-400 text-xl absolute mx-auto w-full">{error}</div>

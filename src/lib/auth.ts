@@ -1,14 +1,15 @@
 'use client';
 
 import {deleteCookie} from "cookies-next/client";
-import { UserObj } from "@/types/user";
+import {TrUserObj, UserObj} from "@/types/user";
 import {getApiUrl} from "@/lib/core";
 import {deleteVerifyToken} from "@/lib/client";
+import {logToServer} from "@/lib/serverFuncs";
 
 export async function getUser(): Promise<UserObj | null> {
 
-    console.debug("==GET USER BEGIN==");
-    console.debug("Fetching... on " + getApiUrl() + "/v1/auth/me");
+    await logToServer("Fetching TR user data...");
+    await logToServer("API URL: " + getApiUrl() + "/v1/auth/me");
     let res;
     try {
         res = await fetch(getApiUrl() + "/v1/auth/me", {
@@ -21,45 +22,79 @@ export async function getUser(): Promise<UserObj | null> {
             credentials: "include",
         });
     } catch (e) {
-        console.debug("ERROR: " + e);
+        await logToServer("Error fetching user data: " + e);
     }
 
-    console.debug("DONE");
+    await logToServer("Done fetching user data.");
 
     if (!res || !res.ok) {
-        console.debug("NOT OK");
-        console.debug(res)
+        await logToServer("Data fetch failed with status: " + (res ? res.status : "No response"));
         return null;
     }
 
     const data = await res.json();
 
     if (data.error) {
-        console.debug("DATA ERROR");
+        await logToServer("Data fetch returned error: " + data.error);
         return null;
     }
 
     const user = data["message"] as UserObj;
 
-    //console.debug("obj: " + JSON.stringify(user));
-    console.debug("user: " + user.username);
-    console.debug("==GET USER END==");
+    await logToServer("User fetched successfully: " + user.username);
+    await logToServer("==GET USER END==");
 
     return user;
+}
 
-    /*const authToken = getCookie("auth_token");
-    if (!authToken) return null;
+export async function getTrUser(): Promise<TrUserObj | null> {
 
-    const token = await decrypt(authToken);
+    await logToServer("Fetching TR user data...");
+    await logToServer("API URL: " + getApiUrl() + "/v1/auth/tr/me");
+    let res;
     try {
-        return JSON.parse(token);
-    } catch {
+        res = await fetch(getApiUrl() + "/v1/auth/tr/me", {
+            method: "GET",
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            credentials: "include",
+        });
+    } catch (e) {
+        await logToServer("Error fetching TR user data: " + e);
+    }
+
+    await logToServer("Done fetching tr user data.");
+
+    if (!res || !res.ok) {
+        await logToServer("Data fetch failed with status: " + (res ? res.status : "No response"));
         return null;
-    }*/
+    }
+
+    const data = await res.json();
+
+    if (data.error) {
+        await logToServer("Data fetch returned error: " + data.error);
+        return null;
+    }
+
+    const user = data["message"] as TrUserObj;
+
+    await logToServer("User fetched successfully: " + user.serverName);
+    await logToServer("==GET USER END==");
+
+    return user;
 }
 
 export function logout() {
     deleteCookie("auth_token");
     deleteCookie("session_token");
+    deleteCookie("tr_token");
     deleteVerifyToken()
+}
+
+export function logoutTr() {
+    deleteCookie("tr_token");
 }

@@ -11,7 +11,6 @@ import LanguageModel from "@/types/LanguageModel";
 import {Album} from "@/types/album";
 import {logToServer} from "@/lib/serverFuncs";
 import {EmbedSettings, UrlPreferences} from "@/types/configs";
-import translations from "@/hooks/useTranslation";
 
 export const errorToast = (message: string, delay: number = 1000) => {
     return toast.error(message, {
@@ -195,6 +194,32 @@ export async function validateApiKey(apiKey: string): Promise<UserObjShort | fal
     } catch (error) {
         return false;
     }
+}
+
+export async function getDiscordTranscriptClient(uid: string, apiKey: string): Promise<DefaultResponse | null> {
+    console.log("getDiscordTranscript " + uid)
+    const data = await axios.get(getApiUrl() + "/v1/discord/transcript/get/" + uid, {
+        headers: {
+            'x-api-key': apiKey
+        },
+        timeout: 10000,
+    });
+    if (!data) return null;
+
+    return data.data as DefaultResponse;
+}
+
+export async function getDiscordTranscriptsClient(apiKey: string): Promise<DefaultResponse | null> {
+    console.log("getDiscordTranscriptsClient")
+    const data = await axios.get(getApiUrl() + "/v1/discord/transcript/getall", {
+        headers: {
+            'x-api-key': apiKey
+        },
+        timeout: 10000,
+    });
+    if (!data) return null;
+
+    return data.data as DefaultResponse;
 }
 
 export async function saveUserEmbedSettings(apiKey: string, settings: EmbedSettings): Promise<boolean> {

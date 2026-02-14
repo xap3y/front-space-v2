@@ -16,6 +16,15 @@ export interface UserObj {
     }
 }
 
+export interface TrUserObj {
+    uid: number;
+    ownerEmail?: string | null;
+    serverIp?: string | null;
+    serverName: string;
+    createdAt: string;
+    apiKey: string;
+}
+
 export interface UserInvitor {
     uid: number;
     username: string;
