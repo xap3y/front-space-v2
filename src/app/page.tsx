@@ -62,22 +62,22 @@ export default function Home() {
                                 Portal
                             </button>
                         </Link>
-                        <Link href="/tempmail" passHref>
+                        {/*<Link href="/tempmail" passHref>
                             <button
                                 className="box-primary p-3"
                                 type="button"
                             >
                                 Temp Mail
                             </button>
-                        </Link>
-                        <Link href="/i" passHref className={"outline-none"}>
+                        </Link>*/}
+                        {/*<Link href="/i" passHref className={"outline-none"}>
                             <button
                                 className="box-primary p-3"
                                 type="button"
                             >
                                 Img Finder
                             </button>
-                        </Link>
+                        </Link>*/}
                     </div>
                 </div>
             </div>
