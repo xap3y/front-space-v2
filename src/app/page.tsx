@@ -62,12 +62,12 @@ export default function Home() {
                                 Portal
                             </button>
                         </Link>
-                        <Link href="https://docs.xap3y.space" passHref>
+                        <Link href="/tempmail" passHref>
                             <button
                                 className="box-primary p-3"
                                 type="button"
                             >
-                                Docs
+                                Temp Mail
                             </button>
                         </Link>
                         <Link href="/i" passHref className={"outline-none"}>

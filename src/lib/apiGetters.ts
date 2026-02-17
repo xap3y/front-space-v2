@@ -170,6 +170,39 @@ export async function getPasteApi(uid: string): Promise<PasteDto | null> {
     return pasteDto;
 }
 
+export async function getAllEmails(): Promise<DefaultResponse> {
+    console.log("Calling getAllEmails")
+
+    try {
+        const url = "/v1/email/getall";
+        const response = await fetch(getApiUrl() + url, {
+            method: "GET",
+            headers: getCurlHeaders(getApiKey()),
+            cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return { error: true, message: data?.message || "Server error" } as DefaultResponse;
+        }
+
+        if (!data || data.error || !data.message) {
+            return { error: true, message: data?.message ?? "Failed to validate data" } as DefaultResponse;
+        }
+
+        return {
+            error: false,
+            message: "OK",
+            data: data.message,
+            count: data.count ?? (Array.isArray(data.message) ? data.message.length : 0),
+            timestamp: data.timestamp ?? "",
+        } as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}
+
 export async function getEmailInfo(email: string): Promise<DefaultResponse | null> {
     console.log("Calling getEmailInfo with email: " + email)
 
