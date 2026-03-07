@@ -211,6 +211,15 @@ export default function ReportGetApiKey() {
                                 </div>
                             </div>
 
+                            <div className={"text-center mt-4 text-gray-400"}>
+                                <span>
+                                    You can use your username and password to view your report transcripts on
+                                    <a href={"/mc/report/dashboard"} className={"text-blue-500 mt-2 block text-center text-sm"}>
+                                        this page
+                                    </a>
+                                </span>
+                            </div>
+
                             {/*<button
                                 type="button"
                                 className="mt-6 w-full py-3 px-4 rounded-md bg-[#212121] border border-[#a2a1a833] text-sm font-medium text-white hover:border-telegram transition"
