@@ -112,7 +112,7 @@ export async function getValidatedResponse(url: string, noAuth: boolean = false)
             return {error: true, message: "Failed to validate data"} as DefaultResponse;
         }
 
-        return {error: false, message: "OK", data: data["message"], count: data["count"]} as DefaultResponse;
+        return {error: false, message: data["data"], data: data["message"], count: data["count"]} as DefaultResponse;
         //return data["message"];
     } catch (e) {
         return {error: true, message: "Server error"} as DefaultResponse;
