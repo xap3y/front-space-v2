@@ -1,5 +1,4 @@
-import {LinkTreeProps} from "@/types/core";
-
+import {LinkItem, LinkTreeProps} from "@/types/core";
 
 export function NestedLinktree({ links, depth = 0 }: LinkTreeProps) {
     return (

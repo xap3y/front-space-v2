@@ -132,3 +132,59 @@ export async function getPeriodStats(preset: string = "TODAY"): Promise<PeriodSt
 
     return data as PeriodStats;
 }
+
+export async function updateMinecraftServer(
+    serverId: string,
+    updates: {
+        password?: string;
+        apiKey?: string;
+        paused?: boolean;
+    }
+): Promise<boolean> {
+    console.log("Updating Minecraft server:", serverId, updates);
+
+    try {
+        const response = await fetch(getApiUrl() + `/v1/discord/transcript/get/${serverId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                'X-API-Key': getApiKey() || "",
+            },
+            body: JSON.stringify(updates),
+        });
+
+        if (!response.ok) {
+            console.error("Failed to update server:");
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error updating server:", error);
+        return false;
+    }
+}
+
+export async function deleteMinecraftServer(serverId: string): Promise<boolean> {
+    console.log("Deleting Minecraft server:", serverId);
+
+    try {
+        const response = await fetch(getApiUrl() + `/v1/discord/transcript/get/${serverId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                'X-API-Key': getApiKey() || "",
+            },
+        });
+
+        if (!response.ok) {
+            console.error("Failed to delete server:", response.statusText);
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error deleting server:", error);
+        return false;
+    }
+}

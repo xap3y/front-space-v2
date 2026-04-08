@@ -59,3 +59,14 @@ export interface CallServer {
     flag: string;
     type?: CallServerEnum;
 }
+
+export interface MinecraftServerReports {
+    serverName: string;
+    password: string;
+    createdAt: string;
+    paused: boolean;
+    apiKey: string;
+    ownerIp?: string | null;
+    serverIp?: string | null;
+    ownerEmail?: string | null;
+}

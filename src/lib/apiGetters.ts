@@ -28,6 +28,14 @@ export async function getSystemMetrics(): Promise<DefaultResponse> {
     return data;
 }
 
+export async function getTranscriptUsers(): Promise<DefaultResponse> {
+    console.log("Calling getTranscriptUsers")
+
+    const data = await getValidatedResponse("/v1/discord/transcript/getall/users");
+    if (data.error) return data;
+    return data;
+}
+
 export async function getUsers(): Promise<DefaultResponse> {
     console.log("Calling getUsers")
 
