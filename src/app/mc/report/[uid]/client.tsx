@@ -13,12 +13,10 @@ import remarkGfm from 'remark-gfm';
 import ReportFinder from "@/app/mc/report/client";
 import {hexToInt} from "@/lib/clientFuncs";
 import {useTrUser} from "@/hooks/useTrUser";
-import {errorToast, getDiscordTranscriptClient} from "@/lib/client";
+import {getDiscordTranscriptClient} from "@/lib/client";
 import LoadingPage from "@/components/LoadingPage";
-import {getApiUrl} from "@/lib/core";
-import {logApiRes} from "@/lib/logger";
 
-// --- Components ---
+// ... (rest of components stay the same)
 
 const Spoiler = ({ content }: { content: string }) => {
     const [visible, setVisible] = useState(false);
@@ -31,65 +29,59 @@ const Spoiler = ({ content }: { content: string }) => {
             }}
             className={`rounded px-1 py-0.5 transition-colors cursor-pointer ${
                 visible
-                    ? 'bg-zinc-800/20 text-inherit' // Revealed
-                    : 'bg-[#1e1f22] text-transparent hover:bg-[#242629] select-none' // Hidden
+                    ? 'bg-zinc-800/20 text-inherit'
+                    : 'bg-[#1e1f22] text-transparent hover:bg-[#242629] select-none'
             }`}
         >
-      {/* We render Markdown INSIDE the spoiler so formatting like **bold** works */}
             <span className={visible ? '' : 'pointer-events-none'}>
-        <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-                // Force inline rendering (no <p> tags inside the spoiler span)
-                p: ({ node, ...props }) => <span {...props} />,
-                a: ({ node, ...props }) => <a {...props} className="text-[#00b0f4] hover:underline" />,
-                code: ({ node, className, children, ...props }) => (
-                    <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
-                ),
-            }}
-        >
-          {content}
-        </ReactMarkdown>
-      </span>
-    </span>
+                <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                        p: ({ node, ...props }) => <span {...props} />,
+                        a: ({ node, ...props }) => <a {...props} className="text-[#00b0f4] hover:underline" />,
+                        code: ({ node, className, children, ...props }) => (
+                            <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
+                        ),
+                    }}
+                >
+                    {content}
+                </ReactMarkdown>
+            </span>
+        </span>
     );
 };
 
 const FormattedText = ({ content }: { content: string }) => {
-    // Regex to capture text between || delimiters
     const parts = content.split(/(\|\|[\s\S]+?\|\|)/g);
 
     return (
         <span>
-      {parts.map((part, i) => {
-          if (part.startsWith('||') && part.endsWith('||')) {
-              // Extract content inside ||...||
-              const innerContent = part.slice(2, -2);
-              return <Spoiler key={i} content={innerContent} />;
-          }
+            {parts.map((part, i) => {
+                if (part.startsWith('||') && part.endsWith('||')) {
+                    const innerContent = part.slice(2, -2);
+                    return <Spoiler key={i} content={innerContent} />;
+                }
 
-          // Regular text
-          return (
-              <ReactMarkdown
-                  key={i}
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                      // Use span instead of p to keep flow inline
-                      p: ({ node, ...props }) => <span {...props} />,
-                      a: ({ node, ...props }) => <a {...props} className="text-[#00b0f4] hover:underline" target="_blank" />,
-                      code: ({ node, className, children, ...props }) => (
-                          <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
-                      ),
-                      pre: ({ node, ...props }) => (
-                          <pre className="bg-[#2b2d31] border border-[#1e1f22] rounded p-2 overflow-x-auto mt-1 mb-1 block" {...props} />
-                      )
-                  }}
-              >
-                  {part}
-              </ReactMarkdown>
-          );
-      })}
-    </span>
+                return (
+                    <ReactMarkdown
+                        key={i}
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                            p: ({ node, ...props }) => <span {...props} />,
+                            a: ({ node, ...props }) => <a {...props} className="text-[#00b0f4] hover:underline" target="_blank" />,
+                            code: ({ node, className, children, ...props }) => (
+                                <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
+                            ),
+                            pre: ({ node, ...props }) => (
+                                <pre className="bg-[#2b2d31] border border-[#1e1f22] rounded p-2 overflow-x-auto mt-1 mb-1 block" {...props} />
+                            )
+                        }}
+                    >
+                        {part}
+                    </ReactMarkdown>
+                );
+            })}
+        </span>
     );
 };
 
@@ -152,64 +144,68 @@ export default function ReportPageClient() {
 
     const { user, loadingUser } = useTrUser();
 
+    // Handle redirect URL cleanup
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const refParam = urlParams.get('ref');
         if (refParam) {
             setRef(refParam);
+            router.replace('/mc/report/' + uid);
         }
+    }, [uid, router]);
 
-        if (refParam) router.replace('/mc/report/' + uid);
-    }, []);
-
+    // Check authentication - redirect if not logged in
     useEffect(() => {
-        if (!uid) return;
-        if (!user || loadingUser) return;
-        getDiscordTranscriptClient(uid, user.apiKey)
-            .then((res) => {
-                if (!res) setError('Transcript not found');
-                else setData(res.message as DiscordTranscript);
-            })
-            .catch((e) => setError(e?.message || 'Failed to load transcript'))
-            .finally(() => setLoading(false));
-    }, [uid, user, loadingUser]);
+        if (loadingUser) return; // Still loading, don't redirect yet
 
-    useEffect(() => {
-        if (!loadingUser && !user) {
+        if (!user) {
             router.replace('/mc/report/login?errortoast=no-login&after=' + uid);
         }
-    }, [user, loadingUser]);
+    }, [user, loadingUser, uid, router]);
+
+    // Fetch transcript - only when user is ready
+    useEffect(() => {
+        if (!uid || !user || loadingUser) return; // Wait for user to be ready
+
+        setLoading(true);
+        getDiscordTranscriptClient(uid, user.apiKey)
+            .then((res) => {
+                if (!res) {
+                    setError('Transcript not found');
+                } else {
+                    setData(res.message as DiscordTranscript);
+                }
+            })
+            .catch((e) => {
+                setError(e?.message || 'Failed to load transcript');
+            })
+            .finally(() => setLoading(false));
+    }, [uid, user]); // Only depend on uid and user, remove loadingUser
 
     // Grouping & Sorting Logic
     const groupedMessages = useMemo(() => {
         if (!data?.messages) return [];
 
-        // 1. Create a shallow copy and REVERSE it so it reads Oldest -> Newest
         const sortedMessages = [...data.messages].reverse();
 
-        // 2. Map through to determine grouping
         return sortedMessages.reduce((acc: DiscordMessage[], curr, index) => {
             const prev = sortedMessages[index - 1];
-
-            // Check if same author and within 5 minutes
             const isSameAuthor = prev && prev.author.username === curr.author.username;
 
-            // Calculate time difference (if needed for strict grouping)
-            // const timeDiff = prev ? new Date(curr.timestamp).getTime() - new Date(prev.timestamp).getTime() : 0;
-            // const isNear = timeDiff < 5 * 60 * 1000;
-
             // @ts-ignore
-            curr.isCompact = isSameAuthor; // && isNear;
+            curr.isCompact = isSameAuthor;
             acc.push(curr);
             return acc;
         }, []);
     }, [data]);
 
-    if (loading || loadingUser || !user) return <LoadingPage />;
+    if (loadingUser) return <LoadingPage />; // Still loading user
+    if (!user) return null; // Redirect is happening, don't render
+    if (loading) return <LoadingPage />; // Loading transcript
+
     if (error) return (
         <>
             <div className="p-10 text-center text-red-400 text-xl absolute mx-auto w-full">{error}</div>
-
             <ReportFinder />
         </>
     );
@@ -257,12 +253,12 @@ export default function ReportPageClient() {
                                 {/* Header (Only for non-compact) */}
                                 {!m.isCompact && (
                                     <div className="flex items-center gap-2 pb-1">
-                  <span className="cursor-pointer font-medium text-white hover:underline">
-                    {m.author.username}
-                  </span>
+                        <span className="cursor-pointer font-medium text-white hover:underline">
+                            {m.author.username}
+                        </span>
                                         <span className="text-xs text-zinc-400 ml-1">
-                    {m.timestamp ? format(new Date(m.timestamp), "MM/dd/yyyy h:mm aa") : ''}
-                  </span>
+                            {m.timestamp ? format(new Date(m.timestamp), "MM/dd/yyyy h:mm aa") : ''}
+                        </span>
                                     </div>
                                 )}
 
@@ -273,7 +269,7 @@ export default function ReportPageClient() {
                                     </div>
                                 )}
 
-                                {/* Attachments (Check for null) */}
+                                {/* Attachments */}
                                 {(m.attachments || []).length > 0 && (
                                     <div className="mt-2 flex flex-wrap gap-2">
                                         {(m.attachments || []).map((a: DiscordAttachment) => (
@@ -282,7 +278,7 @@ export default function ReportPageClient() {
                                     </div>
                                 )}
 
-                                {/* Attachments (Check for null) */}
+                                {/* Stickers */}
                                 {(m.stickers || []).length > 0 && (
                                     <div className="mt-2 flex flex-wrap gap-2 max-w-36 max-h-36">
                                         {(m.stickers || []).map((sticker: StickerEntry) => (
@@ -293,7 +289,7 @@ export default function ReportPageClient() {
                                     </div>
                                 )}
 
-                                {/* Embeds (Check for null) */}
+                                {/* Embeds */}
                                 {(m.embeds || []).length > 0 && (
                                     <div className="grid max-w-[520px] gap-2 z-50">
                                         {(m.embeds || []).map((e: any, idx: number) => (
