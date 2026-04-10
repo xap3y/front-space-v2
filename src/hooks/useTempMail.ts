@@ -56,6 +56,9 @@ export function useTempMail() {
         if (!res.ok) {
             if (res.status === 429) {
                 errorToast('Rate limit exceeded. Please wait before creating another temp mail.');
+                return {
+                        error: "Rate limit exceeded. Please wait before creating another temp mail.",
+                }
             } else {
                 errorToast(`Failed to create temp mail (${res.status})`);
             }

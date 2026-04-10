@@ -62,6 +62,14 @@ export default function Home() {
                                 Portal
                             </button>
                         </Link>
+                        <Link href="/tempmail" passHref>
+                            <button
+                                className="box-primary p-3"
+                                type="button"
+                            >
+                                Temp Mail
+                            </button>
+                        </Link>
                         {/*<Link href="/tempmail" passHref>
                             <button
                                 className="box-primary p-3"

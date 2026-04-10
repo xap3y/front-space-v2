@@ -25,7 +25,7 @@ export interface InboxMessage {
     to?: string;
     date?: string;
     _receivedTs: number;
-    _fp: string;       // fingerprint for dedupe
+    _fp: string;
 }
 
 const MAX_MESSAGES = 30;
@@ -72,21 +72,21 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
     }, [email]);
 
     useEffect(() => {
-
         console.log("CALLED " + email + " " + apiKey + " " + forceId);
 
-        if (!email || !apiKey) return;
-        console.log("ENDED")
+        if (!email) return;
 
-        /*const base = process.env.NEXT_PUBLIC_WS_BASE_URL ||
-            (typeof window !== 'undefined'
-                ? (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host
-                : '');*/
+        // Build URL - cookie will be sent automatically by browser
+        let url: string;
+        const base = process.env.NEXT_PUBLIC_EMAIL_WEBSOCKET_URL;
 
-
-        const base = process.env.NEXT_PUBLIC_EMAIL_WEBSOCKET_URL
-        const url = `${base}?email=${encodeURIComponent(email)}&apiKey=${encodeURIComponent(apiKey)}`;
-        //const url = `${base}?email=${encodeURIComponent(email)}`;
+        if (apiKey && apiKey.trim()) {
+            // Private mode: use API key
+            url = `${base}?email=${encodeURIComponent(email)}&apiKey=${encodeURIComponent(apiKey)}`;
+        } else {
+            // Public mode: just send email, cookie will be sent automatically
+            url = `${base}?email=${encodeURIComponent(email)}`;
+        }
 
         console.log('Connecting to WS:', url);
 
@@ -96,30 +96,39 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         ws.onopen = () => {
             setConnected(true)
             console.log('WebSocket connected');
-            console.log("MESSAGES IDS: " + getMessagesId())
 
             let ids = getMessagesId();
             if (ids == null || ids.length === 0) {
                 ids = ['']
             }
 
+            // Determine headers for getmissing request
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+
+            if (apiKey && apiKey.trim()) {
+                headers['x-api-key'] = apiKey;
+            }
+
             fetch(getApiUrl() + `/v1/email/getmissing`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': apiKey
-                },
-                body: JSON.stringify({ mail: email, messageIds: ids })
+                headers,
+                body: JSON.stringify({ mail: email, messageIds: ids }),
+                credentials: 'include', // Send cookies automatically
             }).then(async (res) => {
                 if (!res.ok) {
                     throw new Error(`Failed to fetch missing messages: ${res.statusText}`);
                 }
 
                 try {
+                    if (res.status === 204) {
+                        console.log('No missing messages');
+                        return;
+                    }
                     const response = await res.json();
                     console.log('Missing messages response:', response);
 
-                    // check if response is an array
                     if (Array.isArray(response)) {
                         response.forEach((msg: RawWsMessage) => {
                             pushNewMessage(msg);
@@ -128,32 +137,37 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
                         console.warn('Unexpected response format:', response);
                     }
                 } catch (e) {
-                    // IGNORE
+                    console.error('Failed to parse response:', e);
                 }
-            })
+            }).catch(err => {
+                console.error('Failed to fetch missing messages:', err);
+            });
         };
+
         ws.onclose = (e) => {
-            console.log('WebSocket disconnected??');
+            console.log('WebSocket disconnected');
             console.log(e.reason)
-            if (e.reason.includes("expired")) {
+            if (e.reason && e.reason.includes("expired")) {
                 setIsWsExpired(true);
             }
             setConnected(false);
         }
+
         ws.onerror = (e) => {
             console.error('WebSocket error', e);
             setConnected(false);
         }
+
         ws.onmessage = (ev) => {
             try {
-                //console.log(ev.data);
-                if (JSON.parse(ev.data).error === true && JSON.parse(ev.data).close == true && refetchCallback != null) {
+                const data = JSON.parse(ev.data);
+                if (data.error === true && data.close === true && refetchCallback != null) {
                     setTimeout(() => {
                         refetchCallback();
                     }, 400);
                     return;
                 }
-                const raw: RawWsMessage = JSON.parse(ev.data);
+                const raw: RawWsMessage = data;
                 pushNewMessage(raw);
             } catch (e) {
                 console.error('Invalid WS message', e);
@@ -163,7 +177,7 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         return () => {
             ws.close();
         };
-    }, [email, apiKey, forceId, persist]);
+    }, [email, apiKey, forceId]);
 
     const pushNewMessage = useCallback((raw: RawWsMessage) => {
         if (raw.messageId && messages.some(m => m.serverId === raw.messageId)) {
@@ -173,7 +187,6 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
 
         console.log('Received WS message:', raw);
 
-        // Build a fingerprint to prevent duplicates if server resends
         const fpParts = [
             raw.from || '',
             raw.subject || '',

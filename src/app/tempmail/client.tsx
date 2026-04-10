@@ -92,7 +92,12 @@ export default function TempMailPage() {
             const res = await createPublicTempMail(token);
 
             if (!res || res.error) {
-                errorToast("Failed to generate temp mail");
+                if (res.error && res.error.includes("Rate limit")) {
+                    // IGNORE
+                } else {
+                    errorToast(res.error || "Failed to create temp mail");
+                }
+
                 turnstile.reset();
                 setToken("");
                 setGenerating(false);
@@ -138,7 +143,11 @@ export default function TempMailPage() {
         localStorage.removeItem(STORAGE_KEY);
         setTempMail(null);
         setToken("");
-        turnstile.reset();
+        try {
+            turnstile.reset();
+        } catch (e) {
+            // Ignore if turnstile is not ready
+        }
     }
 
     if (loading) return <LoadingPage />;
