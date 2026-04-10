@@ -1,18 +1,15 @@
 'use client';
 import {SidebarComp} from "@/components/Sidebar";
-import { FaHome, FaImages, FaPaste, FaUserCircle } from "react-icons/fa";
+import {FaHome, FaImages, FaPaste, FaUserCircle} from "react-icons/fa";
 import { IoIosSettings } from "react-icons/io";
 import { FaLink } from "react-icons/fa6";
 import {useTranslation} from "@/hooks/useTranslation";
 import {useEffect, useState} from "react";
 import LoadingPage from "@/components/LoadingPage";
 import {PageProvider} from "@/context/PageContext";
-import GalleryPageServer from "@/app/home/gallery/page";
-import GalleryPage from "@/app/home/gallery/client";
-import {Tooltip} from "react-tooltip";
-import {IoLink, IoMailOutline} from "react-icons/io5";
-import {RiLinkM} from "react-icons/ri";
+import {IoMailOutline} from "react-icons/io5";
 import {PiLinkSimpleBold} from "react-icons/pi";
+import { FiTool } from "react-icons/fi";
 
 export default function HomeLayout({
                                         children,
@@ -44,6 +41,7 @@ export default function HomeLayout({
                                 {title: "Temp Mail", icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
                                 {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
                                 {title: "Connections", icon: <PiLinkSimpleBold className={"w-[30px] h-[30px]"} />, href: "/connections", page: "connections"},
+                                {title: "Tools", icon: <FiTool className={"w-[30px] h-[30px]"} />, href: "/tools", page: "tools"},
                             ]} logout_text={lang.comp.sidebar.logout} />
                             <section className="flex-1 min-w-0 bg-primary1 bg-primaryDottedSize bg-primaryDotted">
                                 {children}

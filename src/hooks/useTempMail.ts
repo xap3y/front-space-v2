@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {getApiUrl} from "@/lib/core";
 import {getEmailInfo} from "@/lib/apiGetters";
+import { errorToast } from '@/lib/client';
 export interface TempMail {
     email: string;
     status: string;
@@ -23,7 +24,12 @@ export function useTempMail() {
             body: JSON.stringify({})
         });
         if (!res.ok) {
-            throw new Error(`Create failed (${res.status})`);
+            if (res.status === 429) {
+                errorToast('Rate limit exceeded. Please wait before creating another temp mail.');
+            } else {
+                errorToast(`Failed to create temp mail (${res.status})`);
+            }
+            return;
         }
         const data = await res.json();
         console.log('Temp mail created:', data);

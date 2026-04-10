@@ -12,10 +12,15 @@ const nextConfig: NextConfig = {
         destination: '/home/dashboard',
         permanent: true,
       },
+      {
+        source: '/home/tools',
+        destination: '/tools',
+        permanent: true,
+      },
     ]
   },
     images: {
-        remotePatterns: [new URL('https://r3.xap3y.space/**')],
+        remotePatterns: [new URL('https://r3.xap3y.space/**'), new URL('https://r2.xap3y.eu/**')],
     },
 };
 

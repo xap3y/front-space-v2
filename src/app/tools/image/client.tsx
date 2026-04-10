@@ -1,13 +1,9 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import MediaInput from "@/components/tools/MediaInput";
-import ToolResult from "@/components/tools/ToolResult";
-import ToolCard from "@/components/tools/ToolCard";
 import { NumberInput, SelectInput, TextInput, CheckboxInput } from "@/components/tools/ToolInputs";
 import { processMedia } from "@/lib/tools-api";
-import HoverDiv from "@/components/HoverDiv";
+import ToolWorkspace from "@/components/tools/ToolWorkspace";
 
 const IMAGE_ACCEPT = {
     "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tiff", ".avif", ".svg"],
@@ -394,94 +390,31 @@ export default function ImageToolsClient() {
     };
 
     return (
-        <div className="text-neutral-200 font-sans xl:pb-0 pb-24">
-            <div className="mb-6 sm:mb-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Image Tools</h1>
-                <p className="text-neutral-500 text-xs sm:text-sm mt-1">
-                    Resize, compress, convert, and edit images with ffmpeg
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6">
-                {/* Left — tool selector + input */}
-                <div className="space-y-4">
-                    {/* Media Input */}
-                    <MediaInput
-                        accept={IMAGE_ACCEPT}
-                        maxSize={IMAGE_MAX_SIZE}
-                        onFile={handleFile}
-                        file={file}
-                        onClear={handleClear}
-                        label="Drop your image here"
-                        hint="or click to browse • paste with Ctrl+V • PNG, JPG, WebP, GIF..."
-                        disabled={processing}
-                        onImageDimensions={handleImageDimensions}
-                    />
-
-                    {/* Tool Grid */}
-                    <div>
-                        <h2 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">
-                            Select Tool
-                        </h2>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                            {TOOLS.map((tool) => (
-                                <HoverDiv
-                                    key={tool.key}
-                                    onClick={() => {
-                                        setActiveTool(tool.key);
-                                        clearResult();
-                                    }}
-                                    disabled={processing}
-                                    className={`text-left p-3 transition-all active:scale-[0.99] disabled:opacity-50 ${
-                                        activeTool === tool.key
-                                            ? "border-emerald-500 bg-emerald-500/5"
-                                            : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700"
-                                    }`}
-
-                                    inputClassName={ activeTool === tool.key ? "!border-yellow-500/50" : "" }
-                                >
-                                    <div className="text-lg mb-1">{tool.icon}</div>
-                                    <div className="text-xs font-bold text-white">{tool.label}</div>
-                                    <div className="text-[10px] text-neutral-500 mt-0.5 leading-tight">
-                                        {tool.description}
-                                    </div>
-                                </HoverDiv>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Result */}
-                    <ToolResult
-                        processing={processing}
-                        progress={progress}
-                        resultUrl={resultUrl}
-                        resultFilename={resultFilename}
-                        error={error}
-                    />
-                </div>
-
-                {/* Right — tool options */}
-                <div className="space-y-4">
-                    <ToolCard
-                        title={TOOLS.find((t) => t.key === activeTool)?.label || ""}
-                        description={TOOLS.find((t) => t.key === activeTool)?.description || ""}
-                    >
-                        {renderToolOptions()}
-
-                        <button
-                            onClick={handleProcess}
-                            disabled={!file || processing}
-                            className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide shadow-lg transition-all transform active:scale-[0.98] select-none ${
-                                !file || processing
-                                    ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
-                                    : "bg-emerald-500 hover:bg-emerald-400 text-neutral-950 shadow-emerald-500/20"
-                            }`}
-                        >
-                            {processing ? "Processing..." : "Process Image"}
-                        </button>
-                    </ToolCard>
-                </div>
-            </div>
-        </div>
+        <ToolWorkspace
+            title="Image Tools"
+            subtitle="Resize, compress, convert, and edit images with ffmpeg"
+            accept={IMAGE_ACCEPT}
+            maxSize={IMAGE_MAX_SIZE}
+            mediaLabel="Drop your image here"
+            mediaHint="or click to browse • paste with Ctrl+V • PNG, JPG, WebP, GIF..."
+            file={file}
+            onFile={handleFile}
+            onClear={handleClear}
+            processing={processing}
+            tools={TOOLS}
+            activeTool={activeTool}
+            onToolSelect={(tool) => {
+                setActiveTool(tool);
+                clearResult();
+            }}
+            progress={progress}
+            resultUrl={resultUrl}
+            resultFilename={resultFilename}
+            error={error}
+            optionsContent={renderToolOptions()}
+            processLabel="Process Image"
+            onProcess={handleProcess}
+            onImageDimensions={handleImageDimensions}
+        />
     );
 }
