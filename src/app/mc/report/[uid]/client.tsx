@@ -13,8 +13,10 @@ import remarkGfm from 'remark-gfm';
 import ReportFinder from "@/app/mc/report/client";
 import {hexToInt} from "@/lib/clientFuncs";
 import {useTrUser} from "@/hooks/useTrUser";
-import {getDiscordTranscriptClient} from "@/lib/client";
+import {errorToast, getDiscordTranscriptClient} from "@/lib/client";
 import LoadingPage from "@/components/LoadingPage";
+import {getApiUrl} from "@/lib/core";
+import {logApiRes} from "@/lib/logger";
 
 // --- Components ---
 
@@ -145,9 +147,20 @@ export default function ReportPageClient() {
     const [data, setData] = useState<DiscordTranscript | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [ref, setRef] = useState<string | null>(null);
     const router = useRouter();
 
     const { user, loadingUser } = useTrUser();
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const refParam = urlParams.get('ref');
+        if (refParam) {
+            setRef(refParam);
+        }
+
+        if (refParam) router.replace('/mc/report/' + uid);
+    }, []);
 
     useEffect(() => {
         if (!uid) return;

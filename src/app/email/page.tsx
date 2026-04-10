@@ -1,4 +1,4 @@
-import EmailPage from "@/app/email/client";
+import {EmailPage} from "@/app/email/client";
 
 export default async function Page() {
     return (
