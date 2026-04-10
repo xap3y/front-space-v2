@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import {getApiUrl} from "@/lib/core";
-import {getEmailInfo} from "@/lib/apiGetters";
+import { getApiUrl } from "@/lib/core";
+import { getEmailInfo } from "@/lib/apiGetters";
 import { errorToast } from '@/lib/client';
+
 export interface TempMail {
     email: string;
     status: string;
@@ -21,7 +22,6 @@ export function useTempMail() {
                 'Content-Type': 'application/json',
                 'x-api-key': apiKey
             },
-            body: JSON.stringify({})
         });
         if (!res.ok) {
             if (res.status === 429) {
@@ -33,6 +33,36 @@ export function useTempMail() {
         }
         const data = await res.json();
         console.log('Temp mail created:', data);
+        const mail: TempMail = {
+            email: data.message.email,
+            createdBy: data.message.createdBy,
+            status: "OPEN",
+            expireAt: data.message.expireAt === 'never' ? null : data.message.expireAt
+        };
+        setTempMail(mail);
+        storeInLocalStorage(mail);
+        return data;
+    }
+
+    async function createPublicTempMail(turnstileToken: string) {
+        const res = await fetch(getApiUrl() + `/v1/email/create/public`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: turnstileToken }),
+            credentials: 'include',
+        });
+        if (!res.ok) {
+            if (res.status === 429) {
+                errorToast('Rate limit exceeded. Please wait before creating another temp mail.');
+            } else {
+                errorToast(`Failed to create temp mail (${res.status})`);
+            }
+            return;
+        }
+        const data = await res.json();
+        console.log('Public temp mail created:', data);
         const mail: TempMail = {
             email: data.message.email,
             createdBy: data.message.createdBy,
@@ -101,5 +131,13 @@ export function useTempMail() {
         return null;
     }
 
-    return { tempMail, createTempMail, resetTempMail, loadFromLocalStorage, setExistingTempMail, refetchTempMailInfo };
+    return {
+        tempMail,
+        createTempMail,
+        createPublicTempMail,
+        resetTempMail,
+        loadFromLocalStorage,
+        setExistingTempMail,
+        refetchTempMailInfo
+    };
 }
