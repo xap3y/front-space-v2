@@ -19,7 +19,7 @@ export default function Page() {
     return (
         <>
             <div className={"bg-transparent"}>
-                <RedocStandalone specUrl="/redoc.json" options={{
+                <RedocStandalone specUrl="/apidocs.json" options={{
                     nativeScrollbars: true,
                 }}/>
             </div>

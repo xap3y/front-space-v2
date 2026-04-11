@@ -16,9 +16,9 @@ export default function PrivacyPage() {
                     <strong> „XAP3Y’s Space“</strong> (dále jen „Správce“).
                 </p>
                 <ul>
-                    <li>Kontakt pro soukromí/GDPR: <a href="mailto:privacy@xap3y.space">privacy@xap3y.space</a></li>
-                    <li>Podpora: <a href="mailto:support@xap3y.space">support@xap3y.space</a></li>
-                    <li>Zneužití/abuse: <a href="mailto:abuse@xap3y.space">abuse@xap3y.space</a></li>
+                    <li>Kontakt pro soukromí/GDPR: <a href="mailto:privacy@xap3y.eu">privacy@xap3y.eu</a></li>
+                    <li>Podpora: <a href="mailto:support@xap3y.eu">support@xap3y.eu</a></li>
+                    <li>Zneužití/abuse: <a href="mailto:abuse@xap3y.eu">abuse@xap3y.eu</a></li>
                 </ul>
 
                 <h2>2. Jaké údaje zpracováváme</h2>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
                 <h2>7. Vaše práva</h2>
                 <p>V souladu s GDPR máte zejména právo na přístup, opravu, výmaz, omezení zpracování, námitku a přenositelnost. Dále můžete podat stížnost u ÚOOÚ.</p>
                 <p>
-                    Žádosti nám prosím posílejte na <a href="mailto:privacy@xap3y.space">privacy@xap3y.space</a>.
+                    Žádosti nám prosím posílejte na <a href="mailto:privacy@xap3y.eu">privacy@xap3y.eu</a>.
                     Z bezpečnostních důvodů můžeme požádat o ověření identity. Obvykle odpovíme do 30 dnů.
                 </p>
                 <p>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
                 </p>
 
                 <h2>9. DPO a kontakt</h2>
-                <p>Pověřence pro ochranu osobních údajů (DPO) nemáme jmenovaného. Kontakt pro GDPR: <a href="mailto:privacy@xap3y.space">privacy@xap3y.space</a>.</p>
+                <p>Pověřence pro ochranu osobních údajů (DPO) nemáme jmenovaného. Kontakt pro GDPR: <a href="mailto:privacy@xap3y.eu">privacy@xap3y.eu</a>.</p>
 
                 <h2>10. Změny těchto Zásad</h2>
                 <p>

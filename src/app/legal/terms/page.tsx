@@ -23,9 +23,9 @@ export default function TermsPage() {
                     <strong> „XAP3Y’s Space“</strong> (dále jen „Provozovatel“).
                 </p>
                 <ul>
-                    <li>Kontaktní e‑mail (podpora): <a href="mailto:support@xap3y.space">support@xap3y.space</a></li>
-                    <li>Zneužití/abuse: <a href="mailto:abuse@xap3y.space">abuse@xap3y.space</a></li>
-                    <li>DMCA/porušení práv: <a href="mailto:dmca@xap3y.space">dmca@xap3y.space</a></li>
+                    <li>Kontaktní e‑mail (podpora): <a href="mailto:support@xap3y.eu">support@xap3y.eu</a></li>
+                    <li>Zneužití/abuse: <a href="mailto:abuse@xap3y.eu">abuse@xap3y.eu</a></li>
+                    <li>DMCA/porušení práv: <a href="mailto:dmca@xap3y.eu">dmca@xap3y.eu</a></li>
                 </ul>
 
                 <h2>3. Popis Služby</h2>
@@ -63,14 +63,14 @@ export default function TermsPage() {
 
                 <h2>7. API</h2>
                 <ul>
-                    <li>API je dostupné na <code>call.xap3y.space</code>. Uživatelé mají individuální API klíče.</li>
+                    <li>API je dostupné na <code>call.xap3y.eu</code>. Uživatelé mají individuální API klíče.</li>
                     <li>V tuto chvíli nejsou nastaveny limity, nicméně Provozovatel může kdykoli zavést omezení, měnit rozhraní či klíče zneplatnit.</li>
                     <li>Scraping je zakázán.</li>
                 </ul>
 
                 <h2>8. Dostupnost a údržba</h2>
                 <p>
-                    Dostupnost (uptime) lze sledovat na <a href="https://uptime.xap3y.tech/status/space" target="_blank" rel="noreferrer">https://uptime.xap3y.tech/status/space</a>.
+                    Dostupnost (uptime) lze sledovat na <a href="https://uptime.xap3y.eu/status/space" target="_blank" rel="noreferrer">https://uptime.xap3y.eu/status/space</a>.
                     Služba neběží nepřetržitě (24/7) a Provozovatel neposkytuje žádná SLA. Může docházet k výpadkům a plánované i neplánované údržbě.
                 </p>
 
@@ -99,9 +99,9 @@ export default function TermsPage() {
 
                 <h2>13. Kontakt</h2>
                 <ul>
-                    <li>Podpora: <a href="mailto:support@xap3y.space">support@xap3y.space</a></li>
-                    <li>Nahlášení zneužití: <a href="mailto:abuse@xap3y.space">abuse@xap3y.space</a></li>
-                    <li>DMCA/porušení práv: <a href="mailto:dmca@xap3y.space">dmca@xap3y.space</a></li>
+                    <li>Podpora: <a href="mailto:support@xap3y.eu">support@xap3y.eu</a></li>
+                    <li>Nahlášení zneužití: <a href="mailto:abuse@xap3y.eu">abuse@xap3y.eu</a></li>
+                    <li>DMCA/porušení práv: <a href="mailto:dmca@xap3y.eu">dmca@xap3y.eu</a></li>
                 </ul>
 
                 {/*<p className="mt-6 text-xs text-gray-400">

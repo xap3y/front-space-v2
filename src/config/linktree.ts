@@ -183,10 +183,10 @@ export const linktree: LinkItem[] = [
     },
     {
         label: "XAP3Y's space v1",
-        href: "https://xap3y.space"
+        href: "https://space.xap3y.eu"
     },
     {
         label: "XAP3Y's space v2",
-        href: "https://ext.space-front.xap3y.tech"
+        href: "https://ext-space.xap3y.eu"
     },
 ] as LinkItem[];

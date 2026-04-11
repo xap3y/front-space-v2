@@ -32,7 +32,7 @@ export const metadata: Metadata = {
         type: "website",
         locale: "en_US",
         siteName: "XAP3Y's space",
-        url: "https://xap3y.space",
+        url: "https://space.xap3y.eu",
     },
     twitter: {
         title: "XAP3Y's space",

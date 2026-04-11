@@ -18,7 +18,7 @@ export const callServers: CallServer[] = [
     },
     {
         name: "(eeur) R2",
-        url: "https://r3.xap3y.space/status.txt",
+        url: "https://r2.xap3y.eu/status.txt",
         location: "Eastern Europe",
         flag: "/flags/eu.svg",
         type: CallServerEnum.S3
