@@ -8,7 +8,7 @@ import {logToServer} from "@/lib/serverFuncs";
 
 export async function getUser(): Promise<UserObj | null> {
 
-    await logToServer("Fetching TR user data...");
+    await logToServer("Fetching user data...");
     await logToServer("API URL: " + getApiUrl() + "/v1/auth/me");
     let res;
     try {

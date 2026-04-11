@@ -8,25 +8,32 @@ export function useTrUser() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchUser = async () => {
+            setLoadingUser(true); // Ensure it starts in loading state
             try {
-                const user: TrUserObj | null = await getTrUser();
-                if (!user) {
+                const userData = await getTrUser();
+                if (!isMounted) return;
+
+                if (!userData) {
                     setError("TrUser not found.");
                     setUser(null);
-                    return;
+                } else {
+                    setUser(userData);
                 }
-                setUser(user);
             } catch (err) {
+                if (!isMounted) return;
                 console.error("Failed to fetch tr user:", err);
                 setError("Failed to fetch user data.");
             } finally {
-                setLoadingUser(false);
+                if (isMounted) setLoadingUser(false);
             }
         };
 
         fetchUser();
-    }, []);
+        return () => { isMounted = false; };
+    }, []); // Empty array is fine, but ensure it's not being unmounted by the parent
 
     return { user, loadingUser, error };
 }
