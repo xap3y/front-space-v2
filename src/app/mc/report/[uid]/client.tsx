@@ -145,22 +145,14 @@ export default function ReportPageClient() {
     const { user, loadingUser } = useTrUser();
 
     useEffect(() => {
+        if (loading) return;
         const urlParams = new URLSearchParams(window.location.search);
         const refParam = urlParams.get('ref');
         if (refParam) {
             setRef(refParam);
-        }
-    }, []); // Runs once
-
-    // 2. Clean the URL separately
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('ref')) {
-            // We use { scroll: false } to prevent the page from jumping
-            // to the top if the user was already scrolling.
             router.replace(`/mc/report/${uid}`, { scroll: false });
         }
-    }, [uid, router]);
+    }, [uid, router, setRef, loading]);
 
     // Check authentication - redirect if not logged in
     useEffect(() => {

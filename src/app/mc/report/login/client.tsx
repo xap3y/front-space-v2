@@ -5,7 +5,7 @@ import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {useTurnstile} from "react-turnstile";
 import {useTranslation} from "@/hooks/useTranslation";
-import {errorToast} from "@/lib/client";
+import {errorToast, getDiscordTranscriptClient} from "@/lib/client";
 import {getApiUrl} from "@/lib/core";
 import {toAsciiAlnumEmail, toAsciiAlnumName, toAsciiAlnumPassword} from "@/lib/clientFuncs";
 import {toast} from "react-toastify";
@@ -15,6 +15,7 @@ import MainStringInput from "@/components/MainStringInput";
 import {TurnstileWidget} from "@/components/TurnstileWidget";
 import {MAX_NAME_LENGTH, MAX_PASS_LENGTH, MIN_NAME_LENGTH, MIN_PASS_LENGTH} from "@/app/mc/report/get-key/client";
 import {useTrUser} from "@/hooks/useTrUser";
+import {DiscordTranscript} from "@/types/discord";
 
 export default function TranscriptsLoginPage() {
 
@@ -26,7 +27,7 @@ export default function TranscriptsLoginPage() {
     const [afterLogin, setAfterLogin] = useState<string | null>(null);
     const [error, setError] = useState("");
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [isFocused, setIsFocused] = useState(false);
     const [turnstileLoading, setTurnStileLoading] = useState(true);
     const [caToken, setCaToken] = useState("");
@@ -36,6 +37,7 @@ export default function TranscriptsLoginPage() {
     const lang = useTranslation();
 
     useEffect(() => {
+        if (loading) return;
         const urlParams = new URLSearchParams(window.location.search);
         const emailParam = urlParams.get('email');
         const errorParam = urlParams.get('errortoast');
@@ -53,7 +55,14 @@ export default function TranscriptsLoginPage() {
         }
 
         if (emailParam || errorParam || after) router.replace("/mc/report/login", { scroll: false });
-    }, []);
+    }, [setUsername, setAfterLogin, loading, router]);
+
+    useEffect(() => {
+        // Only proceed if we have a UID and a confirmed User
+        if (loadingUser) return;
+        setLoading(false);
+
+    }, [loadingUser]);
 
     const handleSubmit = async (e: unknown) => {
         // @ts-expect-error
