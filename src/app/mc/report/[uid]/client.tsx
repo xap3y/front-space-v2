@@ -144,13 +144,21 @@ export default function ReportPageClient() {
 
     const { user, loadingUser } = useTrUser();
 
-    // Handle redirect URL cleanup
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const refParam = urlParams.get('ref');
         if (refParam) {
             setRef(refParam);
-            router.replace('/mc/report/' + uid);
+        }
+    }, []); // Runs once
+
+    // 2. Clean the URL separately
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('ref')) {
+            // We use { scroll: false } to prevent the page from jumping
+            // to the top if the user was already scrolling.
+            router.replace(`/mc/report/${uid}`, { scroll: false });
         }
     }, [uid, router]);
 
@@ -165,11 +173,15 @@ export default function ReportPageClient() {
 
     // Fetch transcript - only when user is ready
     useEffect(() => {
-        if (!uid || !user || loadingUser) return; // Wait for user to be ready
+        // Only proceed if we have a UID and a confirmed User
+        if (!uid || loadingUser || !user) return;
 
+        let isMounted = true;
         setLoading(true);
+
         getDiscordTranscriptClient(uid, user.apiKey)
             .then((res) => {
+                if (!isMounted) return;
                 if (!res) {
                     setError('Transcript not found');
                 } else {
@@ -177,10 +189,15 @@ export default function ReportPageClient() {
                 }
             })
             .catch((e) => {
+                if (!isMounted) return;
                 setError(e?.message || 'Failed to load transcript');
             })
-            .finally(() => setLoading(false));
-    }, [uid, user]); // Only depend on uid and user, remove loadingUser
+            .finally(() => {
+                if (isMounted) setLoading(false);
+            });
+
+        return () => { isMounted = false; };
+    }, [uid, user, loadingUser]);
 
     // Grouping & Sorting Logic
     const groupedMessages = useMemo(() => {
