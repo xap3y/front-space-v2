@@ -20,6 +20,7 @@ import MainStringInput from "@/components/MainStringInput";
 import {isValidEmail, toAsciiAlnumEmail, toAsciiAlnumPassword} from "@/lib/clientFuncs";
 import {useTurnstile} from "react-turnstile";
 import {TurnstileWidget} from "@/components/TurnstileWidget";
+import {FaArrowRight} from "react-icons/fa6";
 
 export default function LoginPage() {
 
@@ -202,33 +203,43 @@ export default function LoginPage() {
                         <p className="mt-4 text-center text-gray-400">{lang.pages.login.under_title}</p>
 
                         {/*Discord login*/}
-                        <div className={"w-full flex flex-col items-center justify-center"}>
-                            <div className="mt-4 text-center cursor-pointer">
-                                <button
-                                    className="w-full max-w-xs flex items-center justify-center gap-3 px-3 py-2
-                                 bg-[#5865F2] border-4 border-[#404EED] text-white rounded-lg
-                                 font-semibold text-md hover:bg-[#4752C4] disabled:hover:bg-[#5865F2] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    onClick={() => {
-                                        const loginUrl = process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL
-                                        if (!loginUrl) {
-                                            return errorToast("Discord login is not available right now");
-                                        }
-                                        router.push(loginUrl)
-                                    }}
-                                    disabled={!isApiUp || turnstileLoading || !caToken}
-                                >
-                                    <FaDiscord size={24} />
-                                    Login using Discord
-                                </button>
-                            </div>
+                        <div className={"w-full flex flex-col items-center justify-center mb-3 mt-4 space-y-2"}>
+                            <button
+                                className="w-64 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#5865F2]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                                onClick={() => {
+                                    const loginUrl = process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL
+                                    if (!loginUrl) {
+                                        return errorToast("Discord login is not available right now");
+                                    }
+                                    router.push(loginUrl)
+                                }}
+                                disabled={!isApiUp || turnstileLoading || !caToken}
+                            >
+                                <FaDiscord size={18} />
+                                Continue with Discord
+                            </button>
 
-                            <div className={"flex my-4 gap-5"}>
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
-                                <hr className={"w-2 h-2 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                            {/*<button
+                                className="w-64 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#0088cc] hover:bg-[#006a9e] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#0088cc]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                                onClick={() => {
+
+                                    router.push("oauth.telegram.org/auth?bot_id=8747604071&origin=https%3A%2F%2Fext-space.xap3y.eu&embed=1&request_access=write&return_to=https%3A%2F%2Fext-space.xap3y.eu%2Flogin%23tgAuthResult%3DeyJpZCI6NTc1OTY2MDM0MywiZmlyc3RfbmFtZSI6IlhBUDNZIiwidXNlcm5hbWUiOiJ4YXAzeSIsInBob3RvX3VybCI6Imh0dHBzOlwvXC90Lm1lXC9pXC91c2VycGljXC8zMjBcL0ZEUTVyTmtrOVpHNWd6ZzJUblh5MnhGZmh0MmxiaVk0M19aMHptSUJCVEhibW1vc3pkS2x3S3gzZHVoTnBmRXcuanBnIiwiYXV0aF9kYXRlIjoxNzc1OTI4NTAyLCJoYXNoIjoiNzA0MWQzZWFlMGJjNzIyNjIzMWUyNDg5N2NlYzAwOGYxMWFjZDEwZDM5NGRhNDQ4NDIzOWQ0NzQyZTRhODlhMyJ9")
+                                }}
+                                disabled={!isApiUp || turnstileLoading || !caToken}
+                            >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295-.042 0-.084 0-.126-.01l-.214-3.137 5.894-5.33c.26-.23-.056-.357-.4-.127L6.765 13.69l-3.1-.968c-.674-.215-.688-.674.15-.994l12.156-4.686c.563-.23 1.06.144.876.997z"/>
+                                </svg>
+                                Continue with Telegram
+                            </button>*/}
+
+
+                            <div className={"flex my-2 gap-4 pt-2"}>
+                                <hr className={"w-1.5 h-1.5 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-1.5 h-1.5 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-1.5 h-1.5 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-1.5 h-1.5 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
+                                <hr className={"w-1.5 h-1.5 rounded-full border-opacity-50 border-[1px] border-secondary bg-primary0"} />
                             </div>
                         </div>
 
@@ -330,11 +341,12 @@ export default function LoginPage() {
 
                             <div>
                                 <button
-                                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-white text-black font-semibold text-sm transition-all duration-200 hover:bg-gray-100 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                                     type="submit"
-                                    disabled={!email || !password || !caToken || turnstileLoading || loading || !isValidEmail(email)}
+                                    disabled={!email || (!password || password.length < 5) || !caToken || turnstileLoading || loading || !isValidEmail(email)}
                                 >
                                     {lang.pages.login.button_text}
+                                    <FaArrowRight size={14} />
                                 </button>
                             </div>
                         </form>

@@ -7,7 +7,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {MdEmail} from "react-icons/md";
 import {FaKey, FaUser} from "react-icons/fa";
 import {toast} from "react-toastify";
-import {FaCheck, FaLock} from "react-icons/fa6";
+import {FaArrowRight, FaCheck, FaLock} from "react-icons/fa6";
 import {getApiUrl} from "@/lib/core";
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {ErrorPage} from "@/components/ErrorPage";
@@ -239,35 +239,55 @@ export default function RegisterPage() {
                                 <div className="mt-4">
                                     <label
                                         htmlFor="agree"
-                                        className="flex flex-row items-center gap-2.5 dark:text-white light:text-black"
+                                        className="flex items-center gap-3 cursor-pointer"
                                     >
                                         <input
                                             id="agree"
-                                            name={"agree"}
+                                            name="agree"
                                             type="checkbox"
                                             className="peer hidden"
                                             required
                                             checked={agreed}
                                             onChange={(e) => setAgreed(e.target.checked)}
                                         />
-                                        <div
-                                            className="flex rounded-md border border-[#a2a1a833] light:bg-[#e8e8e8] dark:bg-[#212121] peer-checked:bg-telegram transition duration-200"
-                                        >
-                                            <div className={"h-6 w-6 flex items-center justify-center"}>
-                                                <FaCheck className={`transition-all duration-150 w-0 h-0 ${agreed ? "w-4 h-4" : ""}`} />
-                                            </div>
+
+                                        {/* Custom Checkbox */}
+                                        <div className="relative flex-shrink-0">
+                                            <div
+                                                className={`w-5 h-5 rounded border transition-all duration-200 ${
+                                                    agreed
+                                                        ? "bg-white border-white"
+                                                        : "bg-gray-950/50 border-gray-600 hover:border-gray-500"
+                                                }`}
+                                            />
+                                            <FaCheck
+                                                className={`absolute inset-0 m-auto w-3 h-3 text-black transition-all duration-150 ${
+                                                    agreed ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                                                }`}
+                                            />
                                         </div>
-                                        <span className="text-xs sm:text-sm text-gray-200">
-                                            I have read and agree to the{" "}
-                                            <Link href="/legal/terms" target="_blank" rel="noopener noreferrer"
-                                                  className="underline decoration-white/30 hover:text-white">
+
+                                        {/* Text */}
+                                        <span className="text-xs sm:text-sm text-gray-300">
+                                            I agree to the{" "}
+                                            <Link
+                                                href="/legal/terms"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-white hover:text-gray-200 underline underline-offset-2 transition-colors"
+                                            >
                                                 Terms of Service
-                                            </Link>{" "}
-                                            and{" "}
-                                            <Link href="/legal/privacy" target="_blank" rel="noopener noreferrer"
-                                                  className="underline decoration-white/30 hover:text-white">
+                                            </Link>
+                                            {" "}and{" "}
+                                            <Link
+                                                href="/legal/privacy"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-white hover:text-gray-200 underline underline-offset-2 transition-colors"
+                                            >
                                                 Privacy Policy
-                                            </Link>.
+                                            </Link>
+                                            .
                                         </span>
                                     </label>
                                 </div>
@@ -287,11 +307,12 @@ export default function RegisterPage() {
 
                                 <div>
                                     <button
-                                        className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-white text-black font-semibold text-sm transition-all duration-200 hover:bg-gray-100 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                                         type="submit"
                                         disabled={!isValidEmail(email) || password.length < 5 || !confirmPass || !agreed || !inviteCode}
                                     >
                                         {lang.pages.register.button_text}
+                                        <FaArrowRight size={14} />
                                     </button>
                                 </div>
                             </form>

@@ -73,8 +73,8 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             <div
                 className={cx(
                     // base wrapper styles
-                    "border-2 duration-200 transition-all rounded",
-                    // focus vs hover/idle styles (matches your example)
+                    "border-2 duration-200 transition-all rounded overflow-visible",
+                    // focus vs hover/idle styles
                     isFocused ? "in-shadow border-zinc-500" : "hover:border-zinc-700 border-primary0",
                     // disabled visuals
                     disabled && "opacity-50 cursor-not-allowed",
@@ -91,7 +91,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={cx(
-                        "p-3 w-full bg-transparent rounded outline-none",
+                        "p-3 w-full bg-transparent rounded-none outline-none text-white placeholder-gray-500",
                         disabled && "pointer-events-none",
                         inputClassName
                     )}
