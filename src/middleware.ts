@@ -1,67 +1,65 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decrypt } from "@/lib/crypto";
-import { deleteCookie } from 'cookies-next/server';
-import {UserObj} from "@/types/user";
-import supportedLocales, {getDefaultLocale} from "@/lib/core";
-import {validateUserAgent} from "@/lib/uaValidator";
+import type { UserObj } from "@/types/user";
+import supportedLocales, { getDefaultLocale } from "@/lib/core";
+import { validateUserAgent } from "@/lib/uaValidator";
+
+const PROTECTED_ROUTES = ["/home", "/admin"] as const;
+const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+function isProtectedRoute(pathname: string): boolean {
+    return PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+}
 
 function languageMiddleware(req: NextRequest, res: NextResponse) {
-    const cookieLocale = req.cookies.get('locale')?.value;
-
-    let locale = cookieLocale || getDefaultLocale();
-    console.log({locale})
-    if (!supportedLocales.includes(locale)) {
-        res.cookies.set('locale', getDefaultLocale(), { path: '/', maxAge: 60 * 60 * 24 * 365 });
-        locale = getDefaultLocale();
+    if (req.nextUrl.pathname === "/") {
+        return;
     }
 
-    // Set the locale in cookies if not already set
-    if (!cookieLocale) {
-        console.log({locale});
-        res.cookies.set('locale', locale, { path: '/', maxAge: 60 * 60 * 24 * 365 });
+    const cookieLocale = req.cookies.get("locale")?.value;
+    const hasValidLocaleCookie = !!cookieLocale && supportedLocales.includes(cookieLocale);
+    const locale = hasValidLocaleCookie ? cookieLocale : getDefaultLocale();
+
+    if (!hasValidLocaleCookie) {
+        res.cookies.set("locale", locale, { path: "/", maxAge: LOCALE_COOKIE_MAX_AGE });
     }
 
     req.headers.set('x-locale', locale); // Pass locale to server components
 }
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
-    const bypassMiddleware = req.headers.get('X-Bypass-Middleware');
-    if (bypassMiddleware && bypassMiddleware === 'true') {
-        console.log("Bypassing middleware");
+    const bypassMiddleware = req.headers.get("X-Bypass-Middleware");
+    if (bypassMiddleware === "true") {
         return res;
     }
 
-    const protectedRoutes = ['/home2']; // TODO: rename to /home
-    const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route));
-    if (!isProtectedRoute) return res;
+    if (!isProtectedRoute(req.nextUrl.pathname)) {
+        return res;
+    }
 
     /*const authCookie = await getCookie('auth_token', { res, req });*/
-    const authCookie = req.cookies.get('auth_token')?.value;
+    const authCookie = req.cookies.get("auth_token")?.value;
 
     if (!authCookie) {
-        console.log("No auth token found");
-        //toast.error("Unauthorized access");
+        return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    const { decrypt } = await import("@/lib/crypto");
+    const token = await decrypt(authCookie);
+    if (!token) {
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
     let user: UserObj | null = null;
-    const token = await decrypt(authCookie);
-    if (!token) {
-        console.log("MW: No token found");
-        return NextResponse.redirect(new URL("/login", req.url));
-    }
     try {
-        user = JSON.parse(token);
-        console.log("MW user: " + user);
-    } catch (error) {
-        console.log(error);
+        user = JSON.parse(token) as UserObj;
+    } catch {
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
     if (!user) {
-        console.log("MW: No user found");
-        await deleteCookie('auth_token', { res, req });
+        const { deleteCookie } = await import("cookies-next/server");
+        await deleteCookie("auth_token", { res, req });
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
@@ -70,27 +68,15 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         return NextResponse.redirect(new URL("/", req.url));
     }
 
-    console.log("MW: Returning RES");
-    console.log("NOT REDIRECTING TO /login");
     return res;
 }
 
 export async function middleware(req: NextRequest) {
-
-    const ip =
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("cf-connecting-ip") ||
-        "unknown";
-
     const ua = req.headers.get("user-agent") || "unknown";
-    const route = req.nextUrl.pathname + req.nextUrl.search;
 
     if (!validateUserAgent(ua).validFormat && !ua.includes("Uptime-Kuma")) {
-        console.log(`[Middleware] Forbidden UA: ${ua} on route ${route}`);
-        return new NextResponse("Blocked UA", {status: 403});
+        return new NextResponse("Blocked UA", { status: 403 });
     }
-
-    console.log(`[Middleware] Req from IP: ${ip}, UA: ${ua}, Route: ${route}`);
 
     const res = NextResponse.next();
 
@@ -104,7 +90,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!api|_next|.*\\..*).*)', // Apply language middleware to all pages
-        '/home/:path*', // Apply authentication only to /home routes
+        '/((?!api|_next|.*\\..*|$).*)',
     ],
 };
