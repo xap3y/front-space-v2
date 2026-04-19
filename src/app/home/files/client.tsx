@@ -60,7 +60,7 @@ export default function FilesPageClient() {
             return;
         } else if (!loadingUser && !user) {
             setLoading(true);
-            return router.push("/login");
+            return router.push("/login?after=/home/files");
         }
 
         setLoading(false);

@@ -12,7 +12,7 @@ export default function Page() {
 
     useEffect(() => {
         setPage("home")
-        router.push("/home/profile")
+        router.push("/home/dashboard");
     }, [])
 
     return (

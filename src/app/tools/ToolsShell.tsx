@@ -24,7 +24,7 @@ export default function ToolsShell({ children }: Props) {
 
     useEffect(() => {
         if (!user && !loadingUser || (user && (user.role != "OWNER" && user.role != "ADMIN") && !loadingUser)) {
-            router.replace("/login");
+            router.replace("/login?after=/tools");
         }
     }, [user, loadingUser, router]);
 

@@ -44,7 +44,7 @@ export default function HomeDashboardPage() {
         }
         else if (error == 'User not found.') {
             //console.log("USER NOT FOUND")
-            return router.push("/login");
+            return router.push("/login?after=/home/dashboard");
         }
     }, [user, loadingUser, error])
 

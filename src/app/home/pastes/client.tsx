@@ -49,7 +49,7 @@ export default function HomePastesPage() {
 
     useEffect(() => {
         if (!loadingUser && !user) {
-            router.push("/login");
+            router.push("/login?after=/home/pastes");
         }
     }, [user, loadingUser, router]);
 

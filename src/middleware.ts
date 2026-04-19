@@ -37,24 +37,25 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         return res;
     }
 
-    /*const authCookie = await getCookie('auth_token', { res, req });*/
+    const path = req.nextUrl.pathname;
+
     const authCookie = req.cookies.get("auth_token")?.value;
 
     if (!authCookie) {
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.redirect(new URL("/login?after=" + path, req.url));
     }
 
     const { decrypt } = await import("@/lib/crypto");
     const token = await decrypt(authCookie);
     if (!token) {
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.redirect(new URL("/login?after=" + path, req.url));
     }
 
     let user: UserObj | null = null;
     try {
         user = JSON.parse(token) as UserObj;
     } catch {
-        return NextResponse.redirect(new URL("/login", req.url));
+        return NextResponse.redirect(new URL("/login?after=" + path, req.url));
     }
 
     if (!user) {
@@ -64,7 +65,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     }
 
     // Optional: Check role if required for admin
-    if (req.nextUrl.pathname.startsWith("/admin") && user.role !== "ADMIN") {
+    if (req.nextUrl.pathname.startsWith("/admin") && user.role !== "ADMIN" && user.role !== "OWNER") {
         return NextResponse.redirect(new URL("/", req.url));
     }
 

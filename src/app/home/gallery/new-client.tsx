@@ -107,7 +107,7 @@ export default function GalleryPage() {
         if (loadingUser) return;
         if (!user && !loadingUser) {
             setLoading(true);
-            router.push("/login");
+            router.push("/login?after=/home/gallery");
         }
     }, [user, loadingUser, router]);
 

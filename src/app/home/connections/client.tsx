@@ -7,7 +7,6 @@ import { TelegramConnection } from "@/types/telegram";
 import { DiscordConnection } from "@/types/discord";
 import { FaRegTrashAlt, FaTelegramPlane } from "react-icons/fa";
 import { getApiUrl } from "@/lib/core";
-import {useCurrentUrl} from "@/hooks/useCurrentUrl";
 import {usePathname, useSearchParams} from "next/navigation";
 
 export default function ConnectionsClient() {

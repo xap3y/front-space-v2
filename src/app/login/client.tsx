@@ -27,6 +27,7 @@ export default function LoginPage() {
     const { isApiUp } = useApiStatusStore();
 
     const [email, setEmail] = useState("");
+    const [after, setAfter] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const router = useRouter();
@@ -50,16 +51,25 @@ export default function LoginPage() {
     useEffect(() => {
         if (user) {
             setLoading(true)
-            router.push("/home/profile");
+            router.push("/home/dashboard");
         }
     }, [user, loadingUser, router]);
 
     useEffect(() => {
+        if (loading || loadingUser) {
+            return;
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
+        const afterParam = urlParams.get('after');
         const emailParam = urlParams.get('email');
         const errorParam = urlParams.get('errortoast');
         if (emailParam) {
             setEmail(emailParam);
+        }
+
+        if (afterParam) {
+            setAfter(afterParam);
         }
 
         if (errorParam) {
@@ -70,7 +80,10 @@ export default function LoginPage() {
             }
         }
 
-        if (emailParam || errorParam) router.replace("/login", { scroll: false });
+        if (emailParam || errorParam || afterParam) router.replace("/login", { scroll: false });
+    }, [loading, loadingUser, router]);
+
+    useEffect(() => {
         console.log("Fetching API status..");
         async function fetchData() {
             try {
@@ -169,6 +182,11 @@ export default function LoginPage() {
             toast.update(toastId, { render: lang.pages.login.success, type: "success", isLoading: false, autoClose: 1000, closeOnClick: true})
             setLoading(true);
             setTimeout(() => {
+
+                if (after && after.startsWith("/")) {
+                    router.push(after);
+                    return;
+                }
                 router.push('/home/dashboard/');
             }, 500)
         } catch (e) {

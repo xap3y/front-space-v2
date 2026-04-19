@@ -37,7 +37,7 @@ export default function HomeGalleryPage() {
             return;
         }
         else if (error == 'User not found.') {
-            return router.push("/login");
+            return router.push("/login?after=/home/gallery");
         }
 
         const fetchImages = async () => {
