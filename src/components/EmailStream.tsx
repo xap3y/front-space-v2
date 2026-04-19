@@ -180,7 +180,7 @@ function InboxList({
                    }: InboxListProps) {
     return (
         <div
-            className={`flex flex-col w-full xl:w-[280px] xl:flex-none box-primary ${
+            className={`flex flex-col w-full xl:w-[280px] xl:flex-none box-primary xl:rounded-lg xl:border-x-4 xl:border-b-4 border-b-0 border-x-0 rounded-none ${
                 !isMdUp && mobileMode === 'detail' ? 'hidden' : ''
             } min-w-0`}
             style={{ height: isMdUp ? desktopHeightPx : 'auto' }}

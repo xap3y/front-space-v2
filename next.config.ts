@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
         destination: '/tools',
         permanent: true,
       },
+      {
+        source: '/api',
+        destination: 'http://127.0.0.1:8012',
+        permanent: true,
+      }
     ]
   },
     images: {

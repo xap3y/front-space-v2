@@ -17,13 +17,15 @@ export async function POST(req: NextRequest) {
     const contentType = req.headers.get('content-type');
     const filename = req.headers.get('filename');
 
+    console.log("filename is " + filename)
+
     if (!contentType || !filename) {
         return NextResponse.json({ error: 'Invalid content type or filename' }, { status: 400 })
     }
 
     const command = new PutObjectCommand({
         Bucket: process.env.S3_BUCKET_NAME!,
-        Key: `media/${filename}`,
+        Key: `files/${filename}`,
         ContentType: contentType,
     })
 
