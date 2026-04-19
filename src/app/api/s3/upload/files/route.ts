@@ -1,54 +1,50 @@
 import {NextRequest, NextResponse} from "next/server";
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import {validateApiKeyServer} from "@/lib/serverFuncs";
-
-const s3 = new S3Client({
-    region: 'auto',
-    endpoint: `${process.env.S3_ENDPOINT}`,
-    credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY!,
-        secretAccessKey: process.env.S3_SECRET_KEY!,
-    },
-})
 
 export async function POST(req: NextRequest) {
 
-    const apiKey = req.headers.get('authorization')?.replace('Bearer ', '');
+    return NextResponse.json({error: true, message: "Deprecated"}, {status: 404});
+
+    /*const {fileName, contentType} = await req.json();
+
+    if (!fileName || !contentType) {
+        return NextResponse.json({error: true, message: "Missing fileName or contentType"}, {status: 400});
+    }
+
+    const apiKey = req.headers.get('x-api-key');
 
     if (!apiKey) {
-        return NextResponse.json(
-            { error: 'Missing API key' },
-            { status: 401 }
-        );
+        return NextResponse.json({error: true, message: "Missing API key"}, {status: 401});
     }
 
     const isValidKey = await validateApiKeyServer(apiKey);
-
     if (!isValidKey) {
-        return NextResponse.json(
-            { error: 'Invalid API key' },
-            { status: 403 }
-        );
+        return NextResponse.json({error: true, message: "Invalid API key"}, {status: 403});
     }
 
-    // check content type of req
-    const contentType = req.headers.get('content-type');
-    const filename = req.headers.get('filename');
+    const clientIp =
+        req.headers.get('x-forwarded-for')?.split(',')[0] ||
+        req.headers.get('x-real-ip') ||
+        'unknown';
 
-    console.log("filename is " + filename)
+    console.log("Client IP:", clientIp);
 
-    if (!contentType || !filename) {
-        return NextResponse.json({ error: 'Invalid content type or filename' }, { status: 400 })
+    // Forward to backend with client IP
+    const response = await axios.post(getApiUrl() + "/v1/files/presigned-url/put", {}, {
+        headers: {
+            'Content-Type': 'application/json',
+            'x-forwarded-for': clientIp,
+            'x-real-ip': clientIp,
+            'x-api-key': getApiKey()
+        },
+        params: {
+            filename: fileName,
+            contentType: contentType,
+        },
+    });
+
+    if (!response.data || response.data.error) {
+        return NextResponse.json({error: true, message: "Failed to get presigned URL"}, {status: 500});
     }
 
-    const command = new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET_NAME!,
-        Key: `files/${filename}`,
-        ContentType: contentType,
-    })
-
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 })
-
-    return NextResponse.json({ url })
+    return NextResponse.json({error: false, data: response.data} as DefaultResponse);*/
 }

@@ -279,7 +279,7 @@ export async function uploadImageBucket(formData: FormData, apiKey: string,  cal
             formData: formData
         }, {
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                'x-api-key': apiKey,
                 'filename': uid,
             },
         })

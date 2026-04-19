@@ -1,15 +1,10 @@
-import type {Metadata} from "next";
-import HomeDashboardPageTemp from "@/app/home/dashboard/building";
+import type { Metadata } from "next";
+import DashboardLauncherClient from "./clientDash";
 
 export const metadata: Metadata = {
-    title: "Space - Home (dashboard)",
+    title: "Space - Launcher",
 };
 
 export default function Page() {
-    return (
-        <>
-            <HomeDashboardPageTemp/>
-            {/*<HomeDashboardPage />*/}
-        </>
-    )
+    return <DashboardLauncherClient />;
 }

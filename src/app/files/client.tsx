@@ -6,19 +6,21 @@ import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import axios, { CancelTokenSource } from "axios";
 import { MdOutlineDelete } from "react-icons/md";
-import { FaCheck, FaDownload, FaCopy, FaPlus, FaPen, FaLink, FaLock, FaLockOpen } from "react-icons/fa6";
-import {FaExclamationTriangle, FaTimes} from "react-icons/fa";
+import { FaCheck, FaCopy, FaPlus, FaPen, FaLink, FaLock, FaLockOpen, FaEye, FaEyeSlash, FaTrash } from "react-icons/fa6";
+import {FaExclamationTriangle, FaTimes, FaExternalLinkAlt} from "react-icons/fa";
 import { LoadingDot } from "@/components/GlobalComponents";
 import LoadingPage from "@/components/LoadingPage";
 import MainStringInput from "@/components/MainStringInput";
 import { errorToast, infoToast, okToast, validateApiKey } from "@/lib/client";
 import { useDebounce } from "@/hooks/useDebounce";
-import {getApiUrl, getStorageUrl} from "@/lib/core";
+import {getApiUrl, getStorageUrl, purifyText, purifyTextStrict} from "@/lib/core";
+import {generatePresignedPutUrl} from "@/lib/apiPoster";
 
 interface UploadItem {
     id: string;
     file: File;
     realFileName: string;
+    customName?: string; // ✅ NEW: Store custom name separately
     progress: number;
     speed: number;
     status: "pending" | "uploading" | "completed" | "error" | "cancelled";
@@ -62,7 +64,7 @@ interface FileUploadResponse {
 }
 
 const MAX_FILES = 15;
-const MAX_SIZE = 1024 * 1024 * 1024; // TODO
+const MAX_SIZE = 1024 * 1024 * 1024 * 15; // 15 GB
 
 export function FilesPageClient() {
     const { user, loadingUser } = useUser();
@@ -86,6 +88,7 @@ export function FilesPageClient() {
 
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
     const [packPassword, setPackPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     const uploadItemsRef = useRef<UploadItem[]>(uploadItems);
     const uploadedFilesRef = useRef<UploadedFile[]>(uploadedFiles);
@@ -130,16 +133,47 @@ export function FilesPageClient() {
             return;
         }
 
-        const newItems: UploadItem[] = files.slice(0, remainingSlots).map((file) => ({
+        // ✅ Validate file sizes
+        let totalSize = 0;
+        const validFiles: File[] = [];
+
+        for (const file of files) {
+            // Check individual file size
+            if (file.size > MAX_SIZE) {
+                errorToast(`File "${file.name}" exceeds maximum size of ${formatFileSize(MAX_SIZE)}`);
+                continue;
+            }
+
+            // Check total size
+            if (totalSize + file.size > MAX_SIZE) {
+                errorToast(`Total upload size would exceed ${formatFileSize(MAX_SIZE)}`);
+                break;
+            }
+
+            totalSize += file.size;
+            validFiles.push(file);
+        }
+
+        if (validFiles.length === 0) {
+            errorToast("No valid files to upload");
+            return;
+        }
+
+        const newItems: UploadItem[] = validFiles.slice(0, remainingSlots).map((file) => ({
             id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             file,
             realFileName: file.name,
+            customName: undefined, // ✅ NEW: No custom name initially
             progress: 0,
             speed: 0,
             status: "pending",
         }));
 
         setUploadItems((prev) => [...prev, ...newItems]);
+
+        if (validFiles.length < files.length) {
+            infoToast(`${validFiles.length} of ${files.length} files added`);
+        }
     };
 
     useEffect(() => {
@@ -259,9 +293,10 @@ export function FilesPageClient() {
         );
     };
 
-    const handleEditFile = (id: string, name: string) => {
+    const handleEditFile = (id: string) => {
         setEditingId(id);
-        setEditingName(name);
+        // ✅ CHANGED: Don't prefill with original name, start with empty
+        setEditingName("");
     };
 
     const handleSaveEdit = () => {
@@ -270,10 +305,11 @@ export function FilesPageClient() {
             return;
         }
 
+        // ✅ CHANGED: Store custom name separately, don't modify realFileName
         setUploadItems((prev) =>
             prev.map((i) =>
                 i.id === editingId
-                    ? { ...i, realFileName: editingName }
+                    ? { ...i, customName: editingName }
                     : i
             )
         );
@@ -297,7 +333,7 @@ export function FilesPageClient() {
 
             let uid = fileName.trim();
             let filenameNew: string;
-            let originalName = item.realFileName;
+            let originalName = item.realFileName; // ✅ KEEP original name
             let extension = "";
 
             const split = originalName.split(".");
@@ -307,32 +343,37 @@ export function FilesPageClient() {
 
             const activeCount = uploadItemsRef.current.filter(i => i.status !== "cancelled").length;
 
-            if (activeCount === 1 && uid) {
+            // ✅ UPDATED: Check for custom name first
+            if (item.customName) {
+                // File has custom name: use it
+                filenameNew = item.customName + extension;
+            } else if (activeCount === 1 && uid) {
+                // Single file with global custom name provided
                 filenameNew = uid + extension;
             } else {
+                // Multiple files OR no custom name: always generate random name
                 uid = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                 filenameNew = uid + extension;
             }
 
-            const presignRes = await axios.post(
-                "/api/s3/upload/files",
-                {
-                    filename: filenameNew,
-                    contentType: item.file.type,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${apiKey}`,
-                        filename: encodeURIComponent(filenameNew),
-                    },
-                    cancelToken: cancelToken.token,
-                }
-            );
+            const uploadUrl = await generatePresignedPutUrl(filenameNew, item.file.type);
 
-            const uploadUrl = presignRes.data.url;
+            if (uploadUrl.error || !uploadUrl.data || typeof uploadUrl.data !== "string") {
+                setUploadItems((prev) =>
+                    prev.map((i) =>
+                        i.id === item.id
+                            ? { ...i, status: "error", error: "Failed to get upload URL" }
+                            : i
+                    )
+                );
+
+                errorToast("Failed to get upload URL for " + item.realFileName);
+                return null;
+            }
+
             const startTime = performance.now();
 
-            await axios.put(uploadUrl, item.file, {
+            await axios.put(uploadUrl.data, item.file, {
                 headers: {
                     "Content-Type": item.file.type,
                 },
@@ -368,7 +409,7 @@ export function FilesPageClient() {
             const newUploadedFile: UploadedFile = {
                 uniqueId: filenameNew,
                 fileName: filenameNew,
-                originalFileName: originalName,
+                originalFileName: originalName, // ✅ Keep original fileName
                 fileType: item.file.type,
                 size: item.file.size,
                 uploadedAt: new Date().toLocaleString(),
@@ -518,6 +559,10 @@ export function FilesPageClient() {
         return `${window.location.origin}/files/pack/${packId}`;
     };
 
+    const getTotalUploadSize = () => {
+        return uploadItems.reduce((acc, i) => acc + (i.status !== "cancelled" ? i.file.size : 0), 0);
+    };
+
     if (allCompleted && uploadedFiles.length > 0) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8">
@@ -535,13 +580,24 @@ export function FilesPageClient() {
                         {/* Pack URL Section */}
                         {packId && (
                             <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    {isPasswordProtected ? (
-                                        <FaLock className="w-4 h-4 text-yellow-400" />
-                                    ) : (
-                                        <FaLink className="w-4 h-4 text-blue-400" />
-                                    )}
-                                    <p className="text-sm text-gray-300">Pack URL {isPasswordProtected && "(Password Protected)"}</p>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        {isPasswordProtected ? (
+                                            <FaLock className="w-4 h-4 text-yellow-400" />
+                                        ) : (
+                                            <FaLink className="w-4 h-4 text-blue-400" />
+                                        )}
+                                        <p className="text-sm text-gray-300">Pack URL {isPasswordProtected && "(Protected)"}</p>
+                                    </div>
+                                    <a
+                                        href={getPackUrl()}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
+                                        title="Open pack"
+                                    >
+                                        <FaExternalLinkAlt className="w-3 h-3 text-blue-400" />
+                                    </a>
                                 </div>
                                 <div className="flex items-center gap-2 p-3 bg-black/50 rounded">
                                     <input
@@ -564,10 +620,18 @@ export function FilesPageClient() {
                             {uploadedFiles.map((file, idx) => (
                                 <div key={idx} className="space-y-2 box-primary p-3 rounded-lg text-xs">
                                     <div>
-                                        <p className="text-gray-400 mb-1">File Name</p>
-                                        <p className="text-white font-semibold truncate">
-                                            {file.fileName}
-                                        </p>
+                                        <p className="text-gray-400 mb-1">Original Name</p>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <p className="text-white font-semibold truncate">
+                                                {file.originalFileName}
+                                            </p>
+                                            <button
+                                                onClick={() => copyToClipboard(file.originalFileName)}
+                                                className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition flex-shrink-0"
+                                            >
+                                                <FaCopy className="w-2.5 h-2.5 text-blue-400" />
+                                            </button>
+                                        </div>
                                     </div>
                                     <div>
                                         <p className="text-gray-400 mb-1">File URL</p>
@@ -600,8 +664,9 @@ export function FilesPageClient() {
                                 setIsPasswordProtected(false);
                                 setPackPassword("");
                             }}
-                            className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded transition"
+                            className="w-full py-3 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2"
                         >
+                            <FaPlus className="w-4 h-4" />
                             Upload More
                         </button>
                     </div>
@@ -661,6 +726,13 @@ export function FilesPageClient() {
                             File Uploader
                         </h1>
 
+                        {/* Show MAX_SIZE info */}
+                        {activeItems.length === 0 && (
+                            <p className="text-center text-xs text-gray-500">
+                                Max file size: {formatFileSize(MAX_SIZE)} • Max files: {MAX_FILES}
+                            </p>
+                        )}
+
                         {!user && (
                             <div className="flex items-center transition-all duration-300 ease-in-out">
                                 <MainStringInput
@@ -668,7 +740,7 @@ export function FilesPageClient() {
                                     value={apiKey}
                                     disabled={!!user || uploading || isKeyValidating || activeItems.length > 0}
                                     onChange={(value) => {
-                                        setApiKey(value.toLowerCase());
+                                        setApiKey(purifyTextStrict(value.toLowerCase()));
                                         setIsKeyValid(null);
                                     }}
                                     onFocus={() => {
@@ -721,6 +793,16 @@ export function FilesPageClient() {
                             <div
                                 className={`space-y-2 ${isMultiple ? "max-h-[500px] overflow-y-auto" : ""}`}
                             >
+                                {/* Show total upload size */}
+                                <div className="bg-zinc-800/50 p-2 rounded text-xs">
+                                    <div className="flex justify-between text-gray-400">
+                                        <span>Total size:</span>
+                                        <span className={getTotalUploadSize() > MAX_SIZE ? "text-red-400" : "text-gray-300"}>
+                                            {formatFileSize(getTotalUploadSize())} / {formatFileSize(MAX_SIZE)}
+                                        </span>
+                                    </div>
+                                </div>
+
                                 {uploadItems.map((item) => (
                                     <div
                                         key={item.id}
@@ -739,12 +821,13 @@ export function FilesPageClient() {
                                                 }`}
                                             >
                                                 <div className="flex-1 min-w-0">
+                                                    {/* ✅ CHANGED: Show customName if exists, otherwise show realFileName */}
                                                     <p
                                                         className={`font-semibold truncate ${
                                                             isMultiple ? "text-gray-300" : "text-white"
                                                         } ${item.status === "cancelled" ? "line-through text-red-400" : ""}`}
                                                     >
-                                                        {item.realFileName}
+                                                        {item.customName || item.realFileName}
                                                     </p>
                                                     <p className={`text-gray-500 text-xs ${item.status === "cancelled" ? "line-through text-red-400" : ""}`}>
                                                         {!isMultiple ? formatFileSize(item.file.size) : "(" + formatFileSize(item.file.size) + ")"}
@@ -760,14 +843,12 @@ export function FilesPageClient() {
 
                                             {!uploading && item.status === "pending" && (
                                                 <div className="flex gap-1">
-                                                    {isMultiple && (
-                                                        <button
-                                                            onClick={() => handleEditFile(item.id, item.realFileName)}
-                                                            className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
-                                                        >
-                                                            <FaPen className="w-3 h-3 text-blue-400" />
-                                                        </button>
-                                                    )}
+                                                    <button
+                                                        onClick={() => handleEditFile(item.id)}
+                                                        className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
+                                                    >
+                                                        <FaPen className="w-3 h-3 text-blue-400" />
+                                                    </button>
                                                     <button
                                                         onClick={() => handleRemoveFile(item.id)}
                                                         className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition"
@@ -854,23 +935,6 @@ export function FilesPageClient() {
 
                         {activeItems.length > 0 && (
                             <>
-                                {!isMultiple && (
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm text-gray-300">
-                                                File Name (optional)
-                                            </label>
-                                            <MainStringInput
-                                                value={fileName}
-                                                onChange={(e) => setFileName(e)}
-                                                placeholder="Enter file name..."
-                                                disabled={uploading}
-                                                className="xl:text-base text-xs w-full"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-
                                 {/* Password Protection Toggle */}
                                 <div className="flex flex-col gap-3 border-t border-gray-700 pt-4">
                                     <div className="flex items-center justify-between">
@@ -918,19 +982,33 @@ export function FilesPageClient() {
                                                 : "max-h-0 opacity-0"
                                         }`}
                                     >
-                                        <MainStringInput
-                                            type="text"
-                                            id={"image"}
-                                            autoComplete={"off"}
-                                            value={packPassword}
-                                            onChange={(e) => setPackPassword(e)}
-                                            placeholder="Enter pack password..."
-                                            disabled={uploading}
-                                            onFocus={() => {
-                                                setTimeout(() => setIsPassFocused(true), 100);
-                                            }}
-                                            className={`xl:text-base text-xs w-full ${isFocused ? "text-dots" : ""}`}
-                                        />
+                                        <div className="relative">
+                                            <MainStringInput
+                                                type={"text"}
+                                                id={"image"}
+                                                autoComplete={"off"}
+                                                value={packPassword}
+                                                onChange={(e) => setPackPassword(purifyText(e))}
+                                                placeholder="Enter pack password..."
+                                                disabled={uploading}
+                                                onFocus={() => {
+                                                    setTimeout(() => setIsPassFocused(true), 100);
+                                                }}
+                                                className={`xl:text-base text-xs w-full pr-10 ${isPassFocused && !showPassword ? "text-dots" : ""}`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-700 hover:bg-opacity-30 rounded transition"
+                                                title={showPassword ? "Hide password" : "Show password"}
+                                            >
+                                                {showPassword ? (
+                                                    <FaEyeSlash className="w-3.5 h-3.5 text-gray-400" />
+                                                ) : (
+                                                    <FaEye className="w-3.5 h-3.5 text-gray-400" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -958,8 +1036,9 @@ export function FilesPageClient() {
                                             setUploadItems([]);
                                             setFileName("");
                                         }}
-                                        className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded transition text-sm"
+                                        className="w-full py-3 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2"
                                     >
+                                        <FaTrash className="w-4 h-4" />
                                         Clear
                                     </button>
                                 )}
@@ -980,11 +1059,11 @@ export function FilesPageClient() {
                             <h2 className="text-xl font-bold text-white">Rename File</h2>
 
                             <div className="space-y-2">
-                                <label className="text-sm text-gray-300">New File Name</label>
+                                <label className="text-sm text-gray-300">New Slug</label>
                                 <MainStringInput
                                     value={editingName}
-                                    onChange={(e) => setEditingName(e)}
-                                    placeholder="Enter new file name..."
+                                    onChange={(e) => setEditingName(purifyText(e))}
+                                    placeholder="Enter new slug..."
                                     className="xl:text-base text-xs w-full"
                                     autoFocus
                                 />

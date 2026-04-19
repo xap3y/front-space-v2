@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import {validateApiKeyServer} from "@/lib/serverFuncs";
 
 const s3 = new S3Client({
     region: 'auto',
@@ -19,6 +20,17 @@ export async function POST(req: NextRequest) {
 
     if (!contentType || !filename) {
         return NextResponse.json({ error: 'Invalid content type or filename' }, { status: 400 })
+    }
+
+    const apiKey = req.headers.get('x-api-key');
+
+    if (!apiKey) {
+        return NextResponse.json({error: true, message: "Missing API key"}, {status: 401});
+    }
+
+    const isValidKey = await validateApiKeyServer(apiKey);
+    if (!isValidKey) {
+        return NextResponse.json({error: true, message: "Invalid API key"}, {status: 403});
     }
 
     const command = new PutObjectCommand({

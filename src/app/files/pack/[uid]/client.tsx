@@ -1,9 +1,10 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { FaLock, FaCheck, FaCopy, FaDownload } from "react-icons/fa6";
+import { useEffect, useState, useRef } from "react";
+import axios, {CancelTokenSource} from "axios";
+import {FaLock, FaCheck, FaCopy, FaDownload, FaArrowLeft, FaEye, FaFileZipper} from "react-icons/fa6";
+import { FaTimes, FaExternalLinkAlt } from "react-icons/fa";
 import { LoadingDot } from "@/components/GlobalComponents";
 import LoadingPage from "@/components/LoadingPage";
 import MainStringInput from "@/components/MainStringInput";
@@ -49,6 +50,13 @@ export function PackPageClient() {
     const [isFocused, setIsFocused] = useState(false);
     const [requiresPassword, setRequiresPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [downloading, setDownloading] = useState(false);
+    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [downloadError, setDownloadError] = useState<string | null>(null);
+    const [previewFile, setPreviewFile] = useState<FileInfo | null>(null);
+    const [previewPassword, setPreviewPassword] = useState("");
+
+    const cancelTokenRef = useRef<CancelTokenSource | null>(null);
 
     useEffect(() => {
         fetchPackInfo();
@@ -58,15 +66,14 @@ export function PackPageClient() {
         try {
             setLoading(true);
             const response = await axios.get(
-                getApiUrl() + `/v1/files/pack/public/${packId}/info`
+                getApiUrl() + `/v1/files/pack/public/${packId}/info`, {withCredentials: true}
             );
 
             if (!response.data.error) {
                 setPackInfo(response.data);
-                if (response.data.isPasswordProtected) {
+                if (response.data.isPasswordProtected && !response.data.hasAccess) {
                     setRequiresPassword(true);
                 } else {
-                    // No password, fetch files directly
                     fetchPackFiles("");
                 }
             }
@@ -88,8 +95,7 @@ export function PackPageClient() {
             const requestBody = pwd ? { password: pwd } : {};
 
             const response = await axios.post<PackResponse>(
-                getApiUrl() + `/v1/files/pack/public/${packId}`,
-                requestBody
+                getApiUrl() + `/v1/files/pack/public/${packId}`, requestBody, {withCredentials: true}
             );
 
             if (!response.data.error) {
@@ -130,6 +136,80 @@ export function PackPageClient() {
         await fetchPackFiles(password);
     };
 
+    const handleDownloadZip = async () => {
+        try {
+            setDownloading(true);
+            setDownloadProgress(0);
+            setDownloadError(null);
+
+            // Create cancel token for this request
+            cancelTokenRef.current = axios.CancelToken.source();
+
+            const requestBody = packInfo?.isPasswordProtected
+                ? { password: previewPassword || password }
+                : {};
+
+            if (packInfo?.isPasswordProtected && !previewPassword && !password) {
+                errorToast("Password required to download");
+                setDownloading(false);
+                return;
+            }
+
+            const response = await axios.post(
+                getApiUrl() + `/v1/files/pack/public/${packId}/download/zip`,
+                requestBody,
+                {
+                    responseType: 'blob',
+                    withCredentials: true,
+                    timeout: 600000, // 10 minutes
+                    cancelToken: cancelTokenRef.current.token,
+                    onDownloadProgress: (progressEvent) => {
+                        if (progressEvent.total) {
+                            const percentCompleted = Math.round(
+                                (progressEvent.loaded * 100) / progressEvent.total
+                            );
+                            setDownloadProgress(percentCompleted);
+                        }
+                    },
+                }
+            );
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `pack-${packId}.zip`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            okToast("Pack downloaded successfully!");
+            setDownloadProgress(0);
+        } catch (err: any) {
+            if (axios.isCancel(err)) {
+                setDownloadError("Download cancelled");
+                errorToast("Download cancelled");
+            } else {
+                const errorMsg = err.response?.data?.message || "Failed to download pack";
+                setDownloadError(errorMsg);
+                errorToast(errorMsg);
+            }
+            setDownloadProgress(0);
+        } finally {
+            setDownloading(false);
+            cancelTokenRef.current = null;
+        }
+    };
+
+    const handleCancelDownload = () => {
+        if (cancelTokenRef.current) {
+            cancelTokenRef.current.cancel("Download cancelled by user");
+            setDownloading(false);
+            setDownloadProgress(0);
+            setDownloadError("Download cancelled");
+        }
+    };
+
     const copyToClipboard = (text: string) => {
         const url = getStorageUrl() + "/files/" + text;
         navigator.clipboard.writeText(url);
@@ -146,6 +226,18 @@ export function PackPageClient() {
             " " +
             sizes[i]
         );
+    };
+
+    const isMediaPreviewable = (fileType: string): boolean => {
+        return /^(image\/(png|jpg|jpeg|gif|webp|svg)|video\/)/.test(fileType);
+    };
+
+    const isPdfOrDoc = (fileType: string): boolean => {
+        return /^(application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document)$/.test(fileType);
+    };
+
+    const getFileExtension = (fileName: string): string => {
+        return fileName.split('.').pop()?.toLowerCase() || '';
     };
 
     if (loading) {
@@ -166,8 +258,9 @@ export function PackPageClient() {
 
                         <a
                             href="/files"
-                            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition flex items-center justify-center"
+                            className="w-full py-3 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2"
                         >
+                            <FaArrowLeft className="w-4 h-4" />
                             Back to Upload
                         </a>
                     </div>
@@ -198,7 +291,7 @@ export function PackPageClient() {
                                     Enter Password
                                 </label>
                                 <MainStringInput
-                                    type="text"
+                                    type="password"
                                     autoComplete="off"
                                     id="image"
                                     value={password}
@@ -244,8 +337,9 @@ export function PackPageClient() {
 
                         <a
                             href="/files"
-                            className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded transition flex items-center justify-center text-sm"
+                            className="w-full py-2 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2 text-sm"
                         >
+                            <FaArrowLeft className="w-3 h-3" />
                             Back to Upload
                         </a>
                     </div>
@@ -270,8 +364,9 @@ export function PackPageClient() {
 
                         <a
                             href="/files"
-                            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition flex items-center justify-center"
+                            className="w-full py-3 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2"
                         >
+                            <FaArrowLeft className="w-4 h-4" />
                             Back to Upload
                         </a>
                     </div>
@@ -323,7 +418,30 @@ export function PackPageClient() {
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-1 flex-wrap justify-end">
+                                        {/* Preview button for media/pdf/doc */}
+                                        {(isMediaPreviewable(file.fileType) || isPdfOrDoc(file.fileType)) && (
+                                            <button
+                                                onClick={() => setPreviewFile(file)}
+                                                className="p-2 hover:bg-purple-500 hover:bg-opacity-20 rounded transition"
+                                                title="Preview"
+                                            >
+                                                <FaEye className="w-4 h-4 text-purple-400" />
+                                            </button>
+                                        )}
+
+                                        {/* Open in new tab */}
+                                        <a
+                                            href={getStorageUrl() + "/files/" + file.uniqueId}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 hover:bg-cyan-500 hover:bg-opacity-20 rounded transition"
+                                            title="Open"
+                                        >
+                                            <FaExternalLinkAlt className="w-4 h-4 text-cyan-400" />
+                                        </a>
+
+                                        {/* Copy URL */}
                                         <button
                                             onClick={() =>
                                                 copyToClipboard(file.uniqueId)
@@ -333,6 +451,8 @@ export function PackPageClient() {
                                         >
                                             <FaCopy className="w-4 h-4 text-blue-400" />
                                         </button>
+
+                                        {/* Download */}
                                         <a
                                             href={getStorageUrl() + "/files/" + file.uniqueId + "?download=true"}
                                             target="_blank"
@@ -348,16 +468,168 @@ export function PackPageClient() {
                         ))}
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex gap-3">
-                        <a
-                            href="/files"
-                            className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded transition flex items-center justify-center"
+                    {/* Download as ZIP button */}
+                    {files.length > 1 && (
+                        <button
+                            onClick={handleDownloadZip}
+                            disabled={downloading}
+                            className="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-semibold rounded transition flex items-center justify-center gap-2"
                         >
-                            Back to Upload
-                        </a>
-                    </div>
+                            {downloading ? (
+                                <>
+                                    <LoadingDot size="w-4" />
+                                    Preparing ({downloadProgress}%)...
+                                </>
+                            ) : (
+                                <>
+                                    <FaFileZipper className="w-4 h-4" />
+                                    Download All as .zip
+                                </>
+                            )}
+                        </button>
+                    )}
+
+                    {/* Download Progress Bar */}
+                    {downloading && (
+                        <div className="space-y-3">
+                            <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+                                <div
+                                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all duration-300"
+                                    style={{ width: `${downloadProgress}%` }}
+                                />
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-400">
+                                <span>{downloadProgress}% complete</span>
+                                <button
+                                    onClick={handleCancelDownload}
+                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition flex items-center gap-1"
+                                >
+                                    <FaTimes className="w-3 h-3" />
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Download Error */}
+                    {downloadError && !downloading && (
+                        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded">
+                            <p className="text-red-400 text-sm">
+                                {downloadError}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <a
+                        href="/files"
+                        className="w-full py-2 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2 text-sm"
+                    >
+                        <FaArrowLeft className="w-3 h-3" />
+                        Back to Upload
+                    </a>
                 </div>
+
+                {/* Preview Modal */}
+                {previewFile && (
+                    <div
+                        className="fixed inset-0 flex items-center justify-center p-4 z-50"
+                        onClick={() => setPreviewFile(null)}
+                    >
+                        <div
+                            className="box-primary shadow-2xl w-full max-w-4xl min-h-[90vh] overflow-auto flex flex-col"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-gray-700 sticky top-0">
+                                <h2 className="text-white font-semibold truncate flex-1">
+                                    {previewFile.fileName}
+                                </h2>
+                                <button
+                                    onClick={() => setPreviewFile(null)}
+                                    className="p-2 hover:bg-gray-800 rounded transition ml-4"
+                                >
+                                    <FaTimes className="w-5 h-5 text-white" />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
+                                {isMediaPreviewable(previewFile.fileType) && (
+                                    previewFile.fileType.startsWith('image/') ? (
+                                        <img
+                                            src={getStorageUrl() + "/files/" + previewFile.uniqueId}
+                                            alt={previewFile.fileName}
+                                            className="max-w-full max-h-full object-contain rounded"
+                                        />
+                                    ) : previewFile.fileType.startsWith('video/') ? (
+                                        <video
+                                            controls
+                                            className="max-w-full max-h-full rounded"
+                                        >
+                                            <source src={getStorageUrl() + "/files/" + previewFile.uniqueId} type={previewFile.fileType} />
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    ) : null
+                                )}
+
+                                {/* PDF Preview using iframe */}
+                                {previewFile.fileType === 'application/pdf' && (
+                                    <iframe
+                                        src={`${getStorageUrl()}/files/${previewFile.uniqueId}#toolbar=1&navpanes=0&scrollbar=1`}
+                                        className="w-full min-h-[70vh] rounded"
+                                        title="PDF Preview"
+                                    />
+                                )}
+
+                                {/* Word Document Preview - Using Office Online Viewer */}
+                                {(previewFile.fileType === 'application/msword' ||
+                                    previewFile.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') && (
+                                    <iframe
+                                        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(getStorageUrl() + "/files/" + previewFile.uniqueId)}`}
+                                        className="w-full min-h-[70vh] rounded"
+                                        title="Document Preview"
+                                    />
+                                )}
+
+                                {/* Fallback for unsupported preview */}
+                                {!isMediaPreviewable(previewFile.fileType) && !isPdfOrDoc(previewFile.fileType) && (
+                                    <div className="text-center">
+                                        <p className="text-gray-400 mb-4">Preview not available for this file type</p>
+                                        <a
+                                            href={getStorageUrl() + "/files/" + previewFile.uniqueId}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition"
+                                        >
+                                            Download File
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="flex gap-2 p-4 border-t border-gray-700 bg-black/90">
+                                <a
+                                    href={getStorageUrl() + "/files/" + previewFile.uniqueId}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition flex items-center justify-center gap-2"
+                                >
+                                    <FaExternalLinkAlt className="w-4 h-4" />
+                                    Open
+                                </a>
+                                <a
+                                    href={getStorageUrl() + "/files/" + previewFile.uniqueId + "?download=true"}
+                                    className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded transition flex items-center justify-center gap-2"
+                                >
+                                    <FaDownload className="w-4 h-4" />
+                                    Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

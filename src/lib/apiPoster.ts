@@ -6,6 +6,8 @@ import {PasteDto} from "@/types/paste";
 import {DefaultResponse} from "@/types/core";
 import {DiscordConnection, KeyRequest} from "@/types/discord";
 import defaultPeriodStats, {PeriodStats} from "@/types/stats";
+import axios, {CancelToken} from "axios";
+import {headers} from "next/headers";
 
 
 export async function createShortUrl(url: string, apikey: string, uniqueId: string | null): Promise<ShortUrlDto | null> {
@@ -21,6 +23,37 @@ export async function createShortUrl(url: string, apikey: string, uniqueId: stri
     shortUrlDto.createdAt = new Date(shortUrlDto.createdAt).toLocaleString()
 
     return shortUrlDto;
+}
+
+export async function generatePresignedPutUrl(fileName: string, contentType: string): Promise<DefaultResponse> {
+
+    const headersList = await headers();
+    const clientIp = getClientIp(headersList);
+
+    console.log("Client IP:", clientIp);
+
+
+    const presignRes = await axios.post(
+        getApiUrl() + "/v1/files/presigned-url/put",
+        {},
+        {
+            headers: {
+                "x-api-key": getApiKey(),
+                'x-forwarded-for': clientIp,
+                'x-real-ip': clientIp,
+            },
+            params: {
+                filename: fileName,
+                contentType: contentType,
+            },
+        }
+    );
+
+    if (!presignRes.data || presignRes.data.error) {
+        return {error: true, message: "Failed to get presigned URL"} as DefaultResponse;
+    }
+
+    return {error: false, data: presignRes.data.url} as DefaultResponse;
 }
 
 export async function deleteShortUrl(shortUrl: ShortUrlDto, apikey: string): Promise<DefaultResponse> {
@@ -187,4 +220,24 @@ export async function deleteMinecraftServer(serverId: string): Promise<boolean> 
         console.error("Error deleting server:", error);
         return false;
     }
+}
+
+function getClientIp(headersList: any): string {
+    // Check common headers (in order of preference)
+    const xForwardedFor = headersList.get('x-forwarded-for');
+    if (xForwardedFor) {
+        return xForwardedFor.split(',')[0].trim();
+    }
+
+    const xRealIp = headersList.get('x-real-ip');
+    if (xRealIp) {
+        return xRealIp;
+    }
+
+    const cfConnectingIp = headersList.get('cf-connecting-ip'); // Cloudflare
+    if (cfConnectingIp) {
+        return cfConnectingIp;
+    }
+
+    return 'unknown';
 }

@@ -133,4 +133,12 @@ export function isImageType(type: string): boolean {
     return IMAGE_EXTENSIONS.includes(ext || "");
 }
 
+export function purifyText(text: string): string {
+    return text.replace(/[\u0300-\u036f\u0483-\u0489\u1ab0-\u1aff\u1dc0-\u1dff\ufe20-\ufe2f]/g, '');
+}
+
+export function purifyTextStrict(text: string): string {
+    return text.replace(/[^a-zA-Z0-9-_ ]/g, '');
+}
+
 export default supportedLocales;
