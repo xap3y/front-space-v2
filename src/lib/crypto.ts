@@ -30,7 +30,7 @@ export async function encrypt(message: string): Promise<string> {
 
     // Generate a random initialization vector (IV)
     const iv = crypto.getRandomValues(new Uint8Array(16));
-    console.log("IV length:", iv.length);
+    //console.log("IV length:", iv.length);
 
     // Encrypt the data
     const encrypted = await crypto.subtle.encrypt(
@@ -55,7 +55,7 @@ export async function decrypt(encryptedMessage: string): Promise<string> {
     // Convert the base64 string back to a Uint8Array
     const combined = Buffer.from(encryptedMessage, "base64");
     const iv = combined.slice(0, 16);
-    console.log("IV length:", iv.length);
+    //console.log("IV length:", iv.length);
     const encryptedData = combined.slice(16);
 
     // Decrypt the data

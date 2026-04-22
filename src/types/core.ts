@@ -19,6 +19,7 @@ export interface UrlSet {
     customUrl?: string | null;
     custom?: Map<string, string> | null;
     posterUrl?: string | null;
+    userPreference?: string | null;
     userPreferences?: string | null;
 }
 

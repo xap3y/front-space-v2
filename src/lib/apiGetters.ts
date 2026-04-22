@@ -107,11 +107,28 @@ export async function revokeUserDiscordConnection(apiKey: string): Promise<boole
     }
 }
 
-export async function getUserImages(uid: string, from: number = 0, limit: number = 20): Promise<DefaultResponse | null> {
+/*export async function getUserImages(uid: string, from: number = 0, limit: number = 20): Promise<DefaultResponse | null> {
 
     console.log("Fetching images for user " + uid + " from " + from + " limit " + limit)
     const timeFilter = from > 0 ? "&to=" + from : "";
     const data = await getValidatedResponse('/v1/admin/user/' + uid + "/images?limit=" + limit + timeFilter);
+    if (!data) return null;
+    return data;
+}*/
+
+export async function getUserImages(
+    uid: string,
+    page: number = 0,
+    size: number = 10
+): Promise<DefaultResponse | null> {
+    console.log(`Fetching images for user ${uid} - page ${page}, size ${size}`);
+
+    const data = await getValidatedResponse(
+        `/v1/admin/user/${uid}/images/pageable?page=${page}&size=${size}`
+    );
+
+    console.log("DATA: " + JSON.stringify(data))
+
     if (!data) return null;
     return data;
 }

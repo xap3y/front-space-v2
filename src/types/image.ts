@@ -18,6 +18,28 @@ export interface UploadedImage {
     webhookSettings?: EmbedSettings | null;
 }
 
+export interface UploadedImagePage {
+    uniqueId: string;
+    type: string;
+    size: number;
+    uploadedAt: string;
+    requiresPassword: boolean;
+    hasPoster: boolean;
+    location: "LOCAL" | "R2" | "S3";
+    urls: UrlSet;
+    public: boolean;
+    description?: string;
+}
+
+export interface ImageListResponse {
+    images: UploadedImagePage[];
+    totalElements: number;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+}
+
+
 
 export interface ImageUploadModifiers {
     description: string | null;
