@@ -1,5 +1,4 @@
 import type {Metadata} from "next";
-import HomeUrlsPage from "@/app/home/urls/client";
 import UrlsPage from "@/app/home/urls/new-client";
 
 export const metadata: Metadata = {
