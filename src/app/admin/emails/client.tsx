@@ -271,7 +271,7 @@ export default function AdminEmailsClient({
         if (!confirm(`Delete ${email}?`)) return;
 
         infoToast("Deleting...");
-        const res = await fetch(getApiUrl() + `/v1/email/delete?email=${encodeURIComponent(email)}`, {
+        const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
