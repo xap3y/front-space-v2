@@ -1,9 +1,6 @@
-import AdminPage from "@/app/admin/client";
-import InvitesPage from "@/app/admin/invites/client";
-import UsersPage from "@/app/admin/users/client";
 import {getUsers} from "@/lib/apiGetters";
 import {DefaultResponse} from "@/types/core";
-import {UserObj, UserObjShort} from "@/types/user";
+import {UserObj} from "@/types/user";
 import UsersClient from "@/app/admin/users/client";
 
 export const dynamic = "force-dynamic";

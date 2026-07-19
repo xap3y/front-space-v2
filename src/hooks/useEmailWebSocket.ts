@@ -48,6 +48,11 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
     const [isWsExpired, setIsWsExpired] = useState(false);
     const wsRef = useRef<WebSocket | null>(null);
 
+    const messagesRef = useRef<InboxMessage[]>([]);
+    useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
+
     useEffect(() => {
         if (!email) return;
         try {
@@ -70,6 +75,50 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
             // Could log quota errors
         }
     }, [email]);
+
+    const pushNewMessage = useCallback((raw: RawWsMessage) => {
+        if (raw.messageId && messagesRef.current.some(m => m.serverId === raw.messageId)) {
+            console.log('Duplicate WS message received, ignoring:', raw.messageId);
+            return;
+        }
+
+        console.log('Received WS message:', raw);
+
+        const fpParts = [
+            raw.from || '',
+            raw.subject || '',
+            raw.date || '',
+            (raw.text || raw.content || raw.html || '').slice(0, 40)
+        ];
+
+        const fingerprint = fpParts.join('|');
+
+        setMessages(prev => {
+            if (prev.some(m => m._fp === fingerprint)) {
+                return prev;
+            }
+            const newMsg: InboxMessage = {
+                id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+                serverId: raw.messageId,
+                from: raw.from || '(unknown)',
+                subject: raw.subject || '(no subject)',
+                text: raw.text || raw.content,
+                content: raw.content,
+                html: raw.html,
+                to: raw.to,
+                date: raw.date,
+                _receivedTs: Date.now(),
+                _fp: fingerprint
+            };
+            const updated = [newMsg, ...prev].slice(0, MAX_MESSAGES);
+            persist(updated);
+            return updated;
+        });
+    }, [persist]);
+
+    const getMessagesId = useCallback((): string[] => {
+        return messagesRef.current.map(m => m.serverId || m.id);
+    }, []);
 
     useEffect(() => {
         console.log("CALLED " + email + " " + apiKey + " " + forceId);
@@ -177,47 +226,7 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         return () => {
             ws.close();
         };
-    }, [email, apiKey, forceId]);
-
-    const pushNewMessage = useCallback((raw: RawWsMessage) => {
-        if (raw.messageId && messages.some(m => m.serverId === raw.messageId)) {
-            console.log('Duplicate WS message received, ignoring:', raw.messageId);
-            return;
-        }
-
-        console.log('Received WS message:', raw);
-
-        const fpParts = [
-            raw.from || '',
-            raw.subject || '',
-            raw.date || '',
-            (raw.text || raw.content || raw.html || '').slice(0, 40)
-        ];
-
-        const fingerprint = fpParts.join('|');
-
-        setMessages(prev => {
-            if (prev.some(m => m._fp === fingerprint)) {
-                return prev;
-            }
-            const newMsg: InboxMessage = {
-                id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-                serverId: raw.messageId,
-                from: raw.from || '(unknown)',
-                subject: raw.subject || '(no subject)',
-                text: raw.text || raw.content,
-                content: raw.content,
-                html: raw.html,
-                to: raw.to,
-                date: raw.date,
-                _receivedTs: Date.now(),
-                _fp: fingerprint
-            };
-            const updated = [newMsg, ...prev].slice(0, MAX_MESSAGES);
-            persist(updated);
-            return updated;
-        });
-    }, [messages, persist]);
+    }, [email, apiKey, forceId, pushNewMessage, getMessagesId, refetchCallback]);
 
     const removeMessage = useCallback((id: string) => {
         setMessages(prev => {
@@ -226,10 +235,6 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
             return updated;
         });
     }, [persist]);
-
-    const getMessagesId = useCallback((): string[] => {
-        return messages.map(m => m.serverId || m.id);
-    }, [messages]);
 
     function disconnect() {
         if (wsRef.current) {

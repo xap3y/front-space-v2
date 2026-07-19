@@ -4,7 +4,7 @@ import {toast} from "react-toastify";
 import {UserObjShort} from "@/types/user";
 import {UploadedImage} from "@/types/image";
 import axios from "axios";
-import {getApiKey, getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
+import {getApiUrl, getCurlHeaders} from "@/lib/core";
 import {CallServer, DefaultResponse} from "@/types/core";
 import LanguageModel from "@/types/LanguageModel";
 import {Album} from "@/types/album";
@@ -400,12 +400,7 @@ export async function deleteImageApi(imageId: string, apiKey: string): Promise<b
     }
 }
 
-export async function getImageAlbum(uid: string): Promise<Album | null> {
-    const data = await getValidatedResponse('/v1/image/playlist/get/' + uid);
-    if (data.error) return null;
-    console.log(data + " THIS IS DATA")
-    return data["data"] as Album;
-}
+
 
 export async function pingServer(url: string): Promise<number | null> {
 

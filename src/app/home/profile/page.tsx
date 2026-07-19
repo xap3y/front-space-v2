@@ -1,5 +1,4 @@
 import type {Metadata} from "next";
-import HomeProfilePage from "@/app/home/profile/client";
 import {getUserServer} from "@/app/_server/getUser";
 import {redirect} from "next/navigation";
 import {getImageCountStatsOnDate, getUserDiscordConnection} from "@/lib/apiGetters";

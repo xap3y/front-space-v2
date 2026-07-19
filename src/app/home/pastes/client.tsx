@@ -184,9 +184,20 @@ export default function HomePastesPage() {
                 <div className="grid gap-3 box-primary p-2">
                     {loading &&
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 animate-pulse">
-                                <div className="h-4 w-2/3 bg-white/10 rounded mb-2" />
-                                <div className="h-3 w-1/2 bg-white/5 rounded" />
+                            <div key={i} className="box-primary p-2 animate-pulse">
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                                        <div className="min-w-0 flex flex-col gap-1 w-full">
+                                            <div className="h-4 w-1/3 bg-white/10 rounded" />
+                                            <div className="h-3 w-1/2 bg-white/5 rounded mt-1" />
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <div className="h-8 w-8 bg-white/5 rounded-md" />
+                                            <div className="h-8 w-8 bg-white/5 rounded-md" />
+                                            <div className="h-8 w-8 bg-white/5 rounded-md" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ))}
 

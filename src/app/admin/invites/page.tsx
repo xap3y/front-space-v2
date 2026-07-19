@@ -2,7 +2,6 @@ import InvitesClient from "@/app/admin/invites/client";
 import type { InviteCode } from "@/types/invite";
 import type { DefaultResponse } from "@/types/core";
 import {getInviteCodes} from "@/lib/apiGetters";
-import {useMemo} from "react";
 
 export default async function InviteAdminPage({
                                                   searchParams,

@@ -19,7 +19,6 @@
     "axios": "^1.9.0",
     "chart.js": "^4.4.8",
     "cookies-next": "^5.1.0",
-    "core-js": "^3.40.0",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "echarts": "^6.0.0",
@@ -44,11 +43,9 @@
     "react-tooltip": "^5.28.0",
     "react-turnstile": "^1.1.5",
     "react-zoom-pan-pinch": "^3.7.0",
-    "recharts": "^2.15.1",
     "redark-theme": "^1.0.3",
     "redoc": "^2.4.0",
     "remark-gfm": "^4.0.1",
-    "styled-components": "^6.1.15",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

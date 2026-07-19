@@ -231,7 +231,23 @@ export default function Page() {
     };
 
     if (loading) {
-        return <LoadingPage />;
+        return (
+            <div className="flex min-h-screen w-full items-center justify-center pb-56 bg-primaryDottedSize bg-primaryDotted">
+                <div className="p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary w-full max-w-lg animate-pulse">
+                    <div className="flex flex-col items-center justify-center p-2 w-full space-y-2">
+                        <div className="h-7 w-48 bg-zinc-700 rounded" />
+                        <div className="h-5 w-24 bg-zinc-800 rounded" />
+                    </div>
+                    <div className="mt-2 h-5 w-40 bg-zinc-800 rounded" />
+                    <div className="mt-4 w-full aspect-video bg-zinc-700 rounded-md" />
+                    <div className="mt-5 h-4 w-48 bg-zinc-800 rounded" />
+                    <div className="flex flex-row gap-4 mt-6 justify-center w-full">
+                        <div className="h-10 w-28 bg-zinc-700 rounded-md" />
+                        <div className="h-10 w-28 bg-zinc-700 rounded-md" />
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (!image && !loading) {

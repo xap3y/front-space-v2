@@ -269,7 +269,42 @@ export default function Page() {
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [plainLines, selectedRange, safeContent]);
 
-    if (loading) return <LoadingPage />;
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-primaryDottedSize bg-primaryDotted pt-10 px-4 md:px-6 pb-20">
+                <div className="max-w-6xl mx-auto space-y-4 animate-pulse">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                            <div className="h-6 w-64 bg-zinc-700 rounded" />
+                            <div className="h-4 w-40 bg-zinc-800 rounded" />
+                        </div>
+                        <div className="h-10 w-44 bg-zinc-700 rounded-md" />
+                    </div>
+
+                    <div className="box-primary shadow-lg overflow-hidden border border-white/10 rounded-xl">
+                        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-start lg:items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 bg-zinc-900/60">
+                            <div className="h-5 w-24 bg-zinc-800 rounded" />
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="h-7 w-28 bg-zinc-800 rounded-lg" />
+                                <div className="h-7 w-20 bg-zinc-800 rounded-lg" />
+                                <div className="h-7 w-16 bg-zinc-800 rounded-lg" />
+                                <div className="h-7 w-24 bg-zinc-800 rounded-lg" />
+                            </div>
+                        </div>
+
+                        <div className="p-4 sm:p-6 bg-zinc-950/40 space-y-3 font-mono">
+                            {Array.from({ length: 15 }).map((_, i) => (
+                                <div key={i} className="flex gap-4">
+                                    <div className="w-6 text-right text-zinc-750 select-none">{i + 1}</div>
+                                    <div className="h-4 bg-zinc-800 rounded" style={{ width: `${Math.floor(Math.random() * 50) + 30}%` }} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     if (!paste) return notFound();
 
     const showRaw = paste.title.endsWith(".raw");

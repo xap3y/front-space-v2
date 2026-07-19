@@ -241,7 +241,36 @@ export function PackPageClient() {
     };
 
     if (loading) {
-        return <LoadingPage />;
+        return (
+            <div className="flex items-center justify-center min-h-screen px-4 py-8 bg-primaryDottedSize bg-primaryDotted">
+                <div className="box-primary shadow-2xl w-full max-w-2xl p-6 space-y-6 animate-pulse">
+                    <div className="text-center space-y-2">
+                        <div className="h-8 w-48 bg-zinc-700 rounded mx-auto" />
+                        <div className="h-4 w-64 bg-zinc-800 rounded mx-auto" />
+                        <div className="h-3.5 w-32 bg-zinc-800 rounded mx-auto" />
+                    </div>
+
+                    <div className="space-y-3">
+                        {Array.from({ length: 4 }).map((_, idx) => (
+                            <div key={idx} className="box-primary p-4 rounded-lg flex justify-between items-center gap-3 border border-white/5 bg-zinc-900/10">
+                                <div className="flex-1 space-y-2 min-w-0">
+                                    <div className="h-4 w-2/3 bg-zinc-700 rounded" />
+                                    <div className="flex gap-2">
+                                        <div className="h-3.5 w-16 bg-zinc-800 rounded" />
+                                        <div className="h-3.5 w-20 bg-zinc-800 rounded" />
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="h-8 w-8 bg-zinc-800 rounded" />
+                                    <div className="h-8 w-8 bg-zinc-800 rounded" />
+                                    <div className="h-8 w-8 bg-zinc-800 rounded" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (error) {

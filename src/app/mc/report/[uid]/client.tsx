@@ -210,14 +210,6 @@ export default function ReportPageClient() {
 
     if (loadingUser) return <LoadingPage />; // Still loading user
     if (!user) return null; // Redirect is happening, don't render
-    if (loading) return <LoadingPage />; // Loading transcript
-
-    if (error) return (
-        <>
-            <div className="p-10 text-center text-red-400 text-xl absolute mx-auto w-full">{error}</div>
-            <ReportFinder />
-        </>
-    );
 
     return (
         <>
@@ -228,18 +220,46 @@ export default function ReportPageClient() {
                     <div>
                         <h1 className="flex items-center gap-2 font-bold text-white">
                             <span className="text-zinc-400">#</span>
-                            {data?.channelName || 'transcript'}
+                            {loading ? (
+                                <span className="h-4 w-32 bg-zinc-700 rounded animate-pulse inline-block" />
+                            ) : data?.channelName || 'transcript'}
                         </h1>
                         <p className="text-xs text-zinc-400">UID: {uid}</p>
                     </div>
                     <div className="text-xs text-zinc-500">
-                        Generated: {data?.generatedAt ? new Date(data.generatedAt).toLocaleDateString() : 'Unknown'}
+                        {loading ? (
+                            <span className="h-3.5 w-24 bg-zinc-700 rounded animate-pulse inline-block" />
+                        ) : (
+                            `Generated: ${data?.generatedAt ? new Date(data.generatedAt).toLocaleDateString() : 'Unknown'}`
+                        )}
                     </div>
                 </div>
 
                 {/* Message List */}
                 <div className="mx-auto flex max-w-[100vw] flex-col py-4">
-                    {groupedMessages.map((m: any) => (
+                    {loading ? (
+                        Array.from({ length: 12 }).map((_, idx) => (
+                            <div key={idx} className="flex px-4 py-2 hover:bg-[#2e3035] animate-pulse items-start gap-4">
+                                <div className="w-10 h-10 rounded-full bg-zinc-700 flex-shrink-0" />
+                                <div className="flex-1 space-y-2 py-1">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-4 w-24 bg-zinc-700 rounded" />
+                                        <div className="h-3 w-16 bg-zinc-800 rounded" />
+                                    </div>
+                                    <div className="h-3.5 bg-zinc-700 rounded w-5/6" />
+                                    <div className="h-3.5 bg-zinc-700 rounded w-1/2" />
+                                </div>
+                            </div>
+                        ))
+                    ) : error ? (
+                        <div className="max-w-lg w-full mx-auto px-4 py-10">
+                            <div className="p-6 text-center text-red-400 text-lg font-semibold bg-red-500/10 border border-red-500/20 rounded-lg mb-6">
+                                {error}
+                            </div>
+                            <ReportFinder />
+                        </div>
+                    ) : (
+                        groupedMessages.map((m: any) => (
                         <div
                             key={m.id}
                             className={`group flex px-4 pr-4 hover:bg-[#2e3035] ${
@@ -332,7 +352,7 @@ export default function ReportPageClient() {
                                 )}
                             </div>
                         </div>
-                    ))}
+                    )))}
                 </div>
             </div>
         </>

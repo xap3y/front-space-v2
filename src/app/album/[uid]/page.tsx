@@ -3,7 +3,6 @@
 import {useParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import {Album} from "@/types/album";
-import {getImageAlbum} from "@/lib/client";
 import LoadingPage from "@/components/LoadingPage";
 import {AlbumGrid} from "@/components/AlbumGrid";
 import {ErrorToast} from "@/components/ErrorToast";

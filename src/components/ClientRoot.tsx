@@ -7,16 +7,17 @@ import {GoogleAnalytics} from "@next/third-parties/google";
 import { Analytics } from '@vercel/analytics/next';
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {MdErrorOutline} from "react-icons/md";
+import { useEffect, useState } from "react";
 
 export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
 
-    let debug = false;
-    let cookies = false;
+    const [debug, setDebug] = useState(false);
+    const [cookies, setCookies] = useState(false);
 
-    if (typeof window !== 'undefined') {
-        debug = localStorage.getItem("debug") === "true";
-        cookies = localStorage.getItem("cookie_consent") === "granted";
-    }
+    useEffect(() => {
+        setDebug(localStorage.getItem("debug") === "true");
+        setCookies(localStorage.getItem("cookie_consent") === "granted");
+    }, []);
 
     const { isApiUp } =  useApiStatusStore();
 
