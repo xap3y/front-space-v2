@@ -244,7 +244,7 @@ export default function AdminEmailsClient({
         }
         infoToast("Suspending...");
 
-        const res = await fetch(getApiUrl() + `/v1/email/suspend?email=${encodeURIComponent(email)}`, {
+        const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}/suspend`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
