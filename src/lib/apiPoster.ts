@@ -241,3 +241,48 @@ function getClientIp(headersList: any): string {
 
     return 'unknown';
 }
+
+export async function updateUser(
+    uid: number,
+    body: {
+        mail?: string;
+        email?: string;
+        profilePicUrl?: string;
+        avatar?: string;
+        role?: string;
+        password?: string;
+    }
+): Promise<DefaultResponse> {
+    console.log("Calling updateUser for uid: " + uid);
+
+    try {
+        const response = await fetch(getApiUrl() + "/v1/admin/user/" + uid, {
+            method: "PUT",
+            headers: getCurlHeaders(getApiKey()),
+            body: JSON.stringify(body),
+        });
+
+        if (!response) return { error: true, message: "Failed to update user" } as DefaultResponse;
+
+        return (await response.json()) as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}
+
+export async function deleteUser(uid: number): Promise<DefaultResponse> {
+    console.log("Calling deleteUser for uid: " + uid);
+
+    try {
+        const response = await fetch(getApiUrl() + "/v1/admin/user/" + uid, {
+            method: "DELETE",
+            headers: getCurlHeaders(getApiKey()),
+        });
+
+        if (!response) return { error: true, message: "Failed to delete user" } as DefaultResponse;
+
+        return (await response.json()) as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}

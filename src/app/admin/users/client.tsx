@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserObj } from "@/types/user";
-import { getUserRoleBadge, infoToast } from "@/lib/client";
+import { getUserRoleBadge, infoToast, okToast, errorToast } from "@/lib/client";
 import MainStringInput from "@/components/MainStringInput";
+import { updateUser, deleteUser } from "@/lib/apiPoster";
 import {FaBan, FaRegUserCircle, FaEye, FaEyeSlash, FaKey, FaRegTrashAlt} from "react-icons/fa";
 import {MdAlternateEmail, MdEmail} from "react-icons/md";
 import {FaArrowDown, FaArrowRight, FaIdCardClip, FaPencil} from "react-icons/fa6";
@@ -20,7 +21,7 @@ type SortMode =
     | "uid_asc"
     | "uid_desc";
 
-type ModalType = "email" | "avatar" | "username" | "role" | null;
+type ModalType = "email" | "avatar" | "username" | "role" | "password" | null;
 
 function formatDate(iso?: string | null) {
     if (!iso) return "—";
@@ -197,9 +198,38 @@ export default function UsersClient({
         return filteredSorted.slice(start, start + pageSize);
     }, [filteredSorted, page, pageSize]);
 
-    // Dummy actions for now:
-    const banUser = async (uid: number) => {
-        infoToast("banning user..");
+    const handleBanToggle = async (uid: number, currentRole: string) => {
+        const nextRole = currentRole === "BANNED" ? "USER" : "BANNED";
+        infoToast(currentRole === "BANNED" ? "Unbanning user..." : "Banning user...");
+        try {
+            const res = await updateUser(uid, { role: nextRole });
+            if (res.error) {
+                errorToast(res.message || "Failed to update user role");
+            } else {
+                setError("");
+                okToast(currentRole === "BANNED" ? "User unbanned successfully" : "User banned successfully");
+                router.refresh();
+            }
+        } catch (err: any) {
+            errorToast(err.message || "An error occurred");
+        }
+    };
+
+    const handleDelete = async (uid: number, username: string) => {
+        if (!confirm(`Are you sure you want to delete user ${username} (#${uid})?`)) return;
+        infoToast("Deleting user...");
+        try {
+            const res = await deleteUser(uid);
+            if (res.error) {
+                errorToast(res.message || "Failed to delete user");
+            } else {
+                setError("");
+                okToast("User deleted successfully");
+                router.refresh();
+            }
+        } catch (err: any) {
+            errorToast(err.message || "An error occurred");
+        }
     };
 
     const openModal = (type: ModalType, uid: number, preset = "") => {
@@ -212,19 +242,33 @@ export default function UsersClient({
         if (!modal.type || !modal.uid) return;
         setModal((m) => ({ ...m, loading: true }));
         try {
+            let res;
             if (modal.type === "email") {
-                console.log("SET EMAIL", modal.uid, modal.value);
+                res = await updateUser(modal.uid, { email: modal.value });
             } else if (modal.type === "avatar") {
-                console.log("SET AVATAR", modal.uid, modal.value);
-            } else if (modal.type === "username") {
-                console.log("SET USERNAME", modal.uid, modal.value);
+                res = await updateUser(modal.uid, { avatar: modal.value });
             } else if (modal.type === "role") {
-                console.log("SET ROLE", modal.uid, modal.value);
+                res = await updateUser(modal.uid, { role: modal.value });
+            } else if (modal.type === "password") {
+                res = await updateUser(modal.uid, { password: modal.value });
             }
-            router.refresh();
-            closeModal();
+
+            if (res) {
+                if (res.error) {
+                    errorToast(res.message || "Failed to update user");
+                } else {
+                    setError("");
+                    okToast(res.message || "User updated successfully");
+                    router.refresh();
+                    closeModal();
+                }
+            } else {
+                errorToast("No response from server");
+            }
         } catch (e) {
             setError((e as any)?.message ?? "Action failed");
+            errorToast((e as any)?.message ?? "Action failed");
+        } finally {
             setModal((m) => ({ ...m, loading: false }));
         }
     };
@@ -482,18 +526,18 @@ export default function UsersClient({
                                             <div className="text-xs text-gray-400">Actions</div>
                                             <div className="mt-2 flex flex-wrap gap-2">
                                                 {u.role == "BANNED" ? (
-                                                    <ActionButton variant="danger" onClick={() => banUser(u.uid)}>
+                                                    <ActionButton variant="danger" onClick={() => handleBanToggle(u.uid, u.role)}>
                                                         <FaBan />
                                                         UnBan
                                                     </ActionButton>
                                                 ) : (
-                                                    <ActionButton variant="danger" onClick={() => banUser(u.uid)}>
+                                                    <ActionButton variant="danger" onClick={() => handleBanToggle(u.uid, u.role)}>
                                                         <FaBan />
                                                         Ban
                                                     </ActionButton>
                                                 )}
 
-                                                <ActionButton variant="verydanger" onClick={() => banUser(u.uid)}>
+                                                <ActionButton variant="verydanger" onClick={() => handleDelete(u.uid, u.username)}>
                                                     <FaRegTrashAlt />
                                                     Delete
                                                 </ActionButton>
@@ -506,7 +550,7 @@ export default function UsersClient({
                                                     <FaRegUserCircle />
                                                     Update profile pic
                                                 </ActionButton>
-                                                <ActionButton onClick={() => openModal("username", u.uid, u.username)}>
+                                                <ActionButton onClick={() => errorToast("Renaming users is not supported by the backend API")}>
                                                     <FaPencil />
                                                     Rename
                                                 </ActionButton>
@@ -514,11 +558,11 @@ export default function UsersClient({
                                                     <FaIdCardClip />
                                                     Change role
                                                 </ActionButton>
-                                                <ActionButton onClick={() => openModal("role", u.uid, u.role)}>
+                                                <ActionButton onClick={() => errorToast("Changing API key is not supported by the backend API")}>
                                                     <FaKey />
                                                     Change API Key
                                                 </ActionButton>
-                                                <ActionButton onClick={() => openModal("role", u.uid, u.role)}>
+                                                <ActionButton onClick={() => openModal("password", u.uid, "")}>
                                                     <RiLockPasswordLine />
                                                     Change password
                                                 </ActionButton>
@@ -552,7 +596,9 @@ export default function UsersClient({
                                         ? "Update profile picture URL"
                                         : modal.type === "username"
                                             ? "Rename user"
-                                            : "Change role"}
+                                            : modal.type === "password"
+                                                ? "Change password"
+                                                : "Change role"}
                             </h2>
                             <button
                                 className="text-gray-300 hover:text-white"
@@ -580,12 +626,15 @@ export default function UsersClient({
                             ) : (
                                 <MainStringInput
                                     className="p-1 in-primary w-full"
+                                    type={modal.type === "password" ? "password" : "text"}
                                     placeholder={
                                         modal.type === "email"
                                             ? "user@example.com"
                                             : modal.type === "avatar"
                                                 ? "https://..."
-                                                : "New username"
+                                                : modal.type === "password"
+                                                    ? "New password"
+                                                    : "New username"
                                     }
                                     value={modal.value}
                                     onChange={(e) => setModal((m) => ({ ...m, value: e }))}
