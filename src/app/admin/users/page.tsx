@@ -6,6 +6,8 @@ import {DefaultResponse} from "@/types/core";
 import {UserObj, UserObjShort} from "@/types/user";
 import UsersClient from "@/app/admin/users/client";
 
+export const dynamic = "force-dynamic";
+
 export default async function UsersAdminPage() {
 
     const res: DefaultResponse = await getUsers();

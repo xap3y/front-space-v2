@@ -2,6 +2,8 @@ import SystemPageClient from "@/app/admin/system/client";
 import type { DefaultResponse } from "@/types/core";
 import {getSystemMetrics} from "@/lib/apiGetters";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
     const res: DefaultResponse = await getSystemMetrics();
 
