@@ -270,6 +270,29 @@ export async function updateUser(
     }
 }
 
+export async function createAdminUser(body: {
+    username: string;
+    email: string;
+    password: string;
+    verified: boolean;
+}): Promise<DefaultResponse> {
+    console.log("Calling createAdminUser for: " + body.username);
+
+    try {
+        const response = await fetch(getApiUrl() + "/v1/admin/user/create", {
+            method: "POST",
+            headers: getCurlHeaders(getApiKey()),
+            body: JSON.stringify(body),
+        });
+
+        if (!response) return { error: true, message: "Failed to create user" } as DefaultResponse;
+
+        return (await response.json()) as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}
+
 export async function deleteUser(uid: number): Promise<DefaultResponse> {
     console.log("Calling deleteUser for uid: " + uid);
 
@@ -282,6 +305,29 @@ export async function deleteUser(uid: number): Promise<DefaultResponse> {
         if (!response) return { error: true, message: "Failed to delete user" } as DefaultResponse;
 
         return (await response.json()) as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}
+
+export async function updateImagePassword(uniqueId: string, password?: string): Promise<DefaultResponse> {
+    console.log("Calling updateImagePassword for image: " + uniqueId);
+    try {
+        const response = await fetch(getApiUrl() + "/v1/image/password/" + uniqueId, {
+            method: "PUT",
+            headers: {
+                ...getCurlHeaders(getApiKey()),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password: password || "" })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            return { error: true, message: data?.message || "Failed to update password" } as DefaultResponse;
+        }
+
+        return data as DefaultResponse;
     } catch (e) {
         return { error: true, message: "Server error" } as DefaultResponse;
     }

@@ -4,7 +4,7 @@ import { MinecraftServerReports } from "@/types/core";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import MainStringInput from "@/components/MainStringInput";
-import { FaRegTrashAlt, FaPencilAlt, FaEye, FaEyeSlash, FaRegCopy } from "react-icons/fa";
+import { FaRegTrashAlt, FaPencilAlt, FaEye, FaEyeSlash, FaRegCopy, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { infoToast } from "@/lib/client";
 import { updateMinecraftServer, deleteMinecraftServer } from "@/lib/apiPoster";
@@ -256,102 +256,58 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                 ) : null}
             </div>
 
-            {/* Controls & List */}
-            <div className="box-primary p-4">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-row gap-5 items-center justify-center">
-                            <div className="font-semibold">Server list</div>
-                            <MainStringInput
-                                className="p-0.5 min-w-96"
-                                inputClassName="p-2"
-                                type="text"
-                                placeholder="Search server name / IP / email..."
-                                value={search}
-                                onChange={(e) => {
-                                    setSearch(e);
-                                    setPage(1);
-                                }}
-                            />
-                        </div>
-                        <div className="text-xs text-gray-400 lg:hidden">
-                            Showing {pageServers.length} of {totalFiltered}
-                        </div>
-                    </div>
+            {/* Compact Filters Panel */}
+            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+                <input
+                    type="text"
+                    placeholder="Search server name / IP / email..."
+                    value={search}
+                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                />
 
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-                        <select
-                            className="in-primary w-full lg:w-[150px]"
-                            value={pausedFilter}
-                            onChange={(e) => {
-                                setPausedFilter(e.target.value);
-                                setPage(1);
-                            }}
-                            title="Filter by status"
-                        >
-                            <option value="">All status</option>
-                            <option value="active">Active</option>
-                            <option value="paused">Paused</option>
-                        </select>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={pausedFilter}
+                    onChange={(e) => { setPausedFilter(e.target.value); setPage(1); }}
+                    title="Filter by status"
+                >
+                    <option value="">All status</option>
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                </select>
 
-                        <select
-                            className="in-primary w-full lg:w-[210px]"
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value as SortMode)}
-                            title="Sort servers"
-                        >
-                            <option value="created_desc">Created: newest</option>
-                            <option value="created_asc">Created: oldest</option>
-                            <option value="name_asc">Name: A → Z</option>
-                            <option value="name_desc">Name: Z → A</option>
-                        </select>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as SortMode)}
+                    title="Sort servers"
+                >
+                    <option value="created_desc">Created: newest</option>
+                    <option value="created_asc">Created: oldest</option>
+                    <option value="name_asc">Name: A → Z</option>
+                    <option value="name_desc">Name: Z → A</option>
+                </select>
 
-                        <div className="flex items-center gap-2 lg:pl-2 lg:ml-2 lg:border-l lg:border-white/10">
-                            <select
-                                className="in-primary w-[110px]"
-                                value={pageSize}
-                                onChange={(e) => {
-                                    setPageSize(Number(e.target.value));
-                                    setPage(1);
-                                }}
-                                title="Page size"
-                            >
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                            >
-                                Prev
-                            </button>
-
-                            <div className="text-sm text-gray-300 whitespace-nowrap">
-                                <span className="hidden xl:inline">
-                                    Showing <span className="text-white">{pageServers.length}</span> of{" "}
-                                    <span className="text-white">{totalFiltered}</span> ·{" "}
-                                </span>
-                                Page <span className="text-white">{page}</span> /{" "}
-                                <span className="text-white">{totalPages}</span>
-                            </div>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                <div className="flex gap-1.5 ml-auto">
+                    <button
+                        onClick={() => { setSearch(""); setPausedFilter(""); setSort("created_desc"); setPage(1); }}
+                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                    >
+                        Reset
+                    </button>
+                    <button
+                        onClick={() => router.refresh()}
+                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                    >
+                        Refresh
+                    </button>
                 </div>
+            </div>
 
-                {/* Card list */}
-                <div className="mt-4 grid gap-3">
+            {/* List */}
+            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
+                <div className="mt-2 grid gap-3">
                     {pageServers.map((server) => {
                         const isOpen = openServer === server.serverName;
                         const passwordShown = revealPassword[server.serverName] ?? false;
@@ -640,6 +596,51 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                         <div className="text-center text-gray-400 py-8">No servers found.</div>
                     ) : null}
                 </div>
+
+                {/* Pagination Footer */}
+                {totalPages > 1 && (
+                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="text-xs text-gray-400">
+                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
+                                <select
+                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value));
+                                        setPage(1);
+                                    }}
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                disabled={page <= 1}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <FaChevronLeft className="h-3 w-3" />
+                                <span>Prev</span>
+                            </button>
+                            <button
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={page >= totalPages}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <span>Next</span>
+                                <FaChevronRight className="h-3 w-3" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Modal */}

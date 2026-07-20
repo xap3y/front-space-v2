@@ -8,7 +8,7 @@ import type { DefaultResponse } from "@/types/core";
 import {errorToast, getUserRoleBadge, infoToast, okToast} from "@/lib/client";
 import {ImCross} from "react-icons/im";
 import {RxCross1} from "react-icons/rx";
-import {FaRegCopy} from "react-icons/fa6";
+import {FaRegCopy, FaChevronLeft, FaChevronRight} from "react-icons/fa6";
 import MainStringInput from "@/components/MainStringInput";
 
 type FilterMode = "all" | "unused" | "used";
@@ -403,98 +403,58 @@ export default function InvitesClient({
                 ) : null}
             </div>
 
-            {/* Invite list header row WITH search + sort + createdBy filter + compact paginator */}
-            <div className="box-primary p-4">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                    <div className="flex lg:flex-row flex-col items-center justify-between gap-5">
-                        <div className="font-semibold">Invite list</div>
-                        <div className="text-xs text-gray-400 lg:hidden">
-                            Showing {pageInvites.length} of {total}
-                        </div>
+            {/* Compact Filters Panel */}
+            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+                <input
+                    type="text"
+                    placeholder="Search code / user..."
+                    value={search}
+                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                />
 
-                        {/* Search */}
-                        <div className={"flex items-center gap-2"}>
-                            <MainStringInput
-                                className="w-full"
-                                type="text"
-                                placeholder="Search code / user..."
-                                value={search}
-                                onChange={(e) => setSearch(e)}
-                            />
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={createdBy}
+                    onChange={(e) => { setCreatedBy(e.target.value); setPage(1); }}
+                    title="Filter by creator"
+                >
+                    <option value="">All creators</option>
+                    {createdByOptions.map((u) => (
+                        <option key={u} value={u}>{u}</option>
+                    ))}
+                </select>
 
-                            <RxCross1 className={`hover:cursor-pointer ${(search.length > 0) ? "" : "hidden"}`} onClick={() => setSearch("")} />
-                        </div>
-                    </div>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as SortMode)}
+                    title="Sort invites"
+                >
+                    <option value="created_desc">Created: newest</option>
+                    <option value="created_asc">Created: oldest</option>
+                    <option value="used_desc">Used at: newest</option>
+                    <option value="used_asc">Used at: oldest</option>
+                </select>
 
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-
-
-
-                        {/*<button
-                            className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                            onClick={() => setSearch("")}
-                            disabled={!search.trim()}
-                        >
-                            Clear
-                        </button>*/}
-
-                        {/* Created-by filter */}
-                        <select
-                            className="in-primary w-full lg:w-[200px]"
-                            value={createdBy}
-                            onChange={(e) => setCreatedBy(e.target.value)}
-                            title="Filter by creator"
-                        >
-                            <option value="">All creators</option>
-                            {createdByOptions.map((u) => (
-                                <option key={u} value={u}>
-                                    {u}
-                                </option>
-                            ))}
-                        </select>
-
-                        {/* Sort */}
-                        <select
-                            className="in-primary w-full lg:w-[230px]"
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value as SortMode)}
-                            title="Sort invites"
-                        >
-                            <option value="created_desc">Created: newest</option>
-                            <option value="created_asc">Created: oldest</option>
-                            <option value="used_desc">Used at: newest</option>
-                            <option value="used_asc">Used at: oldest</option>
-                        </select>
-
-                        {/* Compact paginator */}
-                        <div className="flex items-center gap-2 lg:pl-3.5 lg:ml-2 lg:border-l lg:border-white/10">
-                            <button
-                                className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                            >
-                                Prev
-                            </button>
-
-                            <div className="text-sm text-gray-300 whitespace-nowrap">
-                <span className="hidden xl:inline">
-                  Showing <span className="text-white">{pageInvites.length}</span> of{" "}
-                    <span className="text-white">{total}</span> ·{" "}
-                </span>
-                                Page <span className="text-white">{page}</span> /{" "}
-                                <span className="text-white">{totalPages}</span>
-                            </div>
-
-                            <button
-                                className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                <div className="flex gap-1.5 ml-auto">
+                    <button
+                        onClick={() => { setSearch(""); setCreatedBy(""); setSort("created_desc"); setPage(1); }}
+                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                    >
+                        Reset
+                    </button>
+                    <button
+                        onClick={() => router.refresh()}
+                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                    >
+                        Refresh
+                    </button>
                 </div>
+            </div>
+
+            {/* List */}
+            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
 
                 {/* Desktop table */}
                 <div className="hidden lg:block mt-3 overflow-x-auto">
@@ -595,6 +555,51 @@ export default function InvitesClient({
                         <div className="text-center text-gray-400 py-8">No invites found.</div>
                     ) : null}
                 </div>
+
+                {/* Pagination Footer */}
+                {totalPages > 1 && (
+                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="text-xs text-gray-400">
+                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
+                                <select
+                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value));
+                                        setPage(1);
+                                    }}
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                disabled={page <= 1}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <FaChevronLeft className="h-3 w-3" />
+                                <span>Prev</span>
+                            </button>
+                            <button
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={page >= totalPages}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <span>Next</span>
+                                <FaChevronRight className="h-3 w-3" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

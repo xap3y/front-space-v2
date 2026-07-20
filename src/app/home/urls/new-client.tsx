@@ -10,7 +10,7 @@ import {toast} from "react-toastify";
 import {deleteShortUrl} from "@/lib/apiPoster";
 import {FaExternalLinkAlt} from "react-icons/fa";
 import {errorToast} from "@/lib/client";
-import LoadingPage from "@/components/LoadingPage";
+
 import {useRouter} from "next/navigation";
 
 type DefaultResponse = { error: boolean; message: string };
@@ -44,12 +44,11 @@ export default function UrlsPage() {
             const res: ShortUrlDto[] | DefaultResponse = await getUserShortUrls(String(user.uid));
             if (isErrorResponse(res)) {
                 if (res.error) {
-                    if (res.message.includes("No short urls found")) return
-                    errorToast(res.message || 'Failed to load URLs');
-                    setUrls([]);
-                } else {
-                    setUrls([]);
+                    if (res.message !== 'Resource not found' && !res.message.includes("No short urls found")) {
+                        errorToast(res.message || 'Failed to load URLs');
+                    }
                 }
+                setUrls([]);
             } else {
                 setUrls(res || []);
             }
@@ -121,32 +120,75 @@ export default function UrlsPage() {
         }
     };
 
-    if (loadingUser || !user) return <LoadingPage />;
+    if (loadingUser || !user) {
+        return (
+            <section className="flex-1 min-w-0 pt-0 px-3 md:px-6">
+                <div className="max-w-[90rem] mx-auto w-full space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between pt-5 pb-2 animate-pulse">
+                        <div>
+                            <div className="h-7 w-32 bg-white/5 rounded" />
+                            <div className="h-4 w-16 bg-white/5 rounded mt-2" />
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="h-9 w-20 bg-white/5 rounded-lg" />
+                            <div className="h-9 w-24 bg-white/5 rounded-lg" />
+                        </div>
+                    </div>
+
+                    {/* Card */}
+                    <div className="box-primary overflow-hidden">
+                        <ul className="divide-y divide-white/10">
+                            {Array.from({ length: 12 }).map((_, i) => (
+                                <li key={i} className="px-2 py-1.5 group">
+                                    <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                                        <div className="h-3 w-32 md:w-48 bg-white/10 rounded animate-pulse flex-shrink-0" />
+                                        <div className="hidden md:flex items-center gap-2">
+                                            <div className="h-3 w-20 bg-white/10 rounded animate-pulse" />
+                                            <div className="h-3 w-24 bg-white/10 rounded animate-pulse" />
+                                        </div>
+                                        <div className="hidden lg:block h-3 flex-1 min-w-0 bg-white/10 rounded animate-pulse" />
+                                        <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
+                                            <div className="h-7 w-7 bg-white/10 rounded animate-pulse" />
+                                            <div className="h-7 w-7 bg-white/10 rounded animate-pulse" />
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
-        <section className="flex-1 min-w-0 pt-0 px-2 md:px-6">
-            <div className="max-w-6xl mx-auto w-full space-y-2">
+        <section className="flex-1 min-w-0 pt-0 px-3 md:px-6">
+            <div className="max-w-[90rem] mx-auto w-full space-y-4">
                 {/* Header */}
-                <div className="flex items-center justify-between pt-4 md:pt-5 pb-1">
-                    <h1 className="text-base md:text-xl font-semibold">Short URLs</h1>
-                    <div className="flex gap-1.5">
-                        <a href={"/a/url"}>
+                <div className="flex items-center justify-between pt-5 pb-2">
+                    <div>
+                        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Short URLs</h1>
+                        <p className="text-sm text-gray-400">Total: {urls.length}</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <a href="/a/url">
                             <button
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-xs"
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
                                 disabled={loading}
-                                title="New"
+                                title="New URL"
                             >
-                                <FaPlus className="h-3 w-3" />
+                                <FaPlus className="h-4 w-4" />
                                 <span className="hidden sm:inline">New</span>
                             </button>
                         </a>
                         <button
                             onClick={fetchUrls}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-white/10 bg-transparent hover:bg-white/10 transition-colors text-xs"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
                             disabled={loading}
-                            title="Refresh"
+                            title="Refresh List"
                         >
-                            <FaRotateRight className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+                            <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                             <span className="hidden sm:inline">Refresh</span>
                         </button>
                     </div>
@@ -206,26 +248,26 @@ export default function UrlsPage() {
 
                             {/* Pagination Footer */}
                             {totalPages > 1 && (
-                                <div className="flex items-center justify-between px-2 py-1.5 border-t border-white/10 bg-white/2">
+                                <div className="flex items-center justify-between px-3 py-3 border-t border-white/10 text-sm text-gray-300">
                                     <div className="text-xs text-gray-400">
-                                        {currentPage} / {totalPages}
+                                        Page <span className="text-white font-medium">{currentPage}</span> of <span className="text-white font-medium">{totalPages}</span>
                                     </div>
-                                    <div className="flex gap-1">
+                                    <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                            disabled={currentPage === 1}
-                                            className="p-1 rounded border border-white/10 bg-transparent hover:bg-white/10 disabled:opacity-30 transition-colors"
-                                            title="Prev"
+                                            disabled={currentPage <= 1}
+                                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
                                         >
-                                            <FaChevronLeft className="h-2.5 w-2.5" />
+                                            <FaChevronLeft className="h-3 w-3" />
+                                            <span>Prev</span>
                                         </button>
                                         <button
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                            disabled={currentPage === totalPages}
-                                            className="p-1 rounded border border-white/10 bg-transparent hover:bg-white/10 disabled:opacity-30 transition-colors"
-                                            title="Next"
+                                            disabled={currentPage >= totalPages}
+                                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
                                         >
-                                            <FaChevronRight className="h-2.5 w-2.5" />
+                                            <span>Next</span>
+                                            <FaChevronRight className="h-3 w-3" />
                                         </button>
                                     </div>
                                 </div>

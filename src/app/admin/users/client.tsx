@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { UserObj } from "@/types/user";
 import { getUserRoleBadge, infoToast, okToast, errorToast } from "@/lib/client";
 import MainStringInput from "@/components/MainStringInput";
-import { updateUser, deleteUser } from "@/lib/apiPoster";
+import { updateUser, deleteUser, createAdminUser } from "@/lib/apiPoster";
 import {FaBan, FaRegUserCircle, FaEye, FaEyeSlash, FaKey, FaRegTrashAlt} from "react-icons/fa";
 import {MdAlternateEmail, MdEmail} from "react-icons/md";
-import {FaArrowDown, FaArrowRight, FaIdCardClip, FaPencil} from "react-icons/fa6";
+import {FaArrowDown, FaArrowRight, FaIdCardClip, FaPencil, FaChevronLeft, FaChevronRight} from "react-icons/fa6";
 import { IoIdCardSharp } from "react-icons/io5";
 import {RiLockPasswordLine} from "react-icons/ri";
 import {IoIosArrowDown} from "react-icons/io";
@@ -98,11 +98,11 @@ function ActionButton({
 }
 
 export default function UsersClient({
-                                        initialUsers,
-                                        initialError = "",
-                                        totalCount,
-                                        fetchedAt,
-                                    }: {
+    initialUsers,
+    initialError = "",
+    totalCount,
+    fetchedAt,
+}: {
     initialUsers: UserObj[];
     initialError?: string;
     totalCount: number;
@@ -111,29 +111,30 @@ export default function UsersClient({
     const router = useRouter();
 
     const [error, setError] = useState(initialError);
-
-    // list controls
     const [search, setSearch] = useState("");
+    const [roleFilter, setRoleFilter] = useState("");
     const [sort, setSort] = useState<SortMode>("created_desc");
-    const [roleFilter, setRoleFilter] = useState<string>("");
 
-    // pagination
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10); // default 10 items per page
+    const [pageSize, setPageSize] = useState(10);
 
-    // expand/collapse
     const [openUid, setOpenUid] = useState<number | null>(null);
-
-    // email reveal state
     const [emailReveal, setEmailReveal] = useState<Record<number, boolean>>({});
 
-    // modal state
     const [modal, setModal] = useState<{
         type: ModalType;
         uid: number | null;
         value: string;
         loading: boolean;
     }>({ type: null, uid: null, value: "", loading: false });
+
+    // User Creation states
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createUsername, setCreateUsername] = useState("");
+    const [createEmail, setCreateEmail] = useState("");
+    const [createPassword, setCreatePassword] = useState("");
+    const [createVerified, setCreateVerified] = useState(true);
+    const [creatingUser, setCreatingUser] = useState(false);
 
     const roleOptions = useMemo(() => {
         const s = new Set<string>();
@@ -276,6 +277,40 @@ export default function UsersClient({
     const toggleEmail = (uid: number) =>
         setEmailReveal((prev) => ({ ...prev, [uid]: !prev[uid] }));
 
+    const handleCreateUserSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!createUsername.trim() || !createEmail.trim() || !createPassword.trim()) {
+            errorToast("Please fill all required fields!");
+            return;
+        }
+
+        setCreatingUser(true);
+        try {
+            const res = await createAdminUser({
+                username: createUsername.trim(),
+                email: createEmail.trim(),
+                password: createPassword,
+                verified: createVerified
+            });
+
+            if (res.error) {
+                errorToast(res.message || "Failed to create user");
+            } else {
+                okToast("User created successfully!");
+                setIsCreateModalOpen(false);
+                setCreateUsername("");
+                setCreateEmail("");
+                setCreatePassword("");
+                setCreateVerified(true);
+                router.refresh();
+            }
+        } catch (err: any) {
+            errorToast(err?.message || "User creation failed");
+        } finally {
+            setCreatingUser(false);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-4">
             <div className="box-primary p-4">
@@ -290,12 +325,20 @@ export default function UsersClient({
                         </p>
                     </div>
 
-                    <button
-                        onClick={() => router.refresh()}
-                        className="px-4 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
-                    >
-                        Refresh
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="px-4 py-2 rounded-md text-sm bg-emerald-600/20 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-600/30 transition-colors"
+                        >
+                            New User
+                        </button>
+                        <button
+                            onClick={() => router.refresh()}
+                            className="px-4 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                        >
+                            Refresh
+                        </button>
+                    </div>
                 </div>
 
                 {error ? (
@@ -305,108 +348,61 @@ export default function UsersClient({
                 ) : null}
             </div>
 
-            <div className="box-primary p-4">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                    <div className="flex items-center justify-between">
-                        <div className={"flex flex-row gap-5 items-center justify-center"}>
-                            <div className="font-semibold">User list</div>
+            {/* Compact Filters Panel */}
+            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+                <input
+                    type="text"
+                    placeholder="Search username / uid / invitor..."
+                    value={search}
+                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                />
 
-                            <MainStringInput
-                                className="p-0.5 min-w-96"
-                                inputClassName={"p-2"}
-                                type="text"
-                                placeholder="Search username / uid / invitor..."
-                                value={search}
-                                onChange={(e) => {
-                                    setSearch(e);
-                                    setPage(1);
-                                }}
-                            />
-                        </div>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={roleFilter}
+                    onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
+                    title="Filter by role"
+                >
+                    <option value="">All roles</option>
+                    {roleOptions.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                    ))}
+                </select>
 
-                        <div className="text-xs text-gray-400 lg:hidden">
-                            Showing {pageUsers.length} of {totalFiltered}
-                        </div>
-                    </div>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as SortMode)}
+                    title="Sort users"
+                >
+                    <option value="created_desc">Created: newest</option>
+                    <option value="created_asc">Created: oldest</option>
+                    <option value="username_asc">Username: A → Z</option>
+                    <option value="username_desc">Username: Z → A</option>
+                    <option value="uid_desc">UID: high → low</option>
+                    <option value="uid_asc">UID: low → high</option>
+                </select>
 
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-                        <select
-                            className="in-primary w-full lg:w-[170px]"
-                            value={roleFilter}
-                            onChange={(e) => {
-                                setRoleFilter(e.target.value);
-                                setPage(1);
-                            }}
-                            title="Filter by role"
-                        >
-                            <option value="">All roles</option>
-                            {roleOptions.map((r) => (
-                                <option key={r} value={r}>
-                                    {r}
-                                </option>
-                            ))}
-                        </select>
-
-                        <select
-                            className="in-primary w-full lg:w-[210px]"
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value as SortMode)}
-                            title="Sort users"
-                        >
-                            <option value="created_desc">Created: newest</option>
-                            <option value="created_asc">Created: oldest</option>
-                            <option value="username_asc">Username: A → Z</option>
-                            <option value="username_desc">Username: Z → A</option>
-                            <option value="uid_desc">UID: high → low</option>
-                            <option value="uid_asc">UID: low → high</option>
-                        </select>
-
-                        <div className="flex items-center gap-2 lg:pl-2 lg:ml-2 lg:border-l lg:border-white/10">
-                            <select
-                                className="in-primary w-[110px]"
-                                value={pageSize}
-                                onChange={(e) => {
-                                    setPageSize(Number(e.target.value));
-                                    setPage(1);
-                                }}
-                                title="Page size"
-                            >
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                            >
-                                Prev
-                            </button>
-
-                            <div className="text-sm text-gray-300 whitespace-nowrap">
-                <span className="hidden xl:inline">
-                  Showing <span className="text-white">{pageUsers.length}</span> of{" "}
-                    <span className="text-white">{totalFiltered}</span> ·{" "}
-                </span>
-                                Page <span className="text-white">{page}</span> /{" "}
-                                <span className="text-white">{totalPages}</span>
-                            </div>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                <div className="flex gap-1.5 ml-auto">
+                    <button
+                        onClick={() => { setSearch(""); setRoleFilter(""); setSort("created_desc"); setPage(1); }}
+                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                    >
+                        Reset
+                    </button>
+                    <button
+                        onClick={() => router.refresh()}
+                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                    >
+                        Refresh
+                    </button>
                 </div>
+            </div>
 
-                {/* Card list (desktop and mobile unified) */}
-                <div className="mt-4 grid gap-3">
+            {/* List */}
+            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
+                <div className="mt-2 grid gap-3">
                     {pageUsers.map((u) => {
                         const isOpen = openUid === u.uid;
                         const emailShown = emailReveal[u.uid] ?? false;
@@ -582,6 +578,51 @@ export default function UsersClient({
                         <div className="text-center text-gray-400 py-8">No users found.</div>
                     ) : null}
                 </div>
+
+                {/* Pagination Footer */}
+                {totalPages > 1 && (
+                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="text-xs text-gray-400">
+                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
+                                <select
+                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value));
+                                        setPage(1);
+                                    }}
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                disabled={page <= 1}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <FaChevronLeft className="h-3 w-3" />
+                                <span>Prev</span>
+                            </button>
+                            <button
+                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={page >= totalPages}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <span>Next</span>
+                                <FaChevronRight className="h-3 w-3" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Modal */}
@@ -662,6 +703,131 @@ export default function UsersClient({
                     </div>
                 </div>
             ) : null}
+
+            {/* Create User Modal */}
+            {isCreateModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="w-full max-w-md bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                            <div>
+                                <h2 className="text-base font-semibold text-white">Create User</h2>
+                                <p className="text-[11px] text-gray-500 mt-0.5">Add a new account to the system</p>
+                            </div>
+                            <button
+                                onClick={() => { if (!creatingUser) { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); } }}
+                                className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                                disabled={creatingUser}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCreateUserSubmit} className="p-5 space-y-4">
+                            {/* Username + Email side by side */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Username <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. john_doe"
+                                        value={createUsername}
+                                        onChange={(e) => setCreateUsername(e.target.value)}
+                                        className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                        required
+                                        disabled={creatingUser}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Email <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="email"
+                                        placeholder="user@example.com"
+                                        value={createEmail}
+                                        onChange={(e) => setCreateEmail(e.target.value)}
+                                        className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                        required
+                                        disabled={creatingUser}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Password <span className="text-red-500">*</span></label>
+                                <input
+                                    type="password"
+                                    placeholder="Enter password..."
+                                    value={createPassword}
+                                    onChange={(e) => setCreatePassword(e.target.value)}
+                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                    required
+                                    disabled={creatingUser}
+                                />
+                            </div>
+
+                            {/* Verification toggle */}
+                            <div
+                                className={`flex items-center justify-between px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${
+                                    createVerified
+                                        ? "border-emerald-500/30 bg-emerald-500/5"
+                                        : "border-white/10 bg-white/[0.02]"
+                                }`}
+                                onClick={() => !creatingUser && setCreateVerified(!createVerified)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${createVerified ? "bg-emerald-500/20" : "bg-white/5"}`}>
+                                        {createVerified ? (
+                                            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div className={`text-sm font-medium ${createVerified ? "text-emerald-300" : "text-gray-300"}`}>
+                                            {createVerified ? "Verified (ACTIVE)" : "Unverified (WAITING_VERIFICATION)"}
+                                        </div>
+                                        <div className="text-[11px] text-gray-600 mt-0.5">
+                                            {createVerified ? "Account is immediately active" : "User must verify email first"}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); if (!creatingUser) setCreateVerified(!createVerified); }}
+                                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                        createVerified ? "bg-emerald-500" : "bg-white/10"
+                                    }`}
+                                    disabled={creatingUser}
+                                >
+                                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${createVerified ? "translate-x-4" : "translate-x-0"}`} />
+                                </button>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); }}
+                                    className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    disabled={creatingUser}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-colors"
+                                    disabled={creatingUser || !createUsername.trim() || !createEmail.trim() || !createPassword.trim()}
+                                >
+                                    {creatingUser ? "Creating…" : "Create User"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

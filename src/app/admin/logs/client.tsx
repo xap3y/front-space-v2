@@ -21,7 +21,7 @@ import {
     FiImage,
 } from "react-icons/fi";
 import {IoIosArrowDown} from "react-icons/io";
-import {FaTelegram} from "react-icons/fa";
+import {FaTelegram, FaChevronLeft, FaChevronRight} from "react-icons/fa";
 
 type SortMode = "time_desc" | "time_asc";
 
@@ -261,106 +261,69 @@ export default function LogsClient({
                 ) : null}
             </div>
 
-            <div className="box-primary p-4">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                    <div className="flex items-center justify-between">
-                        <div className="font-semibold">Log list</div>
-                        <div className="text-xs text-gray-400 lg:hidden">
-                            Showing {pageLogs.length} of {totalFiltered}
-                        </div>
-                    </div>
+            {/* Compact Filters Panel */}
+            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+                <input
+                    type="text"
+                    placeholder="Search user / type / desc / source..."
+                    value={q}
+                    onChange={(e) => onSearch(e.target.value)}
+                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                />
 
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-                        <input
-                            className="in-primary w-full lg:w-[220px]"
-                            type="text"
-                            placeholder="Search user / type / desc / source..."
-                            value={q}
-                            onChange={(e) => onSearch(e.target.value)}
-                        />
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={typeFilter}
+                    onChange={(e) => onType(e.target.value)}
+                    title="Filter by type"
+                >
+                    <option value="">All types</option>
+                    {TYPE_OPTIONS.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                    ))}
+                </select>
 
-                        <select
-                            className="in-primary w-full lg:w-[180px]"
-                            value={typeFilter}
-                            onChange={(e) => onType(e.target.value)}
-                            title="Filter by type"
-                        >
-                            <option value="">All types</option>
-                            {TYPE_OPTIONS.map((t) => (
-                                <option key={t} value={t}>
-                                    {t}
-                                </option>
-                            ))}
-                        </select>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={userFilter}
+                    onChange={(e) => onUser(e.target.value)}
+                    title="Filter by uploader"
+                >
+                    <option value="">All users</option>
+                    {userOptions.map((u) => (
+                        <option key={u} value={u}>{u}</option>
+                    ))}
+                </select>
 
-                        <select
-                            className="in-primary w-full lg:w-[180px]"
-                            value={userFilter}
-                            onChange={(e) => onUser(e.target.value)}
-                            title="Filter by user"
-                        >
-                            <option value="">All users</option>
-                            {userOptions.map((u) => (
-                                <option key={u} value={u}>
-                                    {u}
-                                </option>
-                            ))}
-                        </select>
+                <select
+                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as SortMode)}
+                    title="Sort"
+                >
+                    <option value="time_desc">Time: newest</option>
+                    <option value="time_asc">Time: oldest</option>
+                </select>
 
-                        <select
-                            className="in-primary w-full lg:w-[160px]"
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value as SortMode)}
-                            title="Sort"
-                        >
-                            <option value="time_desc">Time: newest</option>
-                            <option value="time_asc">Time: oldest</option>
-                        </select>
-
-                        <div className="flex items-center gap-2 lg:pl-2 lg:ml-2 lg:border-l lg:border-white/10">
-                            <select
-                                className="in-primary w-[110px]"
-                                value={pageSize}
-                                onChange={(e) => {
-                                    setPageSize(Number(e.target.value));
-                                    onPage(1);
-                                }}
-                                title="Page size"
-                            >
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => onPage(Math.max(1, page - 1))}
-                                disabled={page <= 1}
-                            >
-                                Prev
-                            </button>
-
-                            <div className="text-sm text-gray-300 whitespace-nowrap">
-                <span className="hidden xl:inline">
-                  Showing <span className="text-white">{pageLogs.length}</span> of{" "}
-                    <span className="text-white">{totalFiltered}</span> ·{" "}
-                </span>
-                                Page <span className="text-white">{page}</span> /{" "}
-                                <span className="text-white">{totalPages}</span>
-                            </div>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => onPage(Math.min(totalPages, page + 1))}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                <div className="flex gap-1.5 ml-auto">
+                    <button
+                        onClick={() => { onSearch(""); onType(""); onUser(""); setSort("time_desc"); onPage(1); }}
+                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                    >
+                        Reset
+                    </button>
+                    <button
+                        onClick={() => router.refresh()}
+                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                    >
+                        Refresh
+                    </button>
                 </div>
+            </div>
 
-                <div className="mt-4 grid gap-3">
+            {/* List */}
+            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
+                <div className="mt-2 grid gap-3">
                     {pageLogs.map((log) => {
                         const isOpen = openId === log.id;
                         const icon = TYPE_ICONS[log.type] ?? <FiHash />;
@@ -464,6 +427,50 @@ export default function LogsClient({
                         <div className="text-center text-gray-400 py-8">No logs found.</div>
                     ) : null}
                 </div>
+
+                {/* Pagination Footer */}
+                {totalPages > 1 && (
+                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
+                        <div className="flex items-center gap-4">
+                            <div className="text-xs text-gray-400">
+                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
+                                <select
+                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    value={pageSize}
+                                    onChange={(e) => {
+                                        setPageSize(Number(e.target.value));
+                                        onPage(1);
+                                    }}
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => onPage(Math.max(1, page - 1))}
+                                disabled={page <= 1}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <FaChevronLeft className="h-3 w-3" />
+                                <span>Prev</span>
+                            </button>
+                            <button
+                                onClick={() => onPage(Math.min(totalPages, page + 1))}
+                                disabled={page >= totalPages}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                            >
+                                <span>Next</span>
+                                <FaChevronRight className="h-3 w-3" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

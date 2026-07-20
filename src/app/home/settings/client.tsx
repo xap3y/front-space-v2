@@ -6,6 +6,7 @@ import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import EmbedTabContent from "@/app/home/settings/pages/embed";
 import LoadingPage from "@/components/LoadingPage";
+
 import UrlPreferencesTabContent from "@/app/home/settings/pages/url";
 import { PiPaintBrushBold, PiPlugsBold, PiLinkSimpleBold, PiGearBold } from "react-icons/pi";
 
@@ -50,7 +51,38 @@ export default function HomeSettingsEmbed() {
         }
     }, [activeTab, loadingUser, user]);
 
-    if (loadingUser || !user) return <LoadingPage />;
+    if (loadingUser || !user) {
+        return (
+            <section className="flex-1 min-w-0 pt-0 px-1 md:px-12">
+                <div className="w-full md:space-y-8 space-y-4 md:mt-10 mt-2 p-5 box-primary animate-pulse">
+                    {/* Header */}
+                    <div className="flex items-center md:justify-between justify-center pb-2">
+                        <div className="h-8 w-24 bg-white/5 rounded" />
+                    </div>
+
+                    {/* Tab bar */}
+                    <div className="relative -m-5 px-2 mx-1">
+                        <div className="p-2 box-primary">
+                            <div className="flex gap-2 overflow-x-auto flex-nowrap md:flex-wrap">
+                                {TABS.map((tab) => (
+                                    <div key={tab.key} className="flex-shrink-0 md:flex-1 min-w-[110px] md:min-w-[140px]">
+                                        <div className="h-[46px] bg-white/5 rounded-xl border border-transparent" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tab content area */}
+                    <div className="mt-8 space-y-4">
+                        <div className="h-6 w-1/4 bg-white/10 rounded" />
+                        <div className="h-24 w-full bg-white/5 rounded-xl" />
+                        <div className="h-10 w-32 bg-white/10 rounded-xl" />
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="flex-1 min-w-0 pt-0 px-1 md:px-12">

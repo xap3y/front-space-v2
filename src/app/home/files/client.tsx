@@ -8,7 +8,7 @@ import axios from "axios";
 import { FaLock, FaLink, FaTrash, FaChevronLeft, FaChevronRight, FaChevronDown, FaCopy, FaPlus } from "react-icons/fa6";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { LoadingDot } from "@/components/GlobalComponents";
-import LoadingPage from "@/components/LoadingPage";
+
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { getApiUrl, getStorageUrl } from "@/lib/core";
 import HoverDiv from "@/components/HoverDiv";
@@ -182,7 +182,44 @@ export default function FilesPageClient() {
         infoToast(message);
     };
 
-    if (loading || !user || loadingUser) return <LoadingPage />;
+    if (loading || !user || loadingUser) {
+        return (
+            <div className="min-h-screen px-2 md:px-4 py-4 md:py-8">
+                <div className="max-w-6xl mx-auto animate-pulse">
+                    <div className="flex flex-col md:flex-row items-center md:justify-between mb-4 md:mb-8 gap-4">
+                        <div className="text-center md:text-left">
+                            <div className="h-8 md:h-10 w-48 bg-gray-600 rounded mb-2 mx-auto md:mx-0" />
+                            <div className="h-3 md:h-4 w-64 bg-gray-700 rounded mx-auto md:mx-0" />
+                        </div>
+                    </div>
+                    <div className="space-y-2 md:space-y-4 mb-6 md:mb-8">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="box-primary shadow-lg rounded-lg overflow-hidden">
+                                {/* Skeleton Header */}
+                                <div className="p-2 md:p-4 border-b border-gray-700 flex justify-between items-center gap-4">
+                                    <div className="flex items-center gap-2 md:gap-4 w-full">
+                                        <div className="w-3 h-3 md:w-4 md:h-4 bg-gray-600 rounded-full flex-shrink-0"></div>
+                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-16 md:w-20"></div>
+                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-12 md:w-16"></div>
+                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-24 md:w-32 hidden md:block"></div>
+                                    </div>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded"></div>
+                                        <div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded"></div>
+                                    </div>
+                                </div>
+                                {/* Skeleton Actions */}
+                                <div className="p-2 md:p-4 flex gap-2">
+                                    <div className="h-6 md:h-8 w-16 md:w-20 bg-gray-600 rounded"></div>
+                                    <div className="h-6 md:h-8 w-8 md:w-10 bg-gray-600 rounded"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen px-2 md:px-4 py-4 md:py-8">

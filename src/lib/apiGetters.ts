@@ -119,12 +119,14 @@ export async function revokeUserDiscordConnection(apiKey: string): Promise<boole
 export async function getUserImages(
     uid: string,
     page: number = 0,
-    size: number = 10
+    size: number = 10,
+    queryString: string = ""
 ): Promise<DefaultResponse | null> {
     console.log(`Fetching images for user ${uid} - page ${page}, size ${size}`);
 
+    const qs = queryString ? `&${queryString}` : "";
     const data = await getValidatedResponse(
-        `/v1/admin/user/${uid}/images/pageable?page=${page}&size=${size}`
+        `/v1/admin/user/${uid}/images/pageable?page=${page}&size=${size}${qs}`
     );
 
     console.log("DATA: " + JSON.stringify(data))
@@ -264,5 +266,23 @@ export async function getImageCountStatsOnDate(start: string, end: string, apiKe
     const data = await response.json();
     if (!data) return null;
     console.debug("[getImageCountStatsOnDate] DATA IS " + data)
+    return data;
+}
+
+export async function getAdminPastes(queryString: string): Promise<DefaultResponse> {
+    console.log("Calling getAdminPastes with query: " + queryString);
+    const data = await getValidatedResponse(`/v1/admin/pastes?${queryString}`);
+    return data;
+}
+
+export async function getAdminUrls(queryString: string): Promise<DefaultResponse> {
+    console.log("Calling getAdminUrls with query: " + queryString);
+    const data = await getValidatedResponse(`/v1/admin/urls?${queryString}`);
+    return data;
+}
+
+export async function getAdminImages(queryString: string): Promise<DefaultResponse> {
+    console.log("Calling getAdminImages with query: " + queryString);
+    const data = await getValidatedResponse(`/v1/admin/images?${queryString}`);
     return data;
 }

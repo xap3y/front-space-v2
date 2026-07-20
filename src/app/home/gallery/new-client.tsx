@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle } from 'react-icons/fa';
-import { FaPlus, FaRotateRight } from 'react-icons/fa6';
+import { FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaRotateRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import { copyToClipboard, deleteImageApi as apiDeleteImage, errorToast, okToast } from "@/lib/client";
 import { getUserImages } from "@/lib/apiGetters";
+import { updateImagePassword } from "@/lib/apiPoster";
 import { ImageListResponse, UploadedImagePage } from "@/types/image";
 import { isVideoFile } from "@/lib/core";
-import LoadingPage from "@/components/LoadingPage";
+
 import { useRouter } from "next/navigation";
 import { useGalleryRows } from "@/hooks/useGalleryRow";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -42,9 +43,26 @@ export default function GalleryPage() {
     const columnsDesktop = 7;
     const rowsPerPage = 3;
 
-    const imagesPerPage = rowMode === "mobile"
-        ? columnsMobile * rowsPerPage
-        : columnsDesktop * rowsPerPage;
+    // Filters state
+    const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
+    const [timeFilterMode, setTimeFilterMode] = useState<"range" | "exact" | "time-day">("range");
+    const [fromDate, setFromDate] = useState("");
+    const [fromTime, setFromTime] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [toTime, setToTime] = useState("");
+    const [exactDate, setExactDate] = useState("");
+    const [dayDate, setDayDate] = useState("");
+    const [dayStartTime, setDayStartTime] = useState("");
+    const [dayEndTime, setDayEndTime] = useState("");
+
+    // Dropdown open states
+    const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
+    const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
+
+    // Password modal state
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+    const [passwordModalImage, setPasswordModalImage] = useState<UploadedImagePage | null>(null);
+    const [newPasswordVal, setNewPasswordVal] = useState("");
 
     // ✅ Detect mobile and adjust page size
     useEffect(() => {
@@ -59,16 +77,53 @@ export default function GalleryPage() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // ✅ Fetch with page number instead of timestamps
+    // Construct query string helper
+    const getQueryString = () => {
+        const params = new URLSearchParams();
+        if (selectedFormats.length > 0) {
+            params.append("formats", selectedFormats.join(","));
+        }
+
+        let fromStr: string | undefined;
+        let toStr: string | undefined;
+
+        if (timeFilterMode === "range") {
+            if (fromDate) {
+                fromStr = `${fromDate}T${fromTime ? fromTime + ":00" : "00:00:00"}`;
+            }
+            if (toDate) {
+                toStr = `${toDate}T${toTime ? toTime + ":00" : "23:59:59"}`;
+            }
+        } else if (timeFilterMode === "exact") {
+            if (exactDate) {
+                fromStr = `${exactDate}T00:00:00`;
+                toStr = `${exactDate}T23:59:59`;
+            }
+        } else if (timeFilterMode === "time-day") {
+            if (dayDate) {
+                fromStr = `${dayDate}T${dayStartTime ? dayStartTime + ":00" : "00:00:00"}`;
+                toStr = `${dayDate}T${dayEndTime ? dayEndTime + ":00" : "23:59:59"}`;
+            }
+        }
+
+        if (fromStr) params.append("from", fromStr);
+        if (toStr) params.append("to", toStr);
+
+        return params.toString();
+    };
+
+    // ✅ Fetch with page number and filters
     async function fetchImages(page: number = 0) {
         if (!user?.uid) return;
 
         setLoading(true);
         try {
-            const res = await getUserImages(String(user.uid), page, pageSize);
+            const res = await getUserImages(String(user.uid), page, pageSize, getQueryString());
 
             if (res?.error === true) {
-                errorToast(res.message || 'Failed to load images');
+                if (res.message !== 'Resource not found') {
+                    errorToast(res.message || 'Failed to load images');
+                }
                 setItems([]);
                 return;
             }
@@ -80,6 +135,8 @@ export default function GalleryPage() {
                 setTotalPages(message.totalPages);
             } else {
                 setItems([]);
+                setCurrentPage(0);
+                setTotalPages(1);
             }
         } catch (error) {
             console.error('Error fetching images:', error);
@@ -92,12 +149,19 @@ export default function GalleryPage() {
         }
     }
 
-    // Initial Load
+    // Reset to page 0 when filters change
     useEffect(() => {
         if (canLoad) {
-            fetchImages(0);
+            setCurrentPage(0);
         }
-    }, [canLoad, pageSize]);
+    }, [selectedFormats, timeFilterMode, fromDate, fromTime, toDate, toTime, exactDate, dayDate, dayStartTime, dayEndTime]);
+
+    // Live refetch effect
+    useEffect(() => {
+        if (canLoad) {
+            fetchImages(currentPage);
+        }
+    }, [canLoad, currentPage, pageSize, selectedFormats, timeFilterMode, fromDate, fromTime, toDate, toTime, exactDate, dayDate, dayStartTime, dayEndTime]);
 
     // Auth check
     useEffect(() => {
@@ -140,91 +204,65 @@ export default function GalleryPage() {
         }
     }, [visibleCount, items.length, loading]);
 
-    const goToNextPage = async () => {
+    const goToNextPage = () => {
         if (currentPage >= totalPages - 1) {
             errorToast("No more pages");
             return;
         }
-        const nextPage = currentPage + 1;
-        setCurrentPage(nextPage);
-        await fetchImages(nextPage);
+        setCurrentPage(currentPage + 1);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const goToPrevPage = async () => {
+    const goToPrevPage = () => {
         if (currentPage <= 0) return;
-        const prevPage = currentPage - 1;
-        setCurrentPage(prevPage);
-        await fetchImages(prevPage);
+        setCurrentPage(currentPage - 1);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const goToPage = async (page: number) => {
-        if (page < 0 || page >= totalPages) return;
-        setCurrentPage(page);
-        await fetchImages(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // ✅ Generate page numbers to display
-    const getPageNumbers = (): (number | string)[] => {
-        const pages: (number | string)[] = [];
-        const maxVisible = isMobile ? 3 : 5;
-        const halfVisible = Math.floor(maxVisible / 2);
-
-        if (totalPages <= maxVisible) {
-            // Show all pages
-            for (let i = 0; i < totalPages; i++) {
-                pages.push(i);
-            }
+    const toggleFormat = (f: string) => {
+        if (selectedFormats.includes(f)) {
+            setSelectedFormats(selectedFormats.filter(x => x !== f));
         } else {
-            // Always show first page
-            pages.push(0);
-
-            // Calculate range around current page
-            let start = Math.max(1, currentPage - halfVisible);
-            let end = Math.min(totalPages - 2, currentPage + halfVisible);
-
-            // Adjust if we're near the start or end
-            if (currentPage < halfVisible + 1) {
-                end = maxVisible - 2;
-            } else if (currentPage > totalPages - halfVisible - 2) {
-                start = totalPages - maxVisible + 1;
-            }
-
-            // Add ellipsis if there's a gap
-            if (start > 1) {
-                pages.push('...');
-            }
-
-            // Add middle pages
-            for (let i = start; i <= end; i++) {
-                pages.push(i);
-            }
-
-            // Add ellipsis if there's a gap
-            if (end < totalPages - 2) {
-                pages.push('...');
-            }
-
-            // Always show last page
-            pages.push(totalPages - 1);
+            setSelectedFormats([...selectedFormats, f]);
         }
-
-        return pages;
     };
 
-    if (loadingUser || !user) {
-        return <LoadingPage />;
-    }
+    const resetFilters = () => {
+        setSelectedFormats([]);
+        setFromDate("");
+        setFromTime("");
+        setToDate("");
+        setToTime("");
+        setExactDate("");
+        setDayDate("");
+        setDayStartTime("");
+        setDayEndTime("");
+    };
+
+    const handleSavePassword = async () => {
+        if (!passwordModalImage) return;
+        try {
+            const res = await updateImagePassword(passwordModalImage.uniqueId, newPasswordVal);
+            if (res && !res.error) {
+                okToast("Password updated");
+                setPasswordModalOpen(false);
+                setPasswordModalImage(null);
+                fetchImages(currentPage);
+            } else {
+                errorToast(res?.message || "Failed to update password");
+            }
+        } catch (e: any) {
+            errorToast(e?.message || "Failed to update password");
+        }
+    };
 
     const SkeletonCard = ({ animate = true }: { animate?: boolean }) => (
-        <div className={`rounded-md border border-white/10 bg-primary h-full w-full ${animate ? 'animate-pulse' : ''}`}>
-            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-md bg-white/5">
+        <div className={`rounded-xl border border-white/10 bg-primary h-full w-full ${animate ? 'animate-pulse' : ''}`}>
+            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-black">
                 <div className="absolute right-1 top-1 flex items-center gap-1 z-10">
-                    <div className="h-[19px] w-[26px] bg-white/10 rounded border border-white/5" />
-                    <div className="h-[19px] w-[26px] bg-white/10 rounded border border-white/5" />
-                    <div className="h-[19px] w-[35px] bg-white/10 rounded border border-white/5" />
+                    <div className="h-[19px] w-[26px] bg-black/60 rounded border border-white/10" />
+                    <div className="h-[19px] w-[26px] bg-black/60 rounded border border-white/10" />
+                    <div className="h-[19px] w-[35px] bg-black/60 rounded border border-white/10" />
                 </div>
             </div>
 
@@ -236,22 +274,58 @@ export default function GalleryPage() {
 
                 <div className="mt-2 flex items-center justify-between gap-1 pt-1">
                     <div className="flex items-center gap-1 flex-shrink-0">
-                        <div className="h-[26px] w-[31px] rounded-md bg-white/5 border border-white/10" />
-                        <div className="h-[26px] w-[31px] rounded-md bg-white/5 border border-white/10" />
+                        <div className="h-[26px] w-[31px] rounded-md bg-primary border border-white/10" />
+                        <div className="h-[26px] w-[31px] rounded-md bg-primary border border-white/10" />
                     </div>
-                    <div className="h-[26px] w-[31px] rounded-md bg-red-600/5 border border-red-500/20" />
+                    <div className="h-[26px] w-[31px] rounded-md bg-red-600/10 border border-red-500/30" />
                 </div>
             </div>
         </div>
     );
 
-    const gridClasses = "w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3 md:gap-4 grid-rows:[repeat(3,minmax(0,1fr))]";
+    const gridClasses = "w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3 md:gap-4";
+
+    if (loadingUser || !user) {
+        return (
+            <section className="flex-1 min-w-0 pt-0 px-3 md:px-6 bg-primaryDottedSize bg-primaryDotted">
+                <div className="max-w-[90rem] mx-auto w-full space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between pt-5 pb-2 animate-pulse">
+                        <div className="flex flex-col">
+                            <div className="h-7 w-36 bg-white/5 rounded" />
+                            <div className="h-4 w-20 bg-white/5 rounded mt-2" />
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="h-9 w-20 bg-white/5 rounded-lg" />
+                            <div className="h-9 w-24 bg-white/5 rounded-lg" />
+                        </div>
+                    </div>
+
+                    {/* Grid card area */}
+                    <div
+                        className="flex flex-col box-primary sm:p-3 p-2 md:p-4 animate-pulse"
+                        style={{ minHeight: "calc(3 * 220px + 56px + 2rem)" }}
+                    >
+                        <div className="flex-1 flex items-start">
+                            <ul className={gridClasses}>
+                                {Array.from({ length: 14 }).map((_, i) => (
+                                    <li key={`load-${i}`}>
+                                        <SkeletonCard />
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
-        <section className="flex-1 min-w-0 max-w-full px-0 sm:px-3 md:px-6 bg-primaryDottedSize bg-primaryDotted">
-            <div className="w-full mx-auto space-y-4">
+        <section className="flex-1 min-w-0 pt-0 px-3 md:px-6 bg-primaryDottedSize bg-primaryDotted relative">
+            <div className="max-w-[90rem] mx-auto w-full space-y-4">
                 {/* Header */}
-                <div className="flex items-center justify-between px-2 sm:pt-10 pt-5">
+                <div className="flex items-center justify-between pt-5 pb-2">
                     <div className="flex flex-col">
                         <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Your uploads</h1>
                         <div className="mt-1 text-sm text-gray-400">
@@ -259,10 +333,10 @@ export default function GalleryPage() {
                         </div>
                     </div>
 
-                    <div className="space-x-4">
+                    <div className="flex gap-2">
                         <a href="/a/new">
                             <button
-                                className="inline-flex items-center gap-2 px-3 py-2 box-primary transition-colors text-sm"
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
                                 aria-label="New upload"
                                 title="New"
                             >
@@ -276,7 +350,7 @@ export default function GalleryPage() {
                                 setLoading(true);
                                 fetchImages(currentPage);
                             }}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg box-primary transition-colors text-sm"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
                             disabled={loading}
                             aria-label="Refresh list"
                             title="Refresh"
@@ -287,12 +361,172 @@ export default function GalleryPage() {
                     </div>
                 </div>
 
+                {/* Compact Filters Panel */}
+                <div className="flex flex-col gap-1.5">
+                    <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
+                        {/* Format selector */}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                            >
+                                <span>Format ({selectedFormats.length})</span>
+                                <span className="text-[10px] text-gray-400">▼</span>
+                            </button>
+                            {formatDropdownOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-30" onClick={() => setFormatDropdownOpen(false)} />
+                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-1">
+                                        {["png", "jpg", "webp", "gif", "mp4"].map(f => {
+                                            const isSel = selectedFormats.includes(f);
+                                            return (
+                                                <button
+                                                    key={f}
+                                                    type="button"
+                                                    onClick={() => toggleFormat(f)}
+                                                    className={`w-full text-left px-2.5 py-1.5 rounded hover:bg-white/5 text-xs flex items-center justify-between transition-colors ${isSel ? "text-primary_light font-semibold" : "text-gray-300"}`}
+                                                >
+                                                    <span>{f.toUpperCase()}</span>
+                                                    {isSel && <span className="text-[10px]">✓</span>}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Time Filter Dropdown */}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                            >
+                                <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
+                                <span className="text-[10px] text-gray-400">▼</span>
+                            </button>
+                            {timeDropdownOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-30" onClick={() => setTimeDropdownOpen(false)} />
+                                    <div className="absolute left-0 mt-1 w-72 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-3 space-y-3">
+                                        <div className="flex gap-1 border-b border-white/5 pb-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setTimeFilterMode("range")}
+                                                className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "range" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
+                                            >
+                                                Range
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTimeFilterMode("exact")}
+                                                className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "exact" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
+                                            >
+                                                Exact Date
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTimeFilterMode("time-day")}
+                                                className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "time-day" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
+                                            >
+                                                One Day
+                                            </button>
+                                        </div>
+
+                                        {timeFilterMode === "range" && (
+                                            <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                                <div>
+                                                    <span className="text-gray-400 block mb-0.5">From Date</span>
+                                                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-400 block mb-0.5">From Time</span>
+                                                    <input type="time" value={fromTime} onChange={e => setFromTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-400 block mb-0.5">To Date</span>
+                                                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-400 block mb-0.5">To Time</span>
+                                                    <input type="time" value={toTime} onChange={e => setToTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {timeFilterMode === "exact" && (
+                                            <div className="text-[10px]">
+                                                <span className="text-gray-400 block mb-0.5">Date</span>
+                                                <input type="date" value={exactDate} onChange={e => setExactDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                            </div>
+                                        )}
+
+                                        {timeFilterMode === "time-day" && (
+                                            <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                                <div className="col-span-2">
+                                                    <span className="text-gray-400 block mb-0.5">Date</span>
+                                                    <input type="date" value={dayDate} onChange={e => setDayDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-400 block mb-0.5">Start Time</span>
+                                                    <input type="time" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-400 block mb-0.5">End Time</span>
+                                                    <input type="time" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-end gap-1.5 pt-1.5 border-t border-white/5">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFromDate(""); setFromTime(""); setToDate(""); setToTime("");
+                                                    setExactDate(""); setDayDate(""); setDayStartTime(""); setDayEndTime("");
+                                                }}
+                                                className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[10px] font-medium transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Reset button */}
+                        <div className="flex gap-1.5 ml-auto">
+                            <button
+                                onClick={resetFilters}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                            >
+                                Reset Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Filter Badges */}
+                    {selectedFormats.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 text-[10px] px-1">
+                            {selectedFormats.map(f => (
+                                <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border border-white/20 uppercase font-semibold">
+                                    <span>{f}</span>
+                                    <button onClick={() => toggleFormat(f)} className="hover:text-white">×</button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
                 {/* Grid card area */}
                 <div
-                    className="flex flex-col sm:rounded-xl border border-white/10 bg-transparent sm:p-3 p-2 md:p-4"
+                    className="flex flex-col box-primary sm:p-3 p-2 md:p-4"
                     style={{ minHeight: "calc(3 * 220px + 56px + 2rem)" }}
                 >
-                    <div className="flex-1 flex items-stretch">
+                    <div className="flex-1 flex items-start">
                         {/* Loading state */}
                         {loading && (
                             <ul className={gridClasses}>
@@ -307,7 +541,7 @@ export default function GalleryPage() {
                         {/* Error or empty state */}
                         {!loading && (userError || (!items.length && canLoad)) && (
                             <div className="px-2 py-10 w-full text-center text-sm text-gray-400">
-                                {userError ? 'Could not load user.' : 'No uploads on this page.'}
+                                {userError ? 'Could not load user.' : 'No uploads matching the filters.'}
                             </div>
                         )}
 
@@ -332,6 +566,11 @@ export default function GalleryPage() {
                                                 <MediaCard
                                                     item={img}
                                                     onDelete={() => handleDelete(img)}
+                                                    onPasswordChange={() => {
+                                                        setPasswordModalImage(img);
+                                                        setNewPasswordVal("");
+                                                        setPasswordModalOpen(true);
+                                                    }}
                                                     lang={lang}
                                                 />
                                             </div>
@@ -342,62 +581,97 @@ export default function GalleryPage() {
                         )}
                     </div>
 
-                    {/* ✅ Improved Paginator */}
-                    <div className="border-t border-white/10 pt-3 pb-1 flex justify-center items-center gap-2 md:gap-4 bg-black/0 mt-4 min-h-[56px] flex-wrap">
-                        {/* Previous button (visible if not on first page) */}
-                        {currentPage > 0 && (
-                            <button
-                                onClick={goToPrevPage}
-                                disabled={loading}
-                                className="rounded-lg border border-white/10 px-2 py-2 bg-secondary hover:bg-white/10 transition-colors text-sm flex items-center justify-center disabled:opacity-40"
-                                aria-label="Previous page"
-                            >
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                            </button>
-                        )}
-
-                        {/* Page numbers */}
-                        <div className="flex items-center gap-1 md:gap-2 flex-wrap justify-center">
-                            {getPageNumbers().map((pageNum, idx) => (
-                                pageNum === '...' ? (
-                                    <span key={`ellipsis-${idx}`} className="px-1 text-gray-500">...</span>
-                                ) : (
-                                    <button
-                                        key={`page-${pageNum}`}
-                                        onClick={() => goToPage(pageNum as number)}
-                                        disabled={loading || pageNum === currentPage}
-                                        className={`rounded-lg px-2.5 py-1.5 text-xs md:text-sm font-semibold transition-colors ${
-                                            pageNum === currentPage
-                                                ? 'bg-blue-600 text-white'
-                                                : 'border border-white/10 bg-secondary hover:bg-white/10 text-gray-300 hover:text-white disabled:opacity-40'
-                                        }`}
-                                    >
-                                        {(pageNum as number) + 1}
-                                    </button>
-                                )
-                            ))}
+                    {/* Pagination Footer */}
+                    {totalPages > 1 && (
+                        <div className="w-full border-t border-white/10 pt-4 mt-4 flex items-center justify-between text-sm text-gray-300">
+                            <div className="text-xs text-gray-400">
+                                Page <span className="text-white font-medium">{currentPage + 1}</span> of <span className="text-white font-medium">{totalPages}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={goToPrevPage}
+                                    disabled={currentPage <= 0}
+                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                >
+                                    <FaChevronLeft className="h-3 w-3" />
+                                    <span>Prev</span>
+                                </button>
+                                <button
+                                    onClick={goToNextPage}
+                                    disabled={currentPage >= totalPages - 1}
+                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                >
+                                    <span>Next</span>
+                                    <FaChevronRight className="h-3 w-3" />
+                                </button>
+                            </div>
                         </div>
-
-                        {/* Next button (visible if not on last page) */}
-                        {currentPage < totalPages - 1 && (
-                            <button
-                                onClick={goToNextPage}
-                                disabled={loading}
-                                className="rounded-lg border border-white/10 px-2 py-2 bg-secondary hover:bg-white/10 transition-colors text-sm flex items-center justify-center disabled:opacity-40"
-                                aria-label="Next page"
-                            >
-                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                            </button>
-                        )}
-                    </div>
+                    )}
                 </div>
             </div>
+
+            {/* Password Modal */}
+            {passwordModalOpen && passwordModalImage && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="box-primary w-full max-w-sm p-5 space-y-4 rounded-xl border border-white/10 shadow-2xl relative">
+                        <button
+                            type="button"
+                            onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"
+                        >
+                            <FaTimes />
+                        </button>
+                        <div>
+                            <h3 className="text-sm font-semibold text-white">Image Password Settings</h3>
+                            <p className="text-xs text-gray-400 mt-1 truncate">For: {passwordModalImage.uniqueId}</p>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Password</label>
+                            <input
+                                type="password"
+                                placeholder="Enter password (leave empty to remove)"
+                                value={newPasswordVal}
+                                onChange={e => setNewPasswordVal(e.target.value)}
+                                className="w-full rounded-lg border border-white/10 bg-primary px-3 py-2 text-xs text-white focus:outline-none focus:border-primary_light/50"
+                            />
+                        </div>
+
+                        <div className="flex gap-2 justify-end pt-2">
+                            <button
+                                type="button"
+                                onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
+                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-300 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSavePassword}
+                                className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium text-white transition-colors"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
 
-// MediaCard component remains the same as before
-function MediaCard({ item, onDelete, lang }: { item: UploadedImagePage; onDelete: () => void, lang: LanguageModel }) {
+// MediaCard component
+function MediaCard({
+    item,
+    onDelete,
+    onPasswordChange,
+    lang
+}: {
+    item: UploadedImagePage;
+    onDelete: () => void;
+    onPasswordChange: () => void;
+    lang: LanguageModel;
+}) {
     const isVideo = isVideoFile(item.type || '');
     const [imgFailed, setImgFailed] = useState(false);
 
@@ -415,19 +689,19 @@ function MediaCard({ item, onDelete, lang }: { item: UploadedImagePage; onDelete
     const rawUrl = (item.location === "LOCAL" && !item.public) ? item.urls?.webUrl : urls.original;
 
     return (
-        <div className="group rounded-md border border-white/10 bg-primary hover:bg-secondary transition-colors w-full h-full flex flex-col">
+        <div className="group rounded-xl border border-white/10 bg-primary hover:border-white/20 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-300 w-full h-full flex flex-col overflow-hidden">
             {/* Preview */}
-            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-md bg-black flex-shrink-0" style={{ minHeight: 0 }}>
+            <div className="relative w-full aspect-[4/3] overflow-hidden bg-black/60 flex-shrink-0" style={{ minHeight: 0 }}>
                 {showPlaceholder ? (
-                    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary to-black/60 text-white/80 p-2">
+                    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary to-black/80 text-white/80 p-2">
                         <div className="text-center">
-                            <div className="text-[10px] text-gray-300 mb-1">Image - error</div>
-                            <div className="font-mono text-xs break-all">{item.uniqueId}</div>
+                            <div className="text-[10px] text-gray-400 mb-1">Image Error</div>
+                            <div className="font-mono text-xs break-all text-red-400">{item.uniqueId}</div>
                         </div>
                     </div>
                 ) : isVideo ? (
                     <video
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         preload="metadata"
                         poster={item.urls?.posterUrl || undefined}
                         controls={true}
@@ -439,73 +713,84 @@ function MediaCard({ item, onDelete, lang }: { item: UploadedImagePage; onDelete
                     <img
                         src={rawUrl}
                         alt={title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         loading="lazy"
                         style={{ minHeight: 0 }}
                         onError={() => setImgFailed(true)}
                     />
                 )}
 
-                {/* Badges */}
-                <div className="absolute right-1 top-1 flex items-center gap-1 z-10">
-                    <span className="inline-flex items-center gap-1 bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
+                {/* Badges & Overlays */}
+                <div className="absolute right-1.5 top-1.5 flex items-center gap-1.5 z-10">
+                    <span className="inline-flex items-center gap-1 bg-black/60 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer" title="Info">
                         <FaInfoCircle className="h-3 w-3" />
                     </span>
                     <span
                         onClick={() => copyToClipboard(urls.original, lang)}
-                        className="cursor-pointer inline-flex items-center gap-1 bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10"
+                        className="cursor-pointer inline-flex items-center gap-1 bg-black/60 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 text-gray-300 hover:text-white transition-colors"
+                        title="Copy direct URL"
                     >
                         <FaCopy className="h-3 w-3" />
                     </span>
                     {item.requiresPassword && (
-                        <span className="inline-flex items-center gap-1 bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
+                        <span className="inline-flex items-center gap-1 bg-amber-500/20 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-amber-500/30 text-amber-300" title="Password protected">
                             <FaLock className="h-3 w-3" />
                         </span>
                     )}
-                    <span className="inline-flex items-center bg-black/60 text-[10px] px-1 py-0.5 rounded border border-white/10">
+                    <span className="inline-flex items-center bg-black/60 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 text-gray-300 uppercase font-bold tracking-wider">
                         {isVideo ? 'Video' : 'Image'}
                     </span>
                 </div>
             </div>
 
             {/* Body */}
-            <div className="p-2 space-y-1 flex-1 flex flex-col justify-between">
-                <div className="min-w-0 flex items-center gap-2 h-[16px]">
-                    <p className="text-xs font-semibold truncate" title={title}>
+            <div className="p-3 space-y-1.5 flex-1 flex flex-col justify-between">
+                <div className="min-w-0 flex items-center justify-between gap-2 h-[16px]">
+                    <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors" title={title}>
                         {title}.{item.type}
                     </p>
-                    <p className="text-[10px] text-gray-400 flex-shrink-0">({size})</p>
+                    <p className="text-[10px] text-gray-500 group-hover:text-gray-300 flex-shrink-0 font-medium transition-colors">({size})</p>
                 </div>
 
                 {/* Actions */}
-                <div className="mt-2 flex items-center justify-between gap-1 pt-1">
-                    <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="mt-2.5 flex items-center justify-between gap-1 pt-1.5 border-t border-white/5">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
                         <a
                             href={urls.portalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-2 py-1 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary transition-colors"
+                            className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary text-gray-300 hover:text-white transition-colors"
                             aria-label="Open"
-                            title="Open"
+                            title="Open portal"
                         >
-                            <FaExternalLinkAlt className="h-4 w-4" />
+                            <FaExternalLinkAlt className="h-3.5 w-3.5" />
                         </a>
                         <a
                             href={urls.original + "?download=true"}
-                            className="inline-flex items-center px-2 py-1 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary transition-colors"
+                            className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary text-gray-300 hover:text-white transition-colors"
                             aria-label="Download"
-                            title="Download"
+                            title="Download original"
                         >
-                            <FaDownload className="h-4 w-4" />
+                            <FaDownload className="h-3.5 w-3.5" />
                         </a>
+                        {/* Lock Button to modify password */}
+                        <button
+                            type="button"
+                            onClick={onPasswordChange}
+                            className={`inline-flex items-center px-2 py-1.5 rounded-md text-xs border transition-colors ${item.requiresPassword ? "border-amber-500/30 bg-amber-600/10 hover:bg-amber-600/15 text-amber-300" : "border-white/10 bg-primary hover:bg-secondary text-gray-300 hover:text-white"}`}
+                            aria-label="Password settings"
+                            title="Set / update password"
+                        >
+                            <FaLock className="h-3.5 w-3.5" />
+                        </button>
                     </div>
                     <button
                         onClick={onDelete}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors flex-shrink-0"
+                        className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors flex-shrink-0"
                         aria-label="Delete"
-                        title="Delete"
+                        title="Delete upload"
                     >
-                        <FaRegTrashAlt className="h-4 w-4" />
+                        <FaRegTrashAlt className="h-3.5 w-3.5" />
                     </button>
                 </div>
             </div>

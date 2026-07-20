@@ -21,6 +21,7 @@ export interface UrlSet {
     posterUrl?: string | null;
     userPreference?: string | null;
     userPreferences?: string | null;
+    deleteUrl?: string | null;
 }
 
 export interface Quote {

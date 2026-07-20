@@ -3,14 +3,13 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { EmailEntry } from "@/types/email";
-import MainStringInput from "@/components/MainStringInput";
 import { EmailStream } from "@/components/EmailStream";
 import type { TempMail } from "@/hooks/useTempMail";
 import { useUser } from "@/hooks/useUser";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { getApiUrl } from "@/lib/core";
-import {FaExternalLinkAlt, FaRegTrashAlt} from "react-icons/fa";
-import {PiSealWarningDuotone} from "react-icons/pi";
+import { FaExternalLinkAlt, FaRegTrashAlt, FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
+import { PiSealWarningDuotone } from "react-icons/pi";
 
 type SortMode =
     | "created_desc"
@@ -68,17 +67,18 @@ function OpenPill({ expiresAt }: { expiresAt?: string | null }) {
         </span>
     );
 }
-
 function ActionButton({
     children,
     onClick,
     disabled,
     variant = "default",
+    title,
 }: {
     children: ReactNode;
     onClick: () => void;
     disabled?: boolean;
     variant?: "default" | "danger";
+    title?: string;
 }) {
     const styles =
         variant === "danger"
@@ -89,6 +89,7 @@ function ActionButton({
         <button
             disabled={disabled}
             onClick={onClick}
+            title={title}
             className={`px-3 py-2 rounded-md text-sm border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
@@ -98,9 +99,9 @@ function ActionButton({
 
 function UserMini({ user }: { user: EmailEntry["createdBy"] }) {
     if (!user) return <span className="text-gray-500">—</span>;
+
     return (
         <a href={"/user/" + user.username} className="inline-flex items-center gap-2 hover:text-blue-400">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             {user.avatar ? (
                 <img src={user.avatar} alt={user.username} className="h-6 w-6 rounded-full border border-white/10 object-cover" />
             ) : (
@@ -124,11 +125,9 @@ export default function AdminEmailsClient({
     fetchedAt?: string;
 }) {
     const router = useRouter();
-
     const { user, loadingUser } = useUser();
 
     const [error] = useState(initialError);
-
     const [streamOpen, setStreamOpen] = useState(false);
     const [streamEmail, setStreamEmail] = useState<EmailEntry | null>(null);
     const [wsForceRefreshId, setWsForceRefreshId] = useState(0);
@@ -244,324 +243,324 @@ export default function AdminEmailsClient({
         }
         infoToast("Suspending...");
 
-        const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}/suspend`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": user.apiKey,
-            },
-            body: JSON.stringify({}),
-        });
+        try {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}/suspend`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-API-Key": user.apiKey,
+                },
+            });
 
-        const data = await res.json().catch(() => null);
-        if (!res.ok || data?.error) {
-            errorToast(String(data?.message ?? "Failed to suspend"));
-            return;
+            if (!res.ok) {
+                const text = await res.text();
+                errorToast(text || "Failed to suspend");
+                return;
+            }
+
+            okToast("Suspended");
+            router.refresh();
+        } catch {
+            errorToast("Suspend failed");
         }
-        okToast("Suspended");
-        router.refresh();
     };
 
     const deleteEmail = async (email: string) => {
+        const conf = confirm(`Delete email "${email}"?`);
+        if (!conf) return;
+
         if (!user?.apiKey) {
             errorToast("Missing API key");
             return;
         }
-        // eslint-disable-next-line no-alert
-        if (!confirm(`Delete ${email}?`)) return;
 
         infoToast("Deleting...");
-        const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": user.apiKey,
-            },
-        });
+        try {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}`, {
+                method: "DELETE",
+                headers: {
+                    "X-API-Key": user.apiKey,
+                },
+            });
 
-        const data = await res.json().catch(() => null);
-        if (!res.ok || data?.error) {
-            errorToast(String(data?.message ?? "Failed to delete"));
-            return;
+            if (!res.ok) {
+                const text = await res.text();
+                errorToast(text || "Failed to delete");
+                return;
+            }
+
+            okToast("Deleted");
+            router.refresh();
+        } catch {
+            errorToast("Delete failed");
         }
-        okToast("Deleted");
-        router.refresh();
     };
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="box-primary p-4">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="flex-1 min-w-0 pt-0 px-3 md:px-6">
+            <div className="max-w-[90rem] mx-auto w-full space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between pt-5 pb-2">
                     <div>
-                        <h1 className="text-xl font-semibold">Emails</h1>
-                        <p className="text-sm text-gray-300 mt-1">
-                            Total: <span className="text-white">{totalCount}</span>
+                        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Admin Emails</h1>
+                        <p className="text-sm text-gray-400">
+                            Total Found: {totalCount}
                             {fetchedAt ? (
                                 <span className="text-gray-400"> · fetched {formatDate(fetchedAt)}</span>
                             ) : null}
                         </p>
                     </div>
-
-                    <button
-                        onClick={() => router.refresh()}
-                        className="px-4 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
-                    >
-                        Refresh
-                    </button>
                 </div>
 
                 {error ? (
-                    <div className="mt-4 text-sm text-red-300 border border-red-500/20 bg-red-600/10 rounded-lg p-3">
+                    <div className="text-sm text-red-300 border border-red-500/20 bg-red-600/10 rounded-lg p-3">
                         {error}
                     </div>
                 ) : null}
-            </div>
 
-            <div className="box-primary p-4 h-full">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 h-full">
-                    <div className="flex items-center justify-between">
-                        <div className="flex flex-row gap-5 items-center justify-center">
-                            <div className="font-semibold">Email list</div>
+                {/* Compact Filters Panel */}
+                <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+                    <input
+                        type="text"
+                        placeholder="Search email / id / status / creator..."
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                    />
 
-                            <MainStringInput
-                                className="p-0.5 min-w-96"
-                                inputClassName="p-2"
-                                type="text"
-                                placeholder="Search email / id / status / creator..."
-                                value={search}
-                                onChange={(e) => {
-                                    setSearch(e);
-                                    setPage(1);
-                                }}
-                            />
-                        </div>
+                    <select
+                        className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                        value={statusFilter}
+                        onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                        title="Filter by status"
+                    >
+                        <option value="">All statuses</option>
+                        {statusOptions.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                    </select>
 
-                        <div className="text-xs text-gray-400 lg:hidden">
-                            Showing {pageEmails.length} of {totalFiltered}
-                        </div>
-                    </div>
+                    <select
+                        className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                        value={createdByFilter}
+                        onChange={(e) => { setCreatedByFilter(e.target.value); setPage(1); }}
+                        title="Filter by creator"
+                    >
+                        <option value="">All creators</option>
+                        {createdByOptions.map((u) => (
+                            <option key={u} value={u}>{u}</option>
+                        ))}
+                    </select>
 
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-                        <select
-                            className="in-primary w-full lg:w-[170px]"
-                            value={statusFilter}
-                            onChange={(e) => {
-                                setStatusFilter(e.target.value);
-                                setPage(1);
-                            }}
-                            title="Filter by status"
+                    <select
+                        className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                        value={sort}
+                        onChange={(e) => setSort(e.target.value as SortMode)}
+                        title="Sort emails"
+                    >
+                        <option value="created_desc">Created: newest</option>
+                        <option value="created_asc">Created: oldest</option>
+                        <option value="expires_desc">Expires: latest</option>
+                        <option value="expires_asc">Expires: soonest</option>
+                        <option value="email_asc">Email: A → Z</option>
+                        <option value="email_desc">Email: Z → A</option>
+                        <option value="id_desc">ID: high → low</option>
+                        <option value="id_asc">ID: low → high</option>
+                    </select>
+
+                    <div className="flex gap-1.5 ml-auto">
+                        <button
+                            onClick={() => { setSearch(""); setStatusFilter(""); setCreatedByFilter(""); setSort("created_desc"); setPage(1); }}
+                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
                         >
-                            <option value="">All statuses</option>
-                            {statusOptions.map((s) => (
-                                <option key={s} value={s}>
-                                    {s}
-                                </option>
-                            ))}
-                        </select>
-
-                        <select
-                            className="in-primary w-full lg:w-[200px]"
-                            value={createdByFilter}
-                            onChange={(e) => {
-                                setCreatedByFilter(e.target.value);
-                                setPage(1);
-                            }}
-                            title="Filter by creator"
+                            Reset
+                        </button>
+                        <button
+                            onClick={() => router.refresh()}
+                            className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
                         >
-                            <option value="">All creators</option>
-                            {createdByOptions.map((u) => (
-                                <option key={u} value={u}>
-                                    {u}
-                                </option>
-                            ))}
-                        </select>
-
-                        <select
-                            className="in-primary w-full lg:w-[210px]"
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value as SortMode)}
-                            title="Sort emails"
-                        >
-                            <option value="created_desc">Created: newest</option>
-                            <option value="created_asc">Created: oldest</option>
-                            <option value="expires_desc">Expires: latest</option>
-                            <option value="expires_asc">Expires: soonest</option>
-                            <option value="email_asc">Email: A → Z</option>
-                            <option value="email_desc">Email: Z → A</option>
-                            <option value="id_desc">ID: high → low</option>
-                            <option value="id_asc">ID: low → high</option>
-                        </select>
-
-                        <div className="flex items-center gap-2 lg:pl-2 lg:ml-2 lg:border-l lg:border-white/10">
-                            <select
-                                className="in-primary w-[110px]"
-                                value={pageSize}
-                                onChange={(e) => {
-                                    setPageSize(Number(e.target.value));
-                                    setPage(1);
-                                }}
-                                title="Page size"
-                            >
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                            >
-                                Prev
-                            </button>
-
-                            <div className="text-sm text-gray-300 whitespace-nowrap">
-                                <span className="hidden xl:inline">
-                                    Showing <span className="text-white">{pageEmails.length}</span> of{" "}
-                                    <span className="text-white">{totalFiltered}</span> ·{" "}
-                                </span>
-                                Page <span className="text-white">{page}</span> /{" "}
-                                <span className="text-white">{totalPages}</span>
-                            </div>
-
-                            <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </button>
-                        </div>
+                            Refresh
+                        </button>
                     </div>
                 </div>
 
-                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2 space-y-3">
-                    {pageEmails.map((e) => (
-                        <div key={e.id} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30">
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <div className="min-w-0">
-                                        <div className="text-sm sm:text-base text-white font-semibold break-all flex items-center gap-2">
-                                            <span className="truncate">{e.email}</span>
-                                            <button
+                {/* List Container */}
+                <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
+                    <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
+                        {pageEmails.map((e) => (
+                            <div key={e.id} className="rounded-xl box-primary p-3 border border-white/5 bg-primary/20 hover:bg-secondary/25 hover:border-white/10 transition-all duration-300">
+                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="min-w-0">
+                                            <div className="text-sm sm:text-base text-white font-semibold break-all flex items-center gap-2">
+                                                <span className="truncate">{e.email}</span>
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await navigator.clipboard.writeText(e.email);
+                                                            okToast("Copied");
+                                                        } catch (err) {
+                                                            infoToast("Copy failed");
+                                                        }
+                                                    }}
+                                                    title="Copy email"
+                                                    className="p-1 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 text-gray-300">
+                                                        <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v12h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                                    </svg>
+                                                </button>
+                                                <span className="text-gray-400 text-xs sm:text-sm"># {e.id}</span>
+                                            </div>
+                                            <div className="text-xs text-gray-400 mt-1.5 flex flex-wrap items-center gap-2">
+                                                <span className="truncate">Created: {formatDate(e.createdAt)}</span>
+                                                <span className="text-gray-500">•</span>
+                                                <span className="truncate">Expires: {formatDate(e.expiresAt)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-2 sm:ml-4">
+                                        <OpenPill expiresAt={e.expiresAt} />
+                                        <StatusPill status={e.status} />
+
+                                        <div className="flex items-center gap-2">
+                                            <ActionButton
+                                                disabled={loadingUser || !user?.apiKey}
+                                                onClick={() => openStream(e)}
+                                                title="Open Stream"
+                                            >
+                                                <FaExternalLinkAlt className="h-3.5 w-3.5" />
+                                            </ActionButton>
+
+                                            <ActionButton
+                                                disabled={actingId === e.id || loadingUser || !user?.apiKey}
                                                 onClick={async () => {
+                                                    setActingId(e.id);
                                                     try {
-                                                        await navigator.clipboard.writeText(e.email);
-                                                        okToast("Copied");
-                                                    } catch (err) {
-                                                        infoToast("Copy failed");
+                                                        await suspendEmail(e.email);
+                                                    } finally {
+                                                        setActingId(null);
                                                     }
                                                 }}
-                                                title="Copy email"
-                                                className="p-1 rounded-md bg-white/5 hover:bg-white/10 flex items-center justify-center"
+                                                title="Suspend Email"
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 text-gray-300">
-                                                    <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v12h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                                                </svg>
-                                            </button>
-                                            <span className="text-gray-400 text-xs sm:text-sm">#{e.id}</span>
-                                        </div>
-                                        <div className="text-xs text-gray-400 mt-1 flex flex-wrap items-center gap-2">
-                                            <span className="truncate">Created: {formatDate(e.createdAt)}</span>
-                                            <span className="text-gray-500">•</span>
-                                            <span className="truncate">Expires: {formatDate(e.expiresAt)}</span>
+                                                <PiSealWarningDuotone className="h-4 w-4" />
+                                            </ActionButton>
+
+                                            <ActionButton
+                                                variant="danger"
+                                                disabled={actingId === e.id || loadingUser || !user?.apiKey}
+                                                onClick={async () => {
+                                                    setActingId(e.id);
+                                                    try {
+                                                        await deleteEmail(e.email);
+                                                    } finally {
+                                                        setActingId(null);
+                                                    }
+                                                }}
+                                                title="Delete Email"
+                                            >
+                                                <FaRegTrashAlt className="h-3.5 w-3.5 text-red-300" />
+                                            </ActionButton>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 sm:ml-4">
-                                    <OpenPill expiresAt={e.expiresAt} />
-                                    <StatusPill status={e.status} />
-
+                                <div className="mt-2 text-xs text-gray-400 sm:hidden">
                                     <div className="flex items-center gap-2">
-                                        <ActionButton
-                                            disabled={loadingUser || !user?.apiKey}
-                                            onClick={() => openStream(e)}
-                                        >
-                                            <FaExternalLinkAlt />
-                                        </ActionButton>
+                                        <UserMini user={e.createdBy} />
+                                    </div>
+                                </div>
 
-                                        <ActionButton
-                                            disabled={actingId === e.id || loadingUser || !user?.apiKey}
-                                            onClick={async () => {
-                                                setActingId(e.id);
-                                                try {
-                                                    await suspendEmail(e.email);
-                                                } finally {
-                                                    setActingId(null);
-                                                }
-                                            }}
-                                        >
-                                            <PiSealWarningDuotone />
-                                        </ActionButton>
-
-                                        <ActionButton
-                                            variant="danger"
-                                            disabled={actingId === e.id || loadingUser || !user?.apiKey}
-                                            onClick={async () => {
-                                                setActingId(e.id);
-                                                try {
-                                                    await deleteEmail(e.email);
-                                                } finally {
-                                                    setActingId(null);
-                                                }
-                                            }}
-                                        >
-                                            <FaRegTrashAlt />
-                                        </ActionButton>
+                                <div className="hidden sm:block mt-2 pt-2 border-t border-white/5">
+                                    <div className="text-xs text-gray-400">
+                                        Created by <UserMini user={e.createdBy} />
                                     </div>
                                 </div>
                             </div>
+                        ))}
 
-                            <div className="mt-2 text-xs text-gray-400 sm:hidden">
-                                <div className="flex items-center gap-2">
-                                    <UserMini user={e.createdBy} />
+                        {pageEmails.length === 0 ? (
+                            <div className="text-center text-gray-400 py-8">No emails found matching filters.</div>
+                        ) : null}
+                    </div>
+
+                    {/* Pagination Footer */}
+                    {totalPages > 1 && (
+                        <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
+                            <div className="flex items-center gap-4">
+                                <div className="text-xs text-gray-400">
+                                    Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
+                                    <select
+                                        className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                        value={pageSize}
+                                        onChange={(e) => {
+                                            setPageSize(Number(e.target.value));
+                                            setPage(1);
+                                        }}
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={25}>25</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                    </select>
                                 </div>
                             </div>
-
-                            <div className="hidden sm:block mt-2">
-                                <div className="text-xs text-gray-400">
-                                    Created by <UserMini user={e.createdBy} />
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    disabled={page <= 1}
+                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                >
+                                    <FaChevronLeft className="h-3 w-3" />
+                                    <span>Prev</span>
+                                </button>
+                                <button
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={page >= totalPages}
+                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                >
+                                    <span>Next</span>
+                                    <FaChevronRight className="h-3 w-3" />
+                                </button>
                             </div>
                         </div>
-                    ))}
-
-                    {pageEmails.length === 0 ? (
-                        <div className="text-center text-gray-400 py-8">No emails found.</div>
-                    ) : null}
+                    )}
                 </div>
             </div>
 
             {streamOpen && streamEmail ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-5xl box-primary p-4">
-                        <div className="flex items-start justify-between gap-3">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+                    <div className="w-full max-w-5xl box-primary p-5 relative border border-white/10 rounded-xl shadow-2xl">
+                        <button
+                            onClick={closeStream}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                        >
+                            <FaTimes className="h-4 w-4" />
+                        </button>
+                        <div className="flex items-start justify-between gap-3 pr-8">
                             <div className="min-w-0">
-                                <div className="text-white font-semibold break-all">{streamEmail.email}</div>
+                                <div className="text-white font-semibold break-all text-lg">{streamEmail.email}</div>
                                 <div className="text-xs text-gray-400 mt-1">
                                     Status: {String(streamEmail.status ?? "UNKNOWN")} · Expires: {formatDate(streamEmail.expiresAt)}
                                 </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 shrink-0">
                                 <button
                                     onClick={() => setWsForceRefreshId((v) => v + 1)}
-                                    className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                                    className="px-3 py-1.5 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary text-white transition-colors"
                                     disabled={loadingUser || !user?.apiKey}
                                 >
                                     Reconnect
                                 </button>
-                                <button
-                                    onClick={closeStream}
-                                    className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
-                                >
-                                    Close
-                                </button>
                             </div>
                         </div>
 
-                        <div className="mt-3">
+                        <div className="mt-4">
                             <EmailStream
                                 email={
                                     {
