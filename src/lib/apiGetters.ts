@@ -286,3 +286,50 @@ export async function getAdminImages(queryString: string): Promise<DefaultRespon
     const data = await getValidatedResponse(`/v1/admin/images?${queryString}`);
     return data;
 }
+
+export async function getUserSessions(apiKey: string): Promise<DefaultResponse> {
+    console.log("Calling getUserSessions");
+    try {
+        const response = await fetch(getApiUrl() + "/v1/auth/me/sessions", {
+            method: "GET",
+            headers: {
+                "X-API-Key": apiKey,
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            credentials: "include",
+        });
+        if (!response.ok) {
+            return { error: true, message: "Failed to fetch sessions" } as DefaultResponse;
+        }
+        const data = await response.json();
+        return data as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}
+
+export async function migrateAdminImage(uniqueId: string, apiKey: string): Promise<DefaultResponse> {
+    console.log("Calling migrateAdminImage for image: " + uniqueId);
+    try {
+        const response = await fetch(getApiUrl() + `/v1/admin/images/${uniqueId}/migrate`, {
+            method: "POST",
+            headers: {
+                "X-API-Key": apiKey,
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            credentials: "include",
+        });
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            return { error: true, message: data.message || "Failed to migrate image" } as DefaultResponse;
+        }
+        const data = await response.json();
+        return data as DefaultResponse;
+    } catch (e) {
+        return { error: true, message: "Server error" } as DefaultResponse;
+    }
+}

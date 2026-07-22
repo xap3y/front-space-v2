@@ -1,6 +1,6 @@
 'use client';
 import {SidebarComp} from "@/components/Sidebar";
-import {FaFileAlt, FaHome, FaImages, FaPaste, FaUserCircle} from "react-icons/fa";
+import {FaFileAlt, FaHome, FaImages, FaPaste, FaUserCircle, FaHistory} from "react-icons/fa";
 import { IoIosSettings } from "react-icons/io";
 import {FaFile, FaFolderClosed, FaLink} from "react-icons/fa6";
 import {useTranslation} from "@/hooks/useTranslation";
@@ -42,6 +42,7 @@ export default function HomeLayout({
                                 {title: "Temp Mail", icon: <IoMailOutline className={"w-[30px] h-[30px]"} />, href: "/tempmail", page: "tempmail"},
                                 {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[30px] h-[30px]"} />, href: "/profile", page: "profile"},
                                 {title: "Connections", icon: <PiLinkSimpleBold className={"w-[30px] h-[30px]"} />, href: "/connections", page: "connections"},
+                                {title: "Sessions", icon: <FaHistory className={"w-[30px] h-[30px]"} />, href: "/sessions", page: "sessions"},
                                 {title: "Tools", icon: <FiTool className={"w-[30px] h-[30px]"} />, href: "/tools", page: "tools"},
                                 {title: "Files", icon: <MdFolderZip className={"w-[30px] h-[30px]"} />, href: "/files", page: "files"},
                             ]} logout_text={lang.comp.sidebar.logout} />

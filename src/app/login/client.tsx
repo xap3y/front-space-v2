@@ -174,8 +174,8 @@ export default function LoginPage() {
 
             const token = await encrypt(JSON.stringify(data["message"]));
             setCookie("auth_token", token, {
-                secure: true,
-                sameSite: "strict",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
                 maxAge: 60 * 60 * 24 * 7,
             });
 

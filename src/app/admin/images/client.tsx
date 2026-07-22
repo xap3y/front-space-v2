@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePage } from "@/context/PageContext";
-import { getAdminImages } from "@/lib/apiGetters";
+import { getAdminImages, migrateAdminImage } from "@/lib/apiGetters";
 import { UploadedImage } from "@/types/image";
 import { UserObj } from "@/types/user";
 import {
@@ -35,6 +35,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
     const [page, setPageIdx] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
+    const [migratingId, setMigratingId] = useState<string | null>(null);
 
     // Upload Modal states
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -298,6 +299,26 @@ export default function ImagesClient({ users }: ImagesClientProps) {
             fetchImages();
         } catch (e: any) {
             errorToast(e?.message ?? "Delete failed");
+        }
+    };
+
+    const migrateImageStorage = async (img: UploadedImage) => {
+        const nextStorage = (img.location || "LOCAL") === "LOCAL" ? "R2" : "LOCAL";
+        const ok = window.confirm(`Migrate image "${img.uniqueId}" storage from ${img.location || "LOCAL"} to ${nextStorage}?`);
+        if (!ok) return;
+
+        setMigratingId(img.uniqueId);
+        try {
+            const res = await migrateAdminImage(img.uniqueId, user?.apiKey || "");
+            if (res.error) {
+                throw new Error(res.message || "Migration failed");
+            }
+            okToast("Image storage migrated");
+            fetchImages();
+        } catch (e: any) {
+            errorToast(e?.message ?? "Migration failed");
+        } finally {
+            setMigratingId(null);
         }
     };
 
@@ -682,6 +703,14 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                         title="Copy Link"
                                                     >
                                                         <FaRegCopy className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => migrateImageStorage(img)}
+                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-yellow-500/30 bg-yellow-600/10 hover:bg-yellow-600/15 text-yellow-300 transition-colors disabled:opacity-50"
+                                                        title={`Migrate storage to ${(img.location || "LOCAL") === "LOCAL" ? "R2" : "LOCAL"}`}
+                                                        disabled={migratingId === img.uniqueId}
+                                                    >
+                                                        <FaRotateRight className={`h-4 w-4 ${migratingId === img.uniqueId ? "animate-spin" : ""}`} />
                                                     </button>
                                                     <button
                                                         onClick={() => deleteImage(img)}
