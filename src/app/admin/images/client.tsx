@@ -46,6 +46,27 @@ export default function ImagesClient({ users }: ImagesClientProps) {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadingState, setUploadingState] = useState(false);
 
+    // Enlarge Lightbox modal state
+    const [enlargedImage, setEnlargedImage] = useState<UploadedImage | null>(null);
+
+    // Close modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (enlargedImage) setEnlargedImage(null);
+                if (isUploadModalOpen && !uploadingState) {
+                    setIsUploadModalOpen(false);
+                    setUploadFile(null);
+                    setUploadDesc("");
+                    setUploadPass("");
+                    setUploadCustomUid("");
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [enlargedImage, isUploadModalOpen, uploadingState]);
+
     // Filters state
     const [uniqueId, setUniqueId] = useState("");
     const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
@@ -349,40 +370,38 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsUploadModalOpen(true)}
-                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-600/30 transition-colors text-xs font-semibold"
+                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-emerald-300"
                         >
                             New Image
                         </button>
                         <button
                             onClick={() => fetchImages()}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
-                            title="Refresh List"
                         >
-                            <FaRotateRight className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                            <span className="hidden sm:inline">Refresh</span>
+                            Refresh
                         </button>
                     </div>
                 </div>
 
-                {/* Compact Filters Panel */}
-                <div className="flex flex-col gap-1.5">
-                    <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
-                        {/* Search uniqueId */}
+                {/* Filters Header Bar */}
+                <div className="box-primary p-3 flex flex-col gap-3">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                        {/* Unique ID search */}
                         <input
                             type="text"
-                            placeholder="Search ID..."
+                            placeholder="Unique ID..."
                             value={uniqueId}
                             onChange={e => setUniqueId(e.target.value)}
-                            className="w-32 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                            className="w-40 rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500 transition-colors"
                         />
 
-                        {/* Users Dropdown */}
+                        {/* User Filter Dropdown */}
                         <div className="relative">
                             <button
                                 type="button"
                                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Users ({includedUsers.length + excludedUsers.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -390,7 +409,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             {userDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
+                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
                                         {users.length === 0 ? (
                                             <div className="p-2 text-xs text-gray-500 text-center">No users available</div>
                                         ) : (
@@ -432,7 +451,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -532,7 +551,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Format ({selectedFormats.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -540,7 +559,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             {formatDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setFormatDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-1">
+                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-1">
                                         {["png", "jpg", "webp", "gif", "mp4"].map(f => {
                                             const isSel = selectedFormats.includes(f);
                                             return (
@@ -564,7 +583,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                         <select
                             value={storageFilter}
                             onChange={e => setStorageFilter(e.target.value)}
-                            className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                            className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                         >
                             <option value="">Storage...</option>
                             <option value="LOCAL">Local</option>
@@ -575,13 +594,13 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                         <div className="flex gap-1.5 ml-auto">
                             <button
                                 onClick={resetFilters}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset
                             </button>
                             <button
                                 onClick={() => { setPageIdx(1); fetchImages(1); }}
-                                className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Search
                             </button>
@@ -604,7 +623,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 </span>
                             ))}
                             {selectedFormats.map(f => (
-                                 <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border border-white/20 uppercase font-semibold">
+                                 <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border-2 border-zinc-800 uppercase font-semibold">
                                     <span>{f}</span>
                                     <button onClick={() => toggleFormat(f)} className="hover:text-white">×</button>
                                 </span>
@@ -617,7 +636,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                 <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="box-primary p-2 animate-pulse">
+                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -637,11 +656,15 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             const portalUrl = img.urlSet.portalUrl || img.urlSet.webUrl || img.urlSet.shortUrl || "";
                             const rawUrl = img.urlSet.rawUrl || "";
                             return (
-                                <div key={img.uniqueId} className="box-primary p-3">
+                                <div key={img.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
                                     <div className="flex gap-3 items-center">
                                         {/* Thumbnail preview */}
                                         {rawUrl && (
-                                            <div className="h-12 w-12 rounded bg-black/40 border border-white/10 shrink-0 overflow-hidden flex items-center justify-center">
+                                            <div 
+                                                className="h-12 w-12 rounded bg-black/40 border-2 border-zinc-800 shrink-0 overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                                                onClick={() => setEnlargedImage(img)}
+                                                title="Click to enlarge"
+                                            >
                                                 <img
                                                     src={rawUrl}
                                                     alt={img.uniqueId}
@@ -657,7 +680,9 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                                 <div className="min-w-0 flex flex-col gap-1">
                                                     <div className="text-white font-semibold truncate flex gap-2 items-center">
-                                                        <span>{img.uniqueId}</span>
+                                                        <span className="cursor-pointer hover:underline" onClick={() => setEnlargedImage(img)} title="Click to enlarge">
+                                                            {img.uniqueId}
+                                                        </span>
                                                         <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold bg-white/5 text-gray-300">
                                                             {img.type}
                                                         </span>
@@ -690,7 +715,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                 <div className="flex flex-wrap gap-2">
                                                     <button
                                                         onClick={() => (portalUrl ? window.open(portalUrl, "_blank") : null)}
-                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                         disabled={!portalUrl}
                                                         title="Open Link"
                                                     >
@@ -698,7 +723,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                     </button>
                                                     <button
                                                         onClick={() => copy(portalUrl)}
-                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                         disabled={!portalUrl}
                                                         title="Copy Link"
                                                     >
@@ -706,7 +731,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                     </button>
                                                     <button
                                                         onClick={() => migrateImageStorage(img)}
-                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-yellow-500/30 bg-yellow-600/10 hover:bg-yellow-600/15 text-yellow-300 transition-colors disabled:opacity-50"
+                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-yellow-500/40 hover:border-yellow-500 hover:in-shadow bg-yellow-600/10 text-yellow-300 transition-all duration-200 disabled:opacity-50"
                                                         title={`Migrate storage to ${(img.location || "LOCAL") === "LOCAL" ? "R2" : "LOCAL"}`}
                                                         disabled={migratingId === img.uniqueId}
                                                     >
@@ -714,7 +739,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                     </button>
                                                     <button
                                                         onClick={() => deleteImage(img)}
-                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors"
+                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-300 transition-all duration-200"
                                                         title="Delete Image"
                                                     >
                                                         <FaTrash className="h-4 w-4" />
@@ -738,7 +763,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                     <select
-                                        className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                         value={pageSize}
                                         onChange={(e) => {
                                             setPageSize(Number(e.target.value));
@@ -755,7 +780,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.max(1, p - 1))}
                                     disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -763,7 +788,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.min(totalPages, p + 1))}
                                     disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />
@@ -776,10 +801,24 @@ export default function ImagesClient({ users }: ImagesClientProps) {
 
             {/* Upload Modal */}
             {isUploadModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-lg bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={() => {
+                        if (!uploadingState) {
+                            setIsUploadModalOpen(false);
+                            setUploadFile(null);
+                            setUploadDesc("");
+                            setUploadPass("");
+                            setUploadCustomUid("");
+                        }
+                    }}
+                >
+                    <div 
+                        className="w-full max-w-lg bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
                             <div>
                                 <h2 className="text-base font-semibold text-white">Upload Image</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Upload an image or video to the server</p>
@@ -808,7 +847,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-7 cursor-pointer transition-all duration-200 ${
                                     uploadFile
                                         ? "border-emerald-500/50 bg-emerald-500/5"
-                                        : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+                                        : "border-zinc-800 bg-white/[0.02] hover:border-zinc-700 hover:bg-white/[0.04]"
                                 } ${uploadingState ? "cursor-not-allowed opacity-60" : ""}`}
                             >
                                 <input
@@ -856,7 +895,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                     placeholder="Optional description..."
                                     value={uploadDesc}
                                     onChange={(e) => setUploadDesc(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                     disabled={uploadingState}
                                 />
                             </div>
@@ -870,7 +909,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                         placeholder="Min 3 chars"
                                         value={uploadPass}
                                         onChange={(e) => setUploadPass(e.target.value)}
-                                        className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                         disabled={uploadingState}
                                     />
                                 </div>
@@ -881,7 +920,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                         placeholder="5–8 chars"
                                         value={uploadCustomUid}
                                         onChange={(e) => setUploadCustomUid(e.target.value)}
-                                        className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                         disabled={uploadingState}
                                     />
                                 </div>
@@ -908,20 +947,86 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 <button
                                     type="button"
                                     onClick={() => { setIsUploadModalOpen(false); setUploadFile(null); setUploadDesc(""); setUploadPass(""); setUploadCustomUid(""); }}
-                                    className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={uploadingState}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={uploadingState || !uploadFile}
                                 >
                                     {uploadingState ? "Uploading…" : "Upload"}
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Enlarge Image Modal (Lightbox) */}
+            {enlargedImage && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-pointer"
+                    onClick={() => setEnlargedImage(null)}
+                >
+                    <div 
+                        className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center cursor-default bg-primary1 border-2 border-zinc-800 rounded-2xl p-4 shadow-2xl overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="w-full flex items-center justify-between pb-3 border-b border-zinc-800 mb-3">
+                            <div className="min-w-0 pr-4">
+                                <h3 className="text-sm font-semibold text-white truncate">
+                                    {enlargedImage.uniqueId}
+                                </h3>
+                                <p className="text-xs text-gray-400">
+                                    Size: {formatBytes(enlargedImage.size)} · Storage: {enlargedImage.location || "LOCAL"} · Uploader: {enlargedImage.uploader?.username || "System"}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => copy(enlargedImage.urlSet.portalUrl || enlargedImage.urlSet.webUrl || enlargedImage.urlSet.shortUrl || '')}
+                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
+                                    title="Copy direct link"
+                                >
+                                    <FaRegCopy className="h-4 w-4" />
+                                </button>
+                                <a
+                                    href={(enlargedImage.urlSet.rawUrl || '') + "?download=true"}
+                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
+                                    title="Download"
+                                >
+                                    <FaExternalLinkAlt className="h-4 w-4" />
+                                </a>
+                                <button
+                                    onClick={() => setEnlargedImage(null)}
+                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-400 hover:text-white transition-all duration-200 text-xs"
+                                    title="Close"
+                                >
+                                    <FaTimes className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Image / Video preview */}
+                        <div className="w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden bg-black/40 rounded-xl p-2">
+                            {["mp4", "webm", "mov"].includes(enlargedImage.type?.toLowerCase() || '') ? (
+                                <video
+                                    src={enlargedImage.urlSet.rawUrl}
+                                    controls
+                                    autoPlay
+                                    className="max-h-[70vh] max-w-full rounded-lg object-contain"
+                                />
+                            ) : (
+                                <img
+                                    src={enlargedImage.urlSet.rawUrl}
+                                    alt={enlargedImage.uniqueId}
+                                    className="max-h-[70vh] max-w-full rounded-lg object-contain"
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

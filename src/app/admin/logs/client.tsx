@@ -248,7 +248,7 @@ export default function LogsClient({
                     </div>
                     <button
                         onClick={() => router.refresh()}
-                        className="px-4 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                        className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 font-medium"
                     >
                         Refresh
                     </button>
@@ -268,11 +268,11 @@ export default function LogsClient({
                     placeholder="Search user / type / desc / source..."
                     value={q}
                     onChange={(e) => onSearch(e.target.value)}
-                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                    className="w-56 rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500 transition-colors"
                 />
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={typeFilter}
                     onChange={(e) => onType(e.target.value)}
                     title="Filter by type"
@@ -284,7 +284,7 @@ export default function LogsClient({
                 </select>
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={userFilter}
                     onChange={(e) => onUser(e.target.value)}
                     title="Filter by uploader"
@@ -296,7 +296,7 @@ export default function LogsClient({
                 </select>
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
                     title="Sort"
@@ -308,13 +308,13 @@ export default function LogsClient({
                 <div className="flex gap-1.5 ml-auto">
                     <button
                         onClick={() => { onSearch(""); onType(""); onUser(""); setSort("time_desc"); onPage(1); }}
-                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
                     </button>
                     <button
                         onClick={() => router.refresh()}
-                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
                     </button>
@@ -331,7 +331,7 @@ export default function LogsClient({
                         return (
                             <div
                                 key={log.id}
-                                className="rounded-xl box-primary p-3 shadow-sm shadow-black/30"
+                                className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 transition-all duration-200 p-3 shadow-sm shadow-black/30"
                             >
                                 <div
                                     role="button"
@@ -411,7 +411,7 @@ export default function LogsClient({
                                             <div className="pt-1">
                                                 <a
                                                     href={`/i/${log.description}`}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5 transition-colors"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200"
                                                 >
                                                     View
                                                 </a>
@@ -438,7 +438,7 @@ export default function LogsClient({
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                 <select
-                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
@@ -455,7 +455,7 @@ export default function LogsClient({
                             <button
                                 onClick={() => onPage(Math.max(1, page - 1))}
                                 disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                             >
                                 <FaChevronLeft className="h-3 w-3" />
                                 <span>Prev</span>
@@ -463,7 +463,7 @@ export default function LogsClient({
                             <button
                                 onClick={() => onPage(Math.min(totalPages, page + 1))}
                                 disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                             >
                                 <span>Next</span>
                                 <FaChevronRight className="h-3 w-3" />

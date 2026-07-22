@@ -252,32 +252,32 @@ export default function InvitesClient({
 
                     <div className="flex items-center gap-2">
                         <div className="text-xs text-gray-400">Show</div>
-                        <div className="inline-flex rounded-lg border border-white/10 overflow-hidden">
+                        <div className="inline-flex rounded-lg border-2 border-zinc-800 overflow-hidden bg-primary1">
                             <button
-                                className={`px-3 py-2 text-sm transition-colors ${
+                                className={`px-3 py-2 text-sm transition-all duration-200 ${
                                     filter === "all"
-                                        ? "bg-white/10 text-white"
-                                        : "text-gray-300 hover:bg-white/5"
+                                        ? "bg-zinc-800 text-white font-semibold"
+                                        : "text-gray-300 hover:bg-zinc-800/50"
                                 }`}
                                 onClick={() => applyFilter("all")}
                             >
                                 All
                             </button>
                             <button
-                                className={`px-3 py-2 text-sm transition-colors ${
+                                className={`px-3 py-2 text-sm transition-all duration-200 ${
                                     filter === "unused"
-                                        ? "bg-white/10 text-white"
-                                        : "text-gray-300 hover:bg-white/5"
+                                        ? "bg-zinc-800 text-white font-semibold"
+                                        : "text-gray-300 hover:bg-zinc-800/50"
                                 }`}
                                 onClick={() => applyFilter("unused")}
                             >
                                 Unused
                             </button>
                             <button
-                                className={`px-3 py-2 text-sm transition-colors ${
+                                className={`px-3 py-2 text-sm transition-all duration-200 ${
                                     filter === "used"
-                                        ? "bg-white/10 text-white"
-                                        : "text-gray-300 hover:bg-white/5"
+                                        ? "bg-zinc-800 text-white font-semibold"
+                                        : "text-gray-300 hover:bg-zinc-800/50"
                                 }`}
                                 onClick={() => applyFilter("used")}
                             >
@@ -299,7 +299,7 @@ export default function InvitesClient({
                             <div className="sm:col-span-1">
                                 <label className="text-xs text-gray-400">Count</label>
                                 <input
-                                    className="in-primary w-full"
+                                    className="in-primary w-full border-2 border-zinc-800 bg-primary1 rounded-lg"
                                     type="number"
                                     min={1}
                                     max={500}
@@ -314,7 +314,7 @@ export default function InvitesClient({
                             <div className="sm:col-span-2">
                                 <label className="text-xs text-gray-400">Prefix (optional)</label>
                                 <MainStringInput
-                                    className="w-full"
+                                    className="w-full border-2 border-zinc-800 bg-primary1 rounded-lg"
                                     type="text"
                                     placeholder="e.g. SPACE-"
                                     value={createPrefix}
@@ -330,21 +330,14 @@ export default function InvitesClient({
                             <button
                                 onClick={onCreate}
                                 disabled={creating}
-                                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium border border-white/10
-                  ${
-                                    creating
-                                        ? "bg-white/5 text-gray-400"
-                                        : "bg-primary_light/20 hover:bg-primary_light/30 text-white"
-                                }
-                `}
+                                className="px-4 py-2 rounded-lg text-sm font-medium border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-white transition-all duration-200 disabled:opacity-50"
                             >
                                 {creating ? "Creating..." : "Create"}
                             </button>
 
                             <button
                                 onClick={() => router.refresh()}
-                                className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                                className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200"
                             >
                                 Refresh
                             </button>
@@ -360,7 +353,7 @@ export default function InvitesClient({
                         <div className="mt-3">
                             <label className="text-xs text-gray-400">Page size</label>
                             <select
-                                className="in-primary w-full mt-1"
+                                className="in-primary w-full mt-1 border-2 border-zinc-800 bg-primary1 rounded-lg text-xs"
                                 value={pageSize}
                                 onChange={(e) => setPageSize(Number(e.target.value))}
                             >
@@ -373,7 +366,7 @@ export default function InvitesClient({
 
                         <div className="mt-3 flex items-center justify-between gap-2">
                             <button
-                                className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
+                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 disabled:opacity-50"
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={page <= 1}
                             >
@@ -386,7 +379,7 @@ export default function InvitesClient({
                             </div>
 
                             <button
-                                className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
+                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 disabled:opacity-50"
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={page >= totalPages}
                             >
@@ -410,11 +403,11 @@ export default function InvitesClient({
                     placeholder="Search code / user..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                    className="w-56 rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500 transition-colors"
                 />
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={createdBy}
                     onChange={(e) => { setCreatedBy(e.target.value); setPage(1); }}
                     title="Filter by creator"
@@ -426,7 +419,7 @@ export default function InvitesClient({
                 </select>
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
                     title="Sort invites"
@@ -436,17 +429,16 @@ export default function InvitesClient({
                     <option value="used_desc">Used at: newest</option>
                     <option value="used_asc">Used at: oldest</option>
                 </select>
-
                 <div className="flex gap-1.5 ml-auto">
                     <button
                         onClick={() => { setSearch(""); setCreatedBy(""); setSort("created_desc"); setPage(1); }}
-                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
                     </button>
                     <button
                         onClick={() => router.refresh()}
-                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
                     </button>
@@ -566,7 +558,7 @@ export default function InvitesClient({
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                 <select
-                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
@@ -584,7 +576,7 @@ export default function InvitesClient({
                             <button
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                             >
                                 <FaChevronLeft className="h-3 w-3" />
                                 <span>Prev</span>
@@ -592,7 +584,7 @@ export default function InvitesClient({
                             <button
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                             >
                                 <span>Next</span>
                                 <FaChevronRight className="h-3 w-3" />

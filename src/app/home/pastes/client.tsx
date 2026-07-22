@@ -184,7 +184,7 @@ export default function HomePastesPage() {
                     <div className="flex gap-2">
                         <a href="/a/paste">
                             <button
-                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                                 disabled={loading}
                                 title="New Paste"
                             >
@@ -194,7 +194,7 @@ export default function HomePastesPage() {
                         </a>
                         <button
                             onClick={fetchPastes}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
                             title="Refresh List"
                         >
@@ -208,7 +208,7 @@ export default function HomePastesPage() {
                 <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
                     {loading &&
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="box-primary p-2 animate-pulse">
+                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -237,7 +237,7 @@ export default function HomePastesPage() {
                             return (
                                 <div
                                     key={p.uniqueId}
-                                    className="box-primary p-2"
+                                    className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary/40 transition-all duration-200 p-3"
                                 >
                                     <div className="flex flex-col gap-2">
                                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -258,21 +258,21 @@ export default function HomePastesPage() {
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => (portalUrl ? window.open(portalUrl, "_blank") : null)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                 >
                                                     <FaExternalLinkAlt className="h-4 w-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => copy(portalUrl)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                 >
                                                     <FaRegCopy className="h-4 w-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => deletePaste(p)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 hover:bg-red-600/20 text-red-300 transition-all duration-200"
                                                 >
                                                     <FaTrash className="h-4 w-4" />
                                                 </button>
@@ -293,7 +293,7 @@ export default function HomePastesPage() {
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                     <select
-                                        className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                         value={pageSize}
                                         onChange={(e) => {
                                             setPageSize(Number(e.target.value));
@@ -310,7 +310,7 @@ export default function HomePastesPage() {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.max(1, p - 1))}
                                     disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -318,7 +318,7 @@ export default function HomePastesPage() {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.min(totalPages, p + 1))}
                                     disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />

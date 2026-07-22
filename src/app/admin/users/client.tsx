@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserObj } from "@/types/user";
 import { getUserRoleBadge, infoToast, okToast, errorToast } from "@/lib/client";
@@ -81,16 +81,16 @@ function ActionButton({
 }) {
     const styles =
         variant === "danger"
-            ? "border-red-500/30 bg-red-600/10 text-red-500 hover:bg-red-600/15"
+            ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-500"
             : variant === "verydanger"
-                ? "border-red-500/30 bg-red-800/10 text-red-500 hover:bg-red-600/15"
-            : "border-white/10 bg-white/5 text-gray-200 hover:bg-white/10";
+                ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-800/20 text-red-500"
+                : "border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200";
     return (
         <button
             title={title}
             disabled={disabled}
             onClick={onClick}
-            className={`px-3 py-2 rounded-md text-sm border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
+            className={`px-3 py-2 rounded-lg text-sm border-2 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
         </button>
@@ -135,6 +135,24 @@ export default function UsersClient({
     const [createPassword, setCreatePassword] = useState("");
     const [createVerified, setCreateVerified] = useState(true);
     const [creatingUser, setCreatingUser] = useState(false);
+
+    // Close modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (modal.type) closeModal();
+                if (isCreateModalOpen && !creatingUser) {
+                    setIsCreateModalOpen(false);
+                    setCreateUsername("");
+                    setCreateEmail("");
+                    setCreatePassword("");
+                    setCreateVerified(true);
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [modal.type, isCreateModalOpen, creatingUser]);
 
     const roleOptions = useMemo(() => {
         const s = new Set<string>();
@@ -328,13 +346,13 @@ export default function UsersClient({
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="px-4 py-2 rounded-md text-sm bg-emerald-600/20 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-600/30 transition-colors"
+                            className="px-4 py-2 rounded-lg text-sm border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-emerald-300 font-medium transition-all duration-200"
                         >
                             New User
                         </button>
                         <button
                             onClick={() => router.refresh()}
-                            className="px-4 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                            className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 font-medium transition-all duration-200"
                         >
                             Refresh
                         </button>
@@ -355,11 +373,11 @@ export default function UsersClient({
                     placeholder="Search username / uid / invitor..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                    className="w-56 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
                 />
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={roleFilter}
                     onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
                     title="Filter by role"
@@ -371,7 +389,7 @@ export default function UsersClient({
                 </select>
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
                     title="Sort users"
@@ -387,13 +405,13 @@ export default function UsersClient({
                 <div className="flex gap-1.5 ml-auto">
                     <button
                         onClick={() => { setSearch(""); setRoleFilter(""); setSort("created_desc"); setPage(1); }}
-                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
                     </button>
                     <button
                         onClick={() => router.refresh()}
-                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
                     </button>
@@ -589,7 +607,7 @@ export default function UsersClient({
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                 <select
-                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
@@ -607,7 +625,7 @@ export default function UsersClient({
                             <button
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                             >
                                 <FaChevronLeft className="h-3 w-3" />
                                 <span>Prev</span>
@@ -615,7 +633,7 @@ export default function UsersClient({
                             <button
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                             >
                                 <span>Next</span>
                                 <FaChevronRight className="h-3 w-3" />
@@ -625,12 +643,17 @@ export default function UsersClient({
                 )}
             </div>
 
-            {/* Modal */}
-            {modal.type && modal.uid !== null ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    <div className="w-full max-w-md box-primary p-5 shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-white">
+            {modal.type ? (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm cursor-pointer"
+                    onClick={closeModal}
+                >
+                    <div
+                        className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl p-5 shadow-2xl cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                            <h2 className="text-base font-semibold text-white">
                                 {modal.type === "email"
                                     ? "Update email"
                                     : modal.type === "avatar"
@@ -642,7 +665,7 @@ export default function UsersClient({
                                                 : "Change role"}
                             </h2>
                             <button
-                                className="text-gray-300 hover:text-white"
+                                className="text-gray-400 hover:text-white transition-colors"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
@@ -653,7 +676,7 @@ export default function UsersClient({
                         <div className="mt-4">
                             {modal.type === "role" ? (
                                 <select
-                                    className="in-primary w-full"
+                                    className="rounded-lg border-2 border-zinc-800 bg-primary1 p-2 text-sm text-white w-full focus:outline-none"
                                     value={modal.value}
                                     onChange={(e) => setModal((m) => ({ ...m, value: e.target.value }))}
                                     disabled={modal.loading}
@@ -666,7 +689,7 @@ export default function UsersClient({
                                 </select>
                             ) : (
                                 <MainStringInput
-                                    className="p-1 in-primary w-full"
+                                    className="p-2 border-2 border-zinc-800 rounded-lg bg-primary1 text-sm text-white w-full focus:outline-none"
                                     type={modal.type === "password" ? "password" : "text"}
                                     placeholder={
                                         modal.type === "email"
@@ -686,14 +709,14 @@ export default function UsersClient({
 
                         <div className="mt-4 flex justify-end gap-2">
                             <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-300 transition-all duration-200"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="px-3 py-2 rounded-md text-sm border border-primary_light/50 bg-primary_light/20 text-white hover:bg-primary_light/30 disabled:opacity-50"
+                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-white font-medium transition-all duration-200 disabled:opacity-50"
                                 onClick={submitModal}
                                 disabled={modal.loading || !modal.value.trim()}
                             >
@@ -706,10 +729,16 @@ export default function UsersClient({
 
             {/* Create User Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-md bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={() => { if (!creatingUser) { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); } }}
+                >
+                    <div
+                        className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
                             <div>
                                 <h2 className="text-base font-semibold text-white">Create User</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Add a new account to the system</p>
@@ -733,7 +762,7 @@ export default function UsersClient({
                                         placeholder="e.g. john_doe"
                                         value={createUsername}
                                         onChange={(e) => setCreateUsername(e.target.value)}
-                                        className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                         required
                                         disabled={creatingUser}
                                     />
@@ -745,7 +774,7 @@ export default function UsersClient({
                                         placeholder="user@example.com"
                                         value={createEmail}
                                         onChange={(e) => setCreateEmail(e.target.value)}
-                                        className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                         required
                                         disabled={creatingUser}
                                     />
@@ -759,7 +788,7 @@ export default function UsersClient({
                                     placeholder="Enter password..."
                                     value={createPassword}
                                     onChange={(e) => setCreatePassword(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                     required
                                     disabled={creatingUser}
                                 />
@@ -767,10 +796,10 @@ export default function UsersClient({
 
                             {/* Verification toggle */}
                             <div
-                                className={`flex items-center justify-between px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${
+                                className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                                     createVerified
-                                        ? "border-emerald-500/30 bg-emerald-500/5"
-                                        : "border-white/10 bg-white/[0.02]"
+                                        ? "border-emerald-500/40 bg-emerald-500/5"
+                                        : "border-zinc-800 bg-white/[0.02]"
                                 }`}
                                 onClick={() => !creatingUser && setCreateVerified(!createVerified)}
                             >
@@ -811,14 +840,14 @@ export default function UsersClient({
                                 <button
                                     type="button"
                                     onClick={() => { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); }}
-                                    className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={creatingUser}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={creatingUser || !createUsername.trim() || !createEmail.trim() || !createPassword.trim()}
                                 >
                                     {creatingUser ? "Creating…" : "Create User"}

@@ -164,6 +164,21 @@ export default function PastesClient({ users }: PastesClientProps) {
         fetchPastes();
     }, [page, pageSize]);
 
+    // Close modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (isPasteModalOpen && !creatingPaste) {
+                    setIsPasteModalOpen(false);
+                    setPasteTitle("");
+                    setPasteContent("");
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isPasteModalOpen, creatingPaste]);
+
     const handleAddUserFilter = (u: UserObj, mode: "include" | "exclude") => {
         if (mode === "include") {
             const isInc = includedUsers.some(x => x.uid === u.uid);
@@ -255,13 +270,13 @@ export default function PastesClient({ users }: PastesClientProps) {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsPasteModalOpen(true)}
-                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-600/30 transition-colors text-xs font-semibold"
+                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-emerald-300 transition-all duration-200 text-xs font-semibold"
                         >
                             New Paste
                         </button>
                         <button
                             onClick={() => fetchPastes()}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
                             title="Refresh List"
                         >
@@ -280,7 +295,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                             placeholder="Search ID..."
                             value={uniqueId}
                             onChange={e => setUniqueId(e.target.value)}
-                            className="w-36 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                            className="w-36 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
                         />
 
                         {/* Users Dropdown */}
@@ -288,7 +303,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Users ({includedUsers.length + excludedUsers.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -296,7 +311,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                             {userDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
+                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
                                         {users.length === 0 ? (
                                             <div className="p-2 text-xs text-gray-500 text-center">No users available</div>
                                         ) : (
@@ -338,7 +353,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -437,13 +452,13 @@ export default function PastesClient({ users }: PastesClientProps) {
                         <div className="flex gap-1.5 ml-auto">
                             <button
                                 onClick={resetFilters}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset
                             </button>
                             <button
                                 onClick={() => { setPageIdx(1); fetchPastes(1); }}
-                                className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Search
                             </button>
@@ -473,7 +488,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                 <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="box-primary p-2 animate-pulse">
+                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -492,7 +507,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                         pastes.map((p) => {
                             const portalUrl = p.urlSet.portalUrl || p.urlSet.webUrl || p.urlSet.shortUrl || "";
                             return (
-                                <div key={p.uniqueId} className="box-primary p-3">
+                                <div key={p.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                             <div className="min-w-0 flex flex-col gap-1">
@@ -525,7 +540,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => (portalUrl ? window.open(portalUrl, "_blank") : null)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                     title="Open Link"
                                                 >
@@ -533,7 +548,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                                 </button>
                                                 <button
                                                     onClick={() => copy(portalUrl)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                     title="Copy Link"
                                                 >
@@ -541,7 +556,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                                 </button>
                                                 <button
                                                     onClick={() => deletePaste(p)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 transition-all duration-200 text-red-300"
                                                     title="Delete Paste"
                                                 >
                                                     <FaTrash className="h-4 w-4" />
@@ -564,7 +579,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                     <select
-                                        className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                         value={pageSize}
                                         onChange={(e) => {
                                             setPageSize(Number(e.target.value));
@@ -581,7 +596,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.max(1, p - 1))}
                                     disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -589,7 +604,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.min(totalPages, p + 1))}
                                     disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />
@@ -602,10 +617,16 @@ export default function PastesClient({ users }: PastesClientProps) {
 
             {/* Paste Modal */}
             {isPasteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-lg bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={() => { if (!creatingPaste) { setIsPasteModalOpen(false); setPasteTitle(""); setPasteContent(""); } }}
+                >
+                    <div 
+                        className="w-full max-w-lg bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
                             <div>
                                 <h2 className="text-base font-semibold text-white">Create Paste</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Create a new text paste</p>
@@ -627,7 +648,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                     placeholder="Optional title..."
                                     value={pasteTitle}
                                     onChange={(e) => setPasteTitle(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                     disabled={creatingPaste}
                                 />
                             </div>
@@ -639,7 +660,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                     value={pasteContent}
                                     onChange={(e) => setPasteContent(e.target.value)}
                                     rows={9}
-                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 font-mono resize-y transition-colors leading-relaxed"
+                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 font-mono resize-y transition-colors leading-relaxed"
                                     required
                                     disabled={creatingPaste}
                                 />
@@ -650,14 +671,14 @@ export default function PastesClient({ users }: PastesClientProps) {
                                 <button
                                     type="button"
                                     onClick={() => { setIsPasteModalOpen(false); setPasteTitle(""); setPasteContent(""); }}
-                                    className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={creatingPaste}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={creatingPaste || !pasteContent.trim()}
                                 >
                                     {creatingPaste ? "Creating…" : "Create Paste"}

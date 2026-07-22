@@ -64,6 +64,24 @@ export default function GalleryPage() {
     const [passwordModalImage, setPasswordModalImage] = useState<UploadedImagePage | null>(null);
     const [newPasswordVal, setNewPasswordVal] = useState("");
 
+    // Enlarge Lightbox modal state
+    const [enlargedImage, setEnlargedImage] = useState<UploadedImagePage | null>(null);
+
+    // Close modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (enlargedImage) setEnlargedImage(null);
+                if (passwordModalOpen) {
+                    setPasswordModalOpen(false);
+                    setPasswordModalImage(null);
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [enlargedImage, passwordModalOpen]);
+
     // ✅ Detect mobile and adjust page size
     useEffect(() => {
         const checkMobile = () => {
@@ -257,7 +275,7 @@ export default function GalleryPage() {
     };
 
     const SkeletonCard = ({ animate = true }: { animate?: boolean }) => (
-        <div className={`rounded-xl border border-white/10 bg-primary h-full w-full ${animate ? 'animate-pulse' : ''}`}>
+        <div className={`rounded-xl border-2 border-zinc-800 bg-primary1 h-full w-full ${animate ? 'animate-pulse' : ''}`}>
             <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-black">
                 <div className="absolute right-1 top-1 flex items-center gap-1 z-10">
                     <div className="h-[19px] w-[26px] bg-black/60 rounded border border-white/10" />
@@ -274,10 +292,10 @@ export default function GalleryPage() {
 
                 <div className="mt-2 flex items-center justify-between gap-1 pt-1">
                     <div className="flex items-center gap-1 flex-shrink-0">
-                        <div className="h-[26px] w-[31px] rounded-md bg-primary border border-white/10" />
-                        <div className="h-[26px] w-[31px] rounded-md bg-primary border border-white/10" />
+                        <div className="h-[26px] w-[31px] rounded-md bg-primary border-2 border-zinc-800" />
+                        <div className="h-[26px] w-[31px] rounded-md bg-primary border-2 border-zinc-800" />
                     </div>
-                    <div className="h-[26px] w-[31px] rounded-md bg-red-600/10 border border-red-500/30" />
+                    <div className="h-[26px] w-[31px] rounded-md bg-red-600/10 border-2 border-red-500/30" />
                 </div>
             </div>
         </div>
@@ -334,9 +352,9 @@ export default function GalleryPage() {
                     </div>
 
                     <div className="flex gap-2">
-                        <a href="/a/new">
+                        <a href="/a/image">
                             <button
-                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                                 aria-label="New upload"
                                 title="New"
                             >
@@ -350,7 +368,7 @@ export default function GalleryPage() {
                                 setLoading(true);
                                 fetchImages(currentPage);
                             }}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
                             aria-label="Refresh list"
                             title="Refresh"
@@ -369,7 +387,7 @@ export default function GalleryPage() {
                             <button
                                 type="button"
                                 onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Format ({selectedFormats.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -377,7 +395,7 @@ export default function GalleryPage() {
                             {formatDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setFormatDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-1">
+                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-1">
                                         {["png", "jpg", "webp", "gif", "mp4"].map(f => {
                                             const isSel = selectedFormats.includes(f);
                                             return (
@@ -402,7 +420,7 @@ export default function GalleryPage() {
                             <button
                                 type="button"
                                 onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -410,7 +428,7 @@ export default function GalleryPage() {
                             {timeDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setTimeDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-72 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-3 space-y-3">
+                                    <div className="absolute left-0 mt-1 w-72 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-3 space-y-3">
                                         <div className="flex gap-1 border-b border-white/5 pb-2">
                                             <button
                                                 type="button"
@@ -439,19 +457,19 @@ export default function GalleryPage() {
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Date</span>
-                                                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Time</span>
-                                                    <input type="time" value={fromTime} onChange={e => setFromTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="time" value={fromTime} onChange={e => setFromTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Date</span>
-                                                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Time</span>
-                                                    <input type="time" value={toTime} onChange={e => setToTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="time" value={toTime} onChange={e => setToTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
@@ -459,7 +477,7 @@ export default function GalleryPage() {
                                         {timeFilterMode === "exact" && (
                                             <div className="text-[10px]">
                                                 <span className="text-gray-400 block mb-0.5">Date</span>
-                                                <input type="date" value={exactDate} onChange={e => setExactDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                <input type="date" value={exactDate} onChange={e => setExactDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                             </div>
                                         )}
 
@@ -467,15 +485,15 @@ export default function GalleryPage() {
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div className="col-span-2">
                                                     <span className="text-gray-400 block mb-0.5">Date</span>
-                                                    <input type="date" value={dayDate} onChange={e => setDayDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="date" value={dayDate} onChange={e => setDayDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">Start Time</span>
-                                                    <input type="time" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="time" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">End Time</span>
-                                                    <input type="time" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <input type="time" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
@@ -487,7 +505,7 @@ export default function GalleryPage() {
                                                     setFromDate(""); setFromTime(""); setToDate(""); setToTime("");
                                                     setExactDate(""); setDayDate(""); setDayStartTime(""); setDayEndTime("");
                                                 }}
-                                                className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[10px] font-medium transition-colors"
+                                                className="px-2 py-1 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-[10px] font-medium text-gray-300 transition-all duration-200"
                                             >
                                                 Clear
                                             </button>
@@ -501,7 +519,7 @@ export default function GalleryPage() {
                         <div className="flex gap-1.5 ml-auto">
                             <button
                                 onClick={resetFilters}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset Filters
                             </button>
@@ -512,7 +530,7 @@ export default function GalleryPage() {
                     {selectedFormats.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 text-[10px] px-1">
                             {selectedFormats.map(f => (
-                                <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border border-white/20 uppercase font-semibold">
+                                <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border-2 border-zinc-800 uppercase font-semibold">
                                     <span>{f}</span>
                                     <button onClick={() => toggleFormat(f)} className="hover:text-white">×</button>
                                 </span>
@@ -571,6 +589,7 @@ export default function GalleryPage() {
                                                         setNewPasswordVal("");
                                                         setPasswordModalOpen(true);
                                                     }}
+                                                    onEnlarge={() => setEnlargedImage(img)}
                                                     lang={lang}
                                                 />
                                             </div>
@@ -591,7 +610,7 @@ export default function GalleryPage() {
                                 <button
                                     onClick={goToPrevPage}
                                     disabled={currentPage <= 0}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -599,7 +618,7 @@ export default function GalleryPage() {
                                 <button
                                     onClick={goToNextPage}
                                     disabled={currentPage >= totalPages - 1}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />
@@ -612,8 +631,14 @@ export default function GalleryPage() {
 
             {/* Password Modal */}
             {passwordModalOpen && passwordModalImage && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="box-primary w-full max-w-sm p-5 space-y-4 rounded-xl border border-white/10 shadow-2xl relative">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm cursor-pointer"
+                    onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
+                >
+                    <div 
+                        className="box-primary w-full max-w-sm p-5 space-y-4 rounded-xl border-2 border-zinc-800 shadow-2xl relative cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <button
                             type="button"
                             onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
@@ -633,7 +658,7 @@ export default function GalleryPage() {
                                 placeholder="Enter password (leave empty to remove)"
                                 value={newPasswordVal}
                                 onChange={e => setNewPasswordVal(e.target.value)}
-                                className="w-full rounded-lg border border-white/10 bg-primary px-3 py-2 text-xs text-white focus:outline-none focus:border-primary_light/50"
+                                className="w-full rounded-lg border-2 border-zinc-800 bg-primary px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-700"
                             />
                         </div>
 
@@ -641,14 +666,14 @@ export default function GalleryPage() {
                             <button
                                 type="button"
                                 onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-300 transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-300 transition-all duration-200"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleSavePassword}
-                                className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium text-white transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-white transition-all duration-200"
                             >
                                 Save
                             </button>
@@ -656,8 +681,75 @@ export default function GalleryPage() {
                     </div>
                 </div>
             )}
+
+            {/* Enlarge Image Modal (Lightbox) */}
+            {enlargedImage && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-pointer"
+                    onClick={() => setEnlargedImage(null)}
+                >
+                    <div 
+                        className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center cursor-default bg-primary1 border-2 border-zinc-800 rounded-2xl p-4 shadow-2xl overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="w-full flex items-center justify-between pb-3 border-b border-zinc-800 mb-3">
+                            <div className="min-w-0 pr-4">
+                                <h3 className="text-sm font-semibold text-white truncate">
+                                    {enlargedImage.description || enlargedImage.uniqueId}
+                                </h3>
+                                <p className="text-xs text-gray-400">
+                                    {enlargedImage.uniqueId} · {formatBytes(enlargedImage.size || 0)}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => copyToClipboard(enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || '', lang)}
+                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
+                                    title="Copy direct link"
+                                >
+                                    <FaCopy className="h-4 w-4" />
+                                </button>
+                                <a
+                                    href={(enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || '') + "?download=true"}
+                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
+                                    title="Download"
+                                >
+                                    <FaDownload className="h-4 w-4" />
+                                </a>
+                                <button
+                                    onClick={() => setEnlargedImage(null)}
+                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-400 hover:text-white transition-all duration-200 text-xs"
+                                    title="Close"
+                                >
+                                    <FaTimes className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Image / Video preview */}
+                        <div className="w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden bg-black/40 rounded-xl p-2">
+                            {isVideoFile(enlargedImage.type || '') ? (
+                                <video
+                                    src={enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || undefined}
+                                    controls
+                                    autoPlay
+                                    className="max-h-[70vh] max-w-full rounded-lg object-contain"
+                                />
+                            ) : (
+                                <img
+                                    src={(enlargedImage.location === "LOCAL" && !enlargedImage.public) ? (enlargedImage.urls?.webUrl || undefined) : (enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || undefined)}
+                                    alt={enlargedImage.uniqueId}
+                                    className="max-h-[70vh] max-w-full rounded-lg object-contain"
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
+
 }
 
 // MediaCard component
@@ -665,11 +757,13 @@ function MediaCard({
     item,
     onDelete,
     onPasswordChange,
+    onEnlarge,
     lang
 }: {
     item: UploadedImagePage;
     onDelete: () => void;
     onPasswordChange: () => void;
+    onEnlarge: () => void;
     lang: LanguageModel;
 }) {
     const isVideo = isVideoFile(item.type || '');
@@ -689,9 +783,13 @@ function MediaCard({
     const rawUrl = (item.location === "LOCAL" && !item.public) ? item.urls?.webUrl : urls.original;
 
     return (
-        <div className="group rounded-xl border border-white/10 bg-primary hover:border-white/20 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-300 w-full h-full flex flex-col overflow-hidden">
+        <div className="group rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-200 w-full h-full flex flex-col overflow-hidden">
             {/* Preview */}
-            <div className="relative w-full aspect-[4/3] overflow-hidden bg-black/60 flex-shrink-0" style={{ minHeight: 0 }}>
+            <div 
+                className="relative w-full aspect-[4/3] overflow-hidden bg-black/60 flex-shrink-0 cursor-pointer" 
+                style={{ minHeight: 0 }}
+                onClick={onEnlarge}
+            >
                 {showPlaceholder ? (
                     <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary to-black/80 text-white/80 p-2">
                         <div className="text-center">
@@ -705,6 +803,7 @@ function MediaCard({
                         preload="metadata"
                         poster={item.urls?.posterUrl || undefined}
                         controls={true}
+                        onClick={(e) => e.stopPropagation()}
                         style={{ minHeight: 0 }}
                     >
                         <source src={urls.original} type="video/mp4" />
@@ -721,12 +820,12 @@ function MediaCard({
                 )}
 
                 {/* Badges & Overlays */}
-                <div className="absolute right-1.5 top-1.5 flex items-center gap-1.5 z-10">
+                <div className="absolute right-1.5 top-1.5 flex items-center gap-1.5 z-10" onClick={(e) => e.stopPropagation()}>
                     <span className="inline-flex items-center gap-1 bg-black/60 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 text-gray-300 hover:text-white transition-colors cursor-pointer" title="Info">
                         <FaInfoCircle className="h-3 w-3" />
                     </span>
                     <span
-                        onClick={() => copyToClipboard(urls.original, lang)}
+                        onClick={(e) => { e.stopPropagation(); copyToClipboard(urls.original, lang); }}
                         className="cursor-pointer inline-flex items-center gap-1 bg-black/60 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 text-gray-300 hover:text-white transition-colors"
                         title="Copy direct URL"
                     >
@@ -746,7 +845,7 @@ function MediaCard({
             {/* Body */}
             <div className="p-3 space-y-1.5 flex-1 flex flex-col justify-between">
                 <div className="min-w-0 flex items-center justify-between gap-2 h-[16px]">
-                    <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors" title={title}>
+                    <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors cursor-pointer" onClick={onEnlarge} title={title}>
                         {title}.{item.type}
                     </p>
                     <p className="text-[10px] text-gray-500 group-hover:text-gray-300 flex-shrink-0 font-medium transition-colors">({size})</p>
@@ -759,7 +858,7 @@ function MediaCard({
                             href={urls.portalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary text-gray-300 hover:text-white transition-colors"
+                            className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200"
                             aria-label="Open"
                             title="Open portal"
                         >
@@ -767,7 +866,7 @@ function MediaCard({
                         </a>
                         <a
                             href={urls.original + "?download=true"}
-                            className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary text-gray-300 hover:text-white transition-colors"
+                            className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200"
                             aria-label="Download"
                             title="Download original"
                         >
@@ -777,7 +876,7 @@ function MediaCard({
                         <button
                             type="button"
                             onClick={onPasswordChange}
-                            className={`inline-flex items-center px-2 py-1.5 rounded-md text-xs border transition-colors ${item.requiresPassword ? "border-amber-500/30 bg-amber-600/10 hover:bg-amber-600/15 text-amber-300" : "border-white/10 bg-primary hover:bg-secondary text-gray-300 hover:text-white"}`}
+                            className={`inline-flex items-center px-2 py-1.5 rounded-md text-xs border-2 transition-all duration-200 ${item.requiresPassword ? "border-amber-500/40 hover:border-amber-500 hover:in-shadow bg-amber-600/10 text-amber-300" : "border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white"}`}
                             aria-label="Password settings"
                             title="Set / update password"
                         >
@@ -786,7 +885,7 @@ function MediaCard({
                     </div>
                     <button
                         onClick={onDelete}
-                        className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors flex-shrink-0"
+                        className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border-2 border-red-500/40 bg-red-600/10 hover:bg-red-600/20 text-red-300 transition-all duration-200 flex-shrink-0"
                         aria-label="Delete"
                         title="Delete upload"
                     >

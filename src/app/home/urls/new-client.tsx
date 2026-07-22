@@ -174,7 +174,7 @@ export default function UrlsPage() {
                     <div className="flex gap-2">
                         <a href="/a/url">
                             <button
-                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                                 disabled={loading}
                                 title="New URL"
                             >
@@ -184,7 +184,7 @@ export default function UrlsPage() {
                         </a>
                         <button
                             onClick={fetchUrls}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
                             title="Refresh List"
                         >
@@ -256,7 +256,7 @@ export default function UrlsPage() {
                                         <button
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                             disabled={currentPage <= 1}
-                                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                            className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                         >
                                             <FaChevronLeft className="h-3 w-3" />
                                             <span>Prev</span>
@@ -264,7 +264,7 @@ export default function UrlsPage() {
                                         <button
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                             disabled={currentPage >= totalPages}
-                                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                            className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
                                         >
                                             <span>Next</span>
                                             <FaChevronRight className="h-3 w-3" />
@@ -293,7 +293,7 @@ function UrlRow({
     const created = safeFormat(url.createdAt);
 
     return (
-        <li className="px-2 py-1.5 group hover:bg-white/5 transition-colors">
+        <li className="px-3 py-2 group hover:bg-white/5 transition-colors">
             <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
                 {/* Short URL */}
                 <a
@@ -324,14 +324,14 @@ function UrlRow({
                 <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
                     <button
                         onClick={onCopy}
-                        className="p-1.5 rounded border border-white/10 bg-primary1 hover:bg-primary0 transition-colors text-gray-200"
+                        className="p-1.5 rounded-md border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200"
                         title="Copy"
                     >
                         <FaRegCopy className="h-3 w-3" />
                     </button>
                     <button
                         onClick={onDelete}
-                        className="p-1.5 rounded border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-400 transition-colors"
+                        className="p-1.5 rounded-md border-2 border-red-500/40 bg-red-600/10 hover:bg-red-600/20 text-red-400 transition-all duration-200"
                         title="Delete"
                     >
                         <FaTrash className="h-3 w-3" />

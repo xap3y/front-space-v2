@@ -218,6 +218,26 @@ export default function UrlsClient({ users }: UrlsClientProps) {
         fetchUrls();
     }, [page, pageSize, expiredFilter]);
 
+    // Close modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (isUrlModalOpen && !creatingUrl) {
+                    setIsUrlModalOpen(false);
+                    setOriginalUrl("");
+                    setCustomUid("");
+                }
+                if (isLogsModalOpen) {
+                    setIsLogsModalOpen(false);
+                    setSelectedUrl(null);
+                    setUrlLogs([]);
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isUrlModalOpen, creatingUrl, isLogsModalOpen]);
+
     const handleAddUserFilter = (u: UserObj, mode: "include" | "exclude") => {
         if (mode === "include") {
             const isInc = includedUsers.some(x => x.uid === u.uid);
@@ -312,13 +332,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsUrlModalOpen(true)}
-                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-600/30 transition-colors text-xs font-semibold"
+                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-emerald-300"
                         >
                             Shorten URL
                         </button>
                         <button
                             onClick={() => fetchUrls()}
-                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-sm font-medium"
+                            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
                             title="Refresh List"
                         >
@@ -337,7 +357,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             placeholder="Search ID..."
                             value={uniqueId}
                             onChange={e => setUniqueId(e.target.value)}
-                            className="w-32 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                            className="w-32 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
                         />
 
                         {/* Users Dropdown */}
@@ -345,7 +365,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Users ({includedUsers.length + excludedUsers.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -353,7 +373,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             {userDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
+                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
                                         {users.length === 0 ? (
                                             <div className="p-2 text-xs text-gray-500 text-center">No users available</div>
                                         ) : (
@@ -395,7 +415,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             <button
                                 type="button"
                                 onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
@@ -505,14 +525,14 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             placeholder="Max Uses..."
                             value={maxUses}
                             onChange={e => setMaxUses(e.target.value)}
-                            className="w-24 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                            className="w-24 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
                         />
 
                         {/* Expiration status */}
                         <select
                             value={expiredFilter}
                             onChange={e => setExpiredFilter(e.target.value)}
-                            className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                            className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         >
                             <option value="">Expiration...</option>
                             <option value="false">Active</option>
@@ -523,13 +543,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         <div className="flex gap-1.5 ml-auto">
                             <button
                                 onClick={resetFilters}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset
                             </button>
                             <button
                                 onClick={() => { setPageIdx(1); fetchUrls(1); }}
-                                className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Search
                             </button>
@@ -559,7 +579,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                 <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="box-primary p-2 animate-pulse">
+                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -578,7 +598,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         urls.map((u) => {
                             const portalUrl = u.urlSet.portalUrl || u.urlSet.webUrl || u.urlSet.shortUrl || "";
                             return (
-                                <div key={u.uniqueId} className="box-primary p-3">
+                                <div key={u.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                             <div className="min-w-0 flex flex-col gap-1">
@@ -613,7 +633,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                             <div className="flex flex-wrap gap-2">
                                                 <button
                                                     onClick={() => (portalUrl ? window.open(portalUrl, "_blank") : null)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                     title="Open Link"
                                                 >
@@ -621,7 +641,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                                 </button>
                                                 <button
                                                     onClick={() => copy(portalUrl)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 transition-colors disabled:opacity-50"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                     title="Copy Link"
                                                 >
@@ -629,14 +649,14 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                                 </button>
                                                 <button
                                                     onClick={() => handleViewLogs(u)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-white/10 bg-primary1 hover:bg-primary0 text-gray-300 hover:text-white transition-colors"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200"
                                                     title="View Access History"
                                                 >
                                                     <FaHistory className="h-4 w-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => deleteUrl(u)}
-                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border border-red-500/30 bg-red-600/10 hover:bg-red-600/15 text-red-300 transition-colors"
+                                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 transition-all duration-200 text-red-300"
                                                     title="Delete URL"
                                                 >
                                                     <FaTrash className="h-4 w-4" />
@@ -659,7 +679,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                     <select
-                                        className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                         value={pageSize}
                                         onChange={(e) => {
                                             setPageSize(Number(e.target.value));
@@ -676,7 +696,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.max(1, p - 1))}
                                     disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -684,7 +704,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 <button
                                     onClick={() => setPageIdx((p) => Math.min(totalPages, p + 1))}
                                     disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />
@@ -697,10 +717,16 @@ export default function UrlsClient({ users }: UrlsClientProps) {
 
             {/* URL Modal */}
             {isUrlModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-md bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={() => { if (!creatingUrl) { setIsUrlModalOpen(false); setOriginalUrl(""); setCustomUid(""); } }}
+                >
+                    <div 
+                        className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
                             <div>
                                 <h2 className="text-base font-semibold text-white">Shorten URL</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Create a shortened redirect link</p>
@@ -722,7 +748,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                     placeholder="https://example.com/some/long/path"
                                     value={originalUrl}
                                     onChange={(e) => setOriginalUrl(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                     required
                                     disabled={creatingUrl}
                                 />
@@ -735,7 +761,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                     placeholder="Optional custom alias..."
                                     value={customUid}
                                     onChange={(e) => setCustomUid(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                                     disabled={creatingUrl}
                                 />
                             </div>
@@ -750,14 +776,14 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 <button
                                     type="button"
                                     onClick={() => { setIsUrlModalOpen(false); setOriginalUrl(""); setCustomUid(""); }}
-                                    className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={creatingUrl}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={creatingUrl || !originalUrl.trim()}
                                 >
                                     {creatingUrl ? "Shortening…" : "Shorten URL"}
@@ -770,10 +796,20 @@ export default function UrlsClient({ users }: UrlsClientProps) {
 
             {/* Logs / History Modal */}
             {isLogsModalOpen && selectedUrl && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-2xl bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={() => {
+                        setIsLogsModalOpen(false);
+                        setSelectedUrl(null);
+                        setUrlLogs([]);
+                    }}
+                >
+                    <div 
+                        className="w-full max-w-2xl bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
                             <div>
                                 <h2 className="text-base font-semibold text-white flex items-center gap-2">
                                     <FaHistory className="text-telegram text-sm" />
@@ -796,13 +832,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         </div>
 
                         {/* Search / Filter Bar */}
-                        <div className="p-4 bg-primary3/40 border-b border-white/[0.05]">
+                        <div className="p-4 bg-primary3/40 border-b border-zinc-800">
                             <input
                                 type="text"
                                 placeholder="Filter logs by IP, User Agent or Date..."
                                 value={logsSearch}
                                 onChange={(e) => setLogsSearch(e.target.value)}
-                                className="w-full rounded-lg border border-white/10 bg-primary3 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-white/25 placeholder-gray-600 transition-colors"
+                                className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
                             />
                         </div>
 
@@ -845,7 +881,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         </div>
 
                         {/* Footer */}
-                        <div className="px-5 py-3 border-t border-white/[0.07] bg-primary3/20 flex justify-between items-center text-[10px] text-gray-500">
+                        <div className="px-5 py-3 border-t border-zinc-800 bg-primary3/20 flex justify-between items-center text-[10px] text-gray-500">
                             <span>Total logged redirects: <strong>{urlLogs.length}</strong></span>
                             {filteredLogs.length !== urlLogs.length && (
                                 <span>Showing <strong>{filteredLogs.length}</strong> matches</span>

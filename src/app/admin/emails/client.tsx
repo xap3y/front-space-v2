@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { EmailEntry } from "@/types/email";
 import { EmailStream } from "@/components/EmailStream";
@@ -82,15 +82,15 @@ function ActionButton({
 }) {
     const styles =
         variant === "danger"
-            ? "border-red-500/30 bg-red-600/10 text-red-300 hover:bg-red-600/15"
-            : "border-white/10 bg-white/5 text-gray-200 hover:bg-white/10";
+            ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-300"
+            : "border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200";
 
     return (
         <button
             disabled={disabled}
             onClick={onClick}
             title={title}
-            className={`px-3 py-2 rounded-md text-sm border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
+            className={`px-3 py-2 rounded-lg text-sm border-2 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
         </button>
@@ -132,6 +132,18 @@ export default function AdminEmailsClient({
     const [streamEmail, setStreamEmail] = useState<EmailEntry | null>(null);
     const [wsForceRefreshId, setWsForceRefreshId] = useState(0);
     const [actingId, setActingId] = useState<number | null>(null);
+
+    // Close modal on ESC
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && streamOpen) {
+                setStreamOpen(false);
+                setStreamEmail(null);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [streamOpen]);
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("");
@@ -325,11 +337,11 @@ export default function AdminEmailsClient({
                         placeholder="Search email / id / status / creator..."
                         value={search}
                         onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                        className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                        className="w-56 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
                     />
 
                     <select
-                        className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                        className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         value={statusFilter}
                         onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                         title="Filter by status"
@@ -341,7 +353,7 @@ export default function AdminEmailsClient({
                     </select>
 
                     <select
-                        className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                        className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         value={createdByFilter}
                         onChange={(e) => { setCreatedByFilter(e.target.value); setPage(1); }}
                         title="Filter by creator"
@@ -353,7 +365,7 @@ export default function AdminEmailsClient({
                     </select>
 
                     <select
-                        className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                        className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         value={sort}
                         onChange={(e) => setSort(e.target.value as SortMode)}
                         title="Sort emails"
@@ -371,13 +383,13 @@ export default function AdminEmailsClient({
                     <div className="flex gap-1.5 ml-auto">
                         <button
                             onClick={() => { setSearch(""); setStatusFilter(""); setCreatedByFilter(""); setSort("created_desc"); setPage(1); }}
-                            className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                            className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                         >
                             Reset
                         </button>
                         <button
                             onClick={() => router.refresh()}
-                            className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                            className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                         >
                             Refresh
                         </button>
@@ -388,7 +400,7 @@ export default function AdminEmailsClient({
                 <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
                     <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
                         {pageEmails.map((e) => (
-                            <div key={e.id} className="rounded-xl box-primary p-3 border border-white/5 bg-primary/20 hover:bg-secondary/25 hover:border-white/10 transition-all duration-300">
+                            <div key={e.id} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                     <div className="flex items-center gap-2 min-w-0">
                                         <div className="min-w-0">
@@ -496,7 +508,7 @@ export default function AdminEmailsClient({
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                     <select
-                                        className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                         value={pageSize}
                                         onChange={(e) => {
                                             setPageSize(Number(e.target.value));
@@ -514,7 +526,7 @@ export default function AdminEmailsClient({
                                 <button
                                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                                     disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -522,7 +534,7 @@ export default function AdminEmailsClient({
                                 <button
                                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                     disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />
@@ -534,8 +546,14 @@ export default function AdminEmailsClient({
             </div>
 
             {streamOpen && streamEmail ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-5xl box-primary p-5 relative border border-white/10 rounded-xl shadow-2xl">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={closeStream}
+                >
+                    <div 
+                        className="w-full max-w-5xl bg-primary1 p-5 relative border-2 border-zinc-800 rounded-xl shadow-2xl cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <button
                             onClick={closeStream}
                             className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
@@ -552,7 +570,7 @@ export default function AdminEmailsClient({
                             <div className="flex gap-2 shrink-0">
                                 <button
                                     onClick={() => setWsForceRefreshId((v) => v + 1)}
-                                    className="px-3 py-1.5 rounded-md text-xs border border-white/10 bg-primary hover:bg-secondary text-white transition-colors"
+                                    className="px-3 py-1.5 rounded-lg text-xs border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-white transition-all duration-200"
                                     disabled={loadingUser || !user?.apiKey}
                                 >
                                     Reconnect

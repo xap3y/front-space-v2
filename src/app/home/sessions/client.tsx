@@ -184,6 +184,17 @@ export default function HomeSessionsPage() {
         return d.toLocaleString();
     };
 
+    // Close modal on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && selectedSession) {
+                setSelectedSession(null);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [selectedSession]);
+
     if (loadingUser) return null;
 
     return (
@@ -197,7 +208,7 @@ export default function HomeSessionsPage() {
                     </div>
                     <button
                         onClick={() => fetchSessions()}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-white/10 bg-primary hover:bg-secondary transition-colors text-xs font-semibold"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-gray-200"
                         disabled={loading}
                     >
                         <FaRotateRight className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
@@ -215,7 +226,7 @@ export default function HomeSessionsPage() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {loading && sessions.length === 0 ? (
                         Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="box-primary p-4 animate-pulse space-y-3">
+                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-4 animate-pulse space-y-3">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded bg-white/5" />
                                     <div className="space-y-1.5 flex-1">
@@ -236,10 +247,10 @@ export default function HomeSessionsPage() {
                             return (
                                 <div 
                                     key={s.id} 
-                                    className={`box-primary p-4 relative flex flex-col justify-between gap-4 border transition-all duration-200 ${
+                                    className={`rounded-xl p-4 relative flex flex-col justify-between gap-4 border-2 transition-all duration-200 bg-primary1 ${
                                         s.isCurrent 
-                                            ? "border-emerald-500/30 bg-emerald-500/[0.02]" 
-                                            : "border-white/10 hover:border-white/20"
+                                            ? "border-emerald-500/40 bg-emerald-500/[0.02]" 
+                                            : "border-zinc-800 hover:border-zinc-700 hover:in-shadow"
                                     }`}
                                 >
                                     {/* OS & Browser Header */}
@@ -291,10 +302,10 @@ export default function HomeSessionsPage() {
                                     <div className="pt-1">
                                         <button
                                             onClick={() => setSelectedSession(s)}
-                                            className={`w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border ${
+                                            className={`w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 border-2 ${
                                                 s.isCurrent
-                                                    ? "bg-red-500/5 hover:bg-red-500/10 text-red-400 border-red-500/20"
-                                                    : "bg-white/5 hover:bg-white/10 text-gray-300 border-white/10"
+                                                    ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/40 hover:border-red-500 hover:in-shadow"
+                                                    : "border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300"
                                             }`}
                                         >
                                             <FaTrash className="h-3 w-3" />
@@ -310,10 +321,16 @@ export default function HomeSessionsPage() {
 
             {/* Revoke Confirmation Modal */}
             {selectedSession && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-                    <div className="w-full max-w-md bg-primary2 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                    onClick={() => setSelectedSession(null)}
+                >
+                    <div 
+                        className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
                             <div>
                                 <h2 className="text-base font-semibold text-white">Revoke Session?</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Please confirm this action</p>
@@ -344,14 +361,14 @@ export default function HomeSessionsPage() {
                             <div className="flex justify-end gap-2 pt-1">
                                 <button
                                     onClick={() => setSelectedSession(null)}
-                                    className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={revoking}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleRevoke}
-                                    className="px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-medium transition-colors"
+                                    className="px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-500 border-2 border-red-500/40 disabled:opacity-50 text-white font-medium transition-all duration-200"
                                     disabled={revoking}
                                 >
                                     {revoking ? "Revoking…" : "Yes, Revoke"}

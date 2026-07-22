@@ -120,7 +120,7 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null }
                                     <button
                                         onClick={handleCopy}
                                         disabled={isRefreshing || isDeleting}
-                                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-medium text-gray-200 bg-white/5 border border-white/20 transition-all opacity-50 group-hover:opacity-60"
+                                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-xs font-medium text-gray-200 transition-all duration-200"
                                         title="Copy email address"
                                         aria-label="Copy email address"
                                     >
@@ -140,20 +140,18 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null }
                                     data-tooltip-id="my-tooltip"
                                     data-tooltip-content={isExpired ? 'Email is expired, create new one!' : 'Reconnect to receive new emails'}
                                     disabled={isRefreshing || isDeleting || isExpired}
-                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                                        isExpired
-                                            ? 'bg-gray-500/10 text-gray-500 border border-gray-500/20 cursor-not-allowed'
-                                            : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-gray-200'
+                                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-xs font-medium transition-all duration-200 text-gray-200 ${
+                                        isExpired ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                 >
-                                    <MdRefresh className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                    <MdRefresh className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                                     Reconnect
                                 </button>
                                 {!isPublic && (
                                     <button
                                         disabled={isRefreshing || isDeleting}
                                         onClick={handleReset}
-                                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-400/30 hover:text-blue-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-xs font-medium transition-all duration-200 text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <MdAdd className={`w-4 h-4 ${isDeleting ? 'animate-spin' : ''}`} />
                                         New Address

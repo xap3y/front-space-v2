@@ -2,7 +2,7 @@
 
 import { MinecraftServerReports } from "@/types/core";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MainStringInput from "@/components/MainStringInput";
 import { FaRegTrashAlt, FaPencilAlt, FaEye, FaEyeSlash, FaRegCopy, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
@@ -45,16 +45,16 @@ function ActionButton({
 }) {
     const styles =
         variant === "danger"
-            ? "border-red-500/30 bg-red-600/10 text-red-500 hover:bg-red-600/15"
+            ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-500"
             : variant === "verydanger"
-                ? "border-red-500/30 bg-red-800/10 text-red-500 hover:bg-red-600/15"
-                : "border-white/10 bg-white/5 text-gray-200 hover:bg-white/10";
+                ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-800/20 text-red-500"
+                : "border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200";
     return (
         <button
             title={title}
             disabled={disabled}
             onClick={onClick}
-            className={`px-3 py-2 rounded-md text-sm border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
+            className={`px-3 py-2 rounded-lg text-sm border-2 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
         </button>
@@ -98,6 +98,17 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
         value: string;
         loading: boolean;
     }>({ type: null, serverName: null, value: "", loading: false });
+
+    // Close modal on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && modal.type) {
+                closeModal();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [modal.type]);
 
     const filteredSorted = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -243,7 +254,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                     </div>
                     <button
                         onClick={() => router.refresh()}
-                        className="px-4 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                        className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 font-medium"
                     >
                         Refresh
                     </button>
@@ -263,11 +274,11 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                     placeholder="Search server name / IP / email..."
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-56 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                    className="w-56 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
                 />
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={pausedFilter}
                     onChange={(e) => { setPausedFilter(e.target.value); setPage(1); }}
                     title="Filter by status"
@@ -278,7 +289,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                 </select>
 
                 <select
-                    className="rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                    className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
                     title="Sort servers"
@@ -292,13 +303,13 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                 <div className="flex gap-1.5 ml-auto">
                     <button
                         onClick={() => { setSearch(""); setPausedFilter(""); setSort("created_desc"); setPage(1); }}
-                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
                     </button>
                     <button
                         onClick={() => router.refresh()}
-                        className="px-3 py-1.5 rounded-lg bg-primary_light/25 hover:bg-primary_light/35 border border-primary_light/40 text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
                     </button>
@@ -607,7 +618,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
                                 <select
-                                    className="rounded border border-white/10 bg-primary px-2 py-0.5 text-xs focus:outline-none text-gray-300"
+                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                     value={pageSize}
                                     onChange={(e) => {
                                         setPageSize(Number(e.target.value));
@@ -625,7 +636,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                             <button
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                             >
                                 <FaChevronLeft className="h-3 w-3" />
                                 <span>Prev</span>
@@ -633,7 +644,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                             <button
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border border-white/10 bg-primary hover:bg-secondary disabled:opacity-40 disabled:hover:bg-primary transition-colors text-xs flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                             >
                                 <span>Next</span>
                                 <FaChevronRight className="h-3 w-3" />
@@ -645,10 +656,16 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
 
             {/* Modal */}
             {modal.type && modal.serverName !== null ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    <div className="w-full max-w-md box-primary p-5 shadow-lg">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-white">
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 cursor-pointer"
+                    onClick={closeModal}
+                >
+                    <div 
+                        className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl p-5 shadow-2xl cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                            <h2 className="text-base font-semibold text-white">
                                 {modal.type === "password"
                                     ? "Update password"
                                     : modal.type === "apiKey"
@@ -656,7 +673,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                         : "Update owner email"}
                             </h2>
                             <button
-                                className="text-gray-300 hover:text-white"
+                                className="text-gray-400 hover:text-white transition-colors"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
@@ -666,7 +683,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
 
                         <div className="mt-4">
                             <MainStringInput
-                                className="p-1 in-primary w-full"
+                                className="p-2 border-2 border-zinc-800 rounded-lg bg-primary1 text-sm text-white w-full focus:outline-none"
                                 placeholder={
                                     modal.type === "password"
                                         ? "New password"
@@ -682,14 +699,14 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
 
                         <div className="mt-4 flex justify-end gap-2">
                             <button
-                                className="px-3 py-2 rounded-md text-sm border border-white/10 text-gray-200 hover:bg-white/5"
+                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 transition-all duration-200"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="px-3 py-2 rounded-md text-sm border border-primary_light/50 bg-primary_light/20 text-white hover:bg-primary_light/30 disabled:opacity-50"
+                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-white font-medium transition-all duration-200 disabled:opacity-50"
                                 onClick={submitModal}
                                 disabled={modal.loading || (modal.type !== "email" && !modal.value)}
                             >
