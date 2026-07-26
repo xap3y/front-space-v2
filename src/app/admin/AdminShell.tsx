@@ -25,6 +25,7 @@ export default function AdminShell({ children }: Props) {
             { title: "Urls", href: "/admin/urls", page: "urls" },
             { title: "Emails", href: "/admin/emails", page: "emails" },
             { title: "Mc-Reports", href: "/admin/mc-reports", page: "mc-reports" },
+            { title: "Active Sessions", href: "/admin/sessions", page: "sessions" },
         ],
         []
     );

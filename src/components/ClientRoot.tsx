@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/next';
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {MdErrorOutline} from "react-icons/md";
 import { useEffect, useState } from "react";
+import { ActiveSocketProvider } from "@/components/ActiveSocketProvider";
 
 export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
 
@@ -25,6 +26,7 @@ export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
         <>
             <Tooltip id="my-tooltip" />
             <HeartbeatChecker />
+            <ActiveSocketProvider />
             {debug && <LanguageSwitcher />}
             {cookies && (
                 <>

@@ -6,101 +6,72 @@ import { errorToast, okToast } from "@/lib/client";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { useTurnstile } from "react-turnstile";
 import { LoadingDot } from "@/components/GlobalComponents";
-import { MdRefresh } from "react-icons/md";
-import { useTempMail, TempMail } from "@/hooks/useTempMail";
-import {EmailPage} from "@/app/email/client";
+import { useTempMail, TempMail, archiveToHistory } from "@/hooks/useTempMail";
+import { useUser } from "@/hooks/useUser";
+import { EmailPage } from "@/app/email/client";
 
-const STORAGE_KEY = "temp_mail_session_v1";
-
-interface StoredTempMail {
-    email: string;
-    status: string;
-    createdBy: string;
-    expireAt: string | null;
-    storedAt: number;
-}
-
+/**
+ * /tempmail — public-facing page.
+ *
+ * Logged-in user  → skips Cloudflare entirely, shows the same session as
+ *                   /home/tempmail (shared localStorage key `lastTempMail`).
+ * Guest user      → Cloudflare Turnstile form. Once created, shows the inbox
+ *                   with a "New Address" button that re-shows the form.
+ *                   Each new session auto-archives the previous one to history.
+ */
 export default function TempMailPage() {
-    const [loading, setLoading] = useState(true);
-    const [tempMail, setTempMail] = useState<TempMail | null>(null);
+    const { user, loadingUser } = useUser();
+    const [pageLoading, setPageLoading] = useState(true);
+
+    // ── guest state ───────────────────────────────────────────────────────────
+    /** The currently active mail for a guest. Null = show Turnstile form. */
+    const [guestMail, setGuestMail] = useState<TempMail | null>(null);
     const [generating, setGenerating] = useState(false);
-    const [turnstileLoading, setTurnStileLoading] = useState(true);
+    const [turnstileLoading, setTurnstileLoading] = useState(true);
     const [token, setToken] = useState("");
     const turnstile = useTurnstile();
-    const { createPublicTempMail } = useTempMail();
 
-    // Load cached temp mail on mount
+    const { createPublicTempMail, loadFromLocalStorage } = useTempMail();
+
+    // ── init ──────────────────────────────────────────────────────────────────
     useEffect(() => {
-        const loadCachedTempMail = () => {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (!stored) {
-                    setLoading(false);
-                    return;
-                }
+        if (loadingUser) return;
 
-                const parsed: StoredTempMail = JSON.parse(stored);
-                const storedTime = parsed.storedAt || 0;
-                const oneHourMs = 60 * 60 * 1000;
-                const isExpired = Date.now() - storedTime > oneHourMs;
-
-                if (isExpired) {
-                    localStorage.removeItem(STORAGE_KEY);
-                    setLoading(false);
-                    return;
-                }
-
-                // Verify the temp mail is still valid
-                if (parsed.expireAt) {
-                    const expireDate = new Date(parsed.expireAt);
-                    if (expireDate < new Date()) {
-                        localStorage.removeItem(STORAGE_KEY);
-                        setLoading(false);
-                        return;
-                    }
-                }
-
-                const mail: TempMail = {
-                    email: parsed.email,
-                    status: parsed.status,
-                    createdBy: parsed.createdBy,
-                    expireAt: parsed.expireAt,
-                };
-
-                setTempMail(mail);
-            } catch (e) {
-                console.error('Failed to load cached temp mail:', e);
-                localStorage.removeItem(STORAGE_KEY);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadCachedTempMail();
-    }, []);
-
-    async function handleGenerateTempMail(e: React.FormEvent) {
-        e.preventDefault();
-
-        if (!token) {
-            return errorToast("Please complete the captcha");
+        if (user) {
+            // Logged-in: will let EmailPage handle loading from shared localStorage
+            setPageLoading(false);
+            return;
         }
 
-        setGenerating(true);
+        // Guest: try to restore from the shared active-mail key (lastTempMail)
+        // This ensures guests also see their last session on revisit.
+        try {
+            const raw = localStorage.getItem("lastTempMail");
+            if (raw) {
+                const parsed = JSON.parse(raw) as TempMail;
+                // Show it even if expired — user can still see old emails
+                setGuestMail(parsed);
+            }
+        } catch { /* ignore */ }
 
+        setPageLoading(false);
+    }, [loadingUser, user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── guest: create new via Turnstile ──────────────────────────────────────
+    async function handleGenerate(e: React.FormEvent) {
+        e.preventDefault();
+        if (!token) return errorToast("Please complete the captcha");
+
+        setGenerating(true);
         try {
             const res = await createPublicTempMail(token);
 
             if (!res || res.error) {
-                if (res.error && res.error.includes("Rate limit")) {
-                    // IGNORE
-                } else {
-                    errorToast(res.error || "Failed to create temp mail");
+                if (!res?.error?.includes("Rate limit")) {
+                    errorToast(res?.error || "Failed to create temp mail");
                 }
-
                 turnstile.reset();
                 setToken("");
-                setGenerating(false);
                 return;
             }
 
@@ -108,11 +79,10 @@ export default function TempMailPage() {
                 email: res.message.email,
                 status: "OPEN",
                 createdBy: res.message.createdBy,
-                expireAt: res.message.expireAt === 'never' ? null : res.message.expireAt,
+                expireAt: res.message.expireAt === "never" ? null : res.message.expireAt,
             };
 
-            setTempMail(mail);
-            cacheTempMail(mail);
+            setGuestMail(mail);
             okToast("Temp mail created successfully");
         } catch (err) {
             console.error(err);
@@ -124,56 +94,49 @@ export default function TempMailPage() {
         }
     }
 
-    function cacheTempMail(mail: TempMail) {
-        try {
-            const toStore: StoredTempMail = {
-                email: mail.email,
-                status: mail.status,
-                createdBy: mail.createdBy,
-                expireAt: mail.expireAt,
-                storedAt: Date.now(),
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
-        } catch (e) {
-            console.error('Failed to cache temp mail:', e);
-        }
-    }
-
-    function handleClearCache() {
-        localStorage.removeItem(STORAGE_KEY);
-        setTempMail(null);
+    /** Called when guest clicks "New Address" inside the inbox */
+    function handleGuestRequestNewSession() {
+        // Archive current active to history
+        if (guestMail) archiveToHistory(guestMail);
+        // Clear active from storage so history panel doesn't count it twice
+        try { localStorage.removeItem("lastTempMail"); } catch { /* ignore */ }
+        // Reset state to show Turnstile form
+        setGuestMail(null);
         setToken("");
-        try {
-            turnstile.reset();
-        } catch (e) {
-            // Ignore if turnstile is not ready
-        }
+        try { turnstile.reset(); } catch { /* ignore */ }
     }
 
-    if (loading) return <LoadingPage />;
+    // ── render ─────────────────────────────────────────────────────────────────
+    if (pageLoading || loadingUser) return <LoadingPage />;
 
-    // If temp mail exists, show the inbox
-    if (tempMail) {
+    // Logged-in: fully delegate to EmailPage (same as /home/tempmail)
+    if (user) {
         return (
             <main className="flex items-center justify-center min-h-screen p-4">
                 <div className="w-full" style={{ maxWidth: 1600 }}>
-                    <div className="mb-4 flex justify-end">
-                        <button
-                            onClick={handleClearCache}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all"
-                            title="Generate new temp mail"
-                        >
-                            <MdRefresh className="w-3.5 h-3.5" />
-                            New Session
-                        </button>
-                    </div>
-                    <EmailPage maxWidth={1600} isPublic={true} initialTempMail={tempMail} />
+                    <EmailPage maxWidth={1600} isPublic={false} />
                 </div>
             </main>
         );
     }
 
-    // Show captcha form to generate temp mail
+    // Guest with existing session: show inbox
+    if (guestMail) {
+        return (
+            <main className="flex items-center justify-center min-h-screen p-4">
+                <div className="w-full" style={{ maxWidth: 1600 }}>
+                    <EmailPage
+                        maxWidth={1600}
+                        isPublic={true}
+                        initialTempMail={guestMail}
+                        onRequestNewSession={handleGuestRequestNewSession}
+                    />
+                </div>
+            </main>
+        );
+    }
+
+    // Guest without session: Turnstile creation form
     return (
         <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
             <div className="max-w-lg w-full mx-3">
@@ -186,9 +149,8 @@ export default function TempMailPage() {
                             Create a temporary email address to receive messages instantly.
                         </div>
 
-                        <form onSubmit={handleGenerateTempMail} className="mt-8 space-y-6">
-                            {/* Turnstile */}
-                            <div className={`mt-2 min-h-[66px]`}>
+                        <form onSubmit={handleGenerate} className="mt-8 space-y-6">
+                            <div className="mt-2 min-h-[66px]">
                                 {turnstileLoading && (
                                     <div className="flex items-center justify-center h-16">
                                         <svg
@@ -197,50 +159,33 @@ export default function TempMailPage() {
                                             fill="none"
                                             viewBox="0 0 24 24"
                                         >
-                                            <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                            ></circle>
-                                            <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                            ></path>
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                         </svg>
                                     </div>
                                 )}
-
                                 <TurnstileWidget
                                     onVerified={(t) => setToken(t)}
-                                    onError={() => {
-                                        setToken("");
-                                        errorToast("Captcha failed, try again");
-                                    }}
-                                    onLoad={() => setTurnStileLoading(false)}
+                                    onError={() => { setToken(""); errorToast("Captcha failed, try again"); }}
+                                    onLoad={() => setTurnstileLoading(false)}
                                     turnstile={turnstile}
                                 />
                             </div>
 
-                            <div>
-                                <button
-                                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:bg-blue-600 bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    type="submit"
-                                    disabled={!token || generating}
-                                >
-                                    {generating ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <LoadingDot size={"w-4"} />
-                                            Creating...
-                                        </span>
-                                    ) : (
-                                        'Create Temp Mail'
-                                    )}
-                                </button>
-                            </div>
+                            <button
+                                className="w-full flex justify-center py-3 px-4 border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow text-sm font-medium rounded-lg text-emerald-300 bg-primary1 transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                                type="submit"
+                                disabled={!token || generating}
+                            >
+                                {generating ? (
+                                    <span className="flex items-center gap-2">
+                                        <LoadingDot size="w-4" />
+                                        Creating...
+                                    </span>
+                                ) : (
+                                    "Create Temp Mail"
+                                )}
+                            </button>
                         </form>
 
                         <div className="mt-6 text-center text-xs text-gray-500">

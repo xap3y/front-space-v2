@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { EmailEntry } from "@/types/email";
 import { EmailStream } from "@/components/EmailStream";
@@ -8,8 +8,9 @@ import type { TempMail } from "@/hooks/useTempMail";
 import { useUser } from "@/hooks/useUser";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { getApiUrl } from "@/lib/core";
-import { FaExternalLinkAlt, FaRegTrashAlt, FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
+import { FaExternalLinkAlt, FaRegTrashAlt, FaChevronLeft, FaChevronRight, FaTimes, FaTrash } from "react-icons/fa";
 import { PiSealWarningDuotone } from "react-icons/pi";
+import { MdEdit, MdDeleteSweep, MdDeleteOutline } from "react-icons/md";
 
 type SortMode =
     | "created_desc"
@@ -67,6 +68,7 @@ function OpenPill({ expiresAt }: { expiresAt?: string | null }) {
         </span>
     );
 }
+
 function ActionButton({
     children,
     onClick,
@@ -113,6 +115,125 @@ function UserMini({ user }: { user: EmailEntry["createdBy"] }) {
     );
 }
 
+// ── Expiration Edit Modal ─────────────────────────────────────────────────────
+
+interface ExpirationModalProps {
+    email: string;
+    currentExpiry: string | null | undefined;
+    apiKey: string;
+    onClose: () => void;
+    onSaved: () => void;
+}
+
+function ExpirationModal({ email, currentExpiry, apiKey, onClose, onSaved }: ExpirationModalProps) {
+    // Convert ISO string to datetime-local format (YYYY-MM-DDTHH:mm)
+    function isoToLocal(iso: string | null | undefined) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return "";
+        // datetime-local needs local time without seconds/tz
+        const pad = (n: number) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    const [value, setValue] = useState(isoToLocal(currentExpiry));
+    const [saving, setSaving] = useState(false);
+    const [err, setErr] = useState("");
+
+    async function handleSave() {
+        if (!value) { setErr("Please pick a date/time"); return; }
+        const d = new Date(value);
+        if (d <= new Date()) { setErr("Expiration must be in the future"); return; }
+        setSaving(true);
+        setErr("");
+        // Backend CustomLocalDateTimeDeserializer rejects "Z" suffix from toISOString().
+        // Format as "YYYY-MM-DDTHH:mm:ss" in LOCAL time (no timezone, no millis).
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const localIso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+        try {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}/expiration`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
+                body: JSON.stringify({ expirationDate: localIso }),
+            });
+            if (!res.ok) {
+                const text = await res.text();
+                setErr(text || "Failed to update expiration");
+                return;
+            }
+            okToast("Expiration updated");
+            onSaved();
+            onClose();
+        } catch {
+            setErr("Network error");
+        } finally {
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={onClose}
+        >
+            <div
+                className="w-full max-w-sm bg-primary1 border-2 border-zinc-800 rounded-xl shadow-2xl p-5 space-y-4"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-white">Edit Expiration</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+                        <FaTimes className="h-3.5 w-3.5" />
+                    </button>
+                </div>
+
+                <p className="text-xs text-gray-400 font-mono break-all">{email}</p>
+
+                <div className="space-y-1.5">
+                    <label className="text-xs text-gray-400 font-medium">New expiration date & time</label>
+                    <input
+                        type="datetime-local"
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-600 [color-scheme:dark]"
+                    />
+                </div>
+
+                {err && <p className="text-xs text-red-400">{err}</p>}
+
+                <div className="flex gap-2 justify-end pt-1">
+                    <button
+                        onClick={onClose}
+                        className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 text-xs text-gray-300 transition-all duration-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="px-3 py-1.5 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 bg-primary1 text-xs text-emerald-300 disabled:opacity-50 transition-all duration-200"
+                    >
+                        {saving ? "Saving…" : "Save"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ── Inbox Message (in stream modal) ──────────────────────────────────────────
+
+interface InboxMessage {
+    id: number;
+    messageId: string;
+    subject: string;
+    from: string;
+    receivedAt: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function AdminEmailsClient({
     initialEmails,
     initialError = "",
@@ -133,17 +254,23 @@ export default function AdminEmailsClient({
     const [wsForceRefreshId, setWsForceRefreshId] = useState(0);
     const [actingId, setActingId] = useState<number | null>(null);
 
+    // Local copy of emails so we can patch status/expiry without full reload
+    const [emails, setEmails] = useState<EmailEntry[]>(initialEmails);
+
+    // Expiration modal
+    const [expiryModalEmail, setExpiryModalEmail] = useState<EmailEntry | null>(null);
+
     // Close modal on ESC
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && streamOpen) {
-                setStreamOpen(false);
-                setStreamEmail(null);
+            if (e.key === "Escape") {
+                if (expiryModalEmail) { setExpiryModalEmail(null); return; }
+                if (streamOpen) { setStreamOpen(false); setStreamEmail(null); }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [streamOpen]);
+    }, [streamOpen, expiryModalEmail]);
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("");
@@ -155,25 +282,25 @@ export default function AdminEmailsClient({
 
     const statusOptions = useMemo(() => {
         const s = new Set<string>();
-        for (const e of initialEmails) s.add(String(e.status ?? "UNKNOWN"));
+        for (const e of emails) s.add(String(e.status ?? "UNKNOWN"));
         return Array.from(s).sort((a, b) => a.localeCompare(b));
-    }, [initialEmails]);
+    }, [emails]);
 
     const createdByOptions = useMemo(() => {
         const s = new Set<string>();
-        for (const e of initialEmails) {
+        for (const e of emails) {
             const u = e.createdBy?.username;
             if (u) s.add(String(u));
         }
         return Array.from(s).sort((a, b) => a.localeCompare(b));
-    }, [initialEmails]);
+    }, [emails]);
 
     const filteredSorted = useMemo(() => {
         const q = search.trim().toLowerCase();
         const statusQ = statusFilter.trim().toLowerCase();
         const createdByQ = createdByFilter.trim().toLowerCase();
 
-        let list = initialEmails;
+        let list = emails;
 
         if (q) {
             list = list.filter((e) => {
@@ -181,12 +308,7 @@ export default function AdminEmailsClient({
                 const id = String(e.id ?? "");
                 const status = String(e.status ?? "").toLowerCase();
                 const creator = String(e.createdBy?.username ?? "").toLowerCase();
-                return (
-                    email.includes(q) ||
-                    id.includes(q) ||
-                    status.includes(q) ||
-                    creator.includes(q)
-                );
+                return email.includes(q) || id.includes(q) || status.includes(q) || creator.includes(q);
             });
         }
 
@@ -205,29 +327,20 @@ export default function AdminEmailsClient({
             const bExp = parseDateMs(b.expiresAt) ?? -Infinity;
 
             switch (sort) {
-                case "created_desc":
-                    return bCreated - aCreated;
-                case "created_asc":
-                    return aCreated - bCreated;
-                case "expires_desc":
-                    return bExp - aExp;
-                case "expires_asc":
-                    return aExp - bExp;
-                case "email_asc":
-                    return String(a.email ?? "").localeCompare(String(b.email ?? ""));
-                case "email_desc":
-                    return String(b.email ?? "").localeCompare(String(a.email ?? ""));
-                case "id_asc":
-                    return (a.id ?? 0) - (b.id ?? 0);
-                case "id_desc":
-                    return (b.id ?? 0) - (a.id ?? 0);
-                default:
-                    return 0;
+                case "created_desc": return bCreated - aCreated;
+                case "created_asc": return aCreated - bCreated;
+                case "expires_desc": return bExp - aExp;
+                case "expires_asc": return aExp - bExp;
+                case "email_asc": return String(a.email ?? "").localeCompare(String(b.email ?? ""));
+                case "email_desc": return String(b.email ?? "").localeCompare(String(a.email ?? ""));
+                case "id_asc": return (a.id ?? 0) - (b.id ?? 0);
+                case "id_desc": return (b.id ?? 0) - (a.id ?? 0);
+                default: return 0;
             }
         });
 
         return sorted;
-    }, [initialEmails, search, statusFilter, createdByFilter, sort]);
+    }, [emails, search, statusFilter, createdByFilter, sort]);
 
     const totalFiltered = filteredSorted.length;
     const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
@@ -236,6 +349,12 @@ export default function AdminEmailsClient({
         const start = (page - 1) * pageSize;
         return filteredSorted.slice(start, start + pageSize);
     }, [filteredSorted, page, pageSize]);
+
+    // ── Patch local state helpers ─────────────────────────────────────────────
+
+    function patchEmail(id: number, patch: Partial<EmailEntry>) {
+        setEmails((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+    }
 
     const openStream = (email: EmailEntry) => {
         setStreamEmail(email);
@@ -248,65 +367,74 @@ export default function AdminEmailsClient({
         setStreamEmail(null);
     };
 
-    const suspendEmail = async (email: string) => {
-        if (!user?.apiKey) {
-            errorToast("Missing API key");
-            return;
-        }
+    // ── Actions ───────────────────────────────────────────────────────────────
+
+    const suspendEmail = async (entry: EmailEntry) => {
+        if (!user?.apiKey) { errorToast("Missing API key"); return; }
         infoToast("Suspending...");
-
         try {
-            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}/suspend`, {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(entry.email)}/suspend`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-API-Key": user.apiKey,
-                },
+                headers: { "Content-Type": "application/json", "X-API-Key": user.apiKey },
             });
-
-            if (!res.ok) {
-                const text = await res.text();
-                errorToast(text || "Failed to suspend");
-                return;
-            }
-
+            if (!res.ok) { errorToast(await res.text() || "Failed to suspend"); return; }
             okToast("Suspended");
-            router.refresh();
+            patchEmail(entry.id, { status: "SUSPENDED" });
         } catch {
             errorToast("Suspend failed");
         }
     };
 
-    const deleteEmail = async (email: string) => {
-        const conf = confirm(`Delete email "${email}"?`);
-        if (!conf) return;
-
-        if (!user?.apiKey) {
-            errorToast("Missing API key");
-            return;
-        }
-
+    const deleteEmail = async (entry: EmailEntry) => {
+        if (!confirm(`Delete email "${entry.email}"?`)) return;
+        if (!user?.apiKey) { errorToast("Missing API key"); return; }
         infoToast("Deleting...");
         try {
-            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(email)}`, {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(entry.email)}`, {
                 method: "DELETE",
-                headers: {
-                    "X-API-Key": user.apiKey,
-                },
+                headers: { "X-API-Key": user.apiKey },
             });
-
-            if (!res.ok) {
-                const text = await res.text();
-                errorToast(text || "Failed to delete");
-                return;
-            }
-
+            if (!res.ok) { errorToast(await res.text() || "Failed to delete"); return; }
             okToast("Deleted");
-            router.refresh();
+            patchEmail(entry.id, { status: "DELETED" });
         } catch {
             errorToast("Delete failed");
         }
     };
+
+    const clearInbox = async (entry: EmailEntry) => {
+        if (!confirm(`Clear ALL inbox messages for "${entry.email}"? This cannot be undone.`)) return;
+        if (!user?.apiKey) { errorToast("Missing API key"); return; }
+        infoToast("Clearing inbox...");
+        try {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(entry.email)}/inbox`, {
+                method: "DELETE",
+                headers: { "X-API-Key": user.apiKey },
+            });
+            if (!res.ok) { errorToast(await res.text() || "Failed to clear inbox"); return; }
+            okToast("Inbox cleared");
+            // Bump WS refresh if the stream for this email is open
+            if (streamEmail?.email === entry.email) setWsForceRefreshId((v) => v + 1);
+        } catch {
+            errorToast("Clear inbox failed");
+        }
+    };
+
+    const deleteInboxMessage = async (emailAddress: string, messageId: number) => {
+        if (!user?.apiKey) { errorToast("Missing API key"); return; }
+        try {
+            const res = await fetch(getApiUrl() + `/v1/email/${encodeURIComponent(emailAddress)}/inbox/${messageId}`, {
+                method: "DELETE",
+                headers: { "X-API-Key": user.apiKey },
+            });
+            if (!res.ok) { errorToast(await res.text() || "Failed to delete message"); return; }
+            okToast("Message deleted");
+        } catch {
+            errorToast("Delete message failed");
+        }
+    };
+
+    // ── Render ────────────────────────────────────────────────────────────────
 
     return (
         <div className="flex-1 min-w-0 pt-0 px-3 md:px-6">
@@ -411,7 +539,7 @@ export default function AdminEmailsClient({
                                                         try {
                                                             await navigator.clipboard.writeText(e.email);
                                                             okToast("Copied");
-                                                        } catch (err) {
+                                                        } catch {
                                                             infoToast("Copy failed");
                                                         }
                                                     }}
@@ -437,39 +565,58 @@ export default function AdminEmailsClient({
                                         <StatusPill status={e.status} />
 
                                         <div className="flex items-center gap-2">
+                                            {/* View inbox */}
                                             <ActionButton
                                                 disabled={loadingUser || !user?.apiKey}
                                                 onClick={() => openStream(e)}
-                                                title="Open Stream"
+                                                title="View Inbox"
                                             >
                                                 <FaExternalLinkAlt className="h-3.5 w-3.5" />
                                             </ActionButton>
 
+                                            {/* Edit expiration */}
+                                            <ActionButton
+                                                disabled={loadingUser || !user?.apiKey}
+                                                onClick={() => setExpiryModalEmail(e)}
+                                                title="Edit Expiration"
+                                            >
+                                                <MdEdit className="h-4 w-4" />
+                                            </ActionButton>
+
+                                            {/* Clear inbox */}
                                             <ActionButton
                                                 disabled={actingId === e.id || loadingUser || !user?.apiKey}
                                                 onClick={async () => {
                                                     setActingId(e.id);
-                                                    try {
-                                                        await suspendEmail(e.email);
-                                                    } finally {
-                                                        setActingId(null);
-                                                    }
+                                                    try { await clearInbox(e); }
+                                                    finally { setActingId(null); }
+                                                }}
+                                                title="Clear Inbox (delete all messages)"
+                                            >
+                                                <MdDeleteSweep className="h-4 w-4" />
+                                            </ActionButton>
+
+                                            {/* Suspend */}
+                                            <ActionButton
+                                                disabled={actingId === e.id || loadingUser || !user?.apiKey}
+                                                onClick={async () => {
+                                                    setActingId(e.id);
+                                                    try { await suspendEmail(e); }
+                                                    finally { setActingId(null); }
                                                 }}
                                                 title="Suspend Email"
                                             >
                                                 <PiSealWarningDuotone className="h-4 w-4" />
                                             </ActionButton>
 
+                                            {/* Delete */}
                                             <ActionButton
                                                 variant="danger"
                                                 disabled={actingId === e.id || loadingUser || !user?.apiKey}
                                                 onClick={async () => {
                                                     setActingId(e.id);
-                                                    try {
-                                                        await deleteEmail(e.email);
-                                                    } finally {
-                                                        setActingId(null);
-                                                    }
+                                                    try { await deleteEmail(e); }
+                                                    finally { setActingId(null); }
                                                 }}
                                                 title="Delete Email"
                                             >
@@ -510,10 +657,7 @@ export default function AdminEmailsClient({
                                     <select
                                         className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
                                         value={pageSize}
-                                        onChange={(e) => {
-                                            setPageSize(Number(e.target.value));
-                                            setPage(1);
-                                        }}
+                                        onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
                                     >
                                         <option value={10}>10</option>
                                         <option value={25}>25</option>
@@ -526,7 +670,7 @@ export default function AdminEmailsClient({
                                 <button
                                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                                     disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <FaChevronLeft className="h-3 w-3" />
                                     <span>Prev</span>
@@ -534,7 +678,7 @@ export default function AdminEmailsClient({
                                 <button
                                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                     disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
+                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
                                 >
                                     <span>Next</span>
                                     <FaChevronRight className="h-3 w-3" />
@@ -545,12 +689,13 @@ export default function AdminEmailsClient({
                 </div>
             </div>
 
+            {/* ── Inbox Stream Modal ── */}
             {streamOpen && streamEmail ? (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={closeStream}
                 >
-                    <div 
+                    <div
                         className="w-full max-w-5xl bg-primary1 p-5 relative border-2 border-zinc-800 rounded-xl shadow-2xl cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -567,13 +712,22 @@ export default function AdminEmailsClient({
                                     Status: {String(streamEmail.status ?? "UNKNOWN")} · Expires: {formatDate(streamEmail.expiresAt)}
                                 </div>
                             </div>
-                            <div className="flex gap-2 shrink-0">
+                            <div className="flex gap-2 shrink-0 flex-wrap">
                                 <button
                                     onClick={() => setWsForceRefreshId((v) => v + 1)}
-                                    className="px-3 py-1.5 rounded-lg text-xs border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-white transition-all duration-200"
+                                    className="px-3 py-1.5 rounded-lg text-xs border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 text-white transition-all duration-200"
                                     disabled={loadingUser || !user?.apiKey}
                                 >
                                     Reconnect
+                                </button>
+                                <button
+                                    onClick={() => clearInbox(streamEmail)}
+                                    className="px-3 py-1.5 rounded-lg text-xs border-2 border-red-500/30 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-300 transition-all duration-200 flex items-center gap-1.5"
+                                    disabled={loadingUser || !user?.apiKey}
+                                    title="Delete all inbox messages"
+                                >
+                                    <MdDeleteSweep className="h-4 w-4" />
+                                    Clear Inbox
                                 </button>
                             </div>
                         </div>
@@ -600,6 +754,20 @@ export default function AdminEmailsClient({
                     </div>
                 </div>
             ) : null}
+
+            {/* ── Expiration Edit Modal ── */}
+            {expiryModalEmail && (
+                <ExpirationModal
+                    email={expiryModalEmail.email}
+                    currentExpiry={expiryModalEmail.expiresAt}
+                    apiKey={user?.apiKey ?? ""}
+                    onClose={() => setExpiryModalEmail(null)}
+                    onSaved={() => {
+                        // Will be reflected on next router.refresh(); optionally patch locally
+                        router.refresh();
+                    }}
+                />
+            )}
         </div>
     );
 }
