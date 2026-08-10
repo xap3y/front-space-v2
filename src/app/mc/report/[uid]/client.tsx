@@ -18,6 +18,26 @@ import LoadingPage from "@/components/LoadingPage";
 
 // ... (rest of components stay the same)
 
+const parseDiscordEmojis = (text: string) => {
+    return text
+        .replace(/<a:([a-zA-Z0-9_]+):(\d+)>/g, '![$1](https://cdn.discordapp.com/emojis/$2.gif?size=44)')
+        .replace(/<:([a-zA-Z0-9_]+):(\d+)>/g, '![$1](https://cdn.discordapp.com/emojis/$2.png?size=44)');
+};
+
+const markdownComponents = {
+    p: ({ node, ...props }: any) => <span {...props} />,
+    a: ({ node, ...props }: any) => <a {...props} className="text-[#00b0f4] hover:underline" target="_blank" />,
+    code: ({ node, className, children, ...props }: any) => (
+        <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
+    ),
+    pre: ({ node, ...props }: any) => (
+        <pre className="bg-[#2b2d31] border border-[#1e1f22] rounded p-2 overflow-x-auto mt-1 mb-1 block" {...props} />
+    ),
+    img: ({ node, ...props }: any) => (
+        <img {...props} className="inline-block h-[1.375rem] w-[1.375rem] object-contain align-text-bottom mx-[1px]" />
+    )
+};
+
 const Spoiler = ({ content }: { content: string }) => {
     const [visible, setVisible] = useState(false);
 
@@ -36,13 +56,7 @@ const Spoiler = ({ content }: { content: string }) => {
             <span className={visible ? '' : 'pointer-events-none'}>
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
-                    components={{
-                        p: ({ node, ...props }) => <span {...props} />,
-                        a: ({ node, ...props }) => <a {...props} className="text-[#00b0f4] hover:underline" />,
-                        code: ({ node, className, children, ...props }) => (
-                            <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
-                        ),
-                    }}
+                    components={markdownComponents}
                 >
                     {content}
                 </ReactMarkdown>
@@ -52,7 +66,8 @@ const Spoiler = ({ content }: { content: string }) => {
 };
 
 const FormattedText = ({ content }: { content: string }) => {
-    const parts = content.split(/(\|\|[\s\S]+?\|\|)/g);
+    const parsedContent = parseDiscordEmojis(content);
+    const parts = parsedContent.split(/(\|\|[\s\S]+?\|\|)/g);
 
     return (
         <span>
@@ -66,16 +81,7 @@ const FormattedText = ({ content }: { content: string }) => {
                     <ReactMarkdown
                         key={i}
                         remarkPlugins={[remarkGfm]}
-                        components={{
-                            p: ({ node, ...props }) => <span {...props} />,
-                            a: ({ node, ...props }) => <a {...props} className="text-[#00b0f4] hover:underline" target="_blank" />,
-                            code: ({ node, className, children, ...props }) => (
-                                <code className="bg-[#2b2d31] rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
-                            ),
-                            pre: ({ node, ...props }) => (
-                                <pre className="bg-[#2b2d31] border border-[#1e1f22] rounded p-2 overflow-x-auto mt-1 mb-1 block" {...props} />
-                            )
-                        }}
+                        components={markdownComponents}
                     >
                         {part}
                     </ReactMarkdown>
