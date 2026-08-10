@@ -5,7 +5,7 @@ import { EmbedVisualizer } from 'embed-visualizer';
 import 'embed-visualizer/dist/index.css';
 
 import {useParams, useRouter} from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {DiscordTranscript, DiscordMessage, DiscordAttachment, StickerEntry} from '@/types/discord';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
@@ -54,16 +54,37 @@ const Spoiler = ({ content }: { content: string }) => {
             }`}
         >
             <span className={visible ? '' : 'pointer-events-none'}>
-                <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={markdownComponents}
-                >
-                    {content}
-                </ReactMarkdown>
+                <MarkdownErrorBoundary fallback={content}>
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={markdownComponents}
+                    >
+                        {content}
+                    </ReactMarkdown>
+                </MarkdownErrorBoundary>
             </span>
         </span>
     );
 };
+
+class MarkdownErrorBoundary extends React.Component<{ children: React.ReactNode; fallback: string }, { hasError: boolean }> {
+    constructor(props: any) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    static getDerivedStateFromError(error: any) {
+        return { hasError: true };
+    }
+    componentDidCatch(error: any, errorInfo: any) {
+        console.error("Markdown rendering error:", error, errorInfo);
+    }
+    render() {
+        if (this.state.hasError) {
+            return <span>{this.props.fallback}</span>;
+        }
+        return this.props.children;
+    }
+}
 
 const FormattedText = ({ content }: { content: string }) => {
     const parsedContent = parseDiscordEmojis(content);
@@ -78,13 +99,14 @@ const FormattedText = ({ content }: { content: string }) => {
                 }
 
                 return (
-                    <ReactMarkdown
-                        key={i}
-                        remarkPlugins={[remarkGfm]}
-                        components={markdownComponents}
-                    >
-                        {part}
-                    </ReactMarkdown>
+                    <MarkdownErrorBoundary key={i} fallback={part}>
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={markdownComponents}
+                        >
+                            {part}
+                        </ReactMarkdown>
+                    </MarkdownErrorBoundary>
                 );
             })}
         </span>
