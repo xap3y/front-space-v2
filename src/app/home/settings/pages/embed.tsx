@@ -60,7 +60,7 @@ export default function EmbedTabContent({ user }: { user: UserObj }) {
     const embed: any = {
         embed: {
             image: {
-                url: "https://r3.xap3y.space/media/RSOY1YQB"
+                url: "https://r2.xap3y.eu/media/RSOY1YQB"
             }
         }};
     if (embedSettings.title) embed.embed.title = embedSettings.title;

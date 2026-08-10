@@ -72,7 +72,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     return res;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const ua = req.headers.get("user-agent") || "unknown";
 
     if (!validateUserAgent(ua).validFormat && !ua.includes("Uptime-Kuma")) {

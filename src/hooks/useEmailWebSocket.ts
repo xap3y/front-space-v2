@@ -120,6 +120,11 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         return messagesRef.current.map(m => m.serverId || m.id);
     }, []);
 
+    const refetchRef = useRef(refetchCallback);
+    useEffect(() => {
+        refetchRef.current = refetchCallback;
+    }, [refetchCallback]);
+
     useEffect(() => {
         console.log("CALLED " + email + " " + apiKey + " " + forceId);
 
@@ -210,9 +215,9 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         ws.onmessage = (ev) => {
             try {
                 const data = JSON.parse(ev.data);
-                if (data.error === true && data.close === true && refetchCallback != null) {
+                if (data.error === true && data.close === true && refetchRef.current != null) {
                     setTimeout(() => {
-                        refetchCallback();
+                        if (refetchRef.current) refetchRef.current();
                     }, 400);
                     return;
                 }
@@ -226,7 +231,7 @@ export function useEmailWebSocket(email: string, apiKey: string, forceId: number
         return () => {
             ws.close();
         };
-    }, [email, apiKey, forceId, pushNewMessage, getMessagesId, refetchCallback]);
+    }, [email, apiKey, forceId, pushNewMessage, getMessagesId]);
 
     const removeMessage = useCallback((id: string) => {
         setMessages(prev => {
