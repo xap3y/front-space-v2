@@ -16,6 +16,7 @@ export function toAsciiAlnumPassword(input: string): string {
 }
 
 export function hexToInt(hex: string) {
+    if (!hex) return 0;
     if (hex.startsWith("#")) {
         return parseInt(hex.replace("#", ""), 16);
     }
