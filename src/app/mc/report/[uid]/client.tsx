@@ -354,7 +354,7 @@ export default function ReportPageClient() {
                                                 key={`embed-${m.id}-${idx}`}
                                                 embed={{
                                                     embed: {
-                                                        title: e.title,
+                                                        title: e.title || undefined,
                                                         timestamp: e.timestamp || undefined,
                                                         description: e.description || undefined,
                                                         url: e.url || undefined,
