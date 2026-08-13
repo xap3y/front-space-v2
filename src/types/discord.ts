@@ -1,5 +1,5 @@
 export interface DiscordAttachment {
-    id: string;
+    id?: string;
     filename: string;
     size: number;
     url: string;

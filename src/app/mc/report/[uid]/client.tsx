@@ -130,15 +130,80 @@ const UserAvatar = ({ username, url }: { username: string; url?: string }) => {
     );
 };
 
+const formatAttachmentSize = (size: number) => {
+    if (!Number.isFinite(size) || size < 0) return '';
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) {
+        const kilobytes = size / 1024;
+        return `${kilobytes < 10 ? kilobytes.toFixed(1) : Math.round(kilobytes)} KB`;
+    }
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const TEXT_PREVIEW_LINE_LIMIT = 8;
+const TEXT_PREVIEW_CHAR_LIMIT = 1200;
+
 const AttachmentDisplay = ({ attachment }: { attachment: DiscordAttachment }) => {
-    const isImage = attachment.contentType?.startsWith('image/') ||
-        attachment.filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+    const attachmentUrl = attachment.safeUrl || attachment.url;
+    const downloadUrl = attachment.safeUrl
+        ? `${attachment.safeUrl}${attachment.safeUrl.includes('?') ? '&' : '?'}download=true`
+        : attachment.url;
+    const isImage = attachment.contentType?.startsWith('image/') === true ||
+        /\.(jpg|jpeg|png|gif|webp)$/i.test(attachment.filename || '');
+    const isVideo = attachment.contentType?.startsWith('video/') === true ||
+        /\.(mp4|webm|mov|mkv)$/i.test(attachment.filename || '');
+    const isAudio = attachment.contentType?.startsWith('audio/') === true ||
+        /\.(mp3|ogg|wav|m4a|flac)$/i.test(attachment.filename || '');
+    const isText = attachment.contentType?.startsWith('text/plain') === true ||
+        /\.txt$/i.test(attachment.filename || '');
+    const sizeText = formatAttachmentSize(attachment.size);
+    const [textContent, setTextContent] = useState<string | null>(null);
+    const [textLoading, setTextLoading] = useState(false);
+    const [textError, setTextError] = useState(false);
+    const [textExpanded, setTextExpanded] = useState(false);
+
+    useEffect(() => {
+        if (!isText) return;
+
+        const controller = new AbortController();
+        setTextLoading(true);
+        setTextError(false);
+        setTextContent(null);
+        setTextExpanded(false);
+
+        fetch(attachmentUrl, { signal: controller.signal })
+            .then((response) => {
+                if (!response.ok) throw new Error(`Failed to load attachment (${response.status})`);
+                return response.text();
+            })
+            .then(setTextContent)
+            .catch((error) => {
+                if (error?.name !== 'AbortError') setTextError(true);
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) setTextLoading(false);
+            });
+
+        return () => controller.abort();
+    }, [attachmentUrl, isText]);
+
+    const textPreview = useMemo(() => {
+        if (textContent === null) return { content: '', expandable: false };
+
+        const lines = textContent.split(/\r?\n/);
+        const lineLimited = lines.slice(0, TEXT_PREVIEW_LINE_LIMIT).join('\n');
+        const content = lineLimited.slice(0, TEXT_PREVIEW_CHAR_LIMIT);
+        return {
+            content,
+            expandable: lines.length > TEXT_PREVIEW_LINE_LIMIT || lineLimited.length > TEXT_PREVIEW_CHAR_LIMIT,
+        };
+    }, [textContent]);
 
     if (isImage) {
         return (
-            <a href={attachment.url} target="_blank" rel="noopener noreferrer" className="block max-w-sm">
+            <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" className="block max-w-sm">
                 <img
-                    src={attachment.safeUrl ? attachment.safeUrl : attachment.url}
+                    src={attachmentUrl}
                     alt={attachment.filename}
                     className="rounded-lg border border-zinc-900 bg-zinc-950 object-contain max-h-[300px] max-w-[300px]"
                     loading="lazy"
@@ -147,14 +212,83 @@ const AttachmentDisplay = ({ attachment }: { attachment: DiscordAttachment }) =>
         );
     }
 
+    if (isVideo) {
+        return (
+            <video
+                src={attachmentUrl}
+                controls
+                preload="metadata"
+                className="max-h-[360px] max-w-full rounded-lg border border-zinc-900 bg-zinc-950"
+            >
+                <a href={attachmentUrl} target="_blank" rel="noopener noreferrer">{attachment.filename}</a>
+            </video>
+        );
+    }
+
+    if (isAudio) {
+        return (
+            <div className="flex max-w-md flex-col gap-2 rounded border border-[#1e1f22] bg-[#2b2d31] p-3">
+                <a href={downloadUrl} target="_blank" rel="noopener noreferrer" className="truncate text-blue-400 hover:underline">
+                    {attachment.filename || 'Audio attachment'}
+                </a>
+                <audio src={attachmentUrl} controls preload="metadata" className="max-w-full" />
+            </div>
+        );
+    }
+
+    if (isText) {
+        const visibleText = textExpanded ? textContent : textPreview.content;
+
+        return (
+            <div className="w-full max-w-[640px] overflow-hidden rounded-md border border-[#1e1f22] bg-[#2b2d31]">
+                <div className="flex items-center gap-3 border-b border-[#1e1f22] px-3 py-2.5">
+                    <div className="text-2xl" aria-hidden="true">📄</div>
+                    <div className="flex min-w-0 flex-col">
+                        <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" className="truncate text-sm font-medium text-blue-400 hover:underline">
+                            {attachment.filename || 'Text attachment'}
+                        </a>
+                        {sizeText && <span className="text-xs text-zinc-400">{sizeText}</span>}
+                    </div>
+                </div>
+
+                {textLoading ? (
+                    <div className="space-y-2 p-3 animate-pulse">
+                        <div className="h-3 w-5/6 rounded bg-zinc-600/60" />
+                        <div className="h-3 w-3/4 rounded bg-zinc-600/60" />
+                        <div className="h-3 w-2/3 rounded bg-zinc-600/60" />
+                    </div>
+                ) : textError ? (
+                    <div className="px-3 py-4 text-sm text-zinc-400">
+                        Preview unavailable. Open the attachment to view it.
+                    </div>
+                ) : (
+                    <pre className="overflow-x-auto whitespace-pre-wrap break-words p-3 font-mono text-xs leading-5 text-[#dbdee1]">
+                        {visibleText || 'This text file is empty.'}
+                    </pre>
+                )}
+
+                {textContent !== null && textPreview.expandable && (
+                    <button
+                        type="button"
+                        onClick={() => setTextExpanded((expanded) => !expanded)}
+                        className="w-full border-t border-[#1e1f22] px-3 py-2 text-left text-xs font-medium text-blue-400 transition-colors hover:bg-[#35373c] hover:text-blue-300"
+                        aria-expanded={textExpanded}
+                    >
+                        {textExpanded ? 'Collapse' : 'Expand'}
+                    </button>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="flex items-center gap-3 rounded bg-[#2b2d31] p-3 border border-[#1e1f22] max-w-md">
             <div className="text-3xl">📄</div>
             <div className="flex flex-col overflow-hidden">
-                <a href={attachment.url} target="_blank" rel="noopener noreferrer" className="truncate text-blue-400 hover:underline">
+                <a href={downloadUrl} target="_blank" rel="noopener noreferrer" className="truncate text-blue-400 hover:underline">
                     {attachment.filename || 'Attachment'}
                 </a>
-                <span className="text-xs text-zinc-400">{attachment.size ? Math.round(attachment.size / 1024) + ' KB' : ''}</span>
+                {sizeText && <span className="text-xs text-zinc-400">{sizeText}</span>}
             </div>
         </div>
     );
@@ -330,7 +464,7 @@ export default function ReportPageClient() {
                                 {(m.attachments || []).length > 0 && (
                                     <div className="mt-2 flex flex-wrap gap-2">
                                         {(m.attachments || []).map((a: DiscordAttachment) => (
-                                            <AttachmentDisplay key={a.url} attachment={a} />
+                                            <AttachmentDisplay key={a.id || a.safeUrl || a.url} attachment={a} />
                                         ))}
                                     </div>
                                 )}
