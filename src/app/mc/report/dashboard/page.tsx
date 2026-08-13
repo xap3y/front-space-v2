@@ -1,9 +1,9 @@
 import type {Metadata} from "next";
-import TranscriptsDashboardClient from "@/app/mc/report/dashboard/client";
+import ReportsDashboardClient from "@/app/mc/report/dashboard/client";
 
 
 export const metadata: Metadata = {
-    title: "Space - Transcripts Dashboard",
+    title: "Space - Report Control Center",
     robots: { index: false, follow: false },
 };
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function Page() {
     return (
         <>
-            <TranscriptsDashboardClient />
+            <ReportsDashboardClient />
         </>
     )
 }
