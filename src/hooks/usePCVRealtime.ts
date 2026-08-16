@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ActiveVIP, Code, VIPPackage, WsEnvelope } from "@/types/playcore";
+import { ActiveVIP, Code, PausedVIP, VIPPackage, WsEnvelope } from "@/types/playcore";
 import { errorToast } from "@/lib/client";
 
 export type Callback = () => void | Promise<void>;
@@ -12,6 +12,8 @@ type Props = {
     setCodes: React.Dispatch<React.SetStateAction<Code[]>>;
     setVipPackages: React.Dispatch<React.SetStateAction<VIPPackage[]>>;
     setActiveVips: React.Dispatch<React.SetStateAction<ActiveVIP[]>>;
+    setPausedVips?: React.Dispatch<React.SetStateAction<PausedVIP[]>>;
+    setGroups?: React.Dispatch<React.SetStateAction<string[]>>;
     callBacks?: Record<string, Callback>;
     onError?: (message: string, payload?: unknown) => void;
 };
@@ -34,12 +36,17 @@ export function usePCVRealtime({
                                    setCodes,
                                    setVipPackages,
                                    setActiveVips,
+                                   setPausedVips,
+                                   setGroups,
                                    callBacks,
                                    onError,
                                }: Props) {
     const [status, setStatus] = useState<Status>("idle");
     const [lastError, setLastError] = useState<string | null>(null);
     const wsRef = useRef<WebSocket | null>(null);
+    const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const reconnectAttemptsRef = useRef(0);
+    const shouldReconnectRef = useRef(true);
 
     const callbacksRef = useRef<Props["callBacks"] | undefined>(undefined);
     useEffect(() => {
@@ -70,6 +77,10 @@ export function usePCVRealtime({
 
     const connect = () => {
         if (!uid) return;
+        if (reconnectTimerRef.current) {
+            clearTimeout(reconnectTimerRef.current);
+            reconnectTimerRef.current = null;
+        }
         setLastError(null);
         setStatus("connecting");
 
@@ -77,7 +88,10 @@ export function usePCVRealtime({
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
-        ws.onopen = () => setStatus("open");
+        ws.onopen = () => {
+            reconnectAttemptsRef.current = 0;
+            setStatus("open");
+        };
 
         ws.onmessage = (ev) => {
             const triggerKeys: string[] = [];
@@ -140,6 +154,17 @@ export function usePCVRealtime({
                             }
                             return [incoming, ...prev];
                         });
+                    } else if (typed.type === "PAUSED_PACKAGE") {
+                        setPausedVips?.((prev) => {
+                            const incoming = typed.data as unknown as PausedVIP;
+                            const idx = prev.findIndex((p) => p.uuid === incoming.uuid && p.packageUi === incoming.packageUi);
+                            if (idx === -1) return [incoming, ...prev];
+                            const updated = [...prev];
+                            updated[idx] = { ...prev[idx], ...incoming };
+                            return updated;
+                        });
+                    } else if (typed.type === "GROUPS" && Array.isArray(typed.data)) {
+                        setGroups?.(typed.data.filter((group): group is string => typeof group === "string"));
                     } else if (typed.type === "DELETE") {
                         const subtype = (typed as any).data?.type;
                         const u = (typed as any).data?.uniqueId;
@@ -170,13 +195,21 @@ export function usePCVRealtime({
         ws.onerror = () => {
             setStatus("error");
             setLastError("WebSocket error");
-            onErrorRef.current?.("WebSocket error");
+            // onclose schedules a reconnect; avoid a noisy toast for transient network failures.
         };
 
-        ws.onclose = () => setStatus("closed");
+        ws.onclose = () => {
+            if (wsRef.current !== ws) return;
+            setStatus("closed");
+            if (!shouldReconnectRef.current) return;
+            const delay = Math.min(1_000 * 2 ** reconnectAttemptsRef.current++, 15_000);
+            reconnectTimerRef.current = setTimeout(connect, delay);
+        };
     };
 
     const reconnect = () => {
+        shouldReconnectRef.current = true;
+        reconnectAttemptsRef.current = 0;
         try {
             wsRef.current?.close();
         } catch {}
@@ -184,14 +217,19 @@ export function usePCVRealtime({
     };
 
     const close = () => {
+        shouldReconnectRef.current = false;
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
         try {
             wsRef.current?.close();
         } catch {}
     };
 
     useEffect(() => {
+        shouldReconnectRef.current = true;
         connect();
         return () => {
+            shouldReconnectRef.current = false;
+            if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
             try {
                 wsRef.current?.close();
             } catch {}

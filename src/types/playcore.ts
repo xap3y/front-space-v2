@@ -15,6 +15,20 @@ export type ActiveVIP = {
     activatedAt: string; // epoch seconds or "0"
 };
 
+export type PausedVIP = {
+    id: number;
+    uuid: string;
+    playerName: string;
+    packageUi: string;
+    activatedAt: number;
+    pausedAt: number;
+    group: string;
+    displayName: string;
+    priority: number;
+    duration: number;
+    packageDuration: number;
+};
+
 export type Code = {
     type: "VIP" | "KIT" | string;
     code: string;
@@ -36,6 +50,7 @@ export type ApiPayload = {
         uniqueId?: string;
         vipPackages?: VIPPackage[];
         activePackages?: ActiveVIP[];
+        pausedPackages?: PausedVIP[];
         codes?: Code[]; // NOTE: initial API will NOT include codes per spec
     };
     timestamp?: string;
@@ -46,5 +61,7 @@ export type WsEnvelope =
     | { type: "CODE"; data: Code }
     | { type: "VIP"; data: VIPPackage }
     | { type: "ACTIVE_VIP"; data: ActiveVIP }
+    | { type: "PAUSED_PACKAGE"; data: PausedVIP }
+    | { type: "GROUPS"; data: string[] }
     | { type: "DELETE"; data: { type: "CODE" | "VIP" | "ACTIVE_VIP"; uniqueId: string } }
     | { type: "ERROR"; data: { message: string, type: string } };

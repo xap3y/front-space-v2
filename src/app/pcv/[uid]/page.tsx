@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getApiUrl } from "@/lib/core";
 import { errorToast, infoToast, copyToClipboard, okToast, secondsToHuman, isValidDurationExpr } from "@/lib/client";
 import { LoadingDot } from "@/components/GlobalComponents";
-import { ActiveVIP, ApiPayload, Code, VIPPackage } from "@/types/playcore";
+import { ActiveVIP, ApiPayload, Code, PausedVIP, VIPPackage } from "@/types/playcore";
 import { Callback, usePCVRealtime } from "@/hooks/usePCVRealtime";
 import { Panel } from "@/components/pcv/Panel";
 import { SectionSkeleton } from "@/components/pcv/SectionSkeleton";
@@ -52,6 +52,8 @@ export default function Page() {
 
     const [vipPackages, setVipPackages] = useState<VIPPackage[]>([]);
     const [activeVips, setActiveVips] = useState<ActiveVIP[]>([]);
+    const [pausedVips, setPausedVips] = useState<PausedVIP[]>([]);
+    const [groups, setGroups] = useState<string[]>([]);
     const [codes, setCodes] = useState<Code[]>([]);
     const [codesPage, setCodesPage] = useState(1);
     const pageSize = 100;
@@ -64,7 +66,10 @@ export default function Page() {
     // Editors
     const [editingActive, setEditingActive] = useState<ActiveVIP | null>(null);
     const [activeEditExpr, setActiveEditExpr] = useState<string>("");
-    const activeExprValid = activeEditExpr.length === 0 ? true : isValidDurationExpr(activeEditExpr);
+    const activeExprValid = activeEditExpr.length > 0 && isValidDurationExprWithDays(activeEditExpr);
+    const [editingQueued, setEditingQueued] = useState<PausedVIP | null>(null);
+    const [queuedEditExpr, setQueuedEditExpr] = useState("");
+    const queuedExprValid = queuedEditExpr.length > 0 && isValidDurationExprWithDays(queuedEditExpr);
 
     const [editingPackage, setEditingPackage] = useState<VIPPackage | null>(null);
     const [pkgGroup, setPkgGroup] = useState("");
@@ -164,17 +169,17 @@ export default function Page() {
 
             const v = (data as any).message?.vipPackages ?? [];
             const a = (data as any).message?.activePackages ?? [];
+            const p = (data as any).message?.pausedPackages ?? [];
 
             setVipPackages(v);
             setActiveVips(a);
+            setPausedVips(p);
         } catch (e: any) {
             errorToast(e?.message || "Failed to load data");
         } finally {
-            if (!apiError) {
-                setTimeout(() => setLoadingMain(false), 500);
-            }
+            setLoadingMain(false);
         }
-    }, [uid, apiBase, apiError]);
+    }, [uid, apiBase]);
 
     const deleteResource = async (type: "CODE" | "VIP" | "ACTIVE_VIP", code: string) => {
         const res = await fetch(
@@ -246,7 +251,7 @@ export default function Page() {
             }
         },
         ACTIVE_UPDATE: () => {
-            setVipPackages([]);
+            setActiveVips([]);
             fetch(`${apiBase}/v1/pcv/scrape/${uid}/activevips`, { cache: "no-store", method: "POST" });
             const id = updatingToastRef.current;
             if (id != null) {
@@ -261,8 +266,12 @@ export default function Page() {
                 setHasUpdatingToast(false);
             }
         },
+        PAUSED_UPDATE: () => {
+            setPausedVips([]);
+            fetch(`${apiBase}/v1/pcv/scrape/${uid}/pausedvips`, { cache: "no-store", method: "POST" });
+        },
         CODE_UPDATE: () => {
-            setVipPackages([]);
+            setCodes([]);
             fetchCodes();
             const id = updatingToastRef.current;
             if (id != null) {
@@ -285,6 +294,8 @@ export default function Page() {
         setCodes,
         setVipPackages,
         setActiveVips,
+        setPausedVips,
+        setGroups,
         callBacks,
         onError: handleWsError, // pass handler that reads the ref
     });
@@ -293,17 +304,75 @@ export default function Page() {
         fetchMain();
     }, [fetchMain]);
 
+    useEffect(() => {
+        if (!uid) return;
+        fetch(`${apiBase}/v1/pcv/scrape/${uid}/groups`, { method: "POST", cache: "no-store" });
+    }, [apiBase, uid]);
+
     const openActiveEditor = (a: ActiveVIP) => {
         setEditingActive(a);
         setActiveEditExpr("");
     };
 
-    const saveActiveEditor = () => {
+    const saveActiveEditor = async () => {
         if (activeEditExpr && !activeExprValid) {
             return errorToast("Invalid duration expression.");
         }
-        setEditingActive(null);
-        setActiveEditExpr("");
+        if (!editingActive || !activeEditExpr) return errorToast("Enter a duration adjustment.");
+        const duration = tryParseDurationToSeconds(activeEditExpr);
+        if (!duration) return errorToast("Duration adjustment cannot be zero.");
+
+        const id = toast.loading("Updating active VIP...");
+        updatingToastRef.current = id;
+        setHasUpdatingToast(true);
+        try {
+            await axios.post(`${apiBase}/v1/pcv/data/${uid}/activevip`, {
+                uuid: editingActive.playerUniqueId,
+                identifier: editingActive.packageName,
+                duration,
+            });
+            setEditingActive(null);
+            setActiveEditExpr("");
+        } catch (e: any) {
+            toast.dismiss(id);
+            updatingToastRef.current = null;
+            setHasUpdatingToast(false);
+            errorToast(e?.response?.data?.message || "Could not update active VIP.");
+        }
+    };
+
+    const saveQueuedEditor = async () => {
+        if (!editingQueued || !queuedExprValid) return errorToast("Enter a valid duration adjustment.");
+        const duration = tryParseDurationToSeconds(queuedEditExpr);
+        if (!duration) return errorToast("Duration adjustment cannot be zero.");
+        const id = toast.loading("Updating queued VIP...");
+        updatingToastRef.current = id;
+        setHasUpdatingToast(true);
+        try {
+            await axios.post(`${apiBase}/v1/pcv/data/${uid}/pausedvip`, {
+                uuid: editingQueued.uuid,
+                identifier: editingQueued.packageUi,
+                duration,
+            });
+            setEditingQueued(null);
+            setQueuedEditExpr("");
+        } catch (e: any) {
+            toast.dismiss(id);
+            updatingToastRef.current = null;
+            setHasUpdatingToast(false);
+            errorToast(e?.response?.data?.message || "Could not update queued VIP.");
+        }
+    };
+
+    const deleteQueuedVip = async (queued: PausedVIP) => {
+        if (!window.confirm(`Remove queued ${queued.packageUi} VIP for ${queued.playerName}?`)) return;
+        try {
+            const res = await fetch(`${apiBase}/v1/pcv/data/${uid}/paused_vip/${encodeURIComponent(queued.uuid)}/${encodeURIComponent(queued.packageUi)}`, { method: "DELETE" });
+            if (!res.ok) throw new Error();
+            okToast("Queued VIP removed.");
+        } catch {
+            errorToast("Could not remove queued VIP.");
+        }
     };
 
     const openPackageEditor = (v: VIPPackage) => {
@@ -415,7 +484,19 @@ export default function Page() {
             const id = toast.loading("Creating active VIP...");
             updatingToastRef.current = id;
             setHasUpdatingToast(true);
-            // TODO: POST to /v1/pcv/data/{uid}/active_vip with payload
+            try {
+                await axios.post(`${apiBase}/v1/pcv/data/${uid}/activevip`, {
+                    playerName: newActivePlayer.trim(),
+                    identifier: newActivePackage,
+                    duration: newActiveDurationExpr ? tryParseDurationToSeconds(newActiveDurationExpr) || 0 : groupByPackage.get(newActivePackage)?.duration,
+                });
+            } catch (e: any) {
+                toast.dismiss(id);
+                updatingToastRef.current = null;
+                setHasUpdatingToast(false);
+                errorToast(e?.response?.data?.message || "Could not create active VIP.");
+                return;
+            }
         }
 
         if (newModalType === "CODE") {
@@ -702,6 +783,34 @@ export default function Page() {
                                         </div>
                                     );
                                 })}
+                            </div>
+                        )}
+                    </Panel>
+
+                    <Panel title="Queued VIPs" subtitle={`${pausedVips.length} waiting`}>
+                        {loadingMain ? (
+                            <SectionSkeleton rows={3} />
+                        ) : pausedVips.length === 0 ? (
+                            <div className="text-sm text-zinc-400">No queued VIPs</div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                {pausedVips.map((p) => (
+                                    <div key={`${p.uuid}-${p.packageUi}`} className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm transition hover:border-zinc-700">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="font-medium">{p.playerName}</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300">Queued</span>
+                                                <button onClick={() => { setEditingQueued(p); setQueuedEditExpr(""); }} disabled={hasUpdatingToast} className="rounded p-1 hover:bg-zinc-800" title="Adjust duration"><FaPen className="h-3.5 w-3.5" /></button>
+                                                <button onClick={() => deleteQueuedVip(p)} disabled={hasUpdatingToast} className="rounded p-1 hover:bg-red-500/10" title="Remove queued VIP"><FaTrashCan className="h-3.5 w-3.5 text-red-500" /></button>
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 text-xs text-zinc-400">
+                                            <div>{p.displayName || p.packageUi} ({p.packageUi})</div>
+                                            <div className="mt-1">Duration: {secondsToHuman(p.duration)}</div>
+                                            <div className="mt-1">Group: {p.group || "-"}</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </Panel>
@@ -1066,12 +1175,17 @@ export default function Page() {
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-xs text-zinc-400">Group</label>
+                                <label className="mb-1 block text-xs text-zinc-400">LuckPerms group</label>
                                 <input
+                                    list="pcv-luckperms-groups"
                                     value={newPkgGroup}
                                     onChange={(e) => setNewPkgGroup(e.target.value)}
+                                    placeholder={groups.length ? "Select or enter a group" : "Loading LuckPerms groups..."}
                                     className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
                                 />
+                                <datalist id="pcv-luckperms-groups">
+                                    {groups.map((group) => <option key={group} value={group} />)}
+                                </datalist>
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Priority</label>
@@ -1248,6 +1362,23 @@ export default function Page() {
                         </div>
                     </div>
                 )}
+            </SlideOver>
+
+            <SlideOver
+                title={editingQueued ? `Edit queued ${editingQueued.packageUi} VIP` : "Edit queued VIP"}
+                open={!!editingQueued}
+                onClose={() => setEditingQueued(null)}
+                onSave={saveQueuedEditor}
+                saveDisabled={!queuedExprValid || hasUpdatingToast}
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-zinc-400">Add or remove time from this queued VIP. Examples: <code>+7d</code>, <code>-30m</code>.</p>
+                    <div className="flex flex-wrap gap-2">
+                        {["-7d", "-1d", "+1d", "+7d"].map((value) => <button key={value} onClick={() => setQueuedEditExpr(value)} className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs hover:bg-zinc-700">{value}</button>)}
+                    </div>
+                    <input value={queuedEditExpr} onChange={(e) => setQueuedEditExpr(e.target.value)} placeholder="e.g. +2h or -30m" className={clsx("w-full rounded border bg-zinc-900 px-3 py-2 text-sm outline-none", queuedExprValid || !queuedEditExpr ? "border-zinc-700" : "border-red-600")} />
+                    {editingQueued && <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-400">Current duration: {secondsToHuman(editingQueued.duration)}</div>}
+                </div>
             </SlideOver>
 
             {/* SlideOver: Edit Active VIP (Enter to save supported) */}
