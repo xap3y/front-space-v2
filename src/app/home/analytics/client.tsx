@@ -9,6 +9,7 @@ import {
     FaDatabase,
     FaEnvelope,
     FaEye,
+    FaFile,
     FaImages,
     FaLink,
     FaPaste,
@@ -36,6 +37,7 @@ const fallbackAllFrom = "2025-01-01";
 
 const colors = {
     images: "#34d399",
+    files: "#fb7185",
     pastes: "#f59e0b",
     urls: "#38bdf8",
     mails: "#a78bfa",
@@ -91,7 +93,7 @@ function presetDates(preset: Preset, accountCreatedAt: string | null) {
     };
 }
 
-function breakdownOption(data: AnalyticsCategory[], centerLabel: string): EChartsOption {
+function breakdownOption(data: AnalyticsCategory[], centerLabel: string, colorsByLabel?: Record<string, string>): EChartsOption {
     const total = data.reduce((sum, item) => sum + Number(item.count || 0), 0);
     return {
         color: ["#34d399", "#38bdf8", "#a78bfa", "#f59e0b", "#fb7185", "#2dd4bf"],
@@ -127,7 +129,14 @@ function breakdownOption(data: AnalyticsCategory[], centerLabel: string): EChart
             itemStyle: {borderColor: "#101014", borderWidth: 4, borderRadius: 5},
             label: {show: false},
             emphasis: {scale: true, scaleSize: 5},
-            data: data.map(item => ({name: item.label, value: item.count})),
+            data: data.map(item => {
+                const color = colorsByLabel?.[item.label.trim().toUpperCase()];
+                return {
+                    name: item.label,
+                    value: item.count,
+                    ...(color ? {itemStyle: {color}} : {}),
+                };
+            }),
         }],
     };
 }
@@ -189,7 +198,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
 
     const activityOption = useMemo<EChartsOption>(() => ({
         animationDuration: 500,
-        color: [colors.images, colors.pastes, colors.urls, colors.mails],
+        color: [colors.images, colors.files, colors.pastes, colors.urls, colors.mails],
         tooltip: {
             trigger: "axis",
             backgroundColor: "rgba(8,10,18,.96)",
@@ -206,7 +215,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                 show: true,
                 position: "top",
                 confine: true,
-                formatter: "{title}",
+                formatter: params => params.title,
                 backgroundColor: "rgba(8,10,18,.98)",
                 borderColor: "rgba(148,163,184,.22)",
                 textStyle: {color: "#e5e7eb", fontSize: 11},
@@ -239,6 +248,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
         ],
         series: [
             {name: "Images", type: "line", smooth: .28, showSymbol: false, lineStyle: {width: 2.5}, areaStyle: {opacity: .12}, data: data?.daily.map(point => point.images) ?? []},
+            {name: "Files", type: "line", smooth: .28, showSymbol: false, lineStyle: {width: 2}, data: data?.daily.map(point => point.files ?? 0) ?? []},
             {name: "Pastes", type: "line", smooth: .28, showSymbol: false, lineStyle: {width: 2}, data: data?.daily.map(point => point.pastes) ?? []},
             {name: "Short URLs", type: "line", smooth: .28, showSymbol: false, lineStyle: {width: 2}, data: data?.daily.map(point => point.urls) ?? []},
             {name: "Temp mails", type: "line", smooth: .28, showSymbol: false, lineStyle: {width: 2}, data: data?.daily.map(point => point.tempMails) ?? []},
@@ -298,7 +308,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
         const values = Array(7).fill(0) as number[];
         for (const point of data?.daily ?? []) {
             const day = new Date(`${point.date}T00:00:00`).getDay();
-            values[day] += point.images + point.pastes + point.urls + point.tempMails;
+            values[day] += point.images + (point.files ?? 0) + point.pastes + point.urls + point.tempMails;
         }
         return {
             color: [colors.images],
@@ -310,10 +320,10 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
         };
     }, [data]);
 
-    const activityTotal = data?.daily.reduce((sum, point) => sum + point.images + point.pastes + point.urls + point.tempMails, 0) ?? 0;
-    const activeDays = data?.daily.filter(point => point.images + point.pastes + point.urls + point.tempMails > 0).length ?? 0;
+    const activityTotal = data?.daily.reduce((sum, point) => sum + point.images + (point.files ?? 0) + point.pastes + point.urls + point.tempMails, 0) ?? 0;
+    const activeDays = data?.daily.filter(point => point.images + (point.files ?? 0) + point.pastes + point.urls + point.tempMails > 0).length ?? 0;
     const busiest = data?.daily.reduce((best, point) => {
-        const amount = point.images + point.pastes + point.urls + point.tempMails;
+        const amount = point.images + (point.files ?? 0) + point.pastes + point.urls + point.tempMails;
         return amount > best.amount ? {date: point.date, amount} : best;
     }, {date: "", amount: 0}) ?? {date: "", amount: 0};
 
@@ -371,8 +381,9 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                     {error ? <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/[0.07] px-3 py-2 text-xs text-red-300">{error}</p> : null}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
+                <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 xl:grid-cols-7">
                     <MetricCard label="Images" value={String(data?.summary.images ?? 0)} hint="uploaded in range" icon={<FaImages />} />
+                    <MetricCard label="Files" value={String(data?.summary.files ?? 0)} hint="uploaded in range" icon={<FaFile />} />
                     <MetricCard label="Pastes" value={String(data?.summary.pastes ?? 0)} hint="created in range" icon={<FaPaste />} />
                     <MetricCard label="Short URLs" value={String(data?.summary.urls ?? 0)} hint="links created" icon={<FaLink />} />
                     <MetricCard label="Temp mails" value={String(data?.summary.tempMails ?? 0)} hint="addresses created" icon={<FaEnvelope />} />
@@ -389,7 +400,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                 </div>
 
                 <div className="box-primary overflow-hidden p-3 md:p-4">
-                    <div className="px-1"><h2 className="text-base font-semibold text-white">Storage used</h2><p className="text-xs text-gray-500">Cumulative retained uploads with daily additions</p></div>
+                    <div className="px-1"><h2 className="text-base font-semibold text-white">Storage used</h2><p className="text-xs text-gray-500">Cumulative retained images and files with daily additions</p></div>
                     <AnalyticsChart option={storageOption} height={340} />
                 </div>
 
@@ -405,10 +416,10 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Upload visibility</h2><AnalyticsChart option={breakdownOption(data?.visibility ?? [], "uploads")} height={260} /></div>
+                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Image visibility</h2><AnalyticsChart option={breakdownOption(data?.visibility ?? [], "images")} height={260} /></div>
                     <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Storage location</h2><AnalyticsChart option={breakdownOption(data?.storageLocations ?? [], "uploads")} height={260} /></div>
                     <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Paste languages</h2><AnalyticsChart option={breakdownOption(data?.pasteLanguages ?? [], "pastes")} height={260} /></div>
-                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Temp-mail status</h2><AnalyticsChart option={breakdownOption(data?.mailStatuses ?? [], "addresses")} height={260} /></div>
+                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Temp-mail status</h2><AnalyticsChart option={breakdownOption(data?.mailStatuses ?? [], "addresses", {OPEN: "#22c55e", SUSPENDED: "#d97706", DELETED: "#ef4444", DELETEED: "#ef4444"})} height={260} /></div>
                 </div>
             </div>
         </section>

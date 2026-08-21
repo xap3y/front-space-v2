@@ -1,6 +1,7 @@
 export type AnalyticsDailyPoint = {
     date: string;
     images: number;
+    files: number;
     pastes: number;
     urls: number;
     tempMails: number;
@@ -20,6 +21,7 @@ export type UserAnalytics = {
     daily: AnalyticsDailyPoint[];
     summary: {
         images: number;
+        files: number;
         pastes: number;
         urls: number;
         tempMails: number;
