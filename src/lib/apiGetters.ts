@@ -269,6 +269,29 @@ export async function getImageCountStatsOnDate(start: string, end: string, apiKe
     return data;
 }
 
+export async function getUserAnalytics(start: string, end: string, apiKey: string) {
+    try {
+        const response = await fetch(getApiUrl() + "/v1/stats/me/analytics", {
+            method: "POST",
+            headers: getCurlHeaders(apiKey),
+            body: JSON.stringify({
+                fromDate: start,
+                toDate: end,
+                fillMissing: true,
+            }),
+            cache: "no-store",
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data || data.error) {
+            throw new Error(typeof data?.message === "string" ? data.message : "Failed to load analytics");
+        }
+        return data.message;
+    } catch (error) {
+        console.error("getUserAnalytics failed", error);
+        return null;
+    }
+}
+
 export async function getAdminPastes(queryString: string): Promise<DefaultResponse> {
     console.log("Calling getAdminPastes with query: " + queryString);
     const data = await getValidatedResponse(`/v1/admin/pastes?${queryString}`);

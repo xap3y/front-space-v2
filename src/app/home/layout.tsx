@@ -2,7 +2,7 @@
 import {SidebarComp} from "@/components/Sidebar";
 import {FaFileAlt, FaHome, FaImages, FaPaste, FaUserCircle, FaHistory} from "react-icons/fa";
 import { IoIosSettings } from "react-icons/io";
-import {FaFile, FaFolderClosed, FaLink} from "react-icons/fa6";
+import {FaChartLine, FaFile, FaFolderClosed, FaLink} from "react-icons/fa6";
 import {useTranslation} from "@/hooks/useTranslation";
 import {useEffect, useState} from "react";
 import LoadingPage from "@/components/LoadingPage";
@@ -35,6 +35,7 @@ export default function HomeLayout({
                         <div className="xl:flex">
                             <SidebarComp sidebar={[
                                 {title: lang.comp.sidebar.home, icon: <FaHome className={"w-[30px] h-[30px]"} />, href: "/dashboard", page: "home"},
+                                {title: "Analytics", icon: <FaChartLine className={"w-[30px] h-[30px]"} />, href: "/analytics", page: "analytics"},
                                 {title: lang.comp.sidebar.images, icon: <FaImages className={"w-[30px] h-[30px]"} />, href: "/gallery", page: "gallery"},
                                 {title: lang.comp.sidebar.pastes, icon: <FaPaste className={"w-[30px] h-[30px]"} />, href: "/pastes", page: "pastes"},
                                 {title: lang.comp.sidebar.short_urls, icon: <FaLink className={"w-[30px] h-[30px]"} />, href: "/urls", page: "urls"},
