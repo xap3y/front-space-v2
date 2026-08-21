@@ -85,13 +85,20 @@ export default function UrlShortener() {
         }
 
         setLoading(true);
-        const data = await createShortUrl(url.trim(), effectiveKey, uniqueId.trim() ? uniqueId.trim() : null);
-        setLoading(false);
-
-        if (!data) {
+        let result;
+        try {
+            result = await createShortUrl(url.trim(), effectiveKey, uniqueId.trim() ? uniqueId.trim() : null);
+        } catch (err) {
             setShortUrl("");
-            return errorToast("Failed to shorten URL");
+            return errorToast(err instanceof Error ? err.message : "Failed to shorten URL");
+        } finally {
+            setLoading(false);
         }
+        if (!result.data) {
+            setShortUrl("");
+            return errorToast(result.error || "Failed to shorten URL");
+        }
+        const data = result.data;
 
         setApiKey(user?.apiKey ? user.apiKey : "");
         setUrl("");

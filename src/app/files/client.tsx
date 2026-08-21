@@ -15,6 +15,7 @@ import { errorToast, infoToast, okToast, validateApiKey } from "@/lib/client";
 import { useDebounce } from "@/hooks/useDebounce";
 import {getApiUrl, getStorageUrl, purifyText, purifyTextStrict} from "@/lib/core";
 import {generatePresignedPutUrl} from "@/lib/apiPoster";
+import {apiErrorMessage} from "@/lib/apiError";
 
 interface UploadItem {
     id: string;
@@ -63,7 +64,7 @@ interface FileUploadResponse {
     uploadTime: string;
 }
 
-const MAX_FILES = 15;
+const MAX_FILES = 10;
 const MAX_SIZE = 1024 * 1024 * 1024 * 15; // 15 GB
 
 export function FilesPageClient() {
@@ -424,7 +425,7 @@ export function FilesPageClient() {
                 return;
             }
 
-            const errorMessage = err.response?.data?.error || err.message || "Failed to upload";
+            const errorMessage = apiErrorMessage(err, "Failed to upload");
             setUploadItems((prev) =>
                 prev.map((i) =>
                     i.id === item.id
@@ -471,7 +472,7 @@ export function FilesPageClient() {
 
             return response.data;
         } catch (err: any) {
-            const errorMessage = err.response?.data?.error || err.message || "Failed to register files";
+            const errorMessage = apiErrorMessage(err, "Failed to register files");
             setRegistrationError(errorMessage);
             errorToast("Registration failed: " + errorMessage);
             return null;
@@ -496,6 +497,17 @@ export function FilesPageClient() {
             return;
         }
 
+        try {
+            await axios.post(getApiUrl() + "/v1/limits/preflight", {
+                type: "FILE",
+                count: pendingItems.length,
+                bytes: pendingItems.reduce((sum, item) => sum + item.file.size, 0),
+            }, {headers: {"x-api-key": apiKey}});
+        } catch (err) {
+            errorToast(apiErrorMessage(err, "This upload is not allowed"));
+            return;
+        }
+
         setUploading(true);
         const successfullyUploaded: UploadedFile[] = [];
 
@@ -513,14 +525,13 @@ export function FilesPageClient() {
             }
         }
 
-        setUploading(false);
-
         if (successfullyUploaded.length > 0) {
-            okToast("All files uploaded!");
-            await registerFilesWithBackend(successfullyUploaded);
+            const registration = await registerFilesWithBackend(successfullyUploaded);
+            if (registration) okToast("All files uploaded and registered!");
         } else {
             errorToast("No files successfully uploaded to register.");
         }
+        setUploading(false);
     };
 
     const copyToClipboard = (text: string) => {
@@ -563,7 +574,7 @@ export function FilesPageClient() {
         return uploadItems.reduce((acc, i) => acc + (i.status !== "cancelled" ? i.file.size : 0), 0);
     };
 
-    if (allCompleted && uploadedFiles.length > 0) {
+    if (!uploading && allCompleted && uploadedFiles.length > 0) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8">
                 <div className="box-primary shadow-2xl w-full max-w-md">

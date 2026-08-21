@@ -101,11 +101,15 @@ export function useTempMail() {
             headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
         });
         if (!res.ok) {
+            let message = `Failed to create temp mail (${res.status})`;
+            try {
+                const payload = await res.json();
+                if (typeof payload?.message === "string" && payload.message.trim()) message = payload.message;
+            } catch { /* use fallback */ }
             if (res.status === 429) {
-                errorToast('Rate limit exceeded. Please wait before creating another temp mail.');
-            } else {
-                errorToast(`Failed to create temp mail (${res.status})`);
+                message = 'Rate limit exceeded. Please wait before creating another temp mail.';
             }
+            errorToast(message);
             return null;
         }
         const data = await res.json();

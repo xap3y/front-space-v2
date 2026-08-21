@@ -128,9 +128,8 @@ export default function Page() {
 
         const toastId = toast.loading("Deleting image...");
 
-        const res: boolean = await deleteImageApi(image.uniqueId, user.apiKey);
-
-        if (res) {
+        try {
+            await deleteImageApi(image.uniqueId, user.apiKey);
             toast.update(toastId, {
                 render: "Image deleted successfully",
                 type: "success",
@@ -144,9 +143,9 @@ export default function Page() {
             setTimeout(() => {
                 router.push("/i")
             }, 200);
-        } else {
+        } catch (err) {
             toast.update(toastId, {
-                render: "Failed to delete image",
+                render: err instanceof Error ? err.message : "Failed to delete image",
                 type: "error",
                 autoClose: 1200,
                 closeOnClick: true,

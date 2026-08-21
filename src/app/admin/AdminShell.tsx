@@ -17,6 +17,7 @@ export default function AdminShell({ children }: Props) {
         () => [
             { title: "Overview", href: "/admin", page: "overview" },
             { title: "Users", href: "/admin/users", page: "users" },
+            { title: "Limits", href: "/admin/limits", page: "limits" },
             { title: "Invites", href: "/admin/invites", page: "invites" },
             { title: "System", href: "/admin/system", page: "system" },
             { title: "Logs", href: "/admin/logs", page: "logs" },

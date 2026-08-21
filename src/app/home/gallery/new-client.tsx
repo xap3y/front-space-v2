@@ -18,12 +18,6 @@ import LanguageModel from "@/types/LanguageModel";
 const ITEMS_PER_STAGGER = 4;
 const STAGGER_DELAY_MS = 120;
 
-type DefaultResponse = { error: boolean; message: string; data?: any; count?: number };
-
-function isErrorResponse(x: unknown): x is DefaultResponse {
-    return !!x && typeof x === 'object' && 'error' in (x as any) && typeof (x as any).error === 'boolean';
-}
-
 export default function GalleryPage() {
     const { user, loadingUser, error: userError } = useUser();
     const [items, setItems] = useState<UploadedImagePage[]>([]);
@@ -193,15 +187,11 @@ export default function GalleryPage() {
     const handleDelete = useCallback(async (img: UploadedImagePage) => {
         if (!user?.apiKey) return;
         try {
-            const res = await apiDeleteImage(img.uniqueId, user.apiKey);
-            if (isErrorResponse(res) && res.error) {
-                errorToast(res.message);
-                return;
-            }
+            await apiDeleteImage(img.uniqueId, user.apiKey);
             setItems(prev => prev.filter(i => i.uniqueId !== img.uniqueId));
             okToast('Deleted.');
-        } catch {
-            errorToast('Delete failed');
+        } catch (err) {
+            errorToast(err instanceof Error ? err.message : 'Delete failed');
         }
     }, [user?.apiKey]);
 

@@ -8,21 +8,35 @@ import {DiscordConnection, KeyRequest} from "@/types/discord";
 import defaultPeriodStats, {PeriodStats} from "@/types/stats";
 import axios, {CancelToken} from "axios";
 import {headers} from "next/headers";
+import {responseErrorMessage} from "@/lib/apiError";
 
 
-export async function createShortUrl(url: string, apikey: string, uniqueId: string | null): Promise<ShortUrlDto | null> {
+export type CreateShortUrlResult = {
+    data: ShortUrlDto | null;
+    error: string | null;
+};
+
+export async function createShortUrl(url: string, apikey: string, uniqueId: string | null): Promise<CreateShortUrlResult> {
     console.log("Calling createShortUrl with url: " + url)
 
-    const data = await postApi('/v1/url/create', {url: url, uniqueId: uniqueId}, apikey);
-
-    if (!data) return null;
+    const response = await fetch(getApiUrl() + '/v1/url/create', {
+        method: 'POST', headers: getCurlHeaders(apikey), body: JSON.stringify({url, uniqueId})
+    });
+    if (!response.ok) {
+        return {data: null, error: await responseErrorMessage(response, "Failed to shorten URL")};
+    }
+    const payload = await response.json();
+    if (payload?.error || !payload?.message) {
+        return {data: null, error: String(payload?.message || "Failed to shorten URL")};
+    }
+    const data = payload.message;
 
     const shortUrlDto = data as ShortUrlDto;
 
     shortUrlDto.uploader.createdAt = new Date(shortUrlDto.uploader.createdAt).toLocaleString()
     shortUrlDto.createdAt = new Date(shortUrlDto.createdAt).toLocaleString()
 
-    return shortUrlDto;
+    return {data: shortUrlDto, error: null};
 }
 
 export async function generatePresignedPutUrl(fileName: string, contentType: string): Promise<DefaultResponse> {

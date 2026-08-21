@@ -163,9 +163,9 @@ export default function UrlsClient({ users }: UrlsClientProps) {
 
         setCreatingUrl(true);
         try {
-            const data = await createShortUrl(originalUrl.trim(), user.apiKey, customUid.trim() ? customUid.trim() : null);
-            if (!data) {
-                errorToast("Failed to shorten URL");
+            const result = await createShortUrl(originalUrl.trim(), user.apiKey, customUid.trim() ? customUid.trim() : null);
+            if (!result.data) {
+                errorToast(result.error || "Failed to shorten URL");
                 return;
             }
             okToast("URL shortened successfully!");

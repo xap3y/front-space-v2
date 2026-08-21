@@ -4,6 +4,7 @@ import {toast} from "react-toastify";
 import {UserObjShort} from "@/types/user";
 import {UploadedImage} from "@/types/image";
 import axios from "axios";
+import {apiErrorMessage} from "@/lib/apiError";
 import {getApiUrl, getCurlHeaders} from "@/lib/core";
 import {CallServer, DefaultResponse} from "@/types/core";
 import LanguageModel from "@/types/LanguageModel";
@@ -212,7 +213,7 @@ export async function getUserEmbedSettings(apiKey: string): Promise<EmbedSetting
     }
 }
 
-export async function uploadImage(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage | null> {
+export async function uploadImage(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage> {
 
     console.log("Calling uploadImage with CS: " + callServer?.url || "DEFAULT")
 
@@ -244,7 +245,7 @@ export async function uploadImage(formData: FormData, apiKey: string,  callServe
         });
 
         if (!response.status.toString().startsWith("2") || !response.data) {
-            return null;
+            throw new Error("The image server returned an empty response");
         }
 
         await logToServer("Response data: ", response.data)
@@ -255,16 +256,16 @@ export async function uploadImage(formData: FormData, apiKey: string,  callServe
     } catch (error) {
         await logToServer("Upload error: ", error)
         console.error('Upload error:', error);
-        return null;
+        throw new Error(apiErrorMessage(error, "Failed to upload image"));
     }
 }
 
-export async function uploadImageBucket(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage | null> {
+export async function uploadImageBucket(formData: FormData, apiKey: string,  callServer: CallServer | null, onProgress?: (progress: number) => void, onSpeedChange?: (speed: number) => void): Promise<UploadedImage> {
 
     console.log("Calling uploadImageBucket");
 
     const file = formData.get('file') as File
-    if (!file) return null
+    if (!file) throw new Error("Choose an image before uploading");
     const startTime = performance.now()
 
     const type = file.name.split('.').pop()?.toLowerCase() || 'png';
@@ -272,6 +273,10 @@ export async function uploadImageBucket(formData: FormData, apiKey: string,  cal
     const uid = generateRandomUniqueId();
 
     try {
+        await axios.post(getApiUrl() + "/v1/limits/preflight", {
+            type: "IMAGE", count: 1, bytes: file.size,
+        }, {headers: {'x-api-key': apiKey}});
+
         // STEP 1: Request a presigned URL from your backend
         const presignRes = await axios.post('/api/s3/upload', {
             filename: uid,
@@ -332,7 +337,7 @@ export async function uploadImageBucket(formData: FormData, apiKey: string,  cal
 
     } catch (error) {
         console.error('Upload to R2 failed:', error)
-        return null
+        throw new Error(apiErrorMessage(error, "Failed to upload image"));
     }
 }
 
@@ -373,7 +378,7 @@ export async function uploadImageBucket(formData: FormData, apiKey: string,  cal
     }
 }*/
 
-export async function deleteImageApi(imageId: string, apiKey: string): Promise<boolean> {
+export async function deleteImageApi(imageId: string, apiKey: string): Promise<void> {
     console.log("Calling deleteImage with imageId: " + imageId)
 
     try {
@@ -385,18 +390,17 @@ export async function deleteImageApi(imageId: string, apiKey: string): Promise<b
             timeout: 0,
         });
         if (!response.status.toString().startsWith("2") || !response.data) {
-            return false;
+            throw new Error("The image server returned an empty response");
         }
         const error: boolean = response.data["error"];
         if (error) {
             console.error("Error deleting image: ", response.data["message"]);
-            return false;
+            throw new Error(String(response.data["message"] || "Failed to delete image"));
         }
-        return !error;
     }
     catch (error) {
         //console.error('Delete error:', error);
-        return false;
+        throw new Error(apiErrorMessage(error, "Failed to delete image"));
     }
 }
 

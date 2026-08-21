@@ -212,22 +212,21 @@ export default function ImageUploader() {
             selectedCallServer = selected;
         }
 
-        if (selectedCallServer.type == CallServerEnum.S3) {
+        try {
+          if (selectedCallServer.type == CallServerEnum.S3) {
             uploadedImg = await uploadImageBucket(formData, apiKey, selectedCallServer, (progress) => {
                 setUploadProgress(progress);
             }, (speed) => {setUploadSpeed(speed)});
-        } else {
+          } else {
             uploadedImg = await uploadImage(formData, apiKey, selectedCallServer, (progress) => {
                 setUploadProgress(progress);
             }, (speed) => {setUploadSpeed(speed)});
-        }
-
-
-        if (!uploadedImg) {
-            toast.warn("uploadedImg: " + uploadedImg)
-            setUploadError(uploadedImg)
-            errorToast("Failed to upload image");
-            resetUpload()
+          }
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Failed to upload image";
+            setUploadError(message);
+            errorToast(message);
+            resetUpload();
             return;
         }
 
