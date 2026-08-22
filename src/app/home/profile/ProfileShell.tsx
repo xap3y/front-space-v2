@@ -5,6 +5,7 @@ import {DiscordConnection} from "@/types/discord";
 import ApiKeyClient from "./clients/ApiKeyClient";
 import DiscordClient from "./clients/DiscordClient";
 import AvatarClient from "./clients/AvatarClient";
+import TwoFactorClient from "./clients/TwoFactorClient";
 
 type Props = { user: UserObj; discordConnection: DiscordConnection | null };
 
@@ -54,6 +55,7 @@ export default function ProfileShell({user, discordConnection}: Props) {
                     <div className="mt-6 rounded-xl border border-zinc-800 bg-black/20 p-4 text-sm text-zinc-500">More integrations are available from the Connections page.</div>
                 </div>
             </div>
+            <TwoFactorClient apiKey={user.apiKey} />
         </div>
     </section>;
 }

@@ -36,6 +36,9 @@ export default function LoginPage() {
     const { user, loadingUser } = useUser();
     const [turnstileLoading, setTurnStileLoading] = useState(true);
     const [caToken, setCaToken] = useState("");
+    const [twoFactorChallenge, setTwoFactorChallenge] = useState("");
+    const [twoFactorCode, setTwoFactorCode] = useState("");
+    const [verifyingTwoFactor, setVerifyingTwoFactor] = useState(false);
     const turnstile = useTurnstile();
 
     const lang = useTranslation();
@@ -56,6 +59,19 @@ export default function LoginPage() {
     }, [user, loadingUser, router]);
 
     useEffect(() => {
+        if (!twoFactorChallenge) return;
+        const onPaste = (event: ClipboardEvent) => {
+            const text = event.clipboardData?.getData("text")?.trim() || "";
+            if (text.length > 0 && text.length < 10) {
+                event.preventDefault();
+                setTwoFactorCode(text.toUpperCase().replace(/\s/g, ""));
+            }
+        };
+        window.addEventListener("paste", onPaste);
+        return () => window.removeEventListener("paste", onPaste);
+    }, [twoFactorChallenge]);
+
+    useEffect(() => {
         if (loading || loadingUser) {
             return;
         }
@@ -64,12 +80,17 @@ export default function LoginPage() {
         const afterParam = urlParams.get('after');
         const emailParam = urlParams.get('email');
         const errorParam = urlParams.get('errortoast');
+        const twoFactorParam = urlParams.get('twoFactorChallenge');
         if (emailParam) {
             setEmail(emailParam);
         }
 
         if (afterParam) {
             setAfter(afterParam);
+        }
+        if (twoFactorParam) {
+            setTwoFactorChallenge(twoFactorParam);
+            setTwoFactorCode("");
         }
 
         if (errorParam) {
@@ -80,7 +101,7 @@ export default function LoginPage() {
             }
         }
 
-        if (emailParam || errorParam || afterParam) router.replace("/login", { scroll: false });
+        if (emailParam || errorParam || afterParam || twoFactorParam) router.replace("/login", { scroll: false });
     }, [loading, loadingUser, router]);
 
     useEffect(() => {
@@ -172,6 +193,13 @@ export default function LoginPage() {
                 return;
             }
 
+            if (data?.message?.requiresTwoFactor && data.message.challengeToken) {
+                setTwoFactorChallenge(data.message.challengeToken);
+                setTwoFactorCode("");
+                toast.update(toastId, {render: "Enter your two-factor authentication code", type: "info", isLoading: false, autoClose: 1200});
+                return;
+            }
+
             const token = await encrypt(JSON.stringify(data["message"]));
             setCookie("auth_token", token, {
                 secure: process.env.NODE_ENV === "production",
@@ -195,6 +223,28 @@ export default function LoginPage() {
         }
     };
 
+    const handleTwoFactorSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!twoFactorCode.trim()) return;
+        setVerifyingTwoFactor(true);
+        const toastId = toast.loading("Verifying code…");
+        try {
+            const response = await fetch(getApiUrl() + "/v1/auth/login/2fa", {
+                method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"}, credentials: "include",
+                body: JSON.stringify({challengeToken: twoFactorChallenge, code: twoFactorCode.trim()}),
+            });
+            const data = await response.json();
+            if (!response.ok || data.error) throw new Error(data.message || "Invalid authentication or backup code");
+            const token = await encrypt(JSON.stringify(data.message));
+            setCookie("auth_token", token, {secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60 * 24 * 7});
+            toast.update(toastId, {render: "Logged in successfully", type: "success", isLoading: false, autoClose: 1000});
+            setLoading(true);
+            setTimeout(() => router.push(after && after.startsWith("/") ? after : "/home/dashboard/"), 400);
+        } catch (err) {
+            toast.update(toastId, {render: err instanceof Error ? err.message : "2FA verification failed", type: "error", isLoading: false, autoClose: 2200});
+        } finally { setVerifyingTwoFactor(false); }
+    };
+
     if (loading || loadingUser || !isApiUp || user) {
         return (
             <LoadingPage />
@@ -207,6 +257,19 @@ export default function LoginPage() {
 
     return (
         <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
+
+            {twoFactorChallenge && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+                    <form onSubmit={handleTwoFactorSubmit} className="w-full max-w-sm rounded-2xl border border-zinc-700 bg-[#101014] p-6 shadow-2xl">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400"><FaKey /></div>
+                        <h2 className="mt-4 text-center text-xl font-semibold">Two-factor authentication</h2>
+                        <p className="mt-1 text-center text-sm text-zinc-500">Enter the 6-digit code from your authenticator app or one of your backup codes.</p>
+                        <input autoFocus value={twoFactorCode} onChange={e => setTwoFactorCode(e.target.value.toUpperCase().replace(/\s/g, "").slice(0, 11))} placeholder="000000 or backup code" autoComplete="one-time-code" className="mt-5 w-full rounded-lg border border-zinc-700 bg-black/30 px-4 py-3 text-center font-mono text-lg tracking-wider outline-none focus:border-blue-500" />
+                        <button type="submit" disabled={!twoFactorCode.trim() || verifyingTwoFactor} className="mt-3 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold hover:bg-blue-500 disabled:opacity-40">{verifyingTwoFactor ? "Verifying…" : "Verify and log in"}</button>
+                        <button type="button" onClick={() => {setTwoFactorChallenge(""); setTwoFactorCode(""); setCaToken(""); try { turnstile.reset(); } catch {}}} className="mt-3 w-full py-2 text-xs text-zinc-500 hover:text-zinc-300">Back to login</button>
+                    </form>
+                </div>
+            )}
 
             {/*<ErrorBanner message="API is down!" />*/}
 

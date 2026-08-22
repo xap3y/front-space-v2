@@ -60,6 +60,13 @@ export async function GET(req: NextRequest) {
             });
         }
 
+        if (data?.message?.requiresTwoFactor && data.message.challengeToken) {
+            return new NextResponse(null, {
+                status: 301,
+                headers: {Location: `/login?twoFactorChallenge=${encodeURIComponent(data.message.challengeToken)}`}
+            });
+        }
+
         const setCookie = response.headers.get('set-cookie');
 
         const connectedDiscord = data["message"] as DiscordConnection;

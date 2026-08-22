@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { UserObj } from "@/types/user";
 import { getUserRoleBadge, infoToast, okToast, errorToast } from "@/lib/client";
 import MainStringInput from "@/components/MainStringInput";
-import { updateUser, deleteUser, createAdminUser } from "@/lib/apiPoster";
+import { updateUser, deleteUser, createAdminUser, getAdminUserTwoFactorStatus, removeAdminUserTwoFactor } from "@/lib/apiPoster";
 import {FaBan, FaRegUserCircle, FaEye, FaEyeSlash, FaKey, FaRegTrashAlt} from "react-icons/fa";
 import {MdAlternateEmail, MdEmail} from "react-icons/md";
 import {FaArrowDown, FaArrowRight, FaIdCardClip, FaPencil, FaChevronLeft, FaChevronRight} from "react-icons/fa6";
 import { IoIdCardSharp } from "react-icons/io5";
 import {RiLockPasswordLine} from "react-icons/ri";
 import {IoIosArrowDown} from "react-icons/io";
+
+const ALL_ROLES = ["OWNER", "ADMIN", "MODERATOR", "USER", "TESTER", "GUEST", "BANNED", "DELETED"] as const;
 
 type SortMode =
     | "created_desc"
@@ -120,6 +122,7 @@ export default function UsersClient({
 
     const [openUid, setOpenUid] = useState<number | null>(null);
     const [emailReveal, setEmailReveal] = useState<Record<number, boolean>>({});
+    const [twoFactorEnabled, setTwoFactorEnabled] = useState<Record<number, boolean | undefined>>({});
 
     const [modal, setModal] = useState<{
         type: ModalType;
@@ -154,11 +157,24 @@ export default function UsersClient({
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [modal.type, isCreateModalOpen, creatingUser]);
 
-    const roleOptions = useMemo(() => {
-        const s = new Set<string>();
-        for (const u of initialUsers) s.add(u.role);
-        return Array.from(s).sort((a, b) => a.localeCompare(b));
-    }, [initialUsers]);
+    const roleOptions = ALL_ROLES;
+
+    useEffect(() => {
+        if (openUid === null || twoFactorEnabled[openUid] !== undefined) return;
+        getAdminUserTwoFactorStatus(openUid).then((res) => {
+            if (!res.error && res.message && typeof res.message === "object") {
+                setTwoFactorEnabled(prev => ({...prev, [openUid]: Boolean((res.message as any).enabled)}));
+            }
+        });
+    }, [openUid, twoFactorEnabled]);
+
+    const handleRemoveTwoFactor = async (uid: number, username: string) => {
+        if (!confirm(`Remove two-factor authentication from ${username} (#${uid})? The user will be able to log in using only their password.`)) return;
+        const res = await removeAdminUserTwoFactor(uid);
+        if (res.error) return errorToast(String(res.message || "Failed to remove 2FA"));
+        setTwoFactorEnabled(prev => ({...prev, [uid]: false}));
+        okToast("Two-factor authentication removed");
+    };
 
     const filteredSorted = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -580,6 +596,12 @@ export default function UsersClient({
                                                     <RiLockPasswordLine />
                                                     Change password
                                                 </ActionButton>
+                                                {twoFactorEnabled[u.uid] === true && (
+                                                    <ActionButton variant="danger" onClick={() => handleRemoveTwoFactor(u.uid, u.username)}>
+                                                        <FaKey />
+                                                        Remove 2FA
+                                                    </ActionButton>
+                                                )}
                                                 <ActionButton onClick={() => router.push("/admin/logs?user=" + u.username)}>
                                                     Display logs
                                                     <FaArrowRight />

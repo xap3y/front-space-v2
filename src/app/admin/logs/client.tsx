@@ -19,6 +19,11 @@ import {
     FiHash,
     FiMail,
     FiImage,
+    FiEye,
+    FiLock,
+    FiPauseCircle,
+    FiShield,
+    FiPackage,
 } from "react-icons/fi";
 import {IoIosArrowDown} from "react-icons/io";
 import {FaTelegram, FaChevronLeft, FaChevronRight} from "react-icons/fa";
@@ -78,7 +83,24 @@ const TYPE_OPTIONS: AuditLogType[] = [
     "EMAIL_RECEIVE",
     "TELEGRAM_CONNECTED",
     "TELEGRAM_REVOKED",
-    "TELEGRAM_BOT_COMMAND"
+    "TELEGRAM_BOT_COMMAND",
+    "TWO_FACTOR_SETUP",
+    "TWO_FACTOR_REVOKE",
+    "TWO_FACTOR_BACKUP_CODES_REGENERATE",
+    "PROFILE_PICTURE_CHANGE",
+    "IMAGE_VIEW",
+    "IMAGE_LOCK_CHANGE",
+    "PASTE_VIEW",
+    "URL_REDIRECT",
+    "SESSION_REVOKE",
+    "FILE_PACK_UPLOAD",
+    "FILE_PACK_DELETE",
+    "TEMP_MAIL_SUSPEND",
+    "RESOURCE_LIMIT_ROLE_CHANGE",
+    "RESOURCE_LIMIT_USER_OVERRIDE_CHANGE",
+    "RESOURCE_LIMIT_USER_OVERRIDE_CLEAR",
+    "USER_PAUSE",
+    "USER_UNPAUSE"
 ];
 
 const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
@@ -104,9 +126,26 @@ const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
     TELEGRAM_CONNECTED: <FiUserPlus className={"text-green-400"} />,
     TELEGRAM_REVOKED: <FiUserX className={"text-red-400"} />,
     TELEGRAM_BOT_COMMAND: <FiSettings />,
+    TWO_FACTOR_SETUP: <FiShield className="text-green-400" />,
+    TWO_FACTOR_REVOKE: <FiShield className="text-red-400" />,
+    TWO_FACTOR_BACKUP_CODES_REGENERATE: <FiKey className="text-amber-400" />,
+    PROFILE_PICTURE_CHANGE: <FiUserPlus className="text-blue-400" />,
+    IMAGE_VIEW: <FiEye className="text-sky-400" />,
+    IMAGE_LOCK_CHANGE: <FiLock className="text-amber-400" />,
+    PASTE_VIEW: <FiEye className="text-sky-400" />,
+    URL_REDIRECT: <FiLink className="text-violet-400" />,
+    SESSION_REVOKE: <FiLogOut className="text-red-400" />,
+    FILE_PACK_UPLOAD: <FiPackage className="text-green-400" />,
+    FILE_PACK_DELETE: <FiTrash2 className="text-red-400" />,
+    TEMP_MAIL_SUSPEND: <FiPauseCircle className="text-amber-400" />,
+    RESOURCE_LIMIT_ROLE_CHANGE: <FiSettings className="text-violet-400" />,
+    RESOURCE_LIMIT_USER_OVERRIDE_CHANGE: <FiSettings className="text-violet-400" />,
+    RESOURCE_LIMIT_USER_OVERRIDE_CLEAR: <FiTrash2 className="text-amber-400" />,
+    USER_PAUSE: <FiPauseCircle className="text-amber-400" />,
+    USER_UNPAUSE: <FiLogIn className="text-green-400" />,
 };
 
-const hasViewButton = (t: AuditLogType) => t === "IMAGE_UPLOAD";
+const hasViewButton = (t: AuditLogType) => t === "IMAGE_UPLOAD" || t === "IMAGE_VIEW";
 
 export default function LogsClient({
                                        initialLogs,

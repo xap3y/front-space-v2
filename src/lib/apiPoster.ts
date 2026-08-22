@@ -39,6 +39,26 @@ export async function createShortUrl(url: string, apikey: string, uniqueId: stri
     return {data: shortUrlDto, error: null};
 }
 
+export async function getAdminUserTwoFactorStatus(uid: number): Promise<DefaultResponse> {
+    try {
+        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/2fa`, {headers: getCurlHeaders()});
+        const data = await response.json();
+        return response.ok ? data as DefaultResponse : {error: true, message: data?.message || "Failed to load 2FA status"} as DefaultResponse;
+    } catch {
+        return {error: true, message: "Failed to load 2FA status"} as DefaultResponse;
+    }
+}
+
+export async function removeAdminUserTwoFactor(uid: number): Promise<DefaultResponse> {
+    try {
+        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/2fa`, {method: "DELETE", headers: getCurlHeaders()});
+        const data = await response.json();
+        return response.ok ? data as DefaultResponse : {error: true, message: data?.message || "Failed to remove 2FA"} as DefaultResponse;
+    } catch {
+        return {error: true, message: "Failed to remove 2FA"} as DefaultResponse;
+    }
+}
+
 export async function generatePresignedPutUrl(fileName: string, contentType: string): Promise<DefaultResponse> {
 
     const headersList = await headers();
