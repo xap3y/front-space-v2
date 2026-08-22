@@ -16,6 +16,7 @@ import { FaCopy } from "react-icons/fa";
 import { UserObj } from "@/types/user";
 import { UserPopupCard } from "@/components/UserPopupCard";
 import {BundledTheme} from "shiki/themes";
+import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
 
 const zoomOptions = [75, 90, 100, 110, 125, 150];
 
@@ -386,6 +387,7 @@ export default function Page() {
 
     return (
         <>
+            <AuthenticatedPageNavClient />
             <div
                 className="min-h-screen w-full text-gray-100 px-3 py-6 flex justify-center relative"
             >

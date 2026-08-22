@@ -8,6 +8,7 @@ import {getPasteApi} from "@/lib/apiGetters";
 import {usePaste} from "@/context/PasteContext";
 import {PasteDto} from "@/types/paste";
 import MainStringInput from "@/components/MainStringInput";
+import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
 
 export default function PasteFinder() {
 
@@ -39,6 +40,7 @@ export default function PasteFinder() {
 
     return (
         <>
+            <AuthenticatedPageNavClient />
 
             {loading && (
                 <LoadingPage/>

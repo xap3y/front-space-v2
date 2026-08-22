@@ -159,28 +159,29 @@ export default function UrlShortener() {
                             />
                         </div>
 
-                        {/* API Key */}
-                        <div className="flex items-center gap-2">
-                            <MainStringInput
-                                name="api-key"
-                                required
-                                placeholder="API Key"
-                                type="password"
-                                value={apiKey}
-                                id="api-key"
-                                disabled={!!user || loading || isKeyValidating || !!shortUrl}
-                                autoComplete="new-password"
-                                onChange={(val) => {
-                                    setIsKeyValid(null);
-                                    setApiKey(val.toLowerCase());
-                                }}
-                                className={`xl:text-base text-xs w-full ${
-                                    (!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""
-                                } ${isKeyValid === false ? "border-red-400 bg-red-400 bg-opacity-5" : ""}`}
-                            />
-                            {isKeyValidating && <LoadingDot size="w-10" />}
-                            {isKeyValid === true && !isKeyValidating && <FaCheck className="w-6 h-6 text-lime-400" />}
-                        </div>
+                        {!user && (
+                            <div className="flex items-center gap-2">
+                                <MainStringInput
+                                    name="api-key"
+                                    required
+                                    placeholder="API Key"
+                                    type="password"
+                                    value={apiKey}
+                                    id="api-key"
+                                    disabled={loading || isKeyValidating || !!shortUrl}
+                                    autoComplete="new-password"
+                                    onChange={(val) => {
+                                        setIsKeyValid(null);
+                                        setApiKey(val.toLowerCase());
+                                    }}
+                                    className={`xl:text-base text-xs w-full ${
+                                        isKeyValid ? "border-lime-500 bg-lime-500 bg-opacity-10" : ""
+                                    } ${isKeyValid === false ? "border-red-400 bg-red-400 bg-opacity-5" : ""}`}
+                                />
+                                {isKeyValidating && <LoadingDot size="w-10" />}
+                                {isKeyValid === true && !isKeyValidating && <FaCheck className="w-6 h-6 text-lime-400" />}
+                            </div>
+                        )}
 
                         {/* Submit button */}
                         <button

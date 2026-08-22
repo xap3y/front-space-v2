@@ -200,27 +200,26 @@ export default function PasteCreator() {
                           />
                         </div>
 
-                        {/* API Key */}
-                        <div className={`flex items-center ${!!user ? "hidden" : ""}`}>
-
-                            <MainStringInput
-                                placeholder={lang?.global?.api_key_input_placeholder || "API key"}
-                                value={apiKey}
-                                disabled={!!user || creating || isKeyValidating}
-                                onChange={(value) => {
-                                    setIsKeyValid(null);
-                                    setApiKey(value.toLowerCase());
-                                }}
-                                onFocus={() => {
-                                    setTimeout(() => setIsFocused(true), 100);
-                                }}
-                                className={`lg:text-base text-xs w-full in-primary p-0 ${isFocused ? "text-dots" : ""} ${
-                                    (!!user || isKeyValid) ? "border-lime-500 bg-lime-500 bg-opacity-10 text-dots" : ""
-                                } ${isKeyValid === false ? "border-red-400 bg-red-400 bg-opacity-5" : ""} ${creating ? "disabled" : ""} ${!!user ? "cursor-not-allowed" : ""}`}
-                            />
-                            {isKeyValidating && <LoadingDot size="w-10" />}
-                            {isKeyValid === true && !isKeyValidating && <FaCheck className="ml-2 w-6 h-6 text-lime-400" />}
-                        </div>
+                        {!user && (
+                            <div className="flex items-center">
+                                <MainStringInput
+                                    placeholder={lang?.global?.api_key_input_placeholder || "API key"}
+                                    value={apiKey}
+                                    type="password"
+                                    disabled={creating || isKeyValidating}
+                                    onChange={(value) => {
+                                        setIsKeyValid(null);
+                                        setApiKey(value.toLowerCase());
+                                    }}
+                                    onFocus={() => setTimeout(() => setIsFocused(true), 100)}
+                                    className={`lg:text-base text-xs w-full in-primary p-0 ${isFocused ? "text-dots" : ""} ${
+                                        isKeyValid ? "border-lime-500 bg-lime-500 bg-opacity-10 text-dots" : ""
+                                    } ${isKeyValid === false ? "border-red-400 bg-red-400 bg-opacity-5" : ""}`}
+                                />
+                                {isKeyValidating && <LoadingDot size="w-10" />}
+                                {isKeyValid === true && !isKeyValidating && <FaCheck className="ml-2 w-6 h-6 text-lime-400" />}
+                            </div>
+                        )}
 
                         {/* Create button */}
                         {!creating ? (

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
 import { usePage } from "@/context/PageContext";
 import { useRouter } from "next/navigation";
-import { FaEnvelope, FaImage, FaClipboard, FaLink, FaFile, FaImages, FaUser } from "react-icons/fa6";
+import { FaEnvelope, FaImage, FaClipboard, FaLink, FaFile, FaImages, FaUser, FaMagnifyingGlass } from "react-icons/fa6";
 import {FaCog, FaTools} from "react-icons/fa";
 import LoadingPage from "@/components/LoadingPage";
 
@@ -94,6 +94,18 @@ export default function DashboardLauncherClient() {
             description: "Browse your media",
             href: "/home/gallery",
             icon: <FaImages className="w-5 h-5" />,
+        },
+        {
+            title: "Find Image",
+            description: "Open an image using its ID",
+            href: "/i",
+            icon: <FaMagnifyingGlass className="w-5 h-5" />,
+        },
+        {
+            title: "Find Paste",
+            description: "Open a paste using its ID",
+            href: "/p",
+            icon: <FaMagnifyingGlass className="w-5 h-5" />,
         },
         {
             title: "Tools",

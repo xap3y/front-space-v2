@@ -257,10 +257,11 @@ export default function HomeSessionsPage() {
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex items-center gap-3 min-w-0">
                                             {/* Combined OS/Browser Badge */}
-                                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-1">
-                                                {getOsIcon(osIcon)}
-                                                <span className="text-[10px] text-gray-600">|</span>
-                                                {getBrowserIcon(browserIcon)}
+                                            <div className="relative flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/10 flex items-center justify-center shadow-inner">
+                                                <span className="[&>svg]:w-6 [&>svg]:h-6">{getOsIcon(osIcon)}</span>
+                                                <span className="absolute -right-1 -bottom-1 w-6 h-6 rounded-lg bg-zinc-950 border border-zinc-700 flex items-center justify-center shadow-lg [&>svg]:w-3.5 [&>svg]:h-3.5">
+                                                    {getBrowserIcon(browserIcon)}
+                                                </span>
                                             </div>
                                             <div className="min-w-0">
                                                 <div className="text-sm font-semibold text-white truncate flex items-center gap-1.5">
@@ -300,17 +301,19 @@ export default function HomeSessionsPage() {
 
                                     {/* Action button */}
                                     <div className="pt-1">
-                                        <button
-                                            onClick={() => setSelectedSession(s)}
-                                            className={`w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 border-2 ${
-                                                s.isCurrent
-                                                    ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/40 hover:border-red-500 hover:in-shadow"
-                                                    : "border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300"
-                                            }`}
-                                        >
-                                            <FaTrash className="h-3 w-3" />
-                                            <span>{s.isCurrent ? "Revoke & Log Out" : "Revoke Session"}</span>
-                                        </button>
+                                        {s.isCurrent ? (
+                                            <div className="w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 border border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-400">
+                                                Protected current session
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => setSelectedSession(s)}
+                                                className="w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 border-2 border-zinc-800 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 bg-primary1 text-gray-300"
+                                            >
+                                                <FaTrash className="h-3 w-3" />
+                                                <span>Revoke Session</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             );

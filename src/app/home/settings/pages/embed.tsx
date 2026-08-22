@@ -165,7 +165,7 @@ export default function EmbedTabContent({ user }: { user: UserObj }) {
                 {/* Preview (right) */}
                 <div className="flex-1 mt-8 md:mt-0 md:ml-0 -ml-4 flex items-start justify-center">
                     {embedSettings.enabled && (
-                        <div className="w-full max-w-lg">
+                        <div className="space-embed-visualizer-scope w-full max-w-lg">
                             <EmbedVisualizer
                                 embed={embed}
                                 onError={(e: any) =>

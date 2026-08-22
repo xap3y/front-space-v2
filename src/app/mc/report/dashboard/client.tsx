@@ -678,7 +678,7 @@ function DiscordMessage({ message }: { message: PortalMessage }) {
                 <div className="flex flex-wrap items-baseline gap-2"><span className="font-medium text-zinc-100">{message.author?.username || "Discord"}</span>{message.author?.bot && <span className="rounded bg-indigo-500 px-1 py-0.5 text-[9px] font-bold uppercase leading-none text-white">Bot</span>}<span className="text-[11px] text-zinc-600">{timeOnly(message.timestamp)}</span></div>
                 {message.content && <p className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-5 text-zinc-300">{message.content}</p>}
                 {!!message.embeds?.length && (
-                    <div className="mt-2 grid max-w-[520px] gap-2">
+                    <div className="space-embed-visualizer-scope mt-2 grid max-w-[520px] gap-2">
                         {message.embeds.map((embed, index) => (
                             <EmbedVisualizer
                                 key={`${message.id}-embed-${index}`}

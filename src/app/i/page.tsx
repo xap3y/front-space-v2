@@ -10,6 +10,7 @@ import {errorToast} from "@/lib/client";
 import {useTranslation} from "@/hooks/useTranslation";
 import {ErrorToast} from "@/components/ErrorToast";
 import MainStringInput from "@/components/MainStringInput";
+import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
 
 export default function ImageFinder() {
 
@@ -42,6 +43,7 @@ export default function ImageFinder() {
 
     return (
         <>
+            <AuthenticatedPageNavClient />
 
             {loading && (
                 <LoadingPage/>

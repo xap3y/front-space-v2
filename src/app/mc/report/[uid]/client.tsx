@@ -482,7 +482,7 @@ export default function ReportPageClient() {
 
                                 {/* Embeds */}
                                 {(m.embeds || []).length > 0 && (
-                                    <div className="grid max-w-[520px] gap-2 z-50">
+                                    <div className="space-embed-visualizer-scope grid max-w-[520px] gap-2 z-50">
                                         {(m.embeds || []).map((e: any, idx: number) => (
                                             <EmbedVisualizer
                                                 key={`embed-${m.id}-${idx}`}

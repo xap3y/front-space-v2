@@ -19,6 +19,7 @@ import {useIsMobile} from "@/hooks/utils";
 import {copyToClipboard, deleteImageApi, errorToast, infoToast} from "@/lib/client";
 import {FaEye, FaEyeSlash} from "react-icons/fa";
 import MainStringInput from "@/components/MainStringInput";
+import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
 
 export default function Page() {
 
@@ -268,6 +269,7 @@ export default function Page() {
 
     return (
         <>
+            <AuthenticatedPageNavClient />
             {(!passwordRequired && showImage && image.type) ? (
                 <>
                     <div className={"overflow-y-scroll overflow-x-hidden"}>
