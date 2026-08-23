@@ -26,10 +26,13 @@ import {ErrorToast} from "@/components/ErrorToast";
 import {useDebounce} from "@/hooks/useDebounce";
 import MainStringInput from "@/components/MainStringInput";
 import {UserObjShort} from "@/types/user";
+import HoverDiv from "@/components/HoverDiv";
 
 export default function ImageUploader() {
 
     const [file, setFile] = useState<File | null>(null);
+    const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+    const [showTransparencyGrid, setShowTransparencyGrid] = useState(false);
 
     const [apiKey, setApiKey] = useState<string>("");
 
@@ -101,6 +104,17 @@ export default function ImageUploader() {
         console.log("Expiry date changed:", expiryDate);
     }, [expiryDate])
 
+    useEffect(() => {
+        setShowTransparencyGrid(false);
+        if (!file) {
+            setFilePreviewUrl(null);
+            return;
+        }
+        const objectUrl = URL.createObjectURL(file);
+        setFilePreviewUrl(objectUrl);
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [file]);
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         accept: {
             'image/*': [],
@@ -111,6 +125,26 @@ export default function ImageUploader() {
             setFile(acceptedFiles[0]);
         },
     });
+
+    useEffect(() => {
+        const handleClipboardPaste = (event: ClipboardEvent) => {
+            if (uploading || !event.clipboardData) return;
+            const clipboardFiles = Array.from(event.clipboardData.files);
+            const itemFiles = Array.from(event.clipboardData.items)
+                .filter(item => item.kind === "file")
+                .map(item => item.getAsFile())
+                .filter((item): item is File => item !== null);
+            const pastedFile = [...clipboardFiles, ...itemFiles].find(item => item.type.startsWith("image/") || item.type.startsWith("video/"));
+            if (!pastedFile) return;
+            event.preventDefault();
+            setFile(pastedFile);
+            setUploadedImage(null);
+            setUploadError(null);
+            infoToast(`${pastedFile.type.startsWith("video/") ? "Video" : "Image"} pasted from clipboard`);
+        };
+        window.addEventListener("paste", handleClipboardPaste);
+        return () => window.removeEventListener("paste", handleClipboardPaste);
+    }, [uploading]);
 
     useEffect(() => {
         if (!debouncedApiKey) {
@@ -329,6 +363,14 @@ export default function ImageUploader() {
 
     const finalUserRole = apiKeyUser ? apiKeyUser.role : user ? user.role : "GUEST";
     const isAdmin = finalUserRole == "ADMIN" || finalUserRole == "OWNER";
+    const selectedFileExtension = file?.name.split(".").pop()?.toLowerCase() ?? "";
+    const supportsTransparency = file?.type.startsWith("image/") && ["png", "apng", "webp", "gif", "avif", "svg", "tif", "tiff"].includes(selectedFileExtension);
+    const transparencyGridStyle = showTransparencyGrid ? {
+        backgroundColor: "#fff",
+        backgroundImage: "linear-gradient(45deg,#d4d4d8 25%,transparent 25%),linear-gradient(-45deg,#d4d4d8 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#d4d4d8 75%),linear-gradient(-45deg,transparent 75%,#d4d4d8 75%)",
+        backgroundSize: "18px 18px",
+        backgroundPosition: "0 0,0 9px,9px -9px,-9px 0",
+    } : undefined;
 
     return (
         <>
@@ -352,14 +394,21 @@ export default function ImageUploader() {
                                     <input disabled={uploading} {...getInputProps()} />
                                     <div className="transition-all duration-200 ease-in-out flex flex-col items-center text-gray-300">
                                         <p className={`${isDragActive ? "text-gray-500" : ""} lg:text-base text-xs`}>{lang.pages.portable_image.drag_and_drop_text}</p>
+                                        <p className="mt-1 text-[10px] text-zinc-500 lg:text-xs">or paste an image/video with Ctrl+V or Cmd+V</p>
                                         {/*<p className={`${(uploadMaxSize.length == 0) ? "opacity-0" : "opacity-80"} ${isDragActive ? "text-gray-500" : ""} duration-500 transition-all lg:text-base text-xs`}>{uploadMaxSize}</p>*/}
                                     </div>
                                 </div>
                             )}
                             {file && (
-                                <div className="flex justify-between items-center p-2 border-2 border-lime-700 rounded-lg">
-                                    <span>{cleanText(file.name)}</span>
-                                    <button className={"ml-2"} onClick={handleRemoveFile}> <MdOutlineDelete className={"w-6 h-6 text-red-500"} /> </button>
+                                <div className="overflow-hidden rounded-xl border-2 border-lime-700/80 bg-black/20">
+                                    {filePreviewUrl && file.type.startsWith("image/") && <div style={transparencyGridStyle} className={`flex min-h-24 max-h-48 w-full items-center justify-center overflow-hidden border-b border-white/10 p-3 ${showTransparencyGrid ? "" : "bg-[radial-gradient(circle_at_center,rgba(255,255,255,.055),transparent_70%)]"}`}>
+                                        <img src={filePreviewUrl} alt={`Preview of ${file.name}`} className="block h-auto max-h-40 w-auto max-w-full rounded-lg object-contain shadow-lg" />
+                                    </div>}
+                                    <div className="flex min-w-0 items-center justify-between gap-3 p-2.5">
+                                        <div className="min-w-0"><span className="block truncate text-sm text-zinc-200" title={file.name}>{cleanText(file.name)}</span><span className="mt-0.5 block text-[10px] uppercase tracking-wider text-zinc-500">{file.type.startsWith("video/") ? "Video" : "Image"} · {file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`}</span></div>
+                                        <button type="button" aria-label="Remove selected file" className="ml-2 shrink-0 rounded-lg p-1.5 transition hover:bg-red-500/10" onClick={handleRemoveFile}> <MdOutlineDelete className="h-6 w-6 text-red-500" /> </button>
+                                    </div>
+                                    {supportsTransparency && <div className="flex items-center justify-between border-t border-white/10 px-2.5 py-2"><span className="text-[11px] text-zinc-400">Transparency grid</span><HoverDiv type={showTransparencyGrid ? "SAVE" : "INFO"} role="switch" aria-checked={showTransparencyGrid} aria-label="Toggle transparency grid" onClick={() => setShowTransparencyGrid(value => !value)} style={{justifyContent: showTransparencyGrid ? "flex-end" : "flex-start"}} className="h-6 w-11 shrink-0 rounded-full p-[3px]"><span className={`block h-4 w-4 shrink-0 rounded-full transition-colors ${showTransparencyGrid ? "bg-emerald-300" : "bg-zinc-500"}`}/></HoverDiv></div>}
                                 </div>
                             )}
 

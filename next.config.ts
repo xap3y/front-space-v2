@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   compress: true,
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
   async redirects() {
     return [
       {
@@ -16,16 +19,11 @@ const nextConfig: NextConfig = {
         source: '/home/tools',
         destination: '/tools',
         permanent: true,
-      },
-      {
-        source: '/api',
-        destination: 'http://127.0.0.1:8012',
-        permanent: true,
       }
     ]
   },
     images: {
-        remotePatterns: [new URL('https://r3.xap3y.space/**'), new URL('https://r2.xap3y.eu/**')],
+        remotePatterns: [new URL('https://r2.xap3y.eu/**'), new URL('https://cdn.discordapp.com/**'), new URL('https://media.discordapp.net/**'), new URL('https://media.discordapp.com/**'), new URL('https://cdn.discordapp.com/attachments/**'), new URL('https://media.discordapp.net/attachments/**'), new URL('https://media.discordapp.com/attachments/**')],
     },
 };
 

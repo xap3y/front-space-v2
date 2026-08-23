@@ -56,11 +56,13 @@ export default function AvatarClient({avatar, username, apiKey}: Props) {
     };
 
     return <>
-        <HoverDiv type="INFO" onClick={() => setOpen(true)} className="group relative block rounded-full border-0 bg-transparent p-0" aria-label="Change profile picture">
-            <img src={currentAvatar} alt={`${username}'s avatar`} className="h-28 w-28 rounded-full border-2 border-white/10 object-cover shadow-2xl" />
-            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 opacity-0 transition group-hover:opacity-100"><FaCamera className="h-6 w-6" /></span>
-            <span className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full border-4 border-[#101014] bg-blue-600 text-white"><FaCamera className="h-3.5 w-3.5" /></span>
-        </HoverDiv>
+        <div className="relative h-28 w-28 shrink-0 overflow-visible">
+            <HoverDiv type="INFO" onClick={() => setOpen(true)} className="group relative h-28 w-28 overflow-hidden rounded-full border-0 bg-transparent p-0" aria-label="Change profile picture">
+                <img src={currentAvatar} alt={`${username}'s avatar`} className="block h-full w-full rounded-full border-2 border-white/10 object-cover shadow-2xl" />
+                <span className="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-black/60 opacity-0 transition group-hover:opacity-100"><FaCamera className="h-6 w-6" /></span>
+            </HoverDiv>
+            <span className="pointer-events-none absolute -bottom-1 -right-1 z-20 flex h-9 w-9 items-center justify-center rounded-full border-4 border-[#101014] bg-blue-600 text-white shadow-lg"><FaCamera className="h-3.5 w-3.5" /></span>
+        </div>
         {open && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onMouseDown={close}>
             <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-700 bg-[#101014] shadow-2xl" onMouseDown={e => e.stopPropagation()}>
                 <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><h2 className="font-semibold">Change profile picture</h2><p className="text-xs text-zinc-500">JPEG, PNG, WebP or GIF · max 5 MB</p></div><HoverDiv type="INFO" icon={<FaXmark/>} onClick={close} disabled={uploading} className="h-9 w-9 rounded-lg p-0 text-zinc-400" aria-label="Close"/></div>

@@ -1,13 +1,13 @@
 'use client';
 
 import {notFound, useParams, useRouter} from "next/navigation";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import LoadingPage from "@/components/LoadingPage";
 import {useImage} from "@/context/ImageContext";
 import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
-import {FaArrowDown, FaDownload, FaLock} from "react-icons/fa6";
+import {FaArrowDown, FaCheck, FaDownload, FaGlobe, FaImage, FaLink, FaLock} from "react-icons/fa6";
 import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
 import {IoMdTrash} from "react-icons/io";
@@ -36,11 +36,22 @@ export default function Page() {
     const [imageUrl, setimageUrl] = useState<string | null>(null);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const [open, setOpen] = useState(false);
+    const [copiedOption, setCopiedOption] = useState<string | null>(null);
+    const copyMenuRef = useRef<HTMLDivElement>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const toggleDropdown = () => setOpen(!open);
-    const closeDropdown = () => setOpen(false);
+
+    const handleCopyUrl = (option: string, value: string) => {
+        if (!value) return errorToast(`${option} is not available`);
+        copyToClipboard(value, lang);
+        setCopiedOption(option);
+        window.setTimeout(() => {
+            setOpen(false);
+            setCopiedOption(null);
+        }, 650);
+    };
 
     const lang = useTranslation();
     const router = useRouter();
@@ -54,6 +65,22 @@ export default function Page() {
         handleMouseLeave,
         handleMouseMove,
     } = useHoverCard(isMobile);
+
+    useEffect(() => {
+        if (!open) return;
+        const close = (event: MouseEvent) => {
+            if (!copyMenuRef.current?.contains(event.target as Node)) setOpen(false);
+        };
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setOpen(false);
+        };
+        document.addEventListener("mousedown", close);
+        window.addEventListener("keydown", closeOnEscape);
+        return () => {
+            document.removeEventListener("mousedown", close);
+            window.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [open]);
 
     useEffect(() => {
 
@@ -355,57 +382,41 @@ export default function Page() {
                                         {lang.pages.image_viewer.copy_button_text}
                                     </button>*/}
 
-                                    <div className="relative inline-block text-left">
+                                    <div ref={copyMenuRef} className="relative inline-block text-left">
                                         <button
-                                            className="lg:h-11 h-9 flex items-center gap-2 border text-white px-2 rounded border-white/10 bg-primary hover:bg-secondary"
+                                            type="button"
+                                            aria-haspopup="menu"
+                                            aria-expanded={open}
+                                            className={`lg:h-11 h-9 flex items-center gap-2 border px-3 rounded-lg transition ${open ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200" : "border-white/10 bg-primary text-white hover:bg-secondary"}`}
                                             onClick={toggleDropdown}
                                         >
-                                            <FaArrowDown className={`h-4 w-4 ${open ? "rotate-180" : ""} duration-200`} />
+                                            <FaLink className="h-4 w-4" />
                                             {lang.pages.image_viewer.copy_button_text}
+                                            <FaArrowDown className={`ml-1 h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
                                         </button>
 
                                         <div
-                                            className={`absolute right-0 mt-1 min-w-52 bg-zinc-900 rounded border border-zinc-700 shadow-lg z-50 overflow-hidden transform transition-all duration-300 ease-in-out origin-top ${
-                                                open ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0 pointer-events-none"
+                                            role="menu"
+                                            className={`absolute bottom-full right-0 z-50 mb-2 max-h-[calc(100vh-2rem)] w-[min(290px,calc(100vw-1.5rem))] origin-bottom-right overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 text-left shadow-2xl shadow-black/60 backdrop-blur-xl transition duration-150 ${
+                                                open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-1 scale-[.98] opacity-0"
                                             }`}
                                         >
-
-                                            <button
-                                                key={"short"}
-                                                onClick={() => {
-                                                    closeDropdown()
-                                                    copyToClipboard(image?.urlSet.shortUrl || "", lang)
-                                                }}
-                                                className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
+                                            <div className="px-3 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500">Copy image link</div>
+                                            {[
+                                                {key: "Short URL", description: "Compact link for sharing", value: image?.urlSet.shortUrl || "", icon: <FaLink/>},
+                                                {key: "Portal URL", description: "Opens this image viewer", value: image?.urlSet.portalUrl || `https://space.xap3y.eu/i/${uid}`, icon: <FaGlobe/>},
+                                                {key: "Raw URL", description: "Direct link to the media file", value: image?.urlSet.rawUrl || "", icon: <FaImage/>},
+                                            ].map(option => <button
+                                                type="button"
+                                                role="menuitem"
+                                                key={option.key}
+                                                disabled={!option.value}
+                                                onClick={() => handleCopyUrl(option.key, option.value)}
+                                                className="group flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition hover:bg-white/[.07] focus-visible:bg-white/[.07] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                             >
-                                                Short URL
-                                            </button>
-
-                                            <hr className="border-zinc-700" />
-
-                                            <button
-                                                key={"portal"}
-                                                onClick={() => {
-                                                    closeDropdown()
-                                                    copyToClipboard(image?.urlSet.portalUrl || "https://space.xap3y.eu/i/" + uid, lang)
-                                                }}
-                                                className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
-                                            >
-                                                Portal URL
-                                            </button>
-
-                                            <hr className="border-zinc-700" />
-
-                                            <button
-                                                key={"raw"}
-                                                onClick={() => {
-                                                    closeDropdown()
-                                                    copyToClipboard(image?.urlSet.rawUrl || "", lang)
-                                                }}
-                                                className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
-                                            >
-                                                Raw URL
-                                            </button>
+                                                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border transition ${copiedOption === option.key ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-white/10 bg-white/[.035] text-zinc-400 group-hover:text-white"}`}>{copiedOption === option.key ? <FaCheck/> : option.icon}</span>
+                                                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-zinc-100">{copiedOption === option.key ? "Copied" : option.key}</span><span className="block truncate text-[11px] font-normal text-zinc-500">{option.description}</span></span>
+                                            </button>)}
                                         </div>
                                     </div>
 
