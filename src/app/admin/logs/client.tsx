@@ -27,6 +27,7 @@ import {
 } from "react-icons/fi";
 import {IoIosArrowDown} from "react-icons/io";
 import {FaTelegram, FaChevronLeft, FaChevronRight} from "react-icons/fa";
+import MainStringInput from "@/components/MainStringInput";
 
 type SortMode = "time_desc" | "time_asc";
 
@@ -302,12 +303,13 @@ export default function LogsClient({
 
             {/* Compact Filters Panel */}
             <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
-                <input
+                <MainStringInput
                     type="text"
                     placeholder="Search user / type / desc / source..."
                     value={q}
-                    onChange={(e) => onSearch(e.target.value)}
-                    className="w-56 rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500 transition-colors"
+                    onChange={onSearch}
+                    className="w-56 rounded-lg border-zinc-800 bg-primary1"
+                    inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
                 <select

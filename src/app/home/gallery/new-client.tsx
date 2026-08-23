@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useGalleryRows } from "@/hooks/useGalleryRow";
 import { useTranslation } from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
+import HoverDiv, {DeleteButton} from "@/components/HoverDiv";
 
 const ITEMS_PER_STAGGER = 4;
 const STAGGER_DELAY_MS = 120;
@@ -693,27 +694,27 @@ export default function GalleryPage() {
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
+                                <HoverDiv
                                     onClick={() => copyToClipboard(enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || '', lang)}
-                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
+                                    icon={<FaCopy className="h-4 w-4"/>}
+                                    className="p-2 text-xs"
                                     title="Copy direct link"
-                                >
-                                    <FaCopy className="h-4 w-4" />
-                                </button>
+                                    aria-label="Copy direct link"
+                                />
                                 <a
                                     href={(enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || '') + "?download=true"}
-                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
+                                    className="inline-flex"
                                     title="Download"
                                 >
-                                    <FaDownload className="h-4 w-4" />
+                                <HoverDiv icon={<FaDownload className="h-4 w-4"/>} className="p-2 text-xs" aria-label="Download"/>
                                 </a>
-                                <button
+                                <HoverDiv
                                     onClick={() => setEnlargedImage(null)}
-                                    className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-400 hover:text-white transition-all duration-200 text-xs"
+                                    icon={<FaTimes className="h-4 w-4"/>}
+                                    className="p-2 text-xs"
                                     title="Close"
-                                >
-                                    <FaTimes className="h-4 w-4" />
-                                </button>
+                                    aria-label="Close"
+                                />
                             </div>
                         </div>
 
@@ -863,24 +864,23 @@ function MediaCard({
                             <FaDownload className="h-3.5 w-3.5" />
                         </a>
                         {/* Lock Button to modify password */}
-                        <button
-                            type="button"
+                        <HoverDiv
                             onClick={onPasswordChange}
-                            className={`inline-flex items-center px-2 py-1.5 rounded-md text-xs border-2 transition-all duration-200 ${item.requiresPassword ? "border-amber-500/40 hover:border-amber-500 hover:in-shadow bg-amber-600/10 text-amber-300" : "border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white"}`}
+                            type={item.requiresPassword ? "WARN" : "INFO"}
+                            icon={<FaLock className="h-3.5 w-3.5"/>}
+                            className="px-2 py-1.5 text-xs"
                             aria-label="Password settings"
                             title="Set / update password"
-                        >
-                            <FaLock className="h-3.5 w-3.5" />
-                        </button>
+                        />
                     </div>
-                    <button
+                    <DeleteButton
                         onClick={onDelete}
-                        className="inline-flex items-center px-2 py-1.5 rounded-md text-xs border-2 border-red-500/40 bg-red-600/10 hover:bg-red-600/20 text-red-300 transition-all duration-200 flex-shrink-0"
+                        icon={<FaRegTrashAlt className="h-3.5 w-3.5"/>}
+                        className="px-2 py-1.5 text-xs"
+                        inputClassName="flex-shrink-0"
                         aria-label="Delete"
                         title="Delete upload"
-                    >
-                        <FaRegTrashAlt className="h-3.5 w-3.5" />
-                    </button>
+                    />
                 </div>
             </div>
         </div>

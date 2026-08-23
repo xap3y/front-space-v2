@@ -2,6 +2,7 @@
 
 import React from "react";
 import { IoSearch } from "react-icons/io5";
+import MainStringInput from "@/components/MainStringInput";
 
 export function SearchInput({
                                 value,
@@ -17,11 +18,13 @@ export function SearchInput({
     return (
         <div className={`relative ${className}`}>
             <IoSearch className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input
+            <MainStringInput
+                type="search"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={onChange}
                 placeholder={placeholder}
-                className="w-full rounded border border-zinc-700 bg-zinc-900 pl-8 pr-3 py-1.5 text-sm outline-none placeholder:text-zinc-500 focus:border-zinc-500"
+                className="w-full rounded border-zinc-700 bg-zinc-900"
+                inputClassName="pl-8 pr-3 py-1.5 text-sm placeholder:text-zinc-500"
             />
         </div>
     );

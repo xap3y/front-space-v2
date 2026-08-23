@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FaArrowLeft } from "react-icons/fa6";
 import "./globals.css";
 import {FaHome} from "react-icons/fa";
+import HoverDiv from "@/components/HoverDiv";
 
 export default function NotFound() {
     return (
@@ -27,20 +28,10 @@ export default function NotFound() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-6">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-white text-black font-medium text-sm transition-all duration-200 hover:bg-gray-100 active:scale-95"
-                    >
-                        <FaHome className="w-4 h-4" />
-                        Home
+                    <Link href="/" className="inline-flex">
+                        <HoverDiv icon={<FaHome className="h-4 w-4"/>} bg="white" text="black" className="px-6 py-2.5 text-sm font-medium">Home</HoverDiv>
                     </Link>
-                    <button
-                        onClick={() => window.history.back()}
-                        className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-black/50 hover:bg-black/70 text-white font-medium text-sm border border-gray-700 transition-all duration-200 active:scale-95"
-                    >
-                        <FaArrowLeft className="w-4 h-4" />
-                        Back
-                    </button>
+                    <HoverDiv onClick={() => window.history.back()} icon={<FaArrowLeft className="h-4 w-4"/>} bg="rgb(0 0 0 / .5)" text="white" className="px-6 py-2.5 text-sm font-medium">Back</HoverDiv>
                 </div>
             </div>
 

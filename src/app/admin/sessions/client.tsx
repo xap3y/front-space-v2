@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa6";
 import { FaBell, FaSignOutAlt, FaTimes } from "react-icons/fa";
 import { MdOutlineComputer } from "react-icons/md";
+import MainStringInput from "@/components/MainStringInput";
 
 interface ActiveClientDto {
     wsSessionId: string;
@@ -405,13 +406,14 @@ export default function AdminSessionsClient() {
                         <p className="text-xs text-gray-400 mb-4">
                             Target: <span className="text-white">{redirectModal.username ?? "Anonymous"}</span>
                         </p>
-                        <input
+                        <MainStringInput
                             autoFocus
                             type="text"
                             value={redirectRoute}
-                            onChange={(e) => setRedirectRoute(e.target.value)}
+                            onChange={setRedirectRoute}
                             placeholder="/home/gallery"
-                            className="w-full rounded-lg border-2 border-zinc-800 focus:border-zinc-700 bg-primary1 text-sm text-white px-3 py-2 focus:outline-none placeholder-gray-500"
+                            className="w-full rounded-lg border-zinc-800 bg-primary1"
+                            inputClassName="text-sm px-3 py-2"
                         />
                         <div className="flex gap-2 justify-end mt-4">
                             <button

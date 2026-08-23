@@ -80,7 +80,7 @@ export default function UserFinder() {
                                 <div className="mb-4">
                                     <button
                                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-telegram hover:bg-telegram-brightest hover:text-primary focus:outline-none transition-all duration-200 transform"
-                                        type={"submit"}
+                                        type="submit"
                                         onClick={findUser}
                                     >
                                         {lang.pages.user_finder.button_text}

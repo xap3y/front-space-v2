@@ -126,7 +126,7 @@ export default function ToolWorkspace<T extends string>({
                     >
                         {optionsContent}
 
-                        <button
+                        <HoverDiv
                             onClick={onProcess}
                             disabled={!file || processing}
                             className={`w-full py-3.5 rounded-xl text-sm font-bold tracking-wide shadow-lg transition-all transform active:scale-[0.98] select-none ${
@@ -136,7 +136,7 @@ export default function ToolWorkspace<T extends string>({
                             }`}
                         >
                             {processing ? "Processing..." : processLabel}
-                        </button>
+                        </HoverDiv>
                     </ToolCard>
                 </div>
             </div>

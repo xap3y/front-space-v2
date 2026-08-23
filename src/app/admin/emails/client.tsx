@@ -11,6 +11,7 @@ import { getApiUrl } from "@/lib/core";
 import { FaExternalLinkAlt, FaRegTrashAlt, FaChevronLeft, FaChevronRight, FaTimes, FaTrash } from "react-icons/fa";
 import { PiSealWarningDuotone } from "react-icons/pi";
 import { MdEdit, MdDeleteSweep, MdDeleteOutline } from "react-icons/md";
+import MainStringInput from "@/components/MainStringInput";
 
 type SortMode =
     | "created_desc"
@@ -192,11 +193,12 @@ function ExpirationModal({ email, currentExpiry, apiKey, onClose, onSaved }: Exp
 
                 <div className="space-y-1.5">
                     <label className="text-xs text-gray-400 font-medium">New expiration date & time</label>
-                    <input
+                    <MainStringInput
                         type="datetime-local"
                         value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-2 text-sm text-white focus:outline-none focus:border-zinc-600 [color-scheme:dark]"
+                        onChange={setValue}
+                        className="w-full rounded-lg border-zinc-800 bg-primary1 [color-scheme:dark]"
+                        inputClassName="px-3 py-2 text-sm"
                     />
                 </div>
 
@@ -460,12 +462,13 @@ export default function AdminEmailsClient({
 
                 {/* Compact Filters Panel */}
                 <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
-                    <input
+                    <MainStringInput
                         type="text"
                         placeholder="Search email / id / status / creator..."
                         value={search}
-                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                        className="w-56 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
+                        onChange={(value) => { setSearch(value); setPage(1); }}
+                        className="w-56 rounded border-zinc-800 bg-primary1"
+                        inputClassName="px-2.5 py-1.5 text-xs"
                     />
 
                     <select

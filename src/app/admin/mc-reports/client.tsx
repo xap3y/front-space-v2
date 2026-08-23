@@ -269,12 +269,13 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
 
             {/* Compact Filters Panel */}
             <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
-                <input
+                <MainStringInput
                     type="text"
                     placeholder="Search server name / IP / email..."
                     value={search}
-                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-56 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
+                    onChange={(value) => { setSearch(value); setPage(1); }}
+                    className="w-56 rounded border-zinc-800 bg-primary1"
+                    inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
                 <select

@@ -1,5 +1,7 @@
 "use client";
 
+import HoverDiv from "@/components/HoverDiv";
+
 import {useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {FaCamera, FaCloudArrowUp, FaXmark} from "react-icons/fa6";
@@ -54,20 +56,20 @@ export default function AvatarClient({avatar, username, apiKey}: Props) {
     };
 
     return <>
-        <button onClick={() => setOpen(true)} className="group relative block rounded-full" aria-label="Change profile picture">
+        <HoverDiv type="INFO" onClick={() => setOpen(true)} className="group relative block rounded-full border-0 bg-transparent p-0" aria-label="Change profile picture">
             <img src={currentAvatar} alt={`${username}'s avatar`} className="h-28 w-28 rounded-full border-2 border-white/10 object-cover shadow-2xl" />
             <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 opacity-0 transition group-hover:opacity-100"><FaCamera className="h-6 w-6" /></span>
             <span className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full border-4 border-[#101014] bg-blue-600 text-white"><FaCamera className="h-3.5 w-3.5" /></span>
-        </button>
+        </HoverDiv>
         {open && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onMouseDown={close}>
             <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-700 bg-[#101014] shadow-2xl" onMouseDown={e => e.stopPropagation()}>
-                <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><h2 className="font-semibold">Change profile picture</h2><p className="text-xs text-zinc-500">JPEG, PNG, WebP or GIF · max 5 MB</p></div><button onClick={close} disabled={uploading} className="rounded-lg p-2 text-zinc-500 hover:bg-white/5 hover:text-white"><FaXmark /></button></div>
+                <div className="flex items-center justify-between border-b border-white/10 px-5 py-4"><div><h2 className="font-semibold">Change profile picture</h2><p className="text-xs text-zinc-500">JPEG, PNG, WebP or GIF · max 5 MB</p></div><HoverDiv type="INFO" icon={<FaXmark/>} onClick={close} disabled={uploading} className="h-9 w-9 rounded-lg p-0 text-zinc-400" aria-label="Close"/></div>
                 <div className="space-y-4 p-5">
-                    <button type="button" onClick={() => inputRef.current?.click()} onDragOver={e => {e.preventDefault(); setDragging(true)}} onDragLeave={() => setDragging(false)} onDrop={e => {e.preventDefault(); setDragging(false); choose(e.dataTransfer.files[0])}} className={`flex min-h-56 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition ${dragging ? "border-blue-400 bg-blue-500/10" : "border-zinc-700 bg-black/20 hover:border-zinc-500"}`}>
+                    <HoverDiv type="INFO" onClick={() => inputRef.current?.click()} onDragOver={e => {e.preventDefault(); setDragging(true)}} onDragLeave={() => setDragging(false)} onDrop={e => {e.preventDefault(); setDragging(false); choose(e.dataTransfer.files[0])}} className={`min-h-56 w-full flex-col rounded-xl border-dashed p-6 ${dragging ? "border-blue-400 bg-blue-500/10" : "bg-black/20"}`}>
                         {preview ? <img src={preview} alt="Avatar preview" className="h-36 w-36 rounded-full object-cover shadow-xl" /> : <><span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400"><FaCloudArrowUp className="h-6 w-6" /></span><span className="font-medium text-zinc-200">Drop your image here</span><span className="mt-1 text-xs text-zinc-500">or click to choose from your computer</span></>}
-                    </button>
+                    </HoverDiv>
                     <input ref={inputRef} hidden type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={e => choose(e.target.files?.[0])} />
-                    <div className="flex justify-end gap-2"><button onClick={close} disabled={uploading} className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-300">Cancel</button><button onClick={upload} disabled={!file || uploading} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">{uploading ? "Uploading…" : "Save picture"}</button></div>
+                    <div className="flex justify-end gap-2"><HoverDiv type="INFO" onClick={close} disabled={uploading} className="rounded-lg px-4 py-2 text-sm">Cancel</HoverDiv><HoverDiv type="SAVE" icon={<FaCloudArrowUp/>} onClick={upload} disabled={!file || uploading} className="rounded-lg px-4 py-2 text-sm font-semibold">{uploading ? "Uploading…" : "Save picture"}</HoverDiv></div>
                 </div>
             </div>
         </div>}

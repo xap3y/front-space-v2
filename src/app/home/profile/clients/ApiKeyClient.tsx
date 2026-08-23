@@ -1,5 +1,7 @@
 "use client";
 
+import HoverDiv from "@/components/HoverDiv";
+
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { okToast, errorToast } from "@/lib/client";
@@ -34,12 +36,13 @@ export default function ApiKeyClient({ apiKey, createdAt, invitor, storageUsed }
                     >
                         {shown ? apiKey : masked}
                     </b>
-                    <button
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 transition"
+                    <HoverDiv
+                        type="INFO"
+                        className="h-8 w-8 rounded-md p-0"
                         onClick={() => setShown((s) => !s)}
                     >
                         {shown ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-                    </button>
+                    </HoverDiv>
                 </div>
             </div>
 

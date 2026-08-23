@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import MainStringInput from "@/components/MainStringInput";
 
 // Types matching server payloads
 type Suit = "♠" | "♥" | "♦" | "♣";
@@ -135,12 +136,13 @@ export default function BlackJackMultiplayer() {
 
                     <div className="space-y-3">
                         <label className="text-xs uppercase text-neutral-500 font-semibold block">Your Nickname</label>
-                        <input
+                        <MainStringInput
                             type="text"
                             placeholder="Enter nickname..."
-                            className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+                            className="w-full bg-neutral-950 border-neutral-700 rounded-lg"
+                            inputClassName="px-4 py-3"
                             value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
+                            onChange={setNickname}
                         />
                     </div>
 
@@ -155,13 +157,14 @@ export default function BlackJackMultiplayer() {
                     </div>
 
                     <div className="flex gap-2">
-                        <input
+                        <MainStringInput
                             type="text"
                             placeholder="Game Code"
                             maxLength={3}
-                            className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-4 py-3 text-white text-center font-mono focus:outline-none focus:border-emerald-500 transition-colors"
+                            className="w-full bg-neutral-950 border-neutral-700 rounded-lg"
+                            inputClassName="px-4 py-3 text-center font-mono"
                             value={code}
-                            onChange={(e) => setCode(e.target.value)}
+                            onChange={setCode}
                         />
                         <button onClick={handleJoinLobby} className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white font-bold px-6 rounded-lg transition-colors">
                             Join

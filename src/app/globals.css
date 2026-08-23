@@ -88,3 +88,16 @@ html {
 :-webkit-autofill {
     transition-delay: 9999s
 }
+/* Keep number fields visually consistent across Chromium, Safari and Firefox. */
+.main-string-input-number {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.main-string-input-number::-webkit-inner-spin-button,
+.main-string-input-number::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    display: none;
+}

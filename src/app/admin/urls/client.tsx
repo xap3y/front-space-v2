@@ -8,6 +8,7 @@ import { UserObj } from "@/types/user";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
 import { createShortUrl } from "@/lib/apiPoster";
+import MainStringInput from "@/components/MainStringInput";
 import {
     FaRotateRight,
     FaChevronLeft,
@@ -352,12 +353,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                 <div className="flex flex-col gap-1.5">
                     <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
                         {/* Search uniqueId */}
-                        <input
+                        <MainStringInput
                             type="text"
                             placeholder="Search ID..."
                             value={uniqueId}
-                            onChange={e => setUniqueId(e.target.value)}
-                            className="w-32 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
+                            onChange={setUniqueId}
+                            className="w-32 rounded border-zinc-800 bg-primary1"
+                            inputClassName="px-2.5 py-1.5 text-xs"
                         />
 
                         {/* Users Dropdown */}
@@ -511,21 +513,23 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         </div>
 
                         {/* Min Visits */}
-                        <input
+                        <MainStringInput
                             type="number"
                             placeholder="Min Visits..."
                             value={minVisits}
-                            onChange={e => setMinVisits(e.target.value)}
-                            className="w-24 rounded border border-white/10 bg-primary px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500"
+                            onChange={setMinVisits}
+                            className="w-24 rounded border-white/10 bg-primary"
+                            inputClassName="px-2.5 py-1.5 text-xs"
                         />
 
                         {/* Max Uses */}
-                        <input
+                        <MainStringInput
                             type="number"
                             placeholder="Max Uses..."
                             value={maxUses}
-                            onChange={e => setMaxUses(e.target.value)}
-                            className="w-24 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
+                            onChange={setMaxUses}
+                            className="w-24 rounded border-zinc-800 bg-primary1"
+                            inputClassName="px-2.5 py-1.5 text-xs"
                         />
 
                         {/* Expiration status */}
@@ -743,12 +747,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         <form onSubmit={handleUrlSubmit} className="p-5 space-y-4">
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Original URL <span className="text-red-500">*</span></label>
-                                <input
+                                <MainStringInput
                                     type="text"
                                     placeholder="https://example.com/some/long/path"
                                     value={originalUrl}
-                                    onChange={(e) => setOriginalUrl(e.target.value)}
-                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                    onChange={setOriginalUrl}
+                                    className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                    inputClassName="px-3 py-2.5 text-sm"
                                     required
                                     disabled={creatingUrl}
                                 />
@@ -756,12 +761,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
 
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Custom UID</label>
-                                <input
+                                <MainStringInput
                                     type="text"
                                     placeholder="Optional custom alias..."
                                     value={customUid}
-                                    onChange={(e) => setCustomUid(e.target.value)}
-                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                    onChange={setCustomUid}
+                                    className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                    inputClassName="px-3 py-2.5 text-sm"
                                     disabled={creatingUrl}
                                 />
                             </div>
@@ -833,12 +839,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
 
                         {/* Search / Filter Bar */}
                         <div className="p-4 bg-primary3/40 border-b border-zinc-800">
-                            <input
+                            <MainStringInput
                                 type="text"
                                 placeholder="Filter logs by IP, User Agent or Date..."
                                 value={logsSearch}
-                                onChange={(e) => setLogsSearch(e.target.value)}
-                                className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                onChange={setLogsSearch}
+                                className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                inputClassName="px-3 py-2.5 text-xs"
                             />
                         </div>
 

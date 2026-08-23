@@ -1,5 +1,7 @@
 "use client";
 
+import HoverDiv from "@/components/HoverDiv";
+
 import { useState, useEffect, useMemo } from "react";
 import { usePage } from "@/context/PageContext";
 import { useUser } from "@/hooks/useUser";
@@ -100,8 +102,8 @@ export default function HomeSettingsEmbed() {
                                 const isActive = activeTab === tab.key;
                                 return (
                                     <li key={tab.key} className="flex-shrink-0 md:flex-1 min-w-[110px] md:min-w-[140px]">
-                                        <button
-                                            type="button"
+                                        <HoverDiv
+                                            type="INFO"
                                             role="tab"
                                             aria-selected={isActive}
                                             aria-controls={`tab-panel-${tab.key}`}
@@ -121,7 +123,7 @@ export default function HomeSettingsEmbed() {
                       </span>
                                             <span className="truncate">{tab.label}</span>
                                             {isActive && <span className="h-1 w-10 rounded-full bg-sky-300/80 absolute bottom-1" />}
-                                        </button>
+                                        </HoverDiv>
                                     </li>
                                 );
                             })}

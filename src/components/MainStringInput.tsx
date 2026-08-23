@@ -2,7 +2,7 @@
 
 import React, { useState, forwardRef } from "react";
 
-type InputTypes = "text" | "email" | "password" | "search" | "url" | "tel" | "datetime-local";
+type InputTypes = "text" | "email" | "password" | "search" | "url" | "tel" | "datetime-local" | "number" | "date" | "time";
 
 /**
  * A reusable string input with focus styles and Tailwind classes.
@@ -16,8 +16,8 @@ export interface MainStringInputProps
         React.InputHTMLAttributes<HTMLInputElement>,
         "onChange" | "className" | "value" | "defaultValue" | "disabled" | "required" | "type"
     > {
-    value?: string;
-    defaultValue?: string;
+    value?: string | number;
+    defaultValue?: string | number;
     onChange?: (value: string, e: React.ChangeEvent<HTMLInputElement>) => void;
     disabled?: boolean;
     required?: boolean;
@@ -26,6 +26,9 @@ export interface MainStringInputProps
     borderColor?: string;
     className?: string;
     inputClassName?: string;
+    suffix?: React.ReactNode;
+    suffixClassName?: string;
+    numericOnly?: boolean;
 }
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -45,6 +48,9 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             borderColor = "border-primary0",
             className,
             inputClassName,
+            suffix,
+            suffixClassName,
+            numericOnly = false,
             onFocus,
             onBlur,
             ...rest
@@ -54,7 +60,28 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
         const [isFocused, setIsFocused] = useState(false);
 
         const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            onChange?.(e.target.value, e);
+            let nextValue = e.target.value;
+
+            if (numericOnly) {
+                nextValue = nextValue.replace(/[^0-9]/g, "");
+                e.target.value = nextValue;
+            } else if (type === "number") {
+                const permitsNegative = rest.min === undefined || Number(rest.min) < 0;
+                nextValue = nextValue.replace(/[^0-9.-]/g, "");
+
+                const negative = permitsNegative && nextValue.startsWith("-");
+                nextValue = nextValue.replace(/-/g, "");
+
+                const decimalIndex = nextValue.indexOf(".");
+                if (decimalIndex >= 0) {
+                    nextValue = nextValue.slice(0, decimalIndex + 1) + nextValue.slice(decimalIndex + 1).replace(/\./g, "");
+                }
+
+                nextValue = (negative ? "-" : "") + nextValue;
+                e.target.value = nextValue;
+            }
+
+            onChange?.(nextValue, e);
         };
 
         const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -73,7 +100,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             <div
                 className={cx(
                     // base wrapper styles
-                    "border-2 duration-200 transition-all rounded overflow-visible",
+                    "relative border-2 duration-200 transition-all rounded overflow-visible",
                     // focus vs hover/idle styles
                     isFocused ? "in-shadow border-zinc-500" : "hover:border-zinc-700 border-primary0",
                     // disabled visuals
@@ -83,21 +110,41 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             >
                 <input
                     ref={ref}
-                    type={type}
+                    {...rest}
+                    type={numericOnly ? "text" : type}
+                    inputMode={numericOnly ? "numeric" : rest.inputMode}
+                    pattern={numericOnly ? "[0-9]*" : rest.pattern}
                     placeholder={placeholder}
                     disabled={disabled}
                     required={required}
                     onChange={handleChange}
+                    onInput={numericOnly ? event => {
+                        const input = event.currentTarget;
+                        const digits = input.value.replace(/[^0-9]/g, "");
+                        if (input.value !== digits) input.value = digits;
+                    } : rest.onInput}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={cx(
                         "p-3 w-full bg-transparent rounded-none outline-none text-white placeholder-gray-500",
+                        type === "number" && "main-string-input-number",
+                        suffix != null && "pr-10",
                         disabled && "pointer-events-none",
                         inputClassName
                     )}
                     {...(isControlled ? { value } : { defaultValue })}
-                    {...rest}
                 />
+                {suffix != null && (
+                    <span
+                        aria-hidden="true"
+                        className={cx(
+                            "pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-500",
+                            suffixClassName
+                        )}
+                    >
+                        {suffix}
+                    </span>
+                )}
             </div>
         );
     }

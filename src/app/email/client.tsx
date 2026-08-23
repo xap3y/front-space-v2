@@ -1,4 +1,5 @@
 "use client";
+
 // History is kept in sync via both direct refreshHistory() calls and
 // the window 'storage' event (cross-tab & same-tab after patching localStorage).
 

@@ -242,9 +242,7 @@ export default function UrlShortener() {
                             }}
                             inputClassName={"mt-4"}
                         >
-                            <button>
-                                <span className="text-lg">Create Another</span>
-                            </button>
+                            <span className="text-lg">Create Another</span>
                         </HoverDiv>
 
                     </div>

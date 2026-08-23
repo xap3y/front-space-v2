@@ -6,6 +6,8 @@ import ApiKeyClient from "./clients/ApiKeyClient";
 import DiscordClient from "./clients/DiscordClient";
 import AvatarClient from "./clients/AvatarClient";
 import TwoFactorClient from "./clients/TwoFactorClient";
+import Link from "next/link";
+import {PiShareNetworkBold} from "react-icons/pi";
 
 type Props = { user: UserObj; discordConnection: DiscordConnection | null };
 
@@ -25,7 +27,7 @@ export default function ProfileShell({user, discordConnection}: Props) {
 
     return <section className="flex-1 min-w-0 px-3 py-6 md:px-6 md:py-8">
         <div className="mx-auto max-w-6xl space-y-5">
-            <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-[#101014] p-5 md:p-7">
+            <div className="relative overflow-hidden box-primary p-5 md:p-7">
                 <div className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-blue-600/10 blur-3xl" />
                 <div className="relative flex flex-col items-center gap-5 sm:flex-row">
                     <AvatarClient avatar={user.avatar} username={user.username} apiKey={user.apiKey} />
@@ -38,21 +40,24 @@ export default function ProfileShell({user, discordConnection}: Props) {
             </div>
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {cards.map(({label, value, icon: Icon, color}) => <div key={label} className="rounded-xl border border-zinc-800 bg-[#101014] p-4">
+                {cards.map(({label, value, icon: Icon, color}) => <div key={label} className="box-primary p-4">
                     <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg ${color}`}><Icon className="h-4 w-4" /></div>
                     <p className="text-xl font-bold md:text-2xl">{value}</p><p className="mt-0.5 text-xs text-zinc-500">{label}</p>
                 </div>)}
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
-                <div className="rounded-2xl border border-zinc-800 bg-[#101014] p-5 md:p-6">
+                <div className="box-primary p-5 md:p-6">
                     <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400"><FaShieldHalved /></span><div><h2 className="font-semibold">Account & security</h2><p className="text-xs text-zinc-500">Credentials and membership details</p></div></div>
                     <ApiKeyClient apiKey={user.apiKey} createdAt={user.createdAt} invitor={user.invitor} storageUsed={user.stats.storageUsed} />
                 </div>
-                <div className="rounded-2xl border border-zinc-800 bg-[#101014] p-5 md:p-6">
+                <div className="box-primary p-5 md:p-6">
                     <div className="mb-5"><h2 className="font-semibold">Connected accounts</h2><p className="text-xs text-zinc-500">Manage integrations linked to Space</p></div>
                     <DiscordClient discordConnection={discordConnection} fallbackHandle="/home/connections" />
-                    <div className="mt-6 rounded-xl border border-zinc-800 bg-black/20 p-4 text-sm text-zinc-500">More integrations are available from the Connections page.</div>
+                    <div className="mt-4 grid gap-2">
+                        <Link href="/home/profile/socials" className="flex items-center justify-between box-primary px-4 py-3 text-sm text-zinc-300 transition hover:border-zinc-700 hover:text-white"><span className="flex items-center gap-2.5"><PiShareNetworkBold className="text-sky-400" />Social profiles</span><span className="text-xs text-zinc-600">Edit</span></Link>
+                        <div className="box-primary px-4 py-3 text-xs text-zinc-500">More integrations are available from the Connections page.</div>
+                    </div>
                 </div>
             </div>
             <TwoFactorClient apiKey={user.apiKey} />

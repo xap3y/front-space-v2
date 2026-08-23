@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import MainStringInput from "@/components/MainStringInput";
 
 export function NumberInput({
                                 label,
@@ -59,13 +60,14 @@ export function TextInput({
     return (
         <div>
             <label className="text-[10px] text-neutral-500 uppercase font-semibold mb-1 block">{label}</label>
-            <input
+            <MainStringInput
                 type="text"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={onChange}
                 placeholder={placeholder}
                 disabled={disabled}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-2 px-3 text-sm font-mono text-white focus:outline-none focus:border-emerald-500/50 transition disabled:opacity-50"
+                className="w-full bg-neutral-950 border-neutral-800 rounded-lg disabled:opacity-50"
+                inputClassName="py-2 px-3 text-sm font-mono"
             />
         </div>
     );

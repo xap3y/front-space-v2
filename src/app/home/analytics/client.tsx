@@ -1,5 +1,7 @@
 "use client";
 
+import HoverDiv from "@/components/HoverDiv";
+
 import dynamic from "next/dynamic";
 import {useMemo, useState} from "react";
 import type {EChartsOption} from "echarts";
@@ -352,10 +354,10 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
                         <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1 xl:pb-0">
                             {presets.map(item => (
-                                <button key={item.value} onClick={() => selectPreset(item.value)} disabled={loading}
+                                <HoverDiv type="INFO" key={item.value} onClick={() => selectPreset(item.value)} disabled={loading}
                                     className={`shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold transition ${preset === item.value ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-white/10 bg-white/[0.025] text-gray-400 hover:border-white/20 hover:text-white"}`}>
                                     {item.label}
-                                </button>
+                                </HoverDiv>
                             ))}
                         </div>
                         <div className="hidden h-7 w-px bg-white/10 xl:block" />
@@ -372,10 +374,10 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                                 <input type="date" value={to} min={from} onChange={event => {setTo(event.target.value); setPreset("custom");}}
                                     className="min-w-0 flex-1 bg-transparent text-gray-200 outline-none [color-scheme:dark]" />
                             </label>
-                            <button onClick={() => void load()} disabled={loading}
+                            <HoverDiv type="INFO" onClick={() => void load()} disabled={loading}
                                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-gray-200 transition hover:border-white/20 hover:bg-white/[0.07] disabled:opacity-50">
                                 <FaRotateRight className={loading ? "animate-spin" : ""} /> {loading ? "Loading" : "Apply"}
-                            </button>
+                            </HoverDiv>
                         </div>
                     </div>
                     {error ? <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/[0.07] px-3 py-2 text-xs text-red-300">{error}</p> : null}

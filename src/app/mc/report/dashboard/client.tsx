@@ -6,6 +6,7 @@ import "embed-visualizer/dist/index.css";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import MainStringInput from "@/components/MainStringInput";
 import {
     FiActivity,
     FiArchive,
@@ -501,7 +502,7 @@ export default function ReportsDashboardClient() {
                                 </div>
                                 <label className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-3 py-2.5 text-zinc-500 focus-within:border-indigo-400/40 focus-within:text-indigo-300">
                                     <FiSearch />
-                                    <input className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-zinc-600" value={reportSearch} onChange={(event) => setReportSearch(event.target.value)} placeholder="Player, reason or ID" />
+                                    <MainStringInput type="search" className="min-w-0 flex-1 border-0 bg-transparent" inputClassName="p-0 text-sm placeholder:text-zinc-600" value={reportSearch} onChange={setReportSearch} placeholder="Player, reason or ID" />
                                 </label>
                             </div>
                             <div className="max-h-[680px] flex-1 space-y-2 overflow-y-auto p-2.5">
@@ -596,7 +597,7 @@ export default function ReportsDashboardClient() {
                         <div className="flex flex-col gap-4 border-b border-white/[0.07] pb-5 md:flex-row md:items-end md:justify-between">
                             <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">Archive</p><h2 className="mt-1 text-xl font-semibold text-white">Closed transcripts</h2><p className="mt-1 text-sm text-zinc-500">Permanent Discord records with saved attachments.</p></div>
                             <div className="flex gap-2">
-                                <label className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-3 py-2.5 text-zinc-500 focus-within:border-indigo-400/40 sm:min-w-72"><FiSearch /><input value={transcriptSearch} onChange={(event) => setTranscriptSearch(event.target.value)} className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none" placeholder="Search transcripts" /></label>
+                                <label className="flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-3 py-2.5 text-zinc-500 focus-within:border-indigo-400/40 sm:min-w-72"><FiSearch /><MainStringInput type="search" value={transcriptSearch} onChange={setTranscriptSearch} className="min-w-0 flex-1 border-0 bg-transparent" inputClassName="p-0 text-sm" placeholder="Search transcripts" /></label>
                                 <button className={actionButton} onClick={loadTranscripts} disabled={transcriptsLoading}><FiRefreshCw className={transcriptsLoading ? "animate-spin" : ""} /></button>
                             </div>
                         </div>

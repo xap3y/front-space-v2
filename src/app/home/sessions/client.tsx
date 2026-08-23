@@ -1,5 +1,7 @@
 "use client";
 
+import HoverDiv from "@/components/HoverDiv";
+
 import { usePage } from "@/context/PageContext";
 import { useCallback, useEffect, useState } from "react";
 import { useUser } from "@/hooks/useUser";
@@ -206,14 +208,15 @@ export default function HomeSessionsPage() {
                         <h1 className="text-xl md:text-2xl font-semibold tracking-tight">Active Sessions</h1>
                         <p className="text-sm text-gray-400">View and manage devices currently logged into your account</p>
                     </div>
-                    <button
+                    <HoverDiv
+                        type="INFO"
                         onClick={() => fetchSessions()}
                         className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-gray-200"
                         disabled={loading}
                     >
                         <FaRotateRight className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
                         <span>Refresh</span>
-                    </button>
+                    </HoverDiv>
                 </div>
 
                 {error && (
@@ -306,13 +309,14 @@ export default function HomeSessionsPage() {
                                                 Protected current session
                                             </div>
                                         ) : (
-                                            <button
+                                            <HoverDiv
+                                                type="DELETE"
                                                 onClick={() => setSelectedSession(s)}
                                                 className="w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 border-2 border-zinc-800 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 bg-primary1 text-gray-300"
                                             >
                                                 <FaTrash className="h-3 w-3" />
                                                 <span>Revoke Session</span>
-                                            </button>
+                                            </HoverDiv>
                                         )}
                                     </div>
                                 </div>
@@ -338,13 +342,14 @@ export default function HomeSessionsPage() {
                                 <h2 className="text-base font-semibold text-white">Revoke Session?</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Please confirm this action</p>
                             </div>
-                            <button
+                            <HoverDiv
+                                type="INFO"
                                 onClick={() => setSelectedSession(null)}
                                 className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors text-sm"
                                 disabled={revoking}
                             >
                                 <FaTimes className="h-3.5 w-3.5" />
-                            </button>
+                            </HoverDiv>
                         </div>
 
                         <div className="p-5 space-y-4">
@@ -362,20 +367,22 @@ export default function HomeSessionsPage() {
                             </div>
 
                             <div className="flex justify-end gap-2 pt-1">
-                                <button
+                                <HoverDiv
+                                    type="INFO"
                                     onClick={() => setSelectedSession(null)}
                                     className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={revoking}
                                 >
                                     Cancel
-                                </button>
-                                <button
+                                </HoverDiv>
+                                <HoverDiv
+                                    type="DELETE"
                                     onClick={handleRevoke}
                                     className="px-4 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-500 border-2 border-red-500/40 disabled:opacity-50 text-white font-medium transition-all duration-200"
                                     disabled={revoking}
                                 >
                                     {revoking ? "Revoking…" : "Yes, Revoke"}
-                                </button>
+                                </HoverDiv>
                             </div>
                         </div>
                     </div>

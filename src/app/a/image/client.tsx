@@ -612,7 +612,7 @@ export default function ImageUploader() {
                             </div>
 
                             {!uploading ? (
-                                <button type={"submit"} disabled={uploading} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
+                                <button type="submit" disabled={uploading} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
                                     {lang.pages.portable_image.button_text}
                                 </button>) : (
                                 <>
@@ -644,7 +644,7 @@ export default function ImageUploader() {
                                         </div>
                                     </div>
                                     { uploadProgress < 100 && (
-                                        <button onClick={cancelUpload} type={"submit"} disabled={!uploading} className="w-full duration-200 bg-red-600 hover:bg-red-700 border-red-800 border-2 text-white p-2 rounded">
+                                        <button onClick={cancelUpload} type="submit" disabled={!uploading} className="w-full duration-200 bg-red-600 hover:bg-red-700 border-red-800 border-2 text-white p-2 rounded">
                                             {lang.global.cancel || "Cancel"}
                                         </button>
                                     )}

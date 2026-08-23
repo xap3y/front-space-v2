@@ -330,7 +330,8 @@ export default function FilesPageClient() {
                                         </div>
 
                                         <div className="flex gap-1 flex-shrink-0">
-                                            <button
+                                            <HoverDiv
+                                                type="INFO"
                                                 onClick={() => togglePackExpanded(pack.packId)}
                                                 className="p-1 hover:bg-gray-700 rounded transition"
                                             >
@@ -339,8 +340,9 @@ export default function FilesPageClient() {
                                                         expandedPackId === pack.packId ? "rotate-180" : ""
                                                     }`}
                                                 />
-                                            </button>
-                                            <button
+                                            </HoverDiv>
+                                            <HoverDiv
+                                                type="DELETE"
                                                 onClick={() => handleDeletePack(pack.packId)}
                                                 disabled={deletingPackId === pack.packId}
                                                 className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition disabled:opacity-50"
@@ -350,7 +352,7 @@ export default function FilesPageClient() {
                                                 ) : (
                                                     <FaTrash className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400" />
                                                 )}
-                                            </button>
+                                            </HoverDiv>
                                         </div>
                                     </div>
                                 </div>
@@ -365,6 +367,7 @@ export default function FilesPageClient() {
                                     </a>
 
                                     <HoverDiv
+                                        type="INFO"
                                         onClick={() => copyToClipboard(getPackUrl(pack.packId), "Link copied!")}
                                         className="flex items-center gap-2 px-2 md:px-3 py-1 text-gray-200 font-semibold rounded transition text-xs md:text-sm"
                                     >
@@ -396,12 +399,13 @@ export default function FilesPageClient() {
                                                                 <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
                                                             </div>
                                                             <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
-                                                                <button
+                                                                <HoverDiv
+                                                                    type="INFO"
                                                                     onClick={() => copyToClipboard(getFileUrl(file.uniqueId), "Copied!")}
                                                                     className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
                                                                 >
                                                                     <FaCopy className="w-2.5 h-2.5 md:w-3 md:h-3 text-blue-400" />
-                                                                </button>
+                                                                </HoverDiv>
                                                                 <a
                                                                     href={getFileUrl(file.uniqueId)}
                                                                     target="_blank"
@@ -410,7 +414,8 @@ export default function FilesPageClient() {
                                                                 >
                                                                     <FaExternalLinkAlt className="w-2.5 h-2.5 md:w-3 md:h-3 text-cyan-400" />
                                                                 </a>
-                                                                <button
+                                                                <HoverDiv
+                                                                    type="DELETE"
                                                                     onClick={() => handleDeleteFile(pack.packId, file.uniqueId, file.fileName)}
                                                                     disabled={deletingFileId === file.uniqueId}
                                                                     className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition disabled:opacity-50"
@@ -420,7 +425,7 @@ export default function FilesPageClient() {
                                                                     ) : (
                                                                         <FaTrash className="w-2.5 h-2.5 md:w-3 md:h-3 text-red-400" />
                                                                     )}
-                                                                </button>
+                                                                </HoverDiv>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -441,7 +446,8 @@ export default function FilesPageClient() {
                 {/* Pagination */}
                 {packs.length > 0 && totalPages > 1 && !fetchingPacks && (
                     <div className="flex items-center justify-center gap-1 md:gap-4">
-                        <button
+                        <HoverDiv
+                            type="INFO"
                             onClick={() => {
                                 if (currentPage > 0) {
                                     fetchPacks(currentPage - 1);
@@ -451,11 +457,12 @@ export default function FilesPageClient() {
                             className="p-1 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed rounded transition"
                         >
                             <FaChevronLeft className="w-3.5 h-3.5 md:w-5 md:h-5 text-white" />
-                        </button>
+                        </HoverDiv>
 
                         <div className="flex items-center gap-0.5 md:gap-2">
                             {Array.from({ length: totalPages }, (_, i) => (
-                                <button
+                                <HoverDiv
+                                    type="INFO"
                                     key={i}
                                     onClick={() => fetchPacks(i)}
                                     className={`px-2 md:px-3 py-1 rounded transition text-xs md:text-sm font-semibold ${
@@ -465,11 +472,12 @@ export default function FilesPageClient() {
                                     }`}
                                 >
                                     {i + 1}
-                                </button>
+                                </HoverDiv>
                             ))}
                         </div>
 
-                        <button
+                        <HoverDiv
+                            type="INFO"
                             onClick={() => {
                                 if (currentPage < totalPages - 1) {
                                     fetchPacks(currentPage + 1);
@@ -479,7 +487,7 @@ export default function FilesPageClient() {
                             className="p-1 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed rounded transition"
                         >
                             <FaChevronRight className="w-3.5 h-3.5 md:w-5 md:h-5 text-white" />
-                        </button>
+                        </HoverDiv>
                     </div>
                 )}
 

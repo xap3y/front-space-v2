@@ -298,13 +298,13 @@ export default function InvitesClient({
                         <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div className="sm:col-span-1">
                                 <label className="text-xs text-gray-400">Count</label>
-                                <input
-                                    className="in-primary w-full border-2 border-zinc-800 bg-primary1 rounded-lg"
+                                <MainStringInput
+                                    className="in-primary w-full border-zinc-800 bg-primary1 rounded-lg"
                                     type="number"
                                     min={1}
                                     max={500}
                                     value={createCount}
-                                    onChange={(e) => setCreateCount(Number(e.target.value))}
+                                    onChange={(value) => setCreateCount(Number(value))}
                                 />
                                 <div className="text-[11px] text-gray-500 mt-1">
                                     Max 500 per batch.
@@ -398,12 +398,13 @@ export default function InvitesClient({
 
             {/* Compact Filters Panel */}
             <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
-                <input
+                <MainStringInput
                     type="text"
                     placeholder="Search code / user..."
                     value={search}
-                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-56 rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none placeholder-gray-500 transition-colors"
+                    onChange={(value) => { setSearch(value); setPage(1); }}
+                    className="w-56 rounded-lg border-zinc-800 bg-primary1"
+                    inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
                 <select

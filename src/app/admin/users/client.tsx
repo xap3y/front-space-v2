@@ -384,12 +384,13 @@ export default function UsersClient({
 
             {/* Compact Filters Panel */}
             <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
-                <input
+                <MainStringInput
                     type="text"
                     placeholder="Search username / uid / invitor..."
                     value={search}
-                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    className="w-56 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
+                    onChange={(value) => { setSearch(value); setPage(1); }}
+                    className="w-56 rounded border-zinc-800 bg-primary1"
+                    inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
                 <select
@@ -779,24 +780,26 @@ export default function UsersClient({
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Username <span className="text-red-500">*</span></label>
-                                    <input
+                                    <MainStringInput
                                         type="text"
                                         placeholder="e.g. john_doe"
                                         value={createUsername}
-                                        onChange={(e) => setCreateUsername(e.target.value)}
-                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                        onChange={(value) => setCreateUsername(value)}
+                                        className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                        inputClassName="px-3 py-2.5 text-sm"
                                         required
                                         disabled={creatingUser}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Email <span className="text-red-500">*</span></label>
-                                    <input
+                                    <MainStringInput
                                         type="email"
                                         placeholder="user@example.com"
                                         value={createEmail}
-                                        onChange={(e) => setCreateEmail(e.target.value)}
-                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                        onChange={(value) => setCreateEmail(value)}
+                                        className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                        inputClassName="px-3 py-2.5 text-sm"
                                         required
                                         disabled={creatingUser}
                                     />
@@ -805,12 +808,13 @@ export default function UsersClient({
 
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Password <span className="text-red-500">*</span></label>
-                                <input
+                                <MainStringInput
                                     type="password"
                                     placeholder="Enter password..."
                                     value={createPassword}
-                                    onChange={(e) => setCreatePassword(e.target.value)}
-                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                    onChange={(value) => setCreatePassword(value)}
+                                    className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                    inputClassName="px-3 py-2.5 text-sm"
                                     required
                                     disabled={creatingUser}
                                 />

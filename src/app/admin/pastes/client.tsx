@@ -8,6 +8,7 @@ import { UserObj } from "@/types/user";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
 import { createPaste } from "@/lib/apiPoster";
+import MainStringInput from "@/components/MainStringInput";
 import {
     FaLock,
     FaRotateRight,
@@ -290,12 +291,13 @@ export default function PastesClient({ users }: PastesClientProps) {
                 <div className="flex flex-col gap-1.5">
                     <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
                         {/* Search uniqueId */}
-                        <input
+                        <MainStringInput
                             type="text"
                             placeholder="Search ID..."
                             value={uniqueId}
-                            onChange={e => setUniqueId(e.target.value)}
-                            className="w-36 rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500"
+                            onChange={setUniqueId}
+                            className="w-36 rounded border-zinc-800 bg-primary1"
+                            inputClassName="px-2.5 py-1.5 text-xs"
                         />
 
                         {/* Users Dropdown */}
@@ -643,12 +645,13 @@ export default function PastesClient({ users }: PastesClientProps) {
                         <form onSubmit={handlePasteSubmit} className="p-5 space-y-4">
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Title</label>
-                                <input
+                                <MainStringInput
                                     type="text"
                                     placeholder="Optional title..."
                                     value={pasteTitle}
-                                    onChange={(e) => setPasteTitle(e.target.value)}
-                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                    onChange={setPasteTitle}
+                                    className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                    inputClassName="px-3 py-2.5 text-sm"
                                     disabled={creatingPaste}
                                 />
                             </div>

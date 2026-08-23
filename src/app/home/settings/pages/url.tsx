@@ -1,116 +1,81 @@
 "use client";
 
+import HoverDiv from "@/components/HoverDiv";
+
+import { useEffect, useState } from "react";
+import { PiCheckBold, PiFileTextBold, PiImageBold, PiLinkBold, PiPathBold } from "react-icons/pi";
 import { UserObj } from "@/types/user";
-import { useRouter } from "next/navigation";
-import {useEffect, useMemo, useState} from "react";
-import {errorToast, getUserUrlPreferencesSettings, okToast, saveUserUrlPreferencesSettings} from "@/lib/client";
-import {UrlPreferences, UrlType} from "@/types/configs";
-import LoadingPage from "@/components/LoadingPage";
-import SelectMenu from "@/components/SelectMenu";
+import { UrlPreferences, UrlType } from "@/types/configs";
+import { errorToast, getUserUrlPreferencesSettings, okToast, saveUserUrlPreferencesSettings } from "@/lib/client";
 
 type PrefKey = keyof UrlPreferences;
+type Choice = { value: UrlType | null; label: string; description: string; sample: string };
 
+const CHOICES: Choice[] = [
+    { value: null, label: "Default", description: "Use Space's recommended URL for this resource.", sample: "Automatic" },
+    { value: "PORTAL", label: "Portal", description: "Open the full Space page with details and actions.", sample: "space.app/i/ABC123" },
+    { value: "SHORT", label: "Short", description: "Use the smallest shareable link available.", sample: "i.space/ABC123" },
+    { value: "RAW", label: "Raw", description: "Link directly to the resource content or API response.", sample: "api.space/v1/…" },
+];
 
-const urlOptions: {value: UrlType, label: string}[] = [
-    { value: "PORTAL", label: "Portal" },
-    { value: "SHORT", label: "Short" },
-    { value: "RAW", label: "Raw" },
+const RESOURCES: Array<{ key: PrefKey; title: string; description: string; icon: React.ReactNode; accent: string }> = [
+    { key: "image", title: "Images", description: "Links returned after an image upload.", icon: <PiImageBold />, accent: "text-sky-300 bg-sky-400/10 border-sky-400/20" },
+    { key: "paste", title: "Pastes", description: "Links returned when you publish a paste.", icon: <PiFileTextBold />, accent: "text-violet-300 bg-violet-400/10 border-violet-400/20" },
+    { key: "url", title: "Short URLs", description: "Links returned by the URL shortener.", icon: <PiLinkBold />, accent: "text-emerald-300 bg-emerald-400/10 border-emerald-400/20" },
 ];
 
 export default function UrlPreferencesTabContent({ user }: { user: UserObj }) {
-
-    const router = useRouter();
-
-    const [preferences, setPreferences] = useState<UrlPreferences>()
+    const [preferences, setPreferences] = useState<UrlPreferences | null>(null);
+    const [lastSaved, setLastSaved] = useState("");
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        const getSettings = async () => {
-            const settings = await getUserUrlPreferencesSettings(user.apiKey);
-            console.log("Fetched embed settings: " + JSON.stringify(settings));
-            // loop every settings value and if its null set to empty string
-            if (!settings) return;
-
+        let active = true;
+        getUserUrlPreferencesSettings(user.apiKey).then((settings) => {
+            if (!active) return;
+            if (!settings) throw new Error();
             setPreferences(settings);
-        }
-        getSettings();
-    }, [user]);
+            setLastSaved(JSON.stringify(settings));
+        }).catch(() => { if (active) errorToast("Failed to load URL preferences"); });
+        return () => { active = false; };
+    }, [user.apiKey]);
 
-    const fields = useMemo<
-        { key: PrefKey; label: string; id: string }[]
-    >(
-        () => [
-            { key: "image" as PrefKey, label: "Images", id: "pref-images" },
-            { key: "paste" as PrefKey, label: "Pastes", id: "pref-pastes" },
-            { key: "url" as PrefKey, label: "Short URL", id: "pref-shorturl" },
-        ],
-        []
-    );
+    const dirty = preferences !== null && JSON.stringify(preferences) !== lastSaved;
+    const update = (key: PrefKey, value: UrlType | null) => setPreferences((current) => current ? { ...current, [key]: value } : current);
 
-    const handleChange = (key: keyof UrlPreferences, value: UrlType | null) => {
-        setPreferences((prev) => ({
-            ...(prev as UrlPreferences),
-            [key]: value,
-        }));
-    };
-
-    const saveSettings = async () => {
+    const save = async () => {
         if (!preferences) return;
+        setSaving(true);
         try {
-            setSaving(true);
-            const saved = await saveUserUrlPreferencesSettings(user.apiKey, preferences);
-            if (saved) {
-                okToast("Settings saved");
-                router.refresh();
-            } else {
-                errorToast("Failed to save settings");
-            }
-        } catch {
-            errorToast("Failed to save settings");
-        } finally {
-            setSaving(false);
-        }
+            if (!await saveUserUrlPreferencesSettings(user.apiKey, preferences)) throw new Error();
+            setLastSaved(JSON.stringify(preferences));
+            okToast("URL preferences saved");
+        } catch { errorToast("Failed to save URL preferences"); }
+        finally { setSaving(false); }
     };
 
-    if (!preferences) return <LoadingPage />
+    if (!preferences) return <div className="space-y-4 animate-pulse"><div className="h-24 rounded-2xl bg-white/[.035]" />{[0, 1, 2].map((item) => <div key={item} className="h-44 rounded-2xl bg-white/[.035]" />)}</div>;
 
-    return (
-        <>
-            <div className="space-y-6 animate-fade-in">
-                <h2 className="text-lg font-semibold mb-2">URL Preferences</h2>
+    return <div className="animate-fade-in space-y-4">
+        <div className="flex items-start gap-3 rounded-xl border border-white/[.08] bg-black/10 p-3.5 sm:px-4">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[.04] text-lg text-zinc-300"><PiPathBold /></span>
+            <div><h2 className="text-sm font-semibold text-white">Returned URL format</h2><p className="mt-0.5 max-w-2xl text-xs leading-5 text-zinc-500">Choose which link Space returns after each action. This does not change resource visibility.</p></div>
+        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {fields.map(({ key, label, id }) => (
-                        <div key={String(key)} className="flex flex-col gap-1">
-                            <label htmlFor={id} className="text-sm text-gray-400 font-medium">
-                                {label}
-                            </label>
-                            <SelectMenu<UrlType>
-                                id={id}
-                                value={preferences[key]}
-                                onChange={(v) => handleChange(key, v)}
-                                options={urlOptions}
-                                placeholder="Select preference"
-                                includeNullOption={true}
-                                nullLabel="None"
-                                className="w-full"
-                            />
-                        </div>
-                    ))}
+        <div className="overflow-hidden rounded-xl border border-white/[.08] bg-black/10">
+            {RESOURCES.map((resource, index) => <section key={resource.key} className={`grid gap-3 p-3 sm:grid-cols-[minmax(150px,.7fr)_minmax(360px,1.3fr)] sm:items-center sm:px-3.5 ${index > 0 ? "border-t border-white/[.07]" : ""}`}>
+                <div className="flex min-w-0 items-center gap-2.5"><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-base ${resource.accent}`}>{resource.icon}</span><div className="min-w-0"><h3 className="text-sm font-semibold text-zinc-100">{resource.title}</h3><p className="truncate text-[11px] text-zinc-500">{resource.description}</p></div></div>
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                    {CHOICES.map((choice) => {
+                        const selected = preferences[resource.key] === choice.value;
+                        return <HoverDiv type="INFO" key={choice.label} title={`${choice.description} Example: ${choice.sample}`} aria-pressed={selected} onClick={() => update(resource.key, choice.value)} className={`h-9 rounded-lg px-2 text-xs font-semibold ${selected ? "bg-sky-500/[.08] text-sky-200" : "text-zinc-400"}`}>
+                            <span className={`text-[10px] ${selected ? "opacity-100" : "opacity-0"}`}><PiCheckBold /></span>{choice.label}
+                        </HoverDiv>;
+                    })}
                 </div>
+            </section>)}
+        </div>
 
-                <div className="flex justify-end mt-8">
-                    <button
-                        onClick={saveSettings}
-                        disabled={saving}
-                        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-green-800 bg-green-600 text-white text-sm font-semibold shadow-md transition-all duration-200 ${
-                            saving ? "opacity-70 cursor-not-allowed" : "hover:bg-green-700 hover:scale-[1.04] active:scale-95"
-                        }`}
-                    >
-                        {saving ? "Saving..." : "Save"}
-                    </button>
-                </div>
-            </div>
-        </>
-    )
+        <div className="flex flex-col gap-2.5 rounded-xl border border-white/[.08] bg-black/10 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-3"><p className={`text-xs ${dirty ? "text-amber-300" : "text-zinc-500"}`}>{dirty ? "Unsaved changes" : "Up to date"}</p><HoverDiv type="SAVE" icon={<PiCheckBold/>} onClick={save} disabled={!dirty || saving} className="min-h-9 rounded-lg px-4 text-xs font-semibold">{saving ? "Saving…" : "Save changes"}</HoverDiv></div>
+    </div>;
 }

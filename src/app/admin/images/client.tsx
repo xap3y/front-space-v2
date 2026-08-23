@@ -13,6 +13,7 @@ import {
 import { CallServerEnum, callServers } from "@/config/global";
 import { errorToast, infoToast, okToast, uploadImage, uploadImageBucket } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
+import MainStringInput from "@/components/MainStringInput";
 import {
     FaLock,
     FaRotateRight,
@@ -388,12 +389,13 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                 <div className="box-primary p-3 flex flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                         {/* Unique ID search */}
-                        <input
+                        <MainStringInput
                             type="text"
                             placeholder="Unique ID..."
                             value={uniqueId}
-                            onChange={e => setUniqueId(e.target.value)}
-                            className="w-40 rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700 placeholder-gray-500 transition-colors"
+                            onChange={setUniqueId}
+                            className="w-40 rounded-lg border-zinc-800 bg-primary1"
+                            inputClassName="px-2.5 py-1.5 text-xs"
                         />
 
                         {/* User Filter Dropdown */}
@@ -890,12 +892,13 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             {/* Description */}
                             <div>
                                 <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Description</label>
-                                <input
+                                <MainStringInput
                                     type="text"
                                     placeholder="Optional description..."
                                     value={uploadDesc}
-                                    onChange={(e) => setUploadDesc(e.target.value)}
-                                    className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                    onChange={setUploadDesc}
+                                    className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                    inputClassName="px-3 py-2.5 text-sm"
                                     disabled={uploadingState}
                                 />
                             </div>
@@ -904,23 +907,25 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Password</label>
-                                    <input
+                                    <MainStringInput
                                         type="password"
                                         placeholder="Min 3 chars"
                                         value={uploadPass}
-                                        onChange={(e) => setUploadPass(e.target.value)}
-                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                        onChange={setUploadPass}
+                                        className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                        inputClassName="px-3 py-2.5 text-sm"
                                         disabled={uploadingState}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Custom UID</label>
-                                    <input
+                                    <MainStringInput
                                         type="text"
                                         placeholder="5–8 chars"
                                         value={uploadCustomUid}
-                                        onChange={(e) => setUploadCustomUid(e.target.value)}
-                                        className="w-full rounded-lg border-2 border-zinc-800 bg-primary3 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-zinc-700 placeholder-gray-600 transition-colors"
+                                        onChange={setUploadCustomUid}
+                                        className="w-full rounded-lg border-zinc-800 bg-primary3"
+                                        inputClassName="px-3 py-2.5 text-sm"
                                         disabled={uploadingState}
                                     />
                                 </div>
