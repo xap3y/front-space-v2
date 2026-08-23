@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {MdLogout, MdMenu, MdClose, MdOutlineAdminPanelSettings} from 'react-icons/md';
 import {useUser} from "@/hooks/useUser";
 
@@ -16,6 +17,20 @@ interface Props {
     sidebar: SidebarItem[];
     logout_text: string;
     brandTitle?: string; // optional brand text shown on desktop and in the drawer
+}
+
+function SidebarBrand({title, compact = false}: {title: string; compact?: boolean}) {
+    return <div className={`flex items-center justify-center ${compact ? 'gap-2' : 'gap-2.5'}`}>
+        <Image
+            src="/only_logo_no_bg.png"
+            alt="Space logo"
+            width={compact ? 28 : 40}
+            height={compact ? 28 : 40}
+            priority
+            className={`${compact ? 'h-7 w-7' : 'h-10 w-10'} block shrink-0 object-contain`}
+        />
+        <span className={`${compact ? 'text-sm' : 'text-3xl tracking-tight'} leading-none font-semibold`}>{title}</span>
+    </div>;
 }
 
 function useLockBodyScroll(locked: boolean) {
@@ -119,8 +134,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     >
                         <MdMenu className="h-6 w-6" />
                     </button>
-                    {/* Center brand text (you can replace with logo) */}
-                    <div className="text-sm font-semibold">{brandTitle}</div>
+                    <SidebarBrand title={brandTitle} compact />
                     <div className="w-9" />
                 </div>
             </div>
@@ -136,7 +150,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
             >
                 {/* Header with brand + divider */}
                 <div className="px-4 h-16 flex items-center justify-center">
-                    <div className="text-3xl font-semibold tracking-tight">{brandTitle}</div>
+                    <SidebarBrand title={brandTitle} />
                 </div>
                 <div className="border-b border-white/10" />
 
@@ -235,7 +249,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 >
                     {/* Drawer header with close and brand */}
                     <div className="h-14 px-3 flex items-center justify-between border-b border-white/10">
-                        <div className="text-sm font-semibold">{brandTitle}</div>
+                        <SidebarBrand title={brandTitle} compact />
                         <button
                             aria-label="Close menu"
                             className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
