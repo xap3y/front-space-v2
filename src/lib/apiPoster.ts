@@ -204,6 +204,7 @@ export async function updateMinecraftServer(
     serverId: string,
     updates: {
         password?: string;
+        username?: string;
         apiKey?: string;
         paused?: boolean;
     }
@@ -230,6 +231,13 @@ export async function updateMinecraftServer(
         console.error("Error updating server:", error);
         return false;
     }
+}
+
+export async function rotateUserApiKey(uid: number): Promise<DefaultResponse> {
+    try {
+        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/api-key/rotate`, {method: "POST", headers: getCurlHeaders(getApiKey())});
+        return await response.json() as DefaultResponse;
+    } catch { return {error: true, message: "Server error"} as DefaultResponse; }
 }
 
 export async function deleteMinecraftServer(serverId: string): Promise<boolean> {
@@ -285,6 +293,7 @@ export async function updateUser(
         avatar?: string;
         role?: string;
         password?: string;
+        username?: string;
     }
 ): Promise<DefaultResponse> {
     console.log("Calling updateUser for uid: " + uid);

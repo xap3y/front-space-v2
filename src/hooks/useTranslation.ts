@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import LanguageModel from "@/types/LanguageModel";
-import en from '@/locales/en.json';
+import en from '@/locales/en2.json';
 import ru from '@/locales/ru.json';
 import cs from '@/locales/cs.json';
 import sk from '@/locales/sk.json';

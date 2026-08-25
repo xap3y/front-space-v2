@@ -239,13 +239,13 @@ export default function InvitesClient({
     };
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
             {/* Header + filter */}
-            <div className="box-primary p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="box-primary p-3 sm:p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-xl font-semibold">Invites</h1>
-                        <p className="text-sm text-gray-300 mt-1">
+                        <p className="mt-0.5 text-sm text-gray-300">
                             View and manage invite codes. Filter by used/unused, and paginate results.
                         </p>
                     </div>
@@ -254,7 +254,7 @@ export default function InvitesClient({
                         <div className="text-xs text-gray-400">Show</div>
                         <div className="inline-flex rounded-lg border-2 border-zinc-800 overflow-hidden bg-primary1">
                             <button
-                                className={`px-3 py-2 text-sm transition-all duration-200 ${
+                                className={`px-3 py-1.5 text-sm transition-all duration-200 ${
                                     filter === "all"
                                         ? "bg-zinc-800 text-white font-semibold"
                                         : "text-gray-300 hover:bg-zinc-800/50"
@@ -264,7 +264,7 @@ export default function InvitesClient({
                                 All
                             </button>
                             <button
-                                className={`px-3 py-2 text-sm transition-all duration-200 ${
+                                className={`px-3 py-1.5 text-sm transition-all duration-200 ${
                                     filter === "unused"
                                         ? "bg-zinc-800 text-white font-semibold"
                                         : "text-gray-300 hover:bg-zinc-800/50"
@@ -274,7 +274,7 @@ export default function InvitesClient({
                                 Unused
                             </button>
                             <button
-                                className={`px-3 py-2 text-sm transition-all duration-200 ${
+                                className={`px-3 py-1.5 text-sm transition-all duration-200 ${
                                     filter === "used"
                                         ? "bg-zinc-800 text-white font-semibold"
                                         : "text-gray-300 hover:bg-zinc-800/50"
@@ -288,18 +288,19 @@ export default function InvitesClient({
                 </div>
 
                 {/* Create */}
-                <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
-                    <div className="lg:col-span-2 box-primary p-4">
+                <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
+                    <div className="box-primary p-3 lg:col-span-2">
                         <div className="font-semibold">Create invites</div>
                         <div className="text-xs text-gray-400 mt-1">
                             Generate new invite codes. (Count required, prefix optional.)
                         </div>
 
-                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div className="sm:col-span-1">
+                        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[7rem_minmax(0,1fr)]">
+                            <div>
                                 <label className="text-xs text-gray-400">Count</label>
                                 <MainStringInput
-                                    className="in-primary w-full border-zinc-800 bg-primary1 rounded-lg"
+                                    className="rounded-lg"
+                                    inputClassName="px-3 py-2 text-sm"
                                     type="number"
                                     min={1}
                                     max={500}
@@ -311,10 +312,11 @@ export default function InvitesClient({
                                 </div>
                             </div>
 
-                            <div className="sm:col-span-2">
+                            <div>
                                 <label className="text-xs text-gray-400">Prefix (optional)</label>
                                 <MainStringInput
-                                    className="w-full border-2 border-zinc-800 bg-primary1 rounded-lg"
+                                    className="w-full border-2 rounded-lg"
+                                    inputClassName="px-3 py-2 text-sm"
                                     type="text"
                                     placeholder="e.g. SPACE-"
                                     value={createPrefix}
@@ -326,34 +328,34 @@ export default function InvitesClient({
                             </div>
                         </div>
 
-                        <div className="mt-3 flex items-center gap-2">
+                        <div className="mt-2 flex items-center gap-2">
                             <button
                                 onClick={onCreate}
                                 disabled={creating}
-                                className="px-4 py-2 rounded-lg text-sm font-medium border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-white transition-all duration-200 disabled:opacity-50"
+                                className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:border-zinc-700 hover:in-shadow disabled:opacity-50"
                             >
                                 {creating ? "Creating..." : "Create"}
                             </button>
 
                             <button
                                 onClick={() => router.refresh()}
-                                className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200"
+                                className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm text-gray-200 transition-all duration-200 hover:border-zinc-700 hover:in-shadow"
                             >
                                 Refresh
                             </button>
                         </div>
                     </div>
 
-                    <div className="box-primary p-4">
+                    <div className="box-primary p-3">
                         <div className="font-semibold">Pagination</div>
                         <div className="text-xs text-gray-400 mt-1">
                             Total: <span className="text-white">{total}</span>
                         </div>
 
-                        <div className="mt-3">
+                        <div className="mt-2">
                             <label className="text-xs text-gray-400">Page size</label>
                             <select
-                                className="in-primary w-full mt-1 border-2 border-zinc-800 bg-primary1 rounded-lg text-xs"
+                                className="in-primary mt-1 w-full rounded-lg border-2 border-zinc-800 bg-primary1 text-xs"
                                 value={pageSize}
                                 onChange={(e) => setPageSize(Number(e.target.value))}
                             >
@@ -364,9 +366,9 @@ export default function InvitesClient({
                             </select>
                         </div>
 
-                        <div className="mt-3 flex items-center justify-between gap-2">
+                        <div className="mt-2 flex items-center justify-between gap-2">
                             <button
-                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 disabled:opacity-50"
+                                className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm text-gray-200 transition-all duration-200 hover:border-zinc-700 hover:in-shadow disabled:opacity-50"
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={page <= 1}
                             >
@@ -379,7 +381,7 @@ export default function InvitesClient({
                             </div>
 
                             <button
-                                className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 disabled:opacity-50"
+                                className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm text-gray-200 transition-all duration-200 hover:border-zinc-700 hover:in-shadow disabled:opacity-50"
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={page >= totalPages}
                             >
@@ -397,7 +399,7 @@ export default function InvitesClient({
             </div>
 
             {/* Compact Filters Panel */}
-            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+            <div className="box-primary mt-1 flex flex-wrap items-center gap-2 p-2.5 text-xs">
                 <MainStringInput
                     type="text"
                     placeholder="Search code / user..."
@@ -447,10 +449,10 @@ export default function InvitesClient({
             </div>
 
             {/* List */}
-            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
+            <div className="mt-1 flex flex-col gap-2 box-primary p-3">
 
                 {/* Desktop table */}
-                <div className="hidden lg:block mt-3 overflow-x-auto">
+                <div className="hidden overflow-x-auto lg:block">
                     <table className="w-full text-sm">
                         <thead className="text-xs text-gray-400">
                         <tr className="border-b border-white/10">

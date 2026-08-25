@@ -136,7 +136,7 @@ export default function DashboardLauncherClient() {
                         Dashboard
                     </h1>
                     <p className="text-gray-400 text-base md:text-lg">
-                        Welcome back, {user.username}. Choose a tool to get started.
+                        Welcome back, <span className={"text-yellow-600"}>{user.username}</span>. Choose a tool to get started.
                     </p>
                 </div>
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { UserObj } from "@/types/user";
 import { getUserRoleBadge, infoToast, okToast, errorToast } from "@/lib/client";
 import MainStringInput from "@/components/MainStringInput";
-import { updateUser, deleteUser, createAdminUser, getAdminUserTwoFactorStatus, removeAdminUserTwoFactor } from "@/lib/apiPoster";
+import { updateUser, deleteUser, rotateUserApiKey, createAdminUser, getAdminUserTwoFactorStatus, removeAdminUserTwoFactor } from "@/lib/apiPoster";
 import {FaBan, FaRegUserCircle, FaEye, FaEyeSlash, FaKey, FaRegTrashAlt} from "react-icons/fa";
 import {MdAlternateEmail, MdEmail} from "react-icons/md";
 import {FaArrowDown, FaArrowRight, FaIdCardClip, FaPencil, FaChevronLeft, FaChevronRight} from "react-icons/fa6";
@@ -23,7 +23,7 @@ type SortMode =
     | "uid_asc"
     | "uid_desc";
 
-type ModalType = "email" | "avatar" | "username" | "role" | "password" | null;
+type ModalType = "email" | "avatar" | "username" | "role" | "password" | "apiKey" | "delete" | null;
 
 function formatDate(iso?: string | null) {
     if (!iso) return "—";
@@ -250,23 +250,6 @@ export default function UsersClient({
         }
     };
 
-    const handleDelete = async (uid: number, username: string) => {
-        if (!confirm(`Are you sure you want to delete user ${username} (#${uid})?`)) return;
-        infoToast("Deleting user...");
-        try {
-            const res = await deleteUser(uid);
-            if (res.error) {
-                errorToast(res.message || "Failed to delete user");
-            } else {
-                setError("");
-                okToast("User deleted successfully");
-                router.refresh();
-            }
-        } catch (err: any) {
-            errorToast(err.message || "An error occurred");
-        }
-    };
-
     const openModal = (type: ModalType, uid: number, preset = "") => {
         setModal({ type, uid, value: preset, loading: false });
     };
@@ -286,6 +269,12 @@ export default function UsersClient({
                 res = await updateUser(modal.uid, { role: modal.value });
             } else if (modal.type === "password") {
                 res = await updateUser(modal.uid, { password: modal.value });
+            } else if (modal.type === "username") {
+                res = await updateUser(modal.uid, {username: modal.value.trim()});
+            } else if (modal.type === "apiKey") {
+                res = await rotateUserApiKey(modal.uid);
+            } else if (modal.type === "delete") {
+                res = await deleteUser(modal.uid);
             }
 
             if (res) {
@@ -568,7 +557,7 @@ export default function UsersClient({
                                                     </ActionButton>
                                                 )}
 
-                                                <ActionButton variant="verydanger" onClick={() => handleDelete(u.uid, u.username)}>
+                                                <ActionButton variant="verydanger" onClick={() => openModal("delete", u.uid, u.username)}>
                                                     <FaRegTrashAlt />
                                                     Delete
                                                 </ActionButton>
@@ -581,7 +570,7 @@ export default function UsersClient({
                                                     <FaRegUserCircle />
                                                     Update profile pic
                                                 </ActionButton>
-                                                <ActionButton onClick={() => errorToast("Renaming users is not supported by the backend API")}>
+                                                <ActionButton onClick={() => openModal("username", u.uid, u.username)}>
                                                     <FaPencil />
                                                     Rename
                                                 </ActionButton>
@@ -589,7 +578,7 @@ export default function UsersClient({
                                                     <FaIdCardClip />
                                                     Change role
                                                 </ActionButton>
-                                                <ActionButton onClick={() => errorToast("Changing API key is not supported by the backend API")}>
+                                                <ActionButton onClick={() => openModal("apiKey", u.uid, u.username)}>
                                                     <FaKey />
                                                     Change API Key
                                                 </ActionButton>
@@ -681,6 +670,10 @@ export default function UsersClient({
                                     ? "Update email"
                                     : modal.type === "avatar"
                                         ? "Update profile picture URL"
+                                        : modal.type === "apiKey"
+                                            ? "Rotate API key"
+                                            : modal.type === "delete"
+                                                ? "Delete user"
                                         : modal.type === "username"
                                             ? "Rename user"
                                             : modal.type === "password"
@@ -697,7 +690,11 @@ export default function UsersClient({
                         </div>
 
                         <div className="mt-4">
-                            {modal.type === "role" ? (
+                            {modal.type === "apiKey" || modal.type === "delete" ? (
+                                <div className={`rounded-xl border p-4 text-sm ${modal.type === "delete" ? "border-red-500/30 bg-red-500/10 text-red-200" : "border-amber-500/30 bg-amber-500/10 text-amber-100"}`}>
+                                    {modal.type === "delete" ? <>Permanently delete <strong>{modal.value}</strong>? This action cannot be undone.</> : <>Generate a new API key for <strong>{modal.value}</strong>? Their current key will stop working immediately.</>}
+                                </div>
+                            ) : modal.type === "role" ? (
                                 <select
                                     className="rounded-lg border-2 border-zinc-800 bg-primary1 p-2 text-sm text-white w-full focus:outline-none"
                                     value={modal.value}
@@ -743,7 +740,7 @@ export default function UsersClient({
                                 onClick={submitModal}
                                 disabled={modal.loading || !modal.value.trim()}
                             >
-                                {modal.loading ? "Saving..." : "Save"}
+                                {modal.loading ? "Working..." : modal.type === "delete" ? "Delete user" : modal.type === "apiKey" ? "Rotate key" : "Save"}
                             </button>
                         </div>
                     </div>

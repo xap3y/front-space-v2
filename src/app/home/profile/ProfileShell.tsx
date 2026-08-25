@@ -6,6 +6,8 @@ import ApiKeyClient from "./clients/ApiKeyClient";
 import DiscordClient from "./clients/DiscordClient";
 import AvatarClient from "./clients/AvatarClient";
 import TwoFactorClient from "./clients/TwoFactorClient";
+import PasswordClient from "./clients/PasswordClient";
+import EmailClient from "./clients/EmailClient";
 import Link from "next/link";
 import {PiShareNetworkBold} from "react-icons/pi";
 
@@ -50,6 +52,8 @@ export default function ProfileShell({user, discordConnection}: Props) {
                 <div className="box-primary p-5 md:p-6">
                     <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400"><FaShieldHalved /></span><div><h2 className="font-semibold">Account & security</h2><p className="text-xs text-zinc-500">Credentials and membership details</p></div></div>
                     <ApiKeyClient apiKey={user.apiKey} createdAt={user.createdAt} invitor={user.invitor} storageUsed={user.stats.storageUsed} />
+                    <EmailClient apiKey={user.apiKey} currentEmail={user.email} />
+                    <PasswordClient apiKey={user.apiKey} />
                 </div>
                 <div className="box-primary p-5 md:p-6">
                     <div className="mb-5"><h2 className="font-semibold">Connected accounts</h2><p className="text-xs text-zinc-500">Manage integrations linked to Space</p></div>

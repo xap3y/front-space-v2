@@ -5,6 +5,7 @@ import {useRouter} from "next/navigation";
 import AdminNavBar, {AdminNavItem} from "@/app/admin/AdminNavBar";
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
+import {FaImage, FaVideo} from "react-icons/fa6";
 
 type Props = {
     children: ReactNode;
@@ -14,8 +15,8 @@ export default function ToolsShell({ children }: Props) {
     const router = useRouter();
     const navItems: AdminNavItem[] = useMemo(
         () => [
-            { title: "Image", href: "/tools/image", page: "image" },
-            { title: "Video", href: "/tools/video", page: "video" },
+            { title: "Image", href: "/tools/image", page: "image", icon: <FaImage className="h-5 w-5" /> },
+            { title: "Video", href: "/tools/video", page: "video", icon: <FaVideo className="h-5 w-5" /> },
         ],
         []
     );
@@ -28,7 +29,7 @@ export default function ToolsShell({ children }: Props) {
         }
     }, [user, loadingUser, router]);
 
-    if (loadingUser || !user || (user.role != "OWNER" && user.role != "ADMIN")) {
+    if (!loadingUser && (!user || (user.role != "OWNER" && user.role != "ADMIN"))) {
         return <LoadingPage />;
     }
 
@@ -40,9 +41,9 @@ export default function ToolsShell({ children }: Props) {
         xl:h-[100dvh] xl:overflow-hidden
       "
         >
-            <AdminNavBar brandTitle="Tools" items={navItems} />
+            <AdminNavBar brandTitle="Tools" items={navItems} loading={loadingUser} />
             <main className="flex-1 p-4 xl:p-6 xl:overflow-y-auto bg-primary1 bg-opacity-90">
-                {children}
+                {loadingUser ? <LoadingPage /> : children}
             </main>
         </div>
     );

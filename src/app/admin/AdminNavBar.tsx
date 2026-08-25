@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { MdArrowBack, MdClose, MdMenu } from "react-icons/md";
 
 export type AdminNavItem = {
     title: string;
@@ -14,7 +16,24 @@ export type AdminNavItem = {
 type Props = {
     items: AdminNavItem[];
     brandTitle?: string;
+    loading?: boolean;
 };
+
+function SidebarBrand({ compact = false }: { compact?: boolean }) {
+    return (
+        <div className={`flex items-center justify-center ${compact ? "gap-2" : "gap-2.5"}`}>
+            <Image
+                src="/only_logo_no_bg.png"
+                alt="Space logo"
+                width={compact ? 28 : 40}
+                height={compact ? 28 : 40}
+                priority
+                className={`${compact ? "h-7 w-7" : "h-10 w-10"} block shrink-0 object-contain`}
+            />
+            <span className={`${compact ? "text-sm" : "text-3xl tracking-tight"} leading-none font-semibold`}>SPACE</span>
+        </div>
+    );
+}
 
 function useLockBodyScroll(lock: boolean) {
     useEffect(() => {
@@ -27,7 +46,7 @@ function useLockBodyScroll(lock: boolean) {
     }, [lock]);
 }
 
-export default function AdminNavBar({ items, brandTitle = "ADMIN" }: Props) {
+export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = false }: Props) {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -100,24 +119,30 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN" }: Props) {
         </ul>
     );
 
+    const Navigation = ({ variant }: { variant: "desktop" | "mobile" }) => loading ? (
+        <ul className="space-y-2 animate-pulse">
+            {Array.from({ length: Math.max(items.length, 4) }).map((_, index) => (
+                <li key={index} className="flex items-center gap-3 px-3 py-2.5">
+                    <div className="h-5 w-5 shrink-0 rounded bg-white/5" />
+                    <div className="h-4 w-28 rounded bg-white/5" />
+                </li>
+            ))}
+        </ul>
+    ) : <NavList variant={variant} />;
+
     return (
         <>
             {/* Mobile top bar */}
-            <div className="xl:hidden sticky top-0 z-30 bg-secondary border-b border-white/10">
+            <div className="xl:hidden sticky top-0 z-30 bg-primary1 border-b border-white/10">
                 <div className="h-14 px-3 flex items-center justify-between">
                     <button
-                        aria-label="Open admin menu"
-                        className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
+                        aria-label="Open menu"
+                        className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-primary0 transition-colors"
                         onClick={() => setMobileOpen(true)}
                     >
-            <span className="block w-5">
-              <span className="block h-[2px] bg-white mb-1" />
-              <span className="block h-[2px] bg-white mb-1 opacity-80" />
-              <span className="block h-[2px] bg-white opacity-60" />
-            </span>
+                        <MdMenu className="h-6 w-6" />
                     </button>
-
-                    <div className="text-sm font-semibold">{brandTitle}</div>
+                    <SidebarBrand compact />
                     <div className="w-9" />
                 </div>
             </div>
@@ -132,21 +157,24 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN" }: Props) {
         "
             >
                 <div className="px-4 h-16 flex items-center justify-center">
-                    <div className="text-2xl font-semibold tracking-tight">{brandTitle}</div>
+                    <SidebarBrand />
                 </div>
                 <div className="border-b border-white/10" />
 
                 <div className="flex-1 overflow-y-auto px-3 py-3">
-                    <NavList variant="desktop" />
+                    <div className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                        {brandTitle}
+                    </div>
+                    <Navigation variant="desktop" />
                 </div>
 
                 <div className="border-t border-white/10 p-3">
-                    <Link
-                        href="/home"
-                        className="w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
-                    >
-                        Back to app
-                    </Link>
+                    {loading ? <div className="h-10 w-full animate-pulse rounded-lg bg-white/5" /> : (
+                        <Link href="/home/dashboard" className="w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors">
+                            <MdArrowBack className="h-5 w-5" />
+                            Back to app
+                        </Link>
+                    )}
                 </div>
             </aside>
 
@@ -173,8 +201,7 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN" }: Props) {
                     className={`
             absolute inset-y-4 left-4
             w-[80vw] max-w-[340px]
-            rounded-2xl overflow-hidden
-            bg-secondary border border-white/10 shadow-2xl
+            overflow-hidden box-primary
             transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
             will-change-transform
             ${mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"}
@@ -182,28 +209,30 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN" }: Props) {
           `}
                 >
                     <div className="h-14 px-3 flex items-center justify-between border-b border-white/10">
-                        <div className="text-sm font-semibold">{brandTitle}</div>
+                        <SidebarBrand compact />
                         <button
                             aria-label="Close admin menu"
                             className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
                             onClick={() => setMobileOpen(false)}
                         >
-                            <span className="text-xl leading-none">×</span>
+                            <MdClose className="h-6 w-6" />
                         </button>
                     </div>
 
                     <div className="flex-1 overflow-y-auto px-3 py-3">
-                        <NavList variant="mobile" />
+                        <div className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+                            {brandTitle}
+                        </div>
+                        <Navigation variant="mobile" />
                     </div>
 
                     <div className="border-t border-white/10 p-3">
-                        <Link
-                            href="/home"
-                            onClick={() => setMobileOpen(false)}
-                            className="w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors"
-                        >
-                            Back to app
-                        </Link>
+                        {loading ? <div className="h-11 w-full animate-pulse rounded-lg bg-white/5" /> : (
+                            <Link href="/home/dashboard" onClick={() => setMobileOpen(false)} className="w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors">
+                                <MdArrowBack className="h-5 w-5" />
+                                Back to app
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
