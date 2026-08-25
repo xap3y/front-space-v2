@@ -15,6 +15,10 @@ export function getStorageUrl() {
     return process.env.NEXT_PUBLIC_STORAGE_URL || "http://127.0.0.1:8012";
 }
 
+export function getR2VideoUrl(kind: "media" | "files", uniqueId: string) {
+    return `/api/media/video/${kind}/${encodeURIComponent(uniqueId)}`;
+}
+
 export function getDefaultLocale(): string {
     const locale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en";
 

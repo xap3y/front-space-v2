@@ -9,7 +9,7 @@ import { LoadingDot } from "@/components/GlobalComponents";
 import LoadingPage from "@/components/LoadingPage";
 import MainStringInput from "@/components/MainStringInput";
 import { errorToast, infoToast, okToast } from "@/lib/client";
-import {getApiUrl, getStorageUrl} from "@/lib/core";
+import {getApiUrl, getR2VideoUrl, getStorageUrl} from "@/lib/core";
 
 interface FileInfo {
     uniqueId: string;
@@ -18,6 +18,7 @@ interface FileInfo {
     size: number;
     uploadTime: string;
     fileUrl?: string;
+    location?: "R2" | "LOCAL" | "UNKNOWN" | null;
 }
 
 interface PackInfo {
@@ -593,10 +594,14 @@ export function PackPageClient() {
                                         />
                                     ) : previewFile.fileType.startsWith('video/') ? (
                                         <video
+                                            src={previewFile.location === "R2" || previewFile.location == null
+                                                ? getR2VideoUrl("files", previewFile.uniqueId)
+                                                : getStorageUrl() + "/files/" + previewFile.uniqueId}
                                             controls
-                                            className="max-w-full max-h-full rounded"
+                                            preload={previewFile.location === "R2" || previewFile.location == null ? "metadata" : "none"}
+                                            playsInline
+                                            className="max-h-full max-w-full rounded object-contain"
                                         >
-                                            <source src={getStorageUrl() + "/files/" + previewFile.uniqueId} type={previewFile.fileType} />
                                             Your browser does not support the video tag.
                                         </video>
                                     ) : null

@@ -14,8 +14,9 @@ const s3 = new S3Client({
 
 export async function POST(req: NextRequest) {
 
-    // check content type of req
-    const contentType = req.headers.get('content-type');
+    const body = await req.json().catch(() => null) as {contentType?: string} | null;
+    // The request itself is JSON; the R2 object type must come from the selected file.
+    const contentType = body?.contentType?.trim();
     const filename = req.headers.get('filename');
 
     if (!contentType || !filename) {

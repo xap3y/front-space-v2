@@ -8,7 +8,7 @@ import { copyToClipboard, deleteImageApi as apiDeleteImage, errorToast, okToast 
 import { getUserImages } from "@/lib/apiGetters";
 import { updateImagePassword } from "@/lib/apiPoster";
 import { ImageListResponse, UploadedImagePage } from "@/types/image";
-import { isVideoFile } from "@/lib/core";
+import { getR2VideoUrl, isVideoFile } from "@/lib/core";
 
 import { useRouter } from "next/navigation";
 import { useGalleryRows } from "@/hooks/useGalleryRow";
@@ -729,9 +729,15 @@ export default function GalleryPage() {
                         <div className="w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden bg-black/40 rounded-xl p-2">
                             {isVideoFile(enlargedImage.type || '') ? (
                                 <video
-                                    src={enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || undefined}
+                                    src={enlargedImage.location === "R2"
+                                        ? getR2VideoUrl("media", enlargedImage.uniqueId)
+                                        : (enlargedImage.location === "LOCAL" && !enlargedImage.public)
+                                            ? enlargedImage.urls?.webUrl || undefined
+                                            : enlargedImage.urls?.userPreference || enlargedImage.urls?.rawUrl || undefined}
                                     controls
                                     autoPlay
+                                    preload="metadata"
+                                    playsInline
                                     className="max-h-[70vh] max-w-full rounded-lg object-contain"
                                 />
                             ) : (
@@ -779,6 +785,7 @@ function MediaCard({
 
     const showPlaceholder = imgFailed || !urls.original || item.size === 0;
     const rawUrl = (item.location === "LOCAL" && !item.public) ? item.urls?.webUrl : urls.original;
+    const videoUrl = item.location === "R2" ? getR2VideoUrl("media", item.uniqueId) : rawUrl;
 
     return (
         <div className="group rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-200 w-full h-full flex flex-col overflow-hidden">
@@ -797,14 +804,16 @@ function MediaCard({
                     </div>
                 ) : isVideo ? (
                     <video
+                        src={videoUrl || undefined}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         preload="metadata"
-                        poster={item.urls?.posterUrl || undefined}
+                        poster={item.location === "R2" ? undefined : item.urls?.posterUrl || undefined}
                         controls={true}
+                        playsInline
                         onClick={(e) => e.stopPropagation()}
                         style={{ minHeight: 0 }}
                     >
-                        <source src={urls.original} type="video/mp4" />
+                        Your browser does not support the video tag.
                     </video>
                 ) : (
                     <img

@@ -5,7 +5,7 @@ import {useEffect, useRef, useState} from "react";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import LoadingPage from "@/components/LoadingPage";
 import {useImage} from "@/context/ImageContext";
-import {getApiUrl, isVideoFile} from "@/lib/core";
+import {getApiUrl, getR2VideoUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {FaArrowDown, FaCheck, FaDownload, FaGlobe, FaImage, FaLink, FaLock} from "react-icons/fa6";
 import {toast} from "react-toastify";
@@ -57,6 +57,9 @@ export default function Page() {
     const router = useRouter();
 
     const isMobile = useIsMobile();
+    const videoUrl = image?.location === "R2" && !imageUrl?.startsWith("blob:")
+        ? getR2VideoUrl("media", image.uniqueId)
+        : imageUrl;
 
     const {
         showCard,
@@ -332,8 +335,13 @@ export default function Page() {
                                 <div className={"mt-4"}>
                                     {isVideoFile(image.type) ? (
                                         <>
-                                            <video className={"rounded shadow-lg max-h-[600px] video-js vjs-default-skin"} controls>
-                                                <source src={imageUrl || ""} type="video/mp4" />
+                                            <video
+                                                src={videoUrl || ""}
+                                                className="max-h-[600px] max-w-full rounded shadow-lg video-js vjs-default-skin"
+                                                controls
+                                                preload="metadata"
+                                                playsInline
+                                            >
                                                 Your browser does not support the video tag.
                                             </video>
                                         </>
