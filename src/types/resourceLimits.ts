@@ -9,9 +9,15 @@ export type LimitRule = {
 
 export type LimitPolicy = Partial<Record<ResourceLimitType, LimitRule>>;
 
+export type FilePackLimits = {
+    maxFiles: number | null;
+    maxBytes: number | null;
+};
+
 export type RoleLimitPolicy = {
     role: string;
     limits: LimitPolicy;
+    filePackLimits: FilePackLimits;
 };
 
 export type UsageValues = {
@@ -28,6 +34,8 @@ export type UserLimitPolicy = {
     overrides: LimitPolicy;
     effective: LimitPolicy;
     usage: Partial<Record<ResourceLimitType, UsageValues>>;
+    filePackOverrides: FilePackLimits;
+    effectiveFilePackLimits: FilePackLimits;
     paused: boolean;
     pausedIndefinitely: boolean;
     pausedUntil: string | null;

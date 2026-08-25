@@ -64,8 +64,9 @@ interface FileUploadResponse {
     uploadTime: string;
 }
 
-const MAX_FILES = 10;
-const MAX_SIZE = 1024 * 1024 * 1024 * 15; // 15 GB
+const DEFAULT_MAX_FILES = 10;
+const DEFAULT_MAX_PACK_SIZE = 1024 * 1024 * 1024 * 15;
+type EffectiveFilePackLimits = {maxFiles: number | null; maxBytes: number | null};
 
 export function FilesPageClient() {
     const { user, loadingUser } = useUser();
@@ -77,10 +78,12 @@ export function FilesPageClient() {
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [registrationError, setRegistrationError] = useState<string | null>(null);
     const [packId, setPackId] = useState<string | null>(null);
+    const [filePackLimits, setFilePackLimits] = useState<EffectiveFilePackLimits>({maxFiles: DEFAULT_MAX_FILES, maxBytes: DEFAULT_MAX_PACK_SIZE});
 
     const [apiKey, setApiKey] = useState<string>("");
     const [isKeyValid, setIsKeyValid] = useState<boolean | null>(null);
     const [isKeyValidating, setIsKeyValidating] = useState<boolean>(false);
+    const [validatedApiKeyRole, setValidatedApiKeyRole] = useState<string | null>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [isPassFocused, setIsPassFocused] = useState(false);
 
@@ -90,6 +93,8 @@ export function FilesPageClient() {
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
     const [packPassword, setPackPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const effectiveRole = String(user?.role ?? validatedApiKeyRole ?? "").toUpperCase();
+    const filePackLimitExempt = effectiveRole === "ADMIN" || effectiveRole === "OWNER";
 
     const uploadItemsRef = useRef<UploadItem[]>(uploadItems);
     const uploadedFilesRef = useRef<UploadedFile[]>(uploadedFiles);
@@ -128,30 +133,26 @@ export function FilesPageClient() {
     });
 
     const addFilesToQueue = (files: File[]) => {
-        const remainingSlots = MAX_FILES - uploadItems.filter(i => i.status !== "cancelled").length;
+        const activeItems = uploadItems.filter(i => i.status !== "cancelled");
+        const maxFiles = filePackLimits.maxFiles ?? Number.MAX_SAFE_INTEGER;
+        const maxBytes = filePackLimits.maxBytes ?? Number.MAX_SAFE_INTEGER;
+        const remainingSlots = maxFiles - activeItems.length;
         if (remainingSlots <= 0) {
-            errorToast("Maximum " + MAX_FILES + " files allowed");
+            errorToast("Maximum " + maxFiles + " files allowed in one pack");
             return;
         }
 
-        // ✅ Validate file sizes
-        let totalSize = 0;
+        const queuedSize = activeItems.reduce((sum, item) => sum + item.file.size, 0);
+        let addedSize = 0;
         const validFiles: File[] = [];
 
         for (const file of files) {
-            // Check individual file size
-            if (file.size > MAX_SIZE) {
-                errorToast(`File "${file.name}" exceeds maximum size of ${formatFileSize(MAX_SIZE)}`);
-                continue;
-            }
-
-            // Check total size
-            if (totalSize + file.size > MAX_SIZE) {
-                errorToast(`Total upload size would exceed ${formatFileSize(MAX_SIZE)}`);
+            if (queuedSize + addedSize + file.size > maxBytes) {
+                errorToast(`This pack would exceed your maximum size of ${formatFileSize(maxBytes)}`);
                 break;
             }
 
-            totalSize += file.size;
+            addedSize += file.size;
             validFiles.push(file);
         }
 
@@ -187,6 +188,7 @@ export function FilesPageClient() {
     useEffect(() => {
         if (!debouncedApiKey) {
             setIsKeyValid(null);
+            setValidatedApiKeyRole(null);
             return;
         }
 
@@ -197,8 +199,10 @@ export function FilesPageClient() {
 
             if (typeof isValid == "boolean" && !isValid) {
                 setIsKeyValid(false);
+                setValidatedApiKeyRole(null);
             } else {
                 setIsKeyValid(true);
+                setValidatedApiKeyRole(typeof isValid === "object" && isValid ? String(isValid.role) : null);
             }
 
             setTimeout(() => {
@@ -208,6 +212,26 @@ export function FilesPageClient() {
 
         validateIt();
     }, [debouncedApiKey]);
+
+    useEffect(() => {
+        if (filePackLimitExempt) {
+            setFilePackLimits({maxFiles: null, maxBytes: null});
+            return;
+        }
+        if (!isKeyValid || !apiKey) {
+            setFilePackLimits({maxFiles: DEFAULT_MAX_FILES, maxBytes: DEFAULT_MAX_PACK_SIZE});
+            return;
+        }
+        axios.get(getApiUrl() + "/v1/limits/file-pack", {headers: {"x-api-key": apiKey}})
+            .then(response => {
+                const limits = response.data?.message;
+                const maxFiles = limits?.maxFiles == null ? null : Number(limits.maxFiles);
+                const maxBytes = limits?.maxBytes == null ? null : Number(limits.maxBytes);
+                if ((maxFiles === null || Number.isFinite(maxFiles) && maxFiles > 0) && (maxBytes === null || Number.isFinite(maxBytes) && maxBytes > 0))
+                    setFilePackLimits({maxFiles, maxBytes});
+            })
+            .catch(() => setFilePackLimits({maxFiles: DEFAULT_MAX_FILES, maxBytes: DEFAULT_MAX_PACK_SIZE}));
+    }, [apiKey, filePackLimitExempt, isKeyValid]);
 
     useEffect(() => {
         const handlePaste = async (e: ClipboardEvent) => {
@@ -564,7 +588,8 @@ export function FilesPageClient() {
     const activeItems = uploadItems.filter(i => i.status !== "cancelled");
     const isMultiple = activeItems.length > 1;
     const allCompleted = uploadItems.every((i) => i.status === "completed" || i.status === "error" || i.status === "cancelled");
-    const canAddMore = activeItems.length < MAX_FILES;
+    const canAddMore = (filePackLimits.maxFiles === null || activeItems.length < filePackLimits.maxFiles)
+        && (filePackLimits.maxBytes === null || activeItems.reduce((sum, item) => sum + item.file.size, 0) < filePackLimits.maxBytes);
 
     const getPackUrl = () => {
         return `${window.location.origin}/files/pack/${packId}`;
@@ -737,10 +762,10 @@ export function FilesPageClient() {
                             File Uploader
                         </h1>
 
-                        {/* Show MAX_SIZE info */}
+                        {/* Show effective pack limits */}
                         {activeItems.length === 0 && (
                             <p className="text-center text-xs text-gray-500">
-                                Max file size: {formatFileSize(MAX_SIZE)} • Max files: {MAX_FILES}
+                                Max pack size: {filePackLimits.maxBytes === null ? "∞" : formatFileSize(filePackLimits.maxBytes)} • Max files: {filePackLimits.maxFiles ?? "∞"}
                             </p>
                         )}
 
@@ -753,6 +778,7 @@ export function FilesPageClient() {
                                     onChange={(value) => {
                                         setApiKey(purifyTextStrict(value.toLowerCase()));
                                         setIsKeyValid(null);
+                                        setValidatedApiKeyRole(null);
                                     }}
                                     onFocus={() => {
                                         setTimeout(() => setIsFocused(true), 100);
@@ -795,7 +821,7 @@ export function FilesPageClient() {
                                             or click to select
                                         </p>
                                         <p className="text-gray-500 text-xs mt-2">
-                                            Press Ctrl+V to paste files (max {MAX_FILES})
+                                            Press Ctrl+V to paste files (max {filePackLimits.maxFiles ?? "∞"})
                                         </p>
                                     </div>
                                 </div>
@@ -808,8 +834,8 @@ export function FilesPageClient() {
                                 <div className="bg-zinc-800/50 p-2 rounded text-xs">
                                     <div className="flex justify-between text-gray-400">
                                         <span>Total size:</span>
-                                        <span className={getTotalUploadSize() > MAX_SIZE ? "text-red-400" : "text-gray-300"}>
-                                            {formatFileSize(getTotalUploadSize())} / {formatFileSize(MAX_SIZE)}
+                                        <span className={filePackLimits.maxBytes !== null && getTotalUploadSize() > filePackLimits.maxBytes ? "text-red-400" : "text-gray-300"}>
+                                            {formatFileSize(getTotalUploadSize())} / {filePackLimits.maxBytes === null ? "∞" : formatFileSize(filePackLimits.maxBytes)}
                                         </span>
                                     </div>
                                 </div>
@@ -937,7 +963,7 @@ export function FilesPageClient() {
                                             className="w-full text-gray-400 hover:text-gray-300 transition flex items-center justify-center gap-2 text-sm"
                                         >
                                             <FaPlus size={14} />
-                                            Add More Files ({activeItems.length}/{MAX_FILES})
+                                            Add More Files ({activeItems.length}/{filePackLimits.maxFiles ?? "∞"})
                                         </button>
                                     </div>
                                 )}

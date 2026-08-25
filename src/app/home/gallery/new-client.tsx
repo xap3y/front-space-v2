@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle, FaTimes } from 'react-icons/fa';
 import { FaPlus, FaRotateRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
@@ -18,6 +18,29 @@ import HoverDiv, {DeleteButton} from "@/components/HoverDiv";
 
 const ITEMS_PER_STAGGER = 4;
 const STAGGER_DELAY_MS = 120;
+
+function TimeDropdownShell({label, children}: {label: string; children: ReactNode}) {
+    const [open, setOpen] = useState(false);
+
+    return <div className="relative">
+        <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            onClick={() => setOpen(value => !value)}
+            className="flex items-center gap-1.5 rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-xs font-medium text-gray-200 transition-colors duration-150 hover:border-zinc-700 hover:in-shadow focus:outline-none"
+        >
+            <span>{label}</span>
+            <span className={`text-[10px] text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
+        </button>
+        {open && <>
+            <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+            <div className="absolute left-0 z-40 mt-1 w-72 space-y-3 rounded-lg border-2 border-zinc-800 bg-primary1 p-3 shadow-xl">
+                {children}
+            </div>
+        </>}
+    </div>;
+}
 
 export default function GalleryPage() {
     const { user, loadingUser, error: userError } = useUser();
@@ -51,7 +74,6 @@ export default function GalleryPage() {
     const [dayEndTime, setDayEndTime] = useState("");
 
     // Dropdown open states
-    const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
     const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
 
     // Password modal state
@@ -407,19 +429,7 @@ export default function GalleryPage() {
                         </div>
 
                         {/* Time Filter Dropdown */}
-                        <div className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
-                            >
-                                <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
-                                <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
-                            {timeDropdownOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-30" onClick={() => setTimeDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-72 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-3 space-y-3">
+                        <TimeDropdownShell label={`Time: ${timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}`}>
                                         <div className="flex gap-1 border-b border-white/5 pb-2">
                                             <button
                                                 type="button"
@@ -501,10 +511,7 @@ export default function GalleryPage() {
                                                 Clear
                                             </button>
                                         </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                        </TimeDropdownShell>
 
                         {/* Reset button */}
                         <div className="flex gap-1.5 ml-auto">
