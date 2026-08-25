@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import MainStringInput from "@/components/MainStringInput";
 
 export function NumberInput({
@@ -22,13 +22,60 @@ export function NumberInput({
     suffix?: string;
     disabled?: boolean;
 }) {
+    const [draft, setDraft] = useState(String(value));
+    const integerOnly = Number.isInteger(step);
+    const permitsNegative = min == null || min < 0;
+
+    useEffect(() => setDraft(String(value)), [value]);
+
+    const commit = () => {
+        const parsed = Number(draft);
+        if (!Number.isFinite(parsed)) {
+            setDraft(String(value));
+            return;
+        }
+        const clamped = Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, parsed));
+        const base = min ?? 0;
+        const stepped = base + Math.round((clamped - base) / step) * step;
+        const precision = integerOnly ? 0 : Math.min(6, (String(step).split(".")[1] || "").length);
+        const next = Number(stepped.toFixed(precision));
+        setDraft(String(next));
+        onChange(next);
+    };
+
     return (
         <div>
             <div className="flex items-center justify-between mb-1">
                 <label className="text-[10px] text-neutral-500 uppercase font-semibold">{label}</label>
-                <span className="text-xs font-mono font-bold text-white">
-                    {value}{suffix && <span className="text-neutral-500 ml-0.5">{suffix}</span>}
-                </span>
+                <MainStringInput
+                    aria-label={`${label} value`}
+                    type={integerOnly && !permitsNegative ? "text" : "number"}
+                    numericOnly={integerOnly && !permitsNegative}
+                    inputMode={integerOnly ? "numeric" : "decimal"}
+                    min={min}
+                    max={max}
+                    step={step}
+                    value={draft}
+                    suffix={suffix}
+                    disabled={disabled}
+                    onChange={(next) => {
+                        if (integerOnly && permitsNegative) {
+                            const negative = next.startsWith("-");
+                            const digits = next.replace(/\D/g, "");
+                            setDraft((negative ? "-" : "") + digits);
+                            return;
+                        }
+                        setDraft(next);
+                    }}
+                    onBlur={commit}
+                    onKeyDown={event => {
+                        if (event.key === "Enter") event.currentTarget.blur();
+                        if (event.key === "Escape") { setDraft(String(value)); event.currentTarget.blur(); }
+                    }}
+                    className="!w-auto !rounded-md !border-transparent !bg-zinc-900/80 !shadow-none hover:!border-transparent focus-within:!border-transparent"
+                    inputClassName={`!w-[72px] !px-2 !py-1 text-right font-mono text-xs font-bold ${suffix ? "!pr-7" : ""}`}
+                    suffixClassName="!right-1.5 !text-[9px]"
+                />
             </div>
             <input
                 type="range"

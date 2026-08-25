@@ -4,6 +4,10 @@ import React, { useState, useCallback } from "react";
 import { NumberInput, SelectInput, TextInput, CheckboxInput } from "@/components/tools/ToolInputs";
 import { processMedia } from "@/lib/tools-api";
 import ToolWorkspace from "@/components/tools/ToolWorkspace";
+import InteractiveCrop from "@/components/tools/InteractiveCrop";
+import ImageEffectPreview from "@/components/tools/ImageEffectPreview";
+import {FaArrowsLeftRight, FaBoxArchive, FaBroom, FaCropSimple, FaDroplet, FaEye, FaMagnifyingGlass, FaRotate, FaSun} from "react-icons/fa6";
+import {FaAdjust, FaExchangeAlt, FaSyncAlt} from "react-icons/fa";
 
 const IMAGE_ACCEPT = {
     "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tiff", ".avif", ".svg"],
@@ -25,20 +29,20 @@ type Tool =
     | "watermark"
     | "strip-metadata";
 
-const TOOLS: { key: Tool; label: string; icon: string; description: string }[] = [
-    { key: "resize", label: "Resize", icon: "↔", description: "Scale to exact dimensions or percentage" },
-    { key: "compress", label: "Compress", icon: "📦", description: "Reduce file size with quality control" },
-    { key: "convert", label: "Convert", icon: "🔄", description: "Change format (PNG, JPG, WebP, AVIF...)" },
-    { key: "crop", label: "Crop", icon: "✂️", description: "Crop to specific region or aspect ratio" },
-    { key: "rotate", label: "Rotate", icon: "🔁", description: "Rotate by any angle" },
-    { key: "flip", label: "Flip", icon: "🪞", description: "Mirror horizontally or vertically" },
-    { key: "blur", label: "Blur", icon: "💨", description: "Apply gaussian blur effect" },
-    { key: "sharpen", label: "Sharpen", icon: "🔍", description: "Enhance edges and details" },
-    { key: "grayscale", label: "Grayscale", icon: "⬛", description: "Convert to black & white" },
-    { key: "brightness", label: "Brightness & Contrast", icon: "☀️", description: "Adjust brightness, contrast, saturation" },
-    { key: "watermark", label: "Watermark", icon: "💧", description: "Add text overlay to image" },
-    { key: "strip-metadata", label: "Strip Metadata", icon: "🧹", description: "Remove EXIF data and metadata" },
-];
+const TOOLS = [
+    { key: "resize", label: "Resize", icon: <FaArrowsLeftRight/>, description: "Scale to exact dimensions or percentage" },
+    { key: "compress", label: "Compress", icon: <FaBoxArchive/>, description: "Reduce file size with quality control" },
+    { key: "convert", label: "Convert", icon: <FaSyncAlt/>, description: "Change format (PNG, JPG, WebP, AVIF...)" },
+    { key: "crop", label: "Crop", icon: <FaCropSimple/>, description: "Crop to specific region or aspect ratio" },
+    { key: "rotate", label: "Rotate", icon: <FaRotate/>, description: "Rotate by any angle" },
+    { key: "flip", label: "Flip", icon: <FaExchangeAlt/>, description: "Mirror horizontally or vertically" },
+    { key: "blur", label: "Blur", icon: <FaEye/>, description: "Apply gaussian blur effect" },
+    { key: "sharpen", label: "Sharpen", icon: <FaMagnifyingGlass/>, description: "Enhance edges and details" },
+    { key: "grayscale", label: "Grayscale", icon: <FaAdjust/>, description: "Convert to black & white" },
+    { key: "brightness", label: "Brightness", icon: <FaSun/>, description: "Adjust brightness, contrast, saturation" },
+    { key: "watermark", label: "Watermark", icon: <FaDroplet/>, description: "Add text overlay to image" },
+    { key: "strip-metadata", label: "Strip Metadata", icon: <FaBroom/>, description: "Remove EXIF data and metadata" },
+] satisfies {key: Tool; label: string; icon: React.ReactNode; description: string}[];
 
 export default function ImageToolsClient() {
     const [file, setFile] = useState<File | null>(null);
@@ -411,6 +415,32 @@ export default function ImageToolsClient() {
             resultUrl={resultUrl}
             resultFilename={resultFilename}
             error={error}
+            onDismissResult={clearResult}
+            editorContent={file && activeTool === "crop" ? (
+                <InteractiveCrop
+                    file={file}
+                    crop={{x: cropX, y: cropY, width: cropW, height: cropH}}
+                    onChange={(next) => {
+                        setCropX(Math.round(next.x));
+                        setCropY(Math.round(next.y));
+                        setCropW(Math.round(next.width));
+                        setCropH(Math.round(next.height));
+                        clearResult();
+                    }}
+                />
+            ) : file ? (
+                <ImageEffectPreview
+                    file={file}
+                    tool={activeTool}
+                    brightness={brightness}
+                    contrast={contrast}
+                    saturation={saturation}
+                    blur={blurRadius}
+                    sharpen={sharpenAmount}
+                    rotation={rotateAngle}
+                    flip={flipDirection}
+                />
+            ) : undefined}
             optionsContent={renderToolOptions()}
             processLabel="Process Image"
             onProcess={handleProcess}

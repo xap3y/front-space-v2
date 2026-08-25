@@ -3,6 +3,8 @@
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
+import HoverDiv from "@/components/HoverDiv";
+import {FaXmark} from "react-icons/fa6";
 
 type MediaInputProps = {
     accept: Record<string, string[]>;
@@ -86,6 +88,18 @@ export default function MediaInput({
                 if (item.kind === "file") {
                     const pastedFile = item.getAsFile();
                     if (pastedFile) {
+                        const acceptedTypes = Object.keys(accept);
+                        const accepted = acceptedTypes.some(type => type.endsWith("/*")
+                            ? pastedFile.type.startsWith(type.slice(0, -1))
+                            : pastedFile.type === type);
+                        if (!accepted) {
+                            setError("That clipboard file is not supported by this tool.");
+                            return;
+                        }
+                        if (pastedFile.size > maxSize) {
+                            setError(`Clipboard file exceeds the ${formatSize(maxSize)} limit.`);
+                            return;
+                        }
                         setError(null);
                         onFile(pastedFile);
                         break;
@@ -96,42 +110,12 @@ export default function MediaInput({
 
         window.addEventListener("paste", handlePaste);
         return () => window.removeEventListener("paste", handlePaste);
-    }, [onFile, disabled]);
+    }, [onFile, disabled, accept, maxSize]);
 
     const formatSize = (bytes: number) => {
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    };
-
-    const getPreview = () => {
-        if (!file) return null;
-        const url = URL.createObjectURL(file);
-        const isImage = file.type.startsWith("image/");
-        const isVideo = file.type.startsWith("video/");
-
-        if (isImage) {
-            return (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                    src={url}
-                    alt="Preview"
-                    className="max-h-[120px] rounded-lg object-contain"
-                    onLoad={() => URL.revokeObjectURL(url)}
-                />
-            );
-        }
-        if (isVideo) {
-            return (
-                <video
-                    src={url}
-                    className="max-h-[120px] rounded-lg"
-                    muted
-                    onLoadedData={() => URL.revokeObjectURL(url)}
-                />
-            );
-        }
-        return null;
     };
 
     return (
@@ -200,10 +184,9 @@ export default function MediaInput({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
                         transition={{ duration: 0.2 }}
-                        className="border border-neutral-800 rounded-2xl p-4 bg-neutral-950/30"
+                        className="rounded-xl border border-neutral-800 bg-neutral-950/30 px-3 py-2"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0">{getPreview()}</div>
+                        <div className="flex items-center gap-3">
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-white truncate">
                                     {file.name}
@@ -217,16 +200,16 @@ export default function MediaInput({
                                     )}
                                 </p>
                             </div>
-                            <button
+                            <HoverDiv
+                                icon={<FaXmark className="h-4 w-4"/>}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onClear();
                                 }}
                                 disabled={disabled}
-                                className="flex-shrink-0 w-8 h-8 rounded-lg bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white transition disabled:opacity-50"
-                            >
-                                ✕
-                            </button>
+                                className="flex-shrink-0 p-2 text-neutral-400 disabled:opacity-50"
+                                aria-label="Remove selected file"
+                            />
                         </div>
                     </motion.div>
                 )}

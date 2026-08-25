@@ -1,22 +1,34 @@
 "use client";
 
+import Link from "next/link";
+import {FaArrowRight, FaImage, FaScissors, FaVideo} from "react-icons/fa6";
+
+const tools = [
+    {title: "Image studio", description: "Crop visually, resize, compress, convert, retouch, watermark, and clean image metadata.", href: "/tools/image", icon: <FaImage className="h-6 w-6"/>, details: "12 image operations"},
+    {title: "Video studio", description: "Trim on a timeline, compress, convert, resize, extract audio, create GIFs, and more.", href: "/tools/video", icon: <FaVideo className="h-6 w-6"/>, details: "15 video operations"},
+];
 
 export default function ToolsPage() {
     return (
-        <div className="flex">
-
-            <main className="flex-1 p-4 xl:p-6">
-                <div className="box-primary p-4">
-                    <h1 className="text-xl font-semibold">Tools</h1>
-                    <p className="text-sm text-gray-300 mt-2">
-                        Welcome to the tools page.
-                    </p>
-
-                    <div className="mt-4 box-primary p-4">
-                        Nothing here yet.
-                    </div>
-                </div>
-            </main>
+        <div className="mx-auto min-h-full max-w-6xl px-1 py-4 sm:px-4 sm:py-8">
+            <header className="mb-8 text-center sm:mb-10">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-300"><FaScissors className="h-5 w-5"/></div>
+                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Media tools</h1>
+                <p className="mx-auto mt-2 max-w-xl text-sm text-zinc-400 sm:text-base">Edit images and videos with focused controls, live previews, and downloadable results.</p>
+            </header>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {tools.map(tool => (
+                    <Link key={tool.href} href={tool.href} className="group box-primary flex min-h-56 flex-col rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-black/30">
+                        <div className="mb-5 flex items-start justify-between">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-800 bg-black/30 text-emerald-300 transition group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10">{tool.icon}</div>
+                            <FaArrowRight className="h-4 w-4 text-zinc-600 transition group-hover:translate-x-1 group-hover:text-emerald-300"/>
+                        </div>
+                        <h2 className="text-xl font-semibold text-white transition group-hover:text-emerald-200">{tool.title}</h2>
+                        <p className="mt-2 flex-1 text-sm leading-6 text-zinc-400">{tool.description}</p>
+                        <div className="mt-5 border-t border-zinc-800 pt-4 font-mono text-[11px] uppercase tracking-wider text-zinc-500">{tool.details}</div>
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 }
