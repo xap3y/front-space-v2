@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import axios, { CancelTokenSource } from "axios";
 import { MdOutlineDelete } from "react-icons/md";
-import { FaCheck, FaCopy, FaPlus, FaPen, FaLink, FaLock, FaLockOpen, FaEye, FaEyeSlash, FaTrash } from "react-icons/fa6";
+import { FaCheck, FaCopy, FaPlus, FaPen, FaLink, FaLock, FaLockOpen, FaEye, FaEyeSlash, FaTrash, FaUserSecret } from "react-icons/fa6";
 import {FaExclamationTriangle, FaTimes, FaExternalLinkAlt} from "react-icons/fa";
 import { LoadingDot } from "@/components/GlobalComponents";
 import LoadingPage from "@/components/LoadingPage";
@@ -53,6 +53,7 @@ interface FileRegisterRequest {
     password?: string;
     description?: string;
     source?: string;
+    anonymous?: boolean;
 }
 
 interface FileUploadResponse {
@@ -91,6 +92,7 @@ export function FilesPageClient() {
     const [editingName, setEditingName] = useState<string>("");
 
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
+    const [isAnonymous, setIsAnonymous] = useState(false);
     const [packPassword, setPackPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const effectiveRole = String(user?.role ?? validatedApiKeyRole ?? "").toUpperCase();
@@ -478,6 +480,7 @@ export function FilesPageClient() {
                 })),
                 source: "PORTAL",
                 password: isPasswordProtected && packPassword.trim() ? packPassword : undefined,
+                anonymous: isAnonymous,
             };
 
             const response = await axios.post<FileUploadResponse>(
@@ -698,6 +701,7 @@ export function FilesPageClient() {
                                 setRegistrationError(null);
                                 setPackId(null);
                                 setIsPasswordProtected(false);
+                                setIsAnonymous(false);
                                 setPackPassword("");
                             }}
                             className="w-full py-3 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2"
@@ -1047,6 +1051,41 @@ export function FilesPageClient() {
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Anonymous Upload Toggle */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <FaUserSecret className={`w-4 h-4 ${isAnonymous ? "text-purple-400" : "text-gray-400"}`} />
+                                        <label className="text-sm text-gray-300">
+                                            Anonymous Upload
+                                        </label>
+                                    </div>
+
+                                    <label
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                            isAnonymous
+                                                ? "bg-purple-600"
+                                                : "bg-gray-700"
+                                        } ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            role="switch"
+                                            aria-label="Upload anonymously"
+                                            checked={isAnonymous}
+                                            onChange={(event) => setIsAnonymous(event.target.checked)}
+                                            disabled={uploading}
+                                            className="sr-only"
+                                        />
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                                isAnonymous
+                                                    ? "translate-x-6"
+                                                    : "translate-x-1"
+                                            }`}
+                                        />
+                                    </label>
                                 </div>
 
                                 <button

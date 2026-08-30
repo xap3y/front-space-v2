@@ -10,6 +10,7 @@ import LoadingPage from "@/components/LoadingPage";
 import MainStringInput from "@/components/MainStringInput";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import {getApiUrl, getR2VideoUrl, getStorageUrl} from "@/lib/core";
+import {UserObjShort} from "@/types/user";
 
 interface FileInfo {
     uniqueId: string;
@@ -28,6 +29,7 @@ interface PackInfo {
     totalSize: number;
     uploadTime: string;
     isPasswordProtected: boolean;
+    uploader: UserObjShort | null;
 }
 
 interface PackResponse {
@@ -241,6 +243,10 @@ export function PackPageClient() {
         return fileName.split('.').pop()?.toLowerCase() || '';
     };
 
+    const isMp3 = (file: FileInfo): boolean => {
+        return file.fileType === "audio/mpeg" || file.fileType === "audio/mp3" || getFileExtension(file.fileName) === "mp3";
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8 bg-primaryDottedSize bg-primaryDotted">
@@ -423,6 +429,19 @@ export function PackPageClient() {
                             {packInfo.totalFiles} file(s) •{" "}
                             {formatFileSize(packInfo.totalSize)}
                         </p>
+                        <p className="text-base text-gray-200 mt-2 flex items-center justify-center gap-2">
+                            <span className="font-medium">Uploaded by</span>
+                            {packInfo.uploader ? (
+                                <a
+                                    className="font-bold underline text-telegram hover:underline"
+                                    href={`/user/${packInfo.uploader.username}`}
+                                >
+                                    {packInfo.uploader.username}
+                                </a>
+                            ) : (
+                                <span className="text-zinc-500">N/A</span>
+                            )}
+                        </p>
                     </div>
 
                     {/* Files List */}
@@ -450,7 +469,7 @@ export function PackPageClient() {
 
                                     <div className="flex gap-1 flex-wrap justify-end">
                                         {/* Preview button for media/pdf/doc */}
-                                        {(isMediaPreviewable(file.fileType) || isPdfOrDoc(file.fileType)) && (
+                                        {(isMediaPreviewable(file.fileType) || isMp3(file) || isPdfOrDoc(file.fileType)) && (
                                             <button
                                                 onClick={() => setPreviewFile(file)}
                                                 className="p-2 hover:bg-purple-500 hover:bg-opacity-20 rounded transition"
@@ -604,6 +623,15 @@ export function PackPageClient() {
                                         >
                                             Your browser does not support the video tag.
                                         </video>
+                                    ) : isMp3(previewFile) ? (
+                                        <audio
+                                            src={getStorageUrl() + "/files/" + previewFile.uniqueId}
+                                            controls
+                                            preload="metadata"
+                                            className="w-full max-w-2xl"
+                                        >
+                                            Your browser does not support MP3 playback.
+                                        </audio>
                                     ) : null
                                 )}
 
