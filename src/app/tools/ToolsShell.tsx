@@ -42,7 +42,7 @@ export default function ToolsShell({ children }: Props) {
       "
         >
             <AdminNavBar brandTitle="Tools" items={navItems} loading={loadingUser} />
-            <main className="flex-1 p-4 xl:p-6 xl:overflow-y-auto bg-primary1 bg-opacity-90">
+            <main className="flex-1 p-4 xl:p-6 xl:overflow-y-auto">
                 {loadingUser ? <LoadingPage /> : children}
             </main>
         </div>

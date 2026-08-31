@@ -28,6 +28,7 @@ import {
 import {IoIosArrowDown} from "react-icons/io";
 import {FaTelegram, FaChevronLeft, FaChevronRight} from "react-icons/fa";
 import MainStringInput from "@/components/MainStringInput";
+import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
 
 type SortMode = "time_desc" | "time_asc";
 
@@ -44,10 +45,10 @@ function parseDateMs(iso?: string | null) {
     return Number.isNaN(t) ? null : t;
 }
 
-function Avatar({ src, username }: { src: string | null | undefined; username: string }) {
+function Avatar({ src, username, compact = false }: { src: string | null | undefined; username: string; compact?: boolean }) {
     if (!src) {
         return (
-            <div className="h-8 w-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-xs text-gray-300">
+            <div className={`${compact ? "h-5 w-5 text-[9px]" : "h-8 w-8 text-xs"} rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-gray-300`}>
                 {username?.slice?.(0, 2)?.toUpperCase?.() ?? "U"}
             </div>
         );
@@ -57,7 +58,7 @@ function Avatar({ src, username }: { src: string | null | undefined; username: s
         <img
             src={src}
             alt={username}
-            className="h-8 w-8 rounded-full border border-white/10 object-cover"
+            className={`${compact ? "h-5 w-5" : "h-8 w-8"} rounded-full border border-white/10 object-cover`}
         />
     );
 }
@@ -161,6 +162,7 @@ export default function LogsClient({
     fetchedAt?: string;
     initialQuery: { q: string; type: string; user: string; page: number };
 }) {
+    const [layoutMode, setLayoutMode] = useLayoutMode("admin-logs-layout");
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -286,12 +288,12 @@ export default function LogsClient({
                             ) : null}
                         </p>
                     </div>
-                    <button
+                    <div className="flex gap-2"><LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/><button
                         onClick={() => router.refresh()}
                         className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 font-medium"
                     >
                         Refresh
-                    </button>
+                    </button></div>
                 </div>
 
                 {error ? (
@@ -363,8 +365,8 @@ export default function LogsClient({
             </div>
 
             {/* List */}
-            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
-                <div className="mt-2 grid gap-3">
+            <div className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-1.5" : "p-3 md:p-4"}`}>
+                <div className={`grid ${layoutMode === "compact" ? "gap-1" : "mt-2 gap-3"}`}>
                     {pageLogs.map((log) => {
                         const isOpen = openId === log.id;
                         const icon = TYPE_ICONS[log.type] ?? <FiHash />;
@@ -372,7 +374,7 @@ export default function LogsClient({
                         return (
                             <div
                                 key={log.id}
-                                className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 transition-all duration-200 p-3 shadow-sm shadow-black/30"
+                                className={`${layoutMode === "compact" ? "rounded-lg p-1.5" : "rounded-xl p-3"} border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 transition-all duration-200 shadow-sm shadow-black/30`}
                             >
                                 <div
                                     role="button"
@@ -386,30 +388,31 @@ export default function LogsClient({
                                         }
                                     }}
                                 >
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <div className="flex items-center justify-center h-12 w-12 text-2xl rounded-lg bg-white/8 text-white/90">
+                                    <div className={`flex items-center min-w-0 ${layoutMode === "compact" ? "gap-2" : "gap-3"}`}>
+                                        <div className={`flex shrink-0 items-center justify-center rounded-lg bg-white/8 text-white/90 ${layoutMode === "compact" ? "h-6 w-6 text-xs" : "h-12 w-12 text-2xl"}`}>
                                             {icon}
                                         </div>
                                         <div className="flex flex-col flex-1 min-w-0">
-                                            <div className="flex items-center flex-wrap gap-2 min-w-0">
+                                            <div className={`flex items-center min-w-0 ${layoutMode === "compact" ? "flex-nowrap gap-1.5" : "flex-wrap gap-2"}`}>
                                                 {log.type.includes("TELEGRAM") && (
-                                                    <FaTelegram className={"text-blue-400 w-5 h-5"} />
+                                                    <FaTelegram className={`text-blue-400 ${layoutMode === "compact" ? "h-3 w-3" : "h-5 w-5"}`} />
                                                 )}
-                                                <span className="text-sm font-semibold text-white truncate">{log.type}</span>
-                                                <div className="flex items-center gap-2 min-w-0 ml-1">
-                                                    <Avatar src={log.user?.avatar} username={log.user?.username ?? "?"} />
-                                                    <span className="text-sm text-gray-100 truncate">
+                                                <span className={`${layoutMode === "compact" ? "text-xs" : "text-sm"} font-semibold text-white truncate`}>{log.type}</span>
+                                                <div className={`flex items-center min-w-0 ${layoutMode === "compact" ? "gap-1" : "ml-1 gap-2"}`}>
+                                                    <Avatar compact={layoutMode === "compact"} src={log.user?.avatar} username={log.user?.username ?? "?"} />
+                                                    <span className={`${layoutMode === "compact" ? "text-xs" : "text-sm"} text-gray-100 truncate`}>
                                                         {log.user?.username ?? "Unknown"}{" "}
                                                         {log.user?.uid ? (
                                                             <span className="text-gray-400">(#{log.user.uid})</span>
                                                         ) : null}
                                                     </span>
-                                                    {log.user?.role
+                                                    {layoutMode === "detailed" && log.user?.role
                                                         ? getUserRoleBadge(log.user.role as any, { size: "xs" })
                                                         : null}
                                                 </div>
+                                                {layoutMode === "compact" && <span className="ml-auto hidden shrink-0 text-[10px] text-gray-500 sm:inline">{formatDate(log.time)}</span>}
                                             </div>
-                                            <div className="text-xs text-gray-400 mt-1">{formatDate(log.time)}</div>
+                                            {layoutMode === "detailed" && <div className="text-xs text-gray-400 mt-1">{formatDate(log.time)}</div>}
                                         </div>
                                         <div
                                             className={`text-gray-300 transition-transform duration-200 ${

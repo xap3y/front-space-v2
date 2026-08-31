@@ -8,7 +8,7 @@ export default function UsersLoading() {
                         <div className="h-7 w-24 bg-white/10 rounded" />
                         <div className="h-4 w-48 bg-white/5 rounded" />
                     </div>
-                    <div className="h-9 w-24 bg-white/5 rounded-md" />
+                    <div className="flex gap-2"><div className="h-9 w-[154px] bg-white/5 rounded-md"/><div className="h-9 w-24 bg-white/5 rounded-md"/><div className="h-9 w-24 bg-white/5 rounded-md"/></div>
                 </div>
             </div>
 
@@ -28,9 +28,9 @@ export default function UsersLoading() {
                 </div>
 
                 {/* Card list skeleton */}
-                <div className="mt-4 grid gap-3">
+                <div className="mt-2 grid gap-1.5">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="rounded-xl box-primary p-3 shadow-sm shadow-black/30 flex items-center gap-3">
+                        <div key={i} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30 flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0" />
                             <div className="flex-1 min-w-0 space-y-2">
                                 <div className="flex items-center gap-2 flex-wrap">

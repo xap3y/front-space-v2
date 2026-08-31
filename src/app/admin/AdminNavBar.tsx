@@ -120,11 +120,11 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
     );
 
     const Navigation = ({ variant }: { variant: "desktop" | "mobile" }) => loading ? (
-        <ul className="space-y-2 animate-pulse">
+        <ul className="animate-pulse">
             {Array.from({ length: Math.max(items.length, 4) }).map((_, index) => (
                 <li key={index} className="flex items-center gap-3 px-3 py-2.5">
                     <div className="h-5 w-5 shrink-0 rounded bg-white/5" />
-                    <div className="h-4 w-28 rounded bg-white/5" />
+                    <div className="h-3.5 w-24 rounded bg-white/5" />
                 </li>
             ))}
         </ul>

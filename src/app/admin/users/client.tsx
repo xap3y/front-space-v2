@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { UserObj } from "@/types/user";
 import { getUserRoleBadge, infoToast, okToast, errorToast } from "@/lib/client";
 import MainStringInput from "@/components/MainStringInput";
+import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
 import { updateUser, deleteUser, rotateUserApiKey, createAdminUser, getAdminUserTwoFactorStatus, removeAdminUserTwoFactor } from "@/lib/apiPoster";
 import {FaBan, FaRegUserCircle, FaEye, FaEyeSlash, FaKey, FaRegTrashAlt} from "react-icons/fa";
 import {MdAlternateEmail, MdEmail} from "react-icons/md";
@@ -111,6 +112,7 @@ export default function UsersClient({
     fetchedAt?: string;
 }) {
     const router = useRouter();
+    const [layoutMode, setLayoutMode] = useLayoutMode("admin-users-layout");
 
     const [error, setError] = useState(initialError);
     const [search, setSearch] = useState("");
@@ -349,6 +351,7 @@ export default function UsersClient({
                     </div>
 
                     <div className="flex gap-2">
+                        <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
                             className="px-4 py-2 rounded-lg text-sm border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-emerald-300 font-medium transition-all duration-200"
@@ -425,15 +428,15 @@ export default function UsersClient({
             </div>
 
             {/* List */}
-            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
-                <div className="mt-2 grid gap-3">
+            <div className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-2" : "p-3 md:p-4"}`}>
+                <div className={`grid ${layoutMode === "compact" ? "gap-1.5" : "mt-2 gap-3"}`}>
                     {pageUsers.map((u) => {
                         const isOpen = openUid === u.uid;
                         const emailShown = emailReveal[u.uid] ?? false;
                         return (
                             <div
                                 key={u.uid}
-                                className="rounded-xl box-primary p-3 shadow-sm shadow-black/30"
+                                className={`rounded-xl box-primary shadow-sm shadow-black/30 ${layoutMode === "compact" ? "p-2" : "p-3"}`}
                             >
                                 <button
                                     className="w-full text-left"
@@ -451,7 +454,7 @@ export default function UsersClient({
                         </span>
                                                 {getUserRoleBadge(u.role as any, { size: "sm" })}
                                             </div>
-                                            <div className="text-xs text-gray-400 mt-1 flex flex-wrap gap-2 items-center">
+                                            <div className={`text-xs text-gray-400 flex flex-wrap gap-2 items-center ${layoutMode === "compact" ? "mt-0" : "mt-1"}`}>
                                                 <span>Created: {formatDate(u.createdAt)}</span>
                                                 <span className="text-gray-500">•</span>
                                                 <span>

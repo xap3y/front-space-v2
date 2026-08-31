@@ -12,6 +12,7 @@ import { FaExternalLinkAlt, FaRegTrashAlt, FaChevronLeft, FaChevronRight, FaTime
 import { PiSealWarningDuotone } from "react-icons/pi";
 import { MdEdit, MdDeleteSweep, MdDeleteOutline } from "react-icons/md";
 import MainStringInput from "@/components/MainStringInput";
+import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
 
 type SortMode =
     | "created_desc"
@@ -249,6 +250,7 @@ export default function AdminEmailsClient({
 }) {
     const router = useRouter();
     const { user, loadingUser } = useUser();
+    const [layoutMode, setLayoutMode] = useLayoutMode("admin-emails-layout");
 
     const [error] = useState(initialError);
     const [streamOpen, setStreamOpen] = useState(false);
@@ -452,6 +454,7 @@ export default function AdminEmailsClient({
                             ) : null}
                         </p>
                     </div>
+                    <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
                 </div>
 
                 {error ? (
@@ -528,10 +531,10 @@ export default function AdminEmailsClient({
                 </div>
 
                 {/* List Container */}
-                <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
-                    <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
+                <div className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-2" : "p-3 md:p-4"}`}>
+                    <div className={`max-h-[60vh] overflow-y-auto pr-2 ${layoutMode === "compact" ? "space-y-1.5" : "space-y-3"}`}>
                         {pageEmails.map((e) => (
-                            <div key={e.id} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
+                            <div key={e.id} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                     <div className="flex items-center gap-2 min-w-0">
                                         <div className="min-w-0">
@@ -555,7 +558,7 @@ export default function AdminEmailsClient({
                                                 </button>
                                                 <span className="text-gray-400 text-xs sm:text-sm"># {e.id}</span>
                                             </div>
-                                            <div className="text-xs text-gray-400 mt-1.5 flex flex-wrap items-center gap-2">
+                                            <div className={`text-xs text-gray-400 flex flex-wrap items-center gap-2 ${layoutMode === "compact" ? "mt-0.5" : "mt-1.5"}`}>
                                                 <span className="truncate">Created: {formatDate(e.createdAt)}</span>
                                                 <span className="text-gray-500">•</span>
                                                 <span className="truncate">Expires: {formatDate(e.expiresAt)}</span>

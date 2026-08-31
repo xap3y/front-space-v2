@@ -18,7 +18,7 @@ export default async function Page() {
     return (
         <AdminEmailsClient
             initialEmails={emails}
-            initialError={!res.error ? String(res.message ?? "Failed to load emails") : ""}
+            initialError={res.error ? String(res.message ?? "Failed to load emails") : ""}
             totalCount={res.count ?? emails.length}
             fetchedAt={res.timestamp ?? ""}
         />

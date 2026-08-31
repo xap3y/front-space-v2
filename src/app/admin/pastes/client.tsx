@@ -9,6 +9,7 @@ import { errorToast, infoToast, okToast } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
 import { createPaste } from "@/lib/apiPoster";
 import MainStringInput from "@/components/MainStringInput";
+import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
 import {
     FaLock,
     FaRotateRight,
@@ -36,6 +37,7 @@ export default function PastesClient({ users }: PastesClientProps) {
     const [page, setPageIdx] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
+    const [layoutMode, setLayoutMode] = useLayoutMode("admin-pastes-layout");
 
     // Paste Modal states
     const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
@@ -269,6 +271,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                         <p className="text-sm text-gray-400">Total Found: {totalElements}</p>
                     </div>
                     <div className="flex gap-2">
+                        <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
                         <button
                             onClick={() => setIsPasteModalOpen(true)}
                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-emerald-300 transition-all duration-200 text-xs font-semibold"
@@ -487,10 +490,10 @@ export default function PastesClient({ users }: PastesClientProps) {
                 </div>
 
                 {/* List */}
-                <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
+                <div className={`flex flex-col box-primary ${layoutMode === "compact" ? "gap-1.5 p-2" : "gap-3 p-3 md:p-4"}`}>
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
+                            <div key={i} className={`rounded-xl border-2 border-zinc-800 bg-primary1 animate-pulse ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -509,7 +512,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                         pastes.map((p) => {
                             const portalUrl = p.urlSet.portalUrl || p.urlSet.webUrl || p.urlSet.shortUrl || "";
                             return (
-                                <div key={p.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
+                                <div key={p.uniqueId} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                     <div className="flex flex-col gap-2">
                                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                             <div className="min-w-0 flex flex-col gap-1">
@@ -521,7 +524,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-gray-400 flex flex-wrap gap-2 mt-1">
+                                                <div className={`text-xs text-gray-400 flex flex-wrap gap-2 ${layoutMode === "compact" ? "mt-0" : "mt-1"}`}>
                                                     <span>ID: {p.uniqueId}</span>
                                                     <span className="text-gray-500">•</span>
                                                     <span>Created: {formatDate(p.createdAt)}</span>

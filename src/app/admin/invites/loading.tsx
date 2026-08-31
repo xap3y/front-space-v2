@@ -9,6 +9,7 @@ export default function InvitesLoading() {
                         <div className="h-4 w-96 bg-white/5 rounded" />
                     </div>
                     <div className="flex items-center gap-2">
+                        <div className="h-9 w-[154px] bg-white/5 rounded-lg border border-white/5" />
                         <div className="h-4 w-10 bg-white/5 rounded" />
                         <div className="h-9 w-44 bg-white/5 rounded-lg border border-white/5" />
                     </div>
@@ -70,25 +71,25 @@ export default function InvitesLoading() {
                         <tbody className="divide-y divide-white/5">
                         {Array.from({ length: 8 }).map((_, i) => (
                             <tr key={i}>
-                                <td className="py-4 pr-2">
+                                <td className="py-2 pr-2">
                                     <div className="h-6 w-28 bg-white/10 rounded" />
                                 </td>
-                                <td className="py-4 pr-2">
+                                <td className="py-2 pr-2">
                                     <div className="h-6 w-16 bg-white/10 rounded-full" />
                                 </td>
-                                <td className="py-4 pr-2">
+                                <td className="py-2 pr-2">
                                     <div className="h-4 w-28 bg-white/5 rounded" />
                                 </td>
-                                <td className="py-4 pr-2">
+                                <td className="py-2 pr-2">
                                     <div className="flex items-center gap-2">
                                         <div className="h-6 w-6 rounded-full bg-white/5" />
                                         <div className="h-4 w-20 bg-white/10 rounded" />
                                     </div>
                                 </td>
-                                <td className="py-4 pr-2">
+                                <td className="py-2 pr-2">
                                     <div className="h-4 w-28 bg-white/5 rounded" />
                                 </td>
-                                <td className="py-4 pr-2">
+                                <td className="py-2 pr-2">
                                     <div className="flex items-center gap-2">
                                         <div className="h-6 w-6 rounded-full bg-white/5" />
                                         <div className="h-4 w-20 bg-white/10 rounded" />

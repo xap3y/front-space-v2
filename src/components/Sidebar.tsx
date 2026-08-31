@@ -157,11 +157,11 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 {/* Nav */}
                 <div className="flex-1 overflow-y-auto px-3 py-3">
                     {showSkeleton ? (
-                        <ul className="divide-y divide-white/5 space-y-2 animate-pulse">
-                            {Array.from({ length: 10 }).map((_, idx) => (
-                                <li key={idx} className="flex items-center gap-3 px-3 py-2.5">
-                                    <div className="w-[30px] h-[30px] rounded-[10px] bg-white/5 shrink-0" />
-                                    <div className="h-4 w-28 bg-white/5 rounded" />
+                        <ul className="divide-y divide-white/5 animate-pulse">
+                            {sidebar.map((item) => (
+                                <li key={item.page} className="flex items-center gap-3 px-3 py-2.5">
+                                    <div className="h-5 w-5 rounded bg-white/5 shrink-0" />
+                                    <div className="h-3.5 rounded bg-white/5" style={{width: `${Math.min(116, Math.max(52, item.title.length * 7))}px`}} />
                                 </li>
                             ))}
                         </ul>
@@ -173,9 +173,15 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 {/* Footer / Logout */}
                 <div className="border-t border-white/10 p-3">
                     {showSkeleton ? (
-                        <div className="animate-pulse flex items-center gap-3 px-3 py-2.5 rounded-lg">
-                            <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
-                            <div className="h-4 w-16 bg-white/5 rounded" />
+                        <div className="animate-pulse space-y-0">
+                            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                                <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
+                                <div className="h-3.5 w-14 bg-white/5 rounded" />
+                            </div>
+                            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                                <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
+                                <div className="h-3.5 w-16 bg-white/5 rounded" />
+                            </div>
                         </div>
                     ) : (
                         <>
@@ -262,11 +268,11 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     {/* Drawer nav (scrolls, with thin separators) */}
                     <div className="flex-1 overflow-y-auto px-3 py-3">
                         {showSkeleton ? (
-                            <ul className="divide-y divide-white/5 space-y-2 animate-pulse">
-                                {Array.from({ length: 10 }).map((_, idx) => (
-                                    <li key={idx} className="flex items-center gap-3 px-3 py-2.5">
-                                        <div className="w-[30px] h-[30px] rounded-[10px] bg-white/5 shrink-0" />
-                                        <div className="h-4 w-28 bg-white/5 rounded" />
+                            <ul className="divide-y divide-white/5 animate-pulse">
+                                {sidebar.map((item) => (
+                                    <li key={item.page} className="flex items-center gap-3 px-3 py-2.5">
+                                        <div className="h-5 w-5 rounded bg-white/5 shrink-0" />
+                                        <div className="h-3.5 rounded bg-white/5" style={{width: `${Math.min(116, Math.max(52, item.title.length * 7))}px`}} />
                                     </li>
                                 ))}
                             </ul>
@@ -278,9 +284,15 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     {/* Drawer footer */}
                     <div className="border-t border-white/10 p-3">
                         {showSkeleton ? (
-                            <div className="animate-pulse flex items-center gap-3 px-3 py-3 rounded-lg">
-                                <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
-                                <div className="h-4 w-16 bg-white/5 rounded" />
+                            <div className="animate-pulse space-y-0">
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                                    <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
+                                    <div className="h-3.5 w-14 bg-white/5 rounded" />
+                                </div>
+                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                                    <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
+                                    <div className="h-3.5 w-16 bg-white/5 rounded" />
+                                </div>
                             </div>
                         ) : (
                             user && (

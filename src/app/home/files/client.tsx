@@ -12,6 +12,7 @@ import { LoadingDot } from "@/components/GlobalComponents";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { getApiUrl, getStorageUrl } from "@/lib/core";
 import HoverDiv from "@/components/HoverDiv";
+import LayoutModeSwitch from "@/components/LayoutModeSwitch";
 
 interface FileInfo {
     uniqueId: string;
@@ -50,8 +51,13 @@ export default function FilesPageClient() {
     const [deletingPackId, setDeletingPackId] = useState<string | null>(null);
     const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
     const [expandedPackId, setExpandedPackId] = useState<string | null>(null);
+    const [layoutMode, setLayoutMode] = useState<"compact" | "detailed">("compact");
 
     const router = useRouter();
+
+    useEffect(() => {
+        if (window.localStorage.getItem("file-pack-layout") === "detailed") setLayoutMode("detailed");
+    }, []);
 
     useEffect(() => {
         setPage("files");
@@ -82,7 +88,7 @@ export default function FilesPageClient() {
                 new Promise((resolve) => setTimeout(resolve, 300))
             ]);
 
-            setPacks(response.data.packs);
+            setPacks([...response.data.packs].sort((a, b) => new Date(b.uploadTime).getTime() - new Date(a.uploadTime).getTime()));
             setCurrentPage(response.data.currentPage);
             setTotalPages(response.data.totalPages);
             setExpandedPackId(null);
@@ -97,6 +103,11 @@ export default function FilesPageClient() {
 
     const togglePackExpanded = (packId: string) => {
         setExpandedPackId((prev) => (prev === packId ? null : packId));
+    };
+
+    const changeLayout = (mode: "compact" | "detailed") => {
+        setLayoutMode(mode);
+        window.localStorage.setItem("file-pack-layout", mode);
     };
 
     const handleDeleteFile = async (packId: string, fileId: string, fileName: string) => {
@@ -182,39 +193,55 @@ export default function FilesPageClient() {
         infoToast(message);
     };
 
-    if (loading || !user || loadingUser) {
-        return (
-            <div className="min-h-screen px-2 md:px-4 py-4 md:py-8">
-                <div className="max-w-6xl mx-auto animate-pulse">
-                    <div className="flex flex-col md:flex-row items-center md:justify-between mb-4 md:mb-8 gap-4">
-                        <div className="text-center md:text-left">
-                            <div className="h-8 md:h-10 w-48 bg-gray-600 rounded mb-2 mx-auto md:mx-0" />
-                            <div className="h-3 md:h-4 w-64 bg-gray-700 rounded mx-auto md:mx-0" />
+    const PackSkeleton = () => (
+        <div className={`box-primary overflow-hidden rounded-lg shadow-lg animate-pulse ${layoutMode === "compact" ? "h-[76px]" : "h-[123px]"}`}>
+            <div className="flex h-[76px] flex-col justify-center border-b border-gray-700 p-2.5">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex h-7 flex-wrap items-center gap-1 md:gap-2">
+                            <div className="h-3 w-3 shrink-0 rounded-full bg-green-400/25 md:h-4 md:w-4" />
+                            <div className="h-3.5 w-[38px] shrink-0 rounded bg-white/10" />
+                            <div className="h-1 w-1 shrink-0 rounded-full bg-white/10" />
+                            <div className="h-3.5 w-[58px] shrink-0 rounded bg-white/10" />
+                            <div className="h-1 w-1 shrink-0 rounded-full bg-white/10" />
+                            <div className="h-3.5 w-[112px] shrink-0 rounded bg-white/[.07]" />
+                            <div className="hidden h-4 w-4 shrink-0 rounded bg-blue-400/20 md:block" />
+                        </div>
+                        <div className="flex h-4 items-center gap-2">
+                            <div className="h-3 w-[252px] max-w-[calc(100%-20px)] rounded bg-white/[.06]" />
+                            <div className="h-3 w-3 rounded bg-white/[.08]" />
                         </div>
                     </div>
-                    <div className="space-y-2 md:space-y-4 mb-6 md:mb-8">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="box-primary shadow-lg rounded-lg overflow-hidden">
-                                {/* Skeleton Header */}
-                                <div className="p-2 md:p-4 border-b border-gray-700 flex justify-between items-center gap-4">
-                                    <div className="flex items-center gap-2 md:gap-4 w-full">
-                                        <div className="w-3 h-3 md:w-4 md:h-4 bg-gray-600 rounded-full flex-shrink-0"></div>
-                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-16 md:w-20"></div>
-                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-12 md:w-16"></div>
-                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-24 md:w-32 hidden md:block"></div>
-                                    </div>
-                                    <div className="flex gap-2 flex-shrink-0">
-                                        <div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded"></div>
-                                        <div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded"></div>
-                                    </div>
-                                </div>
-                                {/* Skeleton Actions */}
-                                <div className="p-2 md:p-4 flex gap-2">
-                                    <div className="h-6 md:h-8 w-16 md:w-20 bg-gray-600 rounded"></div>
-                                    <div className="h-6 md:h-8 w-8 md:w-10 bg-gray-600 rounded"></div>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex shrink-0 gap-1">
+                        {layoutMode === "compact" && <>
+                            <div className="h-[26px] w-[26px] rounded bg-blue-600/35" />
+                            <div className="h-[26px] w-[26px] rounded border-2 border-zinc-800 bg-primary1" />
+                        </>}
+                        <div className="h-[26px] w-[26px] rounded border-2 border-zinc-800 bg-primary1" />
+                        <div className="h-[26px] w-[26px] rounded border-2 border-red-800/70 bg-red-950/45" />
+                    </div>
+                </div>
+            </div>
+            {layoutMode === "detailed" && <div className="flex h-[47px] flex-wrap items-center gap-1 p-2.5 md:gap-2">
+                <div className="h-7 w-[75px] rounded bg-blue-600/35" />
+                <div className="h-7 w-9 rounded border-2 border-zinc-800 bg-primary1" />
+            </div>}
+        </div>
+    );
+
+    if (loading || !user || loadingUser) {
+        return (
+            <div className="min-h-screen px-2 py-3 md:px-4 md:py-5">
+                <div className="max-w-6xl mx-auto animate-pulse">
+                    <div className="mb-4 flex flex-col items-center gap-3 md:flex-row md:justify-between">
+                        <div className="text-center md:text-left">
+                            <div className="mb-2 h-7 w-40 rounded bg-gray-600 mx-auto md:mx-0" />
+                            <div className="h-3 md:h-4 w-64 bg-gray-700 rounded mx-auto md:mx-0" />
+                        </div>
+                        <div className="flex gap-2"><div className="h-9 w-16 rounded-lg border-2 border-zinc-800 bg-white/[.04] sm:w-[154px]"/><div className="h-9 w-[126px] rounded-lg bg-blue-600/30" /></div>
+                    </div>
+                    <div className="mb-5 space-y-2">
+                        {Array.from({ length: 3 }).map((_, i) => <PackSkeleton key={i} />)}
                     </div>
                 </div>
             </div>
@@ -222,14 +249,16 @@ export default function FilesPageClient() {
     }
 
     return (
-        <div className="min-h-screen px-2 md:px-4 py-4 md:py-8">
+        <div className="min-h-screen px-2 py-3 md:px-4 md:py-5">
             <div className="max-w-6xl mx-auto">
-                <div className="flex flex-col md:flex-row items-center md:justify-between mb-4 md:mb-8 gap-4">
+                <div className="mb-4 flex flex-col items-center gap-3 md:flex-row md:justify-between">
                     <div className="text-center md:text-left">
-                        <h1 className="text-2xl md:text-4xl font-bold text-white mb-1">My File Packs</h1>
-                        <p className="text-xs md:text-base text-gray-400">Manage your file collections</p>
+                        <h1 className="mb-0.5 text-xl font-bold text-white md:text-2xl">My File Packs</h1>
+                        <p className="text-xs text-gray-400">Newest packs first · manage your file collections</p>
                     </div>
 
+                    <div className="flex items-center gap-2">
+                    <LayoutModeSwitch value={layoutMode} onChange={changeLayout} />
                     {/* Create Button only shows if not fetching and there are packs */}
                     {!fetchingPacks && packs.length > 0 && (
                         <a
@@ -240,33 +269,16 @@ export default function FilesPageClient() {
                             Create Pack
                         </a>
                     )}
+                    {fetchingPacks && (
+                        <div className="h-9 w-[126px] animate-pulse rounded-lg bg-blue-600/30" />
+                    )}
+                    </div>
                 </div>
 
                 {/* ✅ CHANGED: Ghost Skeletons showing while fetching */}
                 {fetchingPacks && (
-                    <div className="space-y-2 md:space-y-4 mb-6 md:mb-8">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="box-primary shadow-lg rounded-lg overflow-hidden animate-pulse">
-                                {/* Skeleton Header */}
-                                <div className="p-2 md:p-4 border-b border-gray-700 flex justify-between items-center gap-4">
-                                    <div className="flex items-center gap-2 md:gap-4 w-full">
-                                        <div className="w-3 h-3 md:w-4 md:h-4 bg-gray-600 rounded-full flex-shrink-0"></div>
-                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-16 md:w-20"></div>
-                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-12 md:w-16"></div>
-                                        <div className="h-3 md:h-4 bg-gray-600 rounded w-24 md:w-32 hidden md:block"></div>
-                                    </div>
-                                    <div className="flex gap-2 flex-shrink-0">
-                                        <div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded"></div>
-                                        <div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded"></div>
-                                    </div>
-                                </div>
-                                {/* Skeleton Actions */}
-                                <div className="p-2 md:p-4 flex gap-2">
-                                    <div className="h-6 md:h-8 w-16 md:w-20 bg-gray-600 rounded"></div>
-                                    <div className="h-6 md:h-8 w-8 md:w-10 bg-gray-600 rounded"></div>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="mb-5 space-y-2">
+                        {Array.from({ length: 3 }).map((_, i) => <PackSkeleton key={i} />)}
                     </div>
                 )}
 
@@ -286,13 +298,28 @@ export default function FilesPageClient() {
 
                 {/* Packs List */}
                 {!fetchingPacks && packs.length > 0 && (
-                    <div className="space-y-2 md:space-y-4 mb-6 md:mb-8">
+                    <div className="mb-5 space-y-2">
                         {packs.map((pack) => (
                             <div
                                 key={pack.packId}
-                                className="box-primary shadow-lg rounded-lg overflow-hidden"
+                                className="box-primary overflow-hidden rounded-lg shadow-lg"
                             >
-                                <div className="p-2 md:p-4 border-b border-gray-700">
+                                <div
+                                    className="cursor-pointer border-b border-gray-700 p-2.5 transition-colors hover:bg-white/[.025]"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={expandedPackId === pack.packId}
+                                    onClick={(event) => {
+                                        if ((event.target as HTMLElement).closest("[data-pack-action]")) return;
+                                        togglePackExpanded(pack.packId);
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) {
+                                            event.preventDefault();
+                                            togglePackExpanded(pack.packId);
+                                        }
+                                    }}
+                                >
                                     <div className="flex items-center justify-between gap-2">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-1 md:gap-2 mb-1 flex-wrap">
@@ -310,8 +337,8 @@ export default function FilesPageClient() {
                                                 <span className="text-xs md:text-sm text-white font-semibold flex-shrink-0">
                                                     {formatFileSize(pack.totalSize)}
                                                 </span>
-                                                <span className="text-xs text-gray-400 flex-shrink-0">•</span>
-                                                <span className="text-xs text-gray-300 flex-shrink-0">
+                                                <span className={`text-xs text-gray-400 flex-shrink-0 ${layoutMode === "compact" ? "hidden sm:inline" : ""}`}>•</span>
+                                                <span className={`text-xs text-gray-300 flex-shrink-0 ${layoutMode === "compact" ? "hidden sm:inline" : ""}`}>
                                                     {formatDate(pack.uploadTime)}
                                                 </span>
                                                 {pack.isPasswordProtected && (
@@ -323,25 +350,26 @@ export default function FilesPageClient() {
                                             </div>
                                             <div className="text-xs text-gray-500 font-mono truncate flex gap-2 items-center">
                                                 <span>{pack.packId}</span>
-                                                <FaCopy className={"cursor-pointer hover:text-blue-600 duration-500 transition-all"} onClick={
+                                                <FaCopy data-pack-action className={"cursor-pointer hover:text-blue-600 duration-500 transition-all"} onClick={
                                                     () => copyToClipboard(pack.packId, "Link copied!")
                                                 } />
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-1 flex-shrink-0">
-                                            <HoverDiv
-                                                type="INFO"
-                                                onClick={() => togglePackExpanded(pack.packId)}
-                                                className="p-1 hover:bg-gray-700 rounded transition"
-                                            >
+                                        <div className="flex gap-3 flex-shrink-0">
+                                            {layoutMode === "compact" && <>
+                                                <a data-pack-action href={`/files/pack/${pack.packId}`} aria-label="View pack" title="View" className="flex h-[26px] w-[26px] items-center justify-center rounded bg-blue-600 text-white transition hover:bg-blue-700"><FaExternalLinkAlt className="h-3 w-3"/></a>
+                                                <HoverDiv data-pack-action type="INFO" aria-label="Copy pack link" title="Copy" onClick={() => copyToClipboard(getPackUrl(pack.packId), "Link copied!")} className="h-[26px] w-[26px] p-0"><FaCopy className="h-3 w-3"/></HoverDiv>
+                                            </>}
+                                            <span className="flex h-[26px] w-[26px] items-center justify-center" aria-hidden="true">
                                                 <FaChevronDown
                                                     className={`w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 transition-transform duration-300 ${
                                                         expandedPackId === pack.packId ? "rotate-180" : ""
                                                     }`}
                                                 />
-                                            </HoverDiv>
+                                            </span>
                                             <HoverDiv
+                                                data-pack-action
                                                 type="DELETE"
                                                 onClick={() => handleDeletePack(pack.packId)}
                                                 disabled={deletingPackId === pack.packId}
@@ -357,7 +385,7 @@ export default function FilesPageClient() {
                                     </div>
                                 </div>
 
-                                <div className={`p-2 md:p-4 ${expandedPackId === pack.packId ? "border-b" : ""} border-gray-700 flex gap-1 md:gap-2 flex-wrap transition-colors duration-300`}>
+                                {layoutMode === "detailed" && <div className={`p-2.5 ${expandedPackId === pack.packId ? "border-b" : ""} border-gray-700 flex gap-1 md:gap-2 flex-wrap transition-colors duration-300`}>
                                     <a
                                         href={`/files/pack/${pack.packId}`}
                                         className="flex items-center gap-2 px-2 md:px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition text-xs md:text-sm"
@@ -373,7 +401,7 @@ export default function FilesPageClient() {
                                     >
                                         <FaCopy />
                                     </HoverDiv>
-                                </div>
+                                </div>}
 
                                 <div
                                     className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
@@ -382,7 +410,7 @@ export default function FilesPageClient() {
                                 >
                                     <div className="overflow-hidden">
                                         {pack.files && pack.files.length > 0 ? (
-                                            <div className="p-2 md:p-4 bg-black/30">
+                                            <div className="bg-black/30 p-2.5">
                                                 <p className="text-xs md:text-sm font-semibold text-gray-300 mb-2">
                                                     Files ({pack.files.length})
                                                 </p>
@@ -390,7 +418,7 @@ export default function FilesPageClient() {
                                                     {pack.files.map((file, idx) => (
                                                         <div
                                                             key={idx}
-                                                            className="p-2 md:p-3 box-primary flex items-center justify-between gap-1 md:gap-2 transition"
+                                                            className="box-primary flex items-center justify-between gap-1 p-2 md:gap-2 transition"
                                                         >
                                                             <div className="flex-1 min-w-0">
                                                                 <p className="text-xs md:text-sm text-white font-semibold truncate">
@@ -398,7 +426,7 @@ export default function FilesPageClient() {
                                                                 </p>
                                                                 <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
                                                             </div>
-                                                            <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
+                                                            <div className="flex gap-1 md:gap-3 flex-shrink-0">
                                                                 <HoverDiv
                                                                     type="INFO"
                                                                     onClick={() => copyToClipboard(getFileUrl(file.uniqueId), "Copied!")}

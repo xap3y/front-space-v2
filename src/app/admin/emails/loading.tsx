@@ -8,7 +8,7 @@ export default function EmailsLoading() {
                         <div className="h-7 w-24 bg-white/10 rounded" />
                         <div className="h-4 w-48 bg-white/5 rounded" />
                     </div>
-                    <div className="h-9 w-24 bg-white/5 rounded-md" />
+                    <div className="h-9 w-[154px] bg-white/5 rounded-md" />
                 </div>
             </div>
 
@@ -28,9 +28,9 @@ export default function EmailsLoading() {
                 </div>
 
                 {/* Email cards list skeleton */}
-                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2 space-y-3">
+                <div className="mt-2 max-h-[60vh] overflow-y-auto pr-2 space-y-1.5">
                     {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="rounded-xl box-primary p-3 shadow-sm shadow-black/30 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                        <div key={i} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                             <div className="space-y-2 min-w-0">
                                 <div className="flex items-center gap-2">
                                     <div className="h-5 w-48 bg-white/10 rounded" />

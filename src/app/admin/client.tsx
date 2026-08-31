@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FaArrowRight, FaDatabase, FaEnvelope, FaImage, FaLink, FaPaste, FaUsers } from "react-icons/fa6";
-import { FaUserCog } from "react-icons/fa";
+import { FaFileArchive, FaUserCog } from "react-icons/fa";
 import { MdDashboard, MdHistory, MdSettings, MdSpeed } from "react-icons/md";
 
 const adminSections = [
@@ -13,6 +13,7 @@ const adminSections = [
     { title: "Logs", description: "Review administrative and system activity.", href: "/admin/logs", icon: <MdHistory className="h-6 w-6" /> },
     { title: "Images", description: "Browse and manage uploaded images.", href: "/admin/images", icon: <FaImage className="h-6 w-6" /> },
     { title: "Pastes", description: "Browse and moderate shared pastes.", href: "/admin/pastes", icon: <FaPaste className="h-6 w-6" /> },
+    { title: "File Packs", description: "Inspect file packs and remove stored files.", href: "/admin/files", icon: <FaFileArchive className="h-6 w-6" /> },
     { title: "URLs", description: "Review and manage shortened links.", href: "/admin/urls", icon: <FaLink className="h-6 w-6" /> },
     { title: "Emails", description: "Inspect outgoing and managed email data.", href: "/admin/emails", icon: <FaEnvelope className="h-6 w-6" /> },
     { title: "MC Reports", description: "Review Minecraft server reports.", href: "/admin/mc-reports", icon: <FaDatabase className="h-6 w-6" /> },

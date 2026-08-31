@@ -316,42 +316,6 @@ export default function GalleryPage() {
 
     const gridClasses = "w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3 md:gap-4";
 
-    if (loadingUser || !user) {
-        return (
-            <section className="flex-1 min-w-0 pt-0 px-3 md:px-6 bg-primaryDottedSize bg-primaryDotted">
-                <div className="max-w-[90rem] mx-auto w-full space-y-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between pt-5 pb-2 animate-pulse">
-                        <div className="flex flex-col">
-                            <div className="h-7 w-36 bg-white/5 rounded" />
-                            <div className="h-4 w-20 bg-white/5 rounded mt-2" />
-                        </div>
-                        <div className="flex gap-2">
-                            <div className="h-9 w-20 bg-white/5 rounded-lg" />
-                            <div className="h-9 w-24 bg-white/5 rounded-lg" />
-                        </div>
-                    </div>
-
-                    {/* Grid card area */}
-                    <div
-                        className="flex flex-col box-primary sm:p-3 p-2 md:p-4 animate-pulse"
-                        style={{ minHeight: "calc(3 * 220px + 56px + 2rem)" }}
-                    >
-                        <div className="flex-1 flex items-start">
-                            <ul className={gridClasses}>
-                                {Array.from({ length: 14 }).map((_, i) => (
-                                    <li key={`load-${i}`}>
-                                        <SkeletonCard />
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        );
-    }
-
     return (
         <section className="flex-1 min-w-0 pt-0 px-3 md:px-6 bg-primaryDottedSize bg-primaryDotted relative">
             <div className="max-w-[90rem] mx-auto w-full space-y-4">

@@ -10,6 +10,7 @@ import {ImCross} from "react-icons/im";
 import {RxCross1} from "react-icons/rx";
 import {FaRegCopy, FaChevronLeft, FaChevronRight} from "react-icons/fa6";
 import MainStringInput from "@/components/MainStringInput";
+import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
 
 type FilterMode = "all" | "unused" | "used";
 
@@ -94,6 +95,7 @@ export default function InvitesClient({
     initialUsed?: boolean;
     initialError?: string;
 }) {
+    const [layoutMode, setLayoutMode] = useLayoutMode("admin-invites-layout");
     const router = useRouter();
 
     const initialFilter: FilterMode =
@@ -251,6 +253,7 @@ export default function InvitesClient({
                     </div>
 
                     <div className="flex items-center gap-2">
+                        <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
                         <div className="text-xs text-gray-400">Show</div>
                         <div className="inline-flex rounded-lg border-2 border-zinc-800 overflow-hidden bg-primary1">
                             <button
@@ -449,7 +452,7 @@ export default function InvitesClient({
             </div>
 
             {/* List */}
-            <div className="mt-1 flex flex-col gap-2 box-primary p-3">
+            <div className={`mt-1 flex flex-col box-primary ${layoutMode === "compact" ? "gap-1 p-2" : "gap-2 p-3"}`}>
 
                 {/* Desktop table */}
                 <div className="hidden overflow-x-auto lg:block">
@@ -467,7 +470,7 @@ export default function InvitesClient({
                         <tbody className="divide-y divide-white/5">
                         {pageInvites.map((inv) => (
                             <tr key={inv.code} className="align-top">
-                                <td className="py-3 pr-2">
+                                <td className={`${layoutMode === "compact" ? "py-1.5" : "py-3"} pr-2`}>
                                     <div className="flex items-center gap-2">
                                         <code className="px-2 py-1 rounded bg-black/20 border border-white/10">
                                             {inv.code}
@@ -479,15 +482,15 @@ export default function InvitesClient({
 
                                     </div>
                                 </td>
-                                <td className="py-3 pr-2">
+                                <td className={`${layoutMode === "compact" ? "py-1.5" : "py-3"} pr-2`}>
                                     <StatusPill used={inv.used} />
                                 </td>
-                                <td className="py-3 pr-2 text-gray-200">{formatDate(inv.createdAt)}</td>
-                                <td className="py-3 pr-2">
+                                <td className={`${layoutMode === "compact" ? "py-1.5" : "py-3"} pr-2 text-gray-200`}>{formatDate(inv.createdAt)}</td>
+                                <td className={`${layoutMode === "compact" ? "py-1.5" : "py-3"} pr-2`}>
                                     <UserBadge label="Creator" user={(inv as any).createdBy ?? null} />
                                 </td>
-                                <td className="py-3 pr-2 text-gray-200">{formatDate(inv.usedAt)}</td>
-                                <td className="py-3 pr-2">
+                                <td className={`${layoutMode === "compact" ? "py-1.5" : "py-3"} pr-2 text-gray-200`}>{formatDate(inv.usedAt)}</td>
+                                <td className={`${layoutMode === "compact" ? "py-1.5" : "py-3"} pr-2`}>
                                     <UserBadge label="Used by" user={(inv as any).usedBy ?? null} />
                                 </td>
                             </tr>
@@ -505,9 +508,9 @@ export default function InvitesClient({
                 </div>
 
                 {/* Mobile cards */}
-                <div className="lg:hidden mt-3 grid gap-3">
+                <div className={`lg:hidden grid ${layoutMode === "compact" ? "mt-1 gap-1.5" : "mt-3 gap-3"}`}>
                     {pageInvites.map((inv) => (
-                        <div key={inv.code} className="box-primary p-4">
+                        <div key={inv.code} className={`box-primary ${layoutMode === "compact" ? "p-2" : "p-4"}`}>
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                     <div className="text-xs text-gray-400">Code</div>
@@ -524,7 +527,7 @@ export default function InvitesClient({
                                 <StatusPill used={inv.used} />
                             </div>
 
-                            <div className="mt-3 grid gap-3">
+                            <div className={`${layoutMode === "compact" ? "mt-1.5 gap-1.5" : "mt-3 gap-3"} grid`}>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <div className="text-xs text-gray-400">Created</div>

@@ -14,6 +14,7 @@ import { CallServerEnum, callServers } from "@/config/global";
 import { errorToast, infoToast, okToast, uploadImage, uploadImageBucket } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
 import MainStringInput from "@/components/MainStringInput";
+import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
 import {
     FaLock,
     FaRotateRight,
@@ -36,6 +37,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
     const [page, setPageIdx] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
+    const [layoutMode, setLayoutMode] = useLayoutMode("admin-images-layout");
     const [migratingId, setMigratingId] = useState<string | null>(null);
 
     // Upload Modal states
@@ -369,6 +371,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                         <p className="text-sm text-gray-400">Total Found: {totalElements}</p>
                     </div>
                     <div className="flex gap-2">
+                        <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
                         <button
                             onClick={() => setIsUploadModalOpen(true)}
                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-emerald-300"
@@ -635,10 +638,10 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                 </div>
 
                 {/* List */}
-                <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
+                <div className={`flex flex-col box-primary ${layoutMode === "compact" ? "gap-1.5 p-2" : "gap-3 p-3 md:p-4"}`}>
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
+                            <div key={i} className={`rounded-xl border-2 border-zinc-800 bg-primary1 animate-pulse ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -658,12 +661,12 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             const portalUrl = img.urlSet.portalUrl || img.urlSet.webUrl || img.urlSet.shortUrl || "";
                             const rawUrl = img.urlSet.rawUrl || "";
                             return (
-                                <div key={img.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
+                                <div key={img.uniqueId} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                     <div className="flex gap-3 items-center">
                                         {/* Thumbnail preview */}
                                         {rawUrl && (
                                             <div 
-                                                className="h-12 w-12 rounded bg-black/40 border-2 border-zinc-800 shrink-0 overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                                                className={`${layoutMode === "compact" ? "h-9 w-9" : "h-12 w-12"} rounded bg-black/40 border-2 border-zinc-800 shrink-0 overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity`}
                                                 onClick={() => setEnlargedImage(img)}
                                                 title="Click to enlarge"
                                             >
@@ -694,7 +697,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className="text-xs text-gray-400 flex flex-wrap gap-2 mt-1">
+                                                <div className={`text-xs text-gray-400 flex flex-wrap gap-2 ${layoutMode === "compact" ? "mt-0" : "mt-1"}`}>
                                                         <span>Size: <strong className="text-white">{formatBytes(img.size)}</strong></span>
                                                         <span className="text-gray-500">•</span>
                                                         <span>Storage: <strong className="text-white">{img.location || "LOCAL"}</strong></span>

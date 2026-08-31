@@ -4,8 +4,6 @@ import {FaFileAlt, FaHome, FaImages, FaPaste, FaUserCircle, FaHistory} from "rea
 import { IoIosSettings } from "react-icons/io";
 import {FaChartLine, FaFile, FaFolderClosed, FaLink, FaWandMagicSparkles} from "react-icons/fa6";
 import {useTranslation} from "@/hooks/useTranslation";
-import {useEffect, useState} from "react";
-import LoadingPage from "@/components/LoadingPage";
 import {PageProvider} from "@/context/PageContext";
 import {IoMailOutline} from "react-icons/io5";
 import {PiLinkSimpleBold} from "react-icons/pi";
@@ -18,15 +16,7 @@ export default function HomeLayout({
     children: React.ReactNode
 }) {
 
-    const [loading, setLoading] = useState<boolean>(true);
-
     const lang = useTranslation();
-
-    useEffect(() => {
-        setLoading(false);
-    }, []);
-
-    if (loading) return <LoadingPage/>
 
     return (
             <>

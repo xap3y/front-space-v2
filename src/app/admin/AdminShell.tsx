@@ -6,7 +6,7 @@ import AdminNavBar, { type AdminNavItem } from "@/app/admin/AdminNavBar";
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
 import {useRouter} from "next/navigation";
-import {FaDatabase, FaEnvelope, FaImage, FaLink, FaPaste, FaUserCog, FaUsers} from "react-icons/fa";
+import {FaDatabase, FaEnvelope, FaFileArchive, FaImage, FaLink, FaPaste, FaUserCog, FaUsers} from "react-icons/fa";
 import {MdDashboard, MdHistory, MdSettings, MdSpeed} from "react-icons/md";
 
 type Props = {
@@ -25,6 +25,7 @@ export default function AdminShell({ children }: Props) {
             { title: "Logs", href: "/admin/logs", page: "logs", icon: <MdHistory className="h-5 w-5" /> },
             { title: "Images", href: "/admin/images", page: "images", icon: <FaImage className="h-5 w-5" /> },
             { title: "Pastes", href: "/admin/pastes", page: "pastes", icon: <FaPaste className="h-5 w-5" /> },
+            { title: "File Packs", href: "/admin/files", page: "files", icon: <FaFileArchive className="h-5 w-5" /> },
             { title: "Urls", href: "/admin/urls", page: "urls", icon: <FaLink className="h-5 w-5" /> },
             { title: "Emails", href: "/admin/emails", page: "emails", icon: <FaEnvelope className="h-5 w-5" /> },
             { title: "Mc-Reports", href: "/admin/mc-reports", page: "mc-reports", icon: <FaDatabase className="h-5 w-5" /> },
