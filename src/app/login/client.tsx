@@ -43,6 +43,13 @@ export default function LoginPage() {
 
     const lang = useTranslation();
 
+    const finishLogin = (destination: string) => {
+        // Start the authenticated app with a new document request. This prevents
+        // Next's pre-login router/RSC cache from replaying an unauthenticated
+        // redirect for pages that perform their own user lookup.
+        window.location.assign(destination);
+    };
+
     const { checkingAuth, setCheckingAuth } = useAuthCheck({
         onValid: async () => {
             setCheckingAuth(true)
@@ -212,10 +219,10 @@ export default function LoginPage() {
             setTimeout(() => {
 
                 if (after && after.startsWith("/")) {
-                    router.push(after);
+                    finishLogin(after);
                     return;
                 }
-                router.push('/home/dashboard/');
+                finishLogin('/home/dashboard/');
             }, 500)
         } catch (e) {
             console.error(e);
@@ -239,7 +246,7 @@ export default function LoginPage() {
             setCookie("auth_token", token, {secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60 * 24 * 7});
             toast.update(toastId, {render: "Logged in successfully", type: "success", isLoading: false, autoClose: 1000});
             setLoading(true);
-            setTimeout(() => router.push(after && after.startsWith("/") ? after : "/home/dashboard/"), 400);
+            setTimeout(() => finishLogin(after && after.startsWith("/") ? after : "/home/dashboard/"), 400);
         } catch (err) {
             toast.update(toastId, {render: err instanceof Error ? err.message : "2FA verification failed", type: "error", isLoading: false, autoClose: 2200});
         } finally { setVerifyingTwoFactor(false); }

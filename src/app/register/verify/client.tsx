@@ -6,6 +6,9 @@ import {getApiUrl} from "@/lib/core";
 import {deleteVerifyToken, errorToast, okToast} from "@/lib/client";
 import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
+import MainStringInput from "@/components/MainStringInput";
+import HoverDiv from "@/components/HoverDiv";
+import {FaEnvelope, FaSpinner} from "react-icons/fa6";
 
 const CODE_LENGTH = 6;
 const VERIFY_WINDOW_SECONDS = 15 * 60;
@@ -23,11 +26,15 @@ const WS_URL = process.env.NEXT_PUBLIC_TELEGRAM_WEBSOCKET_URL || "ws://localhost
 const RESET_WINDOW_ON_RESEND = true;
 
 type VerifyMethod = "none" | "email" | "telegram";
+type LinkVerification = "idle" | "verifying" | "success" | "error";
 
 export default function RegistrationVerifyPage() {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "waiting" | "verified" | "error">("idle");
     const [method, setMethod] = useState<VerifyMethod>("none");
+    const [methodLoading, setMethodLoading] = useState<"email" | "telegram" | null>(null);
+    const [linkVerification, setLinkVerification] = useState<LinkVerification>("idle");
+    const [linkMessage, setLinkMessage] = useState("");
 
     const wsRef = useRef<WebSocket | null>(null);
     const router = useRouter();
@@ -42,12 +49,46 @@ export default function RegistrationVerifyPage() {
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
+        const linkToken = urlParams.get("token");
         const emailParam = urlParams.get("email");
         if (emailParam) {
             setEmail(emailParam);
             router.replace("/register/verify", { scroll: false });
             localStorage.setItem(LS_EMAIL_VALUE, emailParam);
         }
+
+        if (!linkToken) return;
+
+        let cancelled = false;
+        setLinkVerification("verifying");
+        setLinkMessage("Verifying your email link…");
+
+        fetch(getApiUrl() + "/v1/auth/verify/token?code=" + encodeURIComponent(linkToken), {
+            method: "GET",
+            headers: {Accept: "application/json"},
+            credentials: "include",
+        }).then(async (response) => {
+            const contentType = response.headers.get("content-type") || "";
+            const body = contentType.includes("application/json") ? await response.json() : {message: await response.text()};
+            if (!response.ok || body?.error === true) {
+                throw new Error(body?.message || "This verification link is invalid, expired, or has already been used.");
+            }
+            if (cancelled) return;
+            deleteVerifyToken();
+            localStorage.removeItem(LS_VERIFY_START);
+            localStorage.removeItem(LS_RESEND_AVAILABLE_AT);
+            localStorage.removeItem(LS_VERIFY_METHOD);
+            setLinkVerification("success");
+            setLinkMessage("Your email has been verified. You can now sign in.");
+            window.history.replaceState({}, "", "/register/verify");
+        }).catch((error: unknown) => {
+            if (cancelled) return;
+            setLinkVerification("error");
+            setLinkMessage(error instanceof Error ? error.message : "This verification link is invalid, expired, or has already been used.");
+            window.history.replaceState({}, "", "/register/verify");
+        });
+
+        return () => { cancelled = true; };
     }, [router]);
 
     const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""));
@@ -246,8 +287,15 @@ export default function RegistrationVerifyPage() {
         if (resendCooldown > 0) return;
         setErrorMsg(null);
         try {
-            // Simulate
-            await new Promise((res) => setTimeout(res, 500));
+            const response = await fetch(getApiUrl() + "/v1/auth/verify/resendemail", {
+                method: "POST",
+                headers: {"Content-Type": "application/json", Accept: "application/json"},
+                credentials: "include",
+            });
+            const data = await response.json().catch(() => null);
+            if (!response.ok || data?.error === true) {
+                throw new Error(data?.message || "Failed to resend email.");
+            }
 
             // Reset code inputs
             setDigits(Array(CODE_LENGTH).fill(""));
@@ -267,6 +315,7 @@ export default function RegistrationVerifyPage() {
                 localStorage.setItem(LS_VERIFY_START, String(now));
                 setSecondsLeft(VERIFY_WINDOW_SECONDS);
             }
+            okToast("A new verification email has been sent.");
         } catch (err: any) {
             setErrorMsg(err?.message || "Failed to resend email.");
         }
@@ -303,7 +352,8 @@ export default function RegistrationVerifyPage() {
     };
 
     const startTelegram = async () => {
-        if (tgLoading) return;
+        if (tgLoading || methodLoading) return;
+        setMethodLoading("telegram");
         setTgLoading(true);
         setErrorMsg(null);
         try {
@@ -344,6 +394,7 @@ export default function RegistrationVerifyPage() {
             setErrorMsg(err?.message || "Could not open Telegram.");
         } finally {
             setTgLoading(false);
+            setMethodLoading(null);
         }
     };
 
@@ -353,6 +404,9 @@ export default function RegistrationVerifyPage() {
     };
 
     const chooseEmail = async () => {
+        if (methodLoading) return;
+        setMethodLoading("email");
+        setErrorMsg(null);
         try {
             const res = await fetch(getApiUrl() + "/v1/auth/verify/sendemail", {
                 method: "POST",
@@ -368,6 +422,8 @@ export default function RegistrationVerifyPage() {
             setMethod("email")
         } catch (err: any) {
             setErrorMsg(err?.message || "Could not initiate email verification.");
+        } finally {
+            setMethodLoading(null);
         }
     }
 
@@ -410,8 +466,30 @@ export default function RegistrationVerifyPage() {
     const resendMinutes = Math.floor(resendCooldown / 60);
     const resendSecs = resendCooldown % 60;
 
-    if (checkingAuth) {
+    if (checkingAuth && linkVerification === "idle") {
         return <AuthChecking />;
+    }
+
+    if (linkVerification !== "idle") {
+        const successful = linkVerification === "success";
+        return (
+            <main className="flex min-h-screen items-center justify-center px-4">
+                <div className="w-full max-w-md box-primary shadow-card p-8 text-center">
+                    <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full border ${successful ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400" : linkVerification === "error" ? "border-red-500/40 bg-red-500/10 text-red-400" : "border-telegram/40 bg-telegram/10 text-telegram"}`}>
+                        {linkVerification === "verifying" ? <FaSpinner className="animate-spin text-xl"/> : <FaEnvelope className="text-xl"/>}
+                    </div>
+                    <h1 className="mt-5 text-xl font-semibold tracking-wide text-white">
+                        {successful ? "Email verified" : linkVerification === "error" ? "Link could not be verified" : "Verifying your email"}
+                    </h1>
+                    <p className="mt-2 text-sm leading-6 text-gray-400">{linkMessage}</p>
+                    {linkVerification !== "verifying" && (
+                        <HoverDiv className="mt-6 h-11 w-full" type={successful ? "SAVE" : "INFO"} onClick={() => router.push(successful ? "/login" : "/register/verify") }>
+                            {successful ? "Continue to sign in" : "Enter a verification code instead"}
+                        </HoverDiv>
+                    )}
+                </div>
+            </main>
+        );
     }
 
     // Handle global paste only for email method
@@ -441,19 +519,21 @@ export default function RegistrationVerifyPage() {
                         </p>
 
                         <div className="mt-6 grid grid-cols-1 gap-3">
-                            <button
-                                type="button"
+                            <HoverDiv
                                 onClick={chooseEmail}
-                                className="h-11 rounded-md bg-telegram-darker text-sm font-medium text-white transition hover:brightness-110"
+                                disabled={methodLoading !== null}
+                                type="INFO"
+                                icon={methodLoading === "email" ? <FaSpinner className="animate-spin"/> : <FaEnvelope/>}
+                                className="h-11 w-full bg-telegram-darker text-sm font-medium text-white"
                             >
-                                Verify via Email
-                            </button>
+                                {methodLoading === "email" ? "Sending email…" : "Verify via Email"}
+                            </HoverDiv>
 
-                            <button
-                                type="button"
+                            <HoverDiv
                                 onClick={chooseTelegram}
-                                disabled={tgLoading}
-                                className="h-11 rounded-md flex items-center justify-center gap-2 bg-telegram-darker text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
+                                disabled={methodLoading !== null}
+                                className="h-11 w-full bg-telegram-darker text-sm font-medium text-white"
+                                icon={methodLoading === "telegram" ? <FaSpinner className="animate-spin"/> : undefined}
                             >
                                 {/* Telegram icon on the first page button */}
                                 <svg
@@ -475,8 +555,8 @@ export default function RegistrationVerifyPage() {
                                         d="M29.9,18.2c-0.2-0.2-0.5-0.3-0.7-0.1L16,26c0,0,2.1,5.9,2.4,6.9c0.3,1,0.6,1,0.6,1l1-6l9.8-9.1	C30,18.7,30.1,18.4,29.9,18.2z"
                                     ></path>
                                 </svg>
-                                {tgLoading ? "Starting..." : "Verify via Telegram"}
-                            </button>
+                                {methodLoading === "telegram" ? "Starting…" : "Verify via Telegram"}
+                            </HoverDiv>
                         </div>
 
                         <p className="mt-6 text-center text-[11px] text-gray-500">
@@ -493,22 +573,26 @@ export default function RegistrationVerifyPage() {
                             We sent a 6‑digit code to {email || "your email"}. Enter it below.
                         </p>
 
-                        <div className="mt-6 flex justify-center gap-2">
+                        <div className="mt-7 flex justify-center gap-2 sm:gap-3">
                             {digits.map((d, i) => (
-                                <input
+                                <MainStringInput
                                     key={i}
                                     ref={(el) => {
                                         inputsRef.current[i] = el;
                                     }}
                                     data-index={i}
-                                    inputMode="numeric"
+                                    numericOnly
                                     autoComplete="one-time-code"
                                     maxLength={1}
                                     value={d}
                                     onPaste={handlePasteAllFromStart}
-                                    onChange={(e) => handleChange(i, e.target.value)}
+                                    onChange={(value) => handleChange(i, value)}
                                     onKeyDown={handleKeyDown}
-                                    className="h-12 w-12 rounded-md border border-primary_border bg-primary_light text-center text-lg font-medium tracking-wider text-white focus:border-telegram focus:outline-none focus:ring-1 focus:ring-telegram disabled:opacity-40"
+                                    disabled={expired || submitting}
+                                    aria-label={`Verification code digit ${i + 1}`}
+                                    placeholder=""
+                                    className="h-14 w-11 shrink-0 rounded-lg border-zinc-700 bg-zinc-900/80 shadow-[inset_0_1px_0_rgba(255,255,255,.04)] sm:w-12"
+                                    inputClassName="h-full p-0 text-center text-xl font-semibold tabular-nums text-white caret-telegram"
                                 />
                             ))}
                         </div>
@@ -533,40 +617,38 @@ export default function RegistrationVerifyPage() {
                         )}
 
                         <div className="mt-6 flex flex-col gap-3">
-                            <button
+                            <HoverDiv
                                 onClick={submit}
                                 disabled={!isComplete || submitting || expired}
-                                className="h-10 rounded-md bg-telegram text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-telegram/60 disabled:opacity-50 disabled:cursor-not-allowed"
+                                type="SAVE"
+                                className="h-10 w-full text-sm font-medium"
                             >
                                 {submitting ? "Verifying..." : "Continue"}
-                            </button>
+                            </HoverDiv>
 
-                            <button
-                                type="button"
+                            <HoverDiv
                                 onClick={resend}
-                                disabled={resendCooldown > 0 || expired}
-                                className="h-10 rounded-md border border-primary_border bg-primary_light text-sm font-medium text-gray-200 hover:border-telegram/70 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-primary focus:ring-telegram/60 disabled:opacity-40"
+                                disabled={resendCooldown > 0}
+                                className="h-10 w-full text-sm font-medium"
                             >
                                 {resendCooldown > 0
                                     ? `Resend in ${resendMinutes}:${resendSecs.toString().padStart(2, "0")}`
                                     : "Resend Code"}
-                            </button>
+                            </HoverDiv>
 
-                            <button
-                                type="button"
+                            <HoverDiv
                                 onClick={changeMethod}
-                                className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
+                                className="h-10 w-full border-transparent bg-transparent text-sm font-medium text-gray-400"
                             >
                                 Change verification method
-                            </button>
+                            </HoverDiv>
 
-                            <button
-                                type="button"
+                            <HoverDiv
                                 onClick={cancel}
-                                className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
+                                className="h-10 w-full border-transparent bg-transparent text-sm font-medium text-gray-400"
                             >
                                 Cancel
-                            </button>
+                            </HoverDiv>
                         </div>
 
                         <p className="mt-6 text-center text-[11px] text-gray-500">

@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   compress: true,
   experimental: {
     turbopackFileSystemCacheForBuild: true,
+    // The CLI checker can lose captured stdout in sandboxed/container builds,
+    // causing Next to report that it cannot parse `tsc --showConfig`.
+    useTypeScriptCli: false,
   },
   async redirects() {
     return [
