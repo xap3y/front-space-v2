@@ -29,6 +29,8 @@ export interface MainStringInputProps
     suffix?: React.ReactNode;
     suffixClassName?: string;
     numericOnly?: boolean;
+    multiline?: boolean;
+    rows?: number;
 }
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -51,6 +53,8 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             suffix,
             suffixClassName,
             numericOnly = false,
+            multiline = false,
+            rows = 8,
             onFocus,
             onBlur,
             ...rest
@@ -108,7 +112,18 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
                     className
                 )}
             >
-                <input
+                {multiline ? <textarea
+                    ref={ref as React.Ref<HTMLTextAreaElement>}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    required={required}
+                    rows={rows}
+                    value={value}
+                    onChange={event => onChange?.(event.target.value, event as unknown as React.ChangeEvent<HTMLInputElement>)}
+                    onFocus={event => { setIsFocused(true); onFocus?.(event as unknown as React.FocusEvent<HTMLInputElement>); }}
+                    onBlur={event => { setIsFocused(false); onBlur?.(event as unknown as React.FocusEvent<HTMLInputElement>); }}
+                    className={cx("block w-full resize-y bg-transparent p-3 text-white outline-none placeholder-gray-500", inputClassName)}
+                /> : <input
                     ref={ref}
                     {...rest}
                     type={numericOnly ? "text" : type}
@@ -133,7 +148,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
                         inputClassName
                     )}
                     {...(isControlled ? { value } : { defaultValue })}
-                />
+                />}
                 {suffix != null && (
                     <span
                         aria-hidden="true"

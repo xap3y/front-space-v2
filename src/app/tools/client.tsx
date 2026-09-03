@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {FaArrowRight, FaArrowsRotate, FaEnvelope, FaGlobe, FaImage, FaLocationDot, FaScissors, FaVideo} from "react-icons/fa6";
+import {FaArrowRight, FaArrowsRotate, FaCode, FaEnvelope, FaFingerprint, FaGlobe, FaImage, FaLocationDot, FaQrcode, FaScissors, FaVideo} from "react-icons/fa6";
 
 const tools = [
     {title: "Image studio", description: "Crop visually, resize, compress, convert, retouch, watermark, and clean image metadata.", href: "/tools/image", icon: <FaImage className="h-6 w-6"/>, details: "12 image operations"},
@@ -10,6 +10,10 @@ const tools = [
     {title: "DNS & domain lookup", description: "Inspect DNS records and public RDAP registration information for a domain.", href: "/tools/dns-lookup", icon: <FaGlobe className="h-6 w-6"/>, details: "19 DNS record types"},
     {title: "Email health", description: "Check MX, SPF, DMARC, DKIM, DNSSEC, MTA-STS, TLS reporting, and BIMI.", href: "/tools/email-health", icon: <FaEnvelope className="h-6 w-6"/>, details: "8 policy checks"},
     {title: "IP geolocation", description: "Compare approximate location and network information from nine free providers.", href: "/tools/ip-geo", icon: <FaLocationDot className="h-6 w-6"/>, details: "9 independent sources"},
+    {title: "QR toolkit", description: "Generate downloadable QR codes and scan QR codes from image files.", href: "/tools/qr-toolkit", icon: <FaQrcode className="h-6 w-6"/>, details: "Generate and scan"},
+    {title: "JSON workbench", description: "Validate, format, minify, and recursively sort JSON data in your browser.", href: "/tools/json-workbench", icon: <FaCode className="h-6 w-6"/>, details: "Local processing"},
+    {title: "Code formatter", description: "Clean up JavaScript, CSS, HTML, XML, JSON, and SQL source code.", href: "/tools/code-formatter", icon: <FaCode className="h-6 w-6"/>, details: "5 language modes"},
+    {title: "File checksum", description: "Calculate SHA-256, SHA-384, SHA-512, and CRC32 without uploading the file.", href: "/tools/file-checksum", icon: <FaFingerprint className="h-6 w-6"/>, details: "Private · browser only"},
 ];
 
 export default function ToolsPage() {

@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import AdminNavBar, {AdminNavItem} from "@/app/admin/AdminNavBar";
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
-import {FaArrowsRotate, FaEnvelope, FaGlobe, FaImage, FaLocationDot, FaVideo} from "react-icons/fa6";
+import {FaArrowsRotate, FaCode, FaEnvelope, FaFingerprint, FaGlobe, FaImage, FaLocationDot, FaQrcode, FaVideo} from "react-icons/fa6";
 
 type Props = {
     children: ReactNode;
@@ -21,6 +21,10 @@ export default function ToolsShell({ children }: Props) {
             { title: "DNS", href: "/tools/dns-lookup", page: "dns-lookup", icon: <FaGlobe className="h-5 w-5" /> },
             { title: "Email", href: "/tools/email-health", page: "email-health", icon: <FaEnvelope className="h-5 w-5" /> },
             { title: "IP Geo", href: "/tools/ip-geo", page: "ip-geo", icon: <FaLocationDot className="h-5 w-5" /> },
+            { title: "QR", href: "/tools/qr-toolkit", page: "qr-toolkit", icon: <FaQrcode className="h-5 w-5" /> },
+            { title: "JSON", href: "/tools/json-workbench", page: "json-workbench", icon: <FaCode className="h-5 w-5" /> },
+            { title: "Formatter", href: "/tools/code-formatter", page: "code-formatter", icon: <FaCode className="h-5 w-5" /> },
+            { title: "Checksum", href: "/tools/file-checksum", page: "file-checksum", icon: <FaFingerprint className="h-5 w-5" /> },
         ],
         []
     );
