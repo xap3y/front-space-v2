@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import AdminNavBar, {AdminNavItem} from "@/app/admin/AdminNavBar";
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
-import {FaArrowsRotate, FaCode, FaEnvelope, FaFingerprint, FaGlobe, FaImage, FaLocationDot, FaQrcode, FaVideo} from "react-icons/fa6";
+import {FaArrowsRotate, FaClock, FaCode, FaEnvelope, FaFingerprint, FaGlobe, FaImage, FaLocationDot, FaQrcode, FaVideo} from "react-icons/fa6";
 
 type Props = {
     children: ReactNode;
@@ -25,6 +25,8 @@ export default function ToolsShell({ children }: Props) {
             { title: "JSON", href: "/tools/json-workbench", page: "json-workbench", icon: <FaCode className="h-5 w-5" /> },
             { title: "Formatter", href: "/tools/code-formatter", page: "code-formatter", icon: <FaCode className="h-5 w-5" /> },
             { title: "Checksum", href: "/tools/file-checksum", page: "file-checksum", icon: <FaFingerprint className="h-5 w-5" /> },
+            { title: "Regex", href: "/tools/regex-playground", page: "regex-playground", icon: <FaCode className="h-5 w-5" /> },
+            { title: "Timestamp", href: "/tools/timestamp-lab", page: "timestamp-lab", icon: <FaClock className="h-5 w-5" /> },
         ],
         []
     );

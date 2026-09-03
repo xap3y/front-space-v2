@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {FaArrowRight, FaArrowsRotate, FaCode, FaEnvelope, FaFingerprint, FaGlobe, FaImage, FaLocationDot, FaQrcode, FaScissors, FaVideo} from "react-icons/fa6";
+import {FaArrowRight, FaArrowsRotate, FaClock, FaCode, FaEnvelope, FaFingerprint, FaGlobe, FaImage, FaLocationDot, FaQrcode, FaScissors, FaVideo} from "react-icons/fa6";
 
 const tools = [
     {title: "Image studio", description: "Crop visually, resize, compress, convert, retouch, watermark, and clean image metadata.", href: "/tools/image", icon: <FaImage className="h-6 w-6"/>, details: "12 image operations"},
@@ -14,6 +14,8 @@ const tools = [
     {title: "JSON workbench", description: "Validate, format, minify, and recursively sort JSON data in your browser.", href: "/tools/json-workbench", icon: <FaCode className="h-6 w-6"/>, details: "Local processing"},
     {title: "Code formatter", description: "Clean up JavaScript, CSS, HTML, XML, JSON, and SQL source code.", href: "/tools/code-formatter", icon: <FaCode className="h-6 w-6"/>, details: "5 language modes"},
     {title: "File checksum", description: "Calculate SHA-256, SHA-384, SHA-512, and CRC32 without uploading the file.", href: "/tools/file-checksum", icon: <FaFingerprint className="h-6 w-6"/>, details: "Private · browser only"},
+    {title: "Regex playground", description: "Test expressions, inspect matches, and preview replacements with execution limits.", href: "/tools/regex-playground", icon: <FaCode className="h-6 w-6"/>, details: "300 ms safety limit"},
+    {title: "Timestamp laboratory", description: "Convert local dates, Unix timestamps, ISO dates, and Discord timestamp markup.", href: "/tools/timestamp-lab", icon: <FaClock className="h-6 w-6"/>, details: "7 Discord formats"},
 ];
 
 export default function ToolsPage() {
