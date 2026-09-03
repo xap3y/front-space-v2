@@ -595,7 +595,7 @@ export function FilesPageClient() {
         && (filePackLimits.maxBytes === null || activeItems.reduce((sum, item) => sum + item.file.size, 0) < filePackLimits.maxBytes);
 
     const getPackUrl = () => {
-        return `${window.location.origin}/files/pack/${packId}`;
+        return `https://files.xap3y.eu/${packId}`;
     };
 
     const getTotalUploadSize = () => {
