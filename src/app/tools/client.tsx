@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import {FaArrowRight, FaImage, FaScissors, FaVideo} from "react-icons/fa6";
+import {FaArrowRight, FaArrowsRotate, FaImage, FaScissors, FaVideo} from "react-icons/fa6";
 
 const tools = [
     {title: "Image studio", description: "Crop visually, resize, compress, convert, retouch, watermark, and clean image metadata.", href: "/tools/image", icon: <FaImage className="h-6 w-6"/>, details: "12 image operations"},
+    {title: "Image converter", description: "Convert common images plus HEIC, HEIF, JXL, APNG, EPS, PDF, PSD, and SVG files.", href: "/tools/image-converter", icon: <FaArrowsRotate className="h-6 w-6"/>, details: "15 output formats"},
     {title: "Video studio", description: "Trim on a timeline, compress, convert, resize, extract audio, create GIFs, and more.", href: "/tools/video", icon: <FaVideo className="h-6 w-6"/>, details: "15 video operations"},
 ];
 
@@ -16,7 +17,7 @@ export default function ToolsPage() {
                 <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Media tools</h1>
                 <p className="mx-auto mt-2 max-w-xl text-sm text-zinc-400 sm:text-base">Edit images and videos with focused controls, live previews, and downloadable results.</p>
             </header>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {tools.map(tool => (
                     <Link key={tool.href} href={tool.href} className="group box-primary flex min-h-56 flex-col rounded-xl p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-black/30">
                         <div className="mb-5 flex items-start justify-between">

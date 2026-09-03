@@ -181,6 +181,9 @@ export default function FilesPageClient() {
     };
 
     const getPackUrl = (packId: string) => {
+        if (window.location.origin.includes("space.xap3y.eu")) {
+            return `https://files.xap3y.eu/${packId}`;
+        }
         return `${window.location.origin}/files/pack/${packId}`;
     };
 

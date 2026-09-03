@@ -33,6 +33,13 @@ export default function FilesClient({ users }: Props) {
     const [excludedUsers, setExcludedUsers] = useState<UserObj[]>([]);
     const [usersOpen, setUsersOpen] = useState(false);
 
+    const getPackUrl = (packId: string) => {
+        if (window.location.origin.includes("space.xap3y.eu")) {
+            return `https://files.xap3y.eu/${packId}`;
+        }
+        return `${window.location.origin}/files/pack/${packId}`;
+    };
+
     const fetchPacks = useCallback(async (targetPage = page, filters?: { packId: string; fromDate: string; fromTime: string; toDate: string; toTime: string; includedUsers: UserObj[]; excludedUsers: UserObj[] }) => {
         setLoading(true);
         try {

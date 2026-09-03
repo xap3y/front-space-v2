@@ -4,8 +4,9 @@ export async function processMedia(
     endpoint: string,
     file: File,
     options: Record<string, string | number | boolean>,
-    onProgress?: (pct: number) => void
-): Promise<{ url: string; filename: string }> {
+    onProgress?: (pct: number) => void,
+    apiKey?: string
+): Promise<{ url: string; filename: string; size: number }> {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -19,6 +20,8 @@ export async function processMedia(
     const response = await fetch(`${getApiUrl()}/v1/tools/${endpoint}`, {
         method: "POST",
         body: formData,
+        credentials: "include",
+        headers: apiKey ? {"X-API-Key": apiKey} : undefined,
         // Don't set Content-Type — browser sets it with boundary for FormData
     });
 
@@ -29,24 +32,27 @@ export async function processMedia(
         const contentType = response.headers.get("Content-Type") || "";
         if (contentType.includes("application/json")) {
             const errorData = await response.json();
-            throw new Error(errorData?.error || `Processing failed (${response.status})`);
+            throw new Error(errorData?.message || errorData?.errorMessage || `Processing failed (${response.status})`);
         }
         // Might be a JSON error returned as byte[] from the service
+        const text = await response.text();
+        let parsedMessage = "";
         try {
-            const text = await response.text();
             const parsed = JSON.parse(text);
-            if (parsed.error) throw new Error(parsed.error);
-        } catch {
-            // ignore parse failure
-        }
+            parsedMessage = parsed.error || parsed.message || "";
+        } catch {}
+        if (parsedMessage) throw new Error(parsedMessage);
         throw new Error(`Processing failed (${response.status})`);
     }
 
     // Extract filename from Content-Disposition header
     const disposition = response.headers.get("Content-Disposition") || "";
     let filename = "output";
-    const match = disposition.match(/filename="?([^";\n]+)"?/);
-    if (match) {
+    const encodedMatch = disposition.match(/filename\*=UTF-8''([^;\n]+)/i);
+    const match = disposition.match(/filename="?([^";\n]+)"?/i);
+    if (encodedMatch) {
+        filename = decodeURIComponent(encodedMatch[1]);
+    } else if (match) {
         filename = match[1];
     } else {
         // Fallback: build filename from endpoint
@@ -61,7 +67,7 @@ export async function processMedia(
 
     onProgress?.(100);
 
-    return { url, filename };
+    return { url, filename, size: blob.size };
 }
 
 function guessExtension(contentType: string | null): string {
@@ -74,6 +80,13 @@ function guessExtension(contentType: string | null): string {
         "image/bmp": ".bmp",
         "image/tiff": ".tiff",
         "image/avif": ".avif",
+        "image/x-icon": ".ico",
+        "image/vnd.adobe.photoshop": ".psd",
+        "image/svg+xml": ".svg",
+        "image/jxl": ".jxl",
+        "image/apng": ".apng",
+        "application/postscript": ".eps",
+        "application/pdf": ".pdf",
         "video/mp4": ".mp4",
         "video/webm": ".webm",
         "video/x-matroska": ".mkv",

@@ -130,7 +130,7 @@ export function SelectInput({
     label: string;
     value: string;
     onChange: (v: string) => void;
-    options: { label: string; value: string }[];
+    options: { label: string; value: string; disabled?: boolean }[];
     disabled?: boolean;
 }) {
     return (
@@ -143,7 +143,7 @@ export function SelectInput({
                 className="w-full bg-neutral-950 border border-neutral-800 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition disabled:opacity-50"
             >
                 {options.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                    <option key={opt.value} value={opt.value} disabled={opt.disabled}>
                         {opt.label}
                     </option>
                 ))}

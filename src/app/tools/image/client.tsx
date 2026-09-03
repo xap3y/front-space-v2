@@ -8,6 +8,7 @@ import InteractiveCrop from "@/components/tools/InteractiveCrop";
 import ImageEffectPreview from "@/components/tools/ImageEffectPreview";
 import {FaArrowsLeftRight, FaBoxArchive, FaBroom, FaCropSimple, FaDroplet, FaEye, FaMagnifyingGlass, FaRotate, FaSun} from "react-icons/fa6";
 import {FaAdjust, FaExchangeAlt, FaSyncAlt} from "react-icons/fa";
+import {useUser} from "@/hooks/useUser";
 
 const IMAGE_ACCEPT = {
     "image/*": [".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tiff", ".avif", ".svg"],
@@ -45,6 +46,7 @@ const TOOLS = [
 ] satisfies {key: Tool; label: string; icon: React.ReactNode; description: string}[];
 
 export default function ImageToolsClient() {
+    const {user} = useUser();
     const [file, setFile] = useState<File | null>(null);
     const [activeTool, setActiveTool] = useState<Tool>("resize");
     const [processing, setProcessing] = useState(false);
@@ -178,7 +180,8 @@ export default function ImageToolsClient() {
                 `image/${activeTool}`,
                 file,
                 options,
-                (pct) => setProgress(pct)
+                (pct) => setProgress(pct),
+                user?.apiKey
             );
 
             setResultUrl(result.url);
