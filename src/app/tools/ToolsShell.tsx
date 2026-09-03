@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import AdminNavBar, {AdminNavItem} from "@/app/admin/AdminNavBar";
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
-import {FaArrowsRotate, FaImage, FaVideo} from "react-icons/fa6";
+import {FaArrowsRotate, FaEnvelope, FaGlobe, FaImage, FaLocationDot, FaVideo} from "react-icons/fa6";
 
 type Props = {
     children: ReactNode;
@@ -18,6 +18,9 @@ export default function ToolsShell({ children }: Props) {
             { title: "Image", href: "/tools/image", page: "image", icon: <FaImage className="h-5 w-5" /> },
             { title: "Converter", href: "/tools/image-converter", page: "image-converter", icon: <FaArrowsRotate className="h-5 w-5" /> },
             { title: "Video", href: "/tools/video", page: "video", icon: <FaVideo className="h-5 w-5" /> },
+            { title: "DNS", href: "/tools/dns-lookup", page: "dns-lookup", icon: <FaGlobe className="h-5 w-5" /> },
+            { title: "Email", href: "/tools/email-health", page: "email-health", icon: <FaEnvelope className="h-5 w-5" /> },
+            { title: "IP Geo", href: "/tools/ip-geo", page: "ip-geo", icon: <FaLocationDot className="h-5 w-5" /> },
         ],
         []
     );

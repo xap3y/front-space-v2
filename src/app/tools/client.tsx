@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import {FaArrowRight, FaArrowsRotate, FaImage, FaScissors, FaVideo} from "react-icons/fa6";
+import {FaArrowRight, FaArrowsRotate, FaEnvelope, FaGlobe, FaImage, FaLocationDot, FaScissors, FaVideo} from "react-icons/fa6";
 
 const tools = [
     {title: "Image studio", description: "Crop visually, resize, compress, convert, retouch, watermark, and clean image metadata.", href: "/tools/image", icon: <FaImage className="h-6 w-6"/>, details: "12 image operations"},
     {title: "Image converter", description: "Convert common images plus HEIC, HEIF, JXL, APNG, EPS, PDF, PSD, and SVG files.", href: "/tools/image-converter", icon: <FaArrowsRotate className="h-6 w-6"/>, details: "15 output formats"},
     {title: "Video studio", description: "Trim on a timeline, compress, convert, resize, extract audio, create GIFs, and more.", href: "/tools/video", icon: <FaVideo className="h-6 w-6"/>, details: "15 video operations"},
+    {title: "DNS & domain lookup", description: "Inspect DNS records and public RDAP registration information for a domain.", href: "/tools/dns-lookup", icon: <FaGlobe className="h-6 w-6"/>, details: "19 DNS record types"},
+    {title: "Email health", description: "Check MX, SPF, DMARC, DKIM, DNSSEC, MTA-STS, TLS reporting, and BIMI.", href: "/tools/email-health", icon: <FaEnvelope className="h-6 w-6"/>, details: "8 policy checks"},
+    {title: "IP geolocation", description: "Compare approximate location and network information from nine free providers.", href: "/tools/ip-geo", icon: <FaLocationDot className="h-6 w-6"/>, details: "9 independent sources"},
 ];
 
 export default function ToolsPage() {
