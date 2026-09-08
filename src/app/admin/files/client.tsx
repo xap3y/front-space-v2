@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { FaChevronDown, FaChevronLeft, FaChevronRight, FaFile, FaLock, FaRotateRight, FaTrash } from "react-icons/fa6";
+import { FaChevronDown, FaChevronLeft, FaChevronRight, FaFile, FaLock, FaPlus, FaRotateRight, FaTrash } from "react-icons/fa6";
 import { usePage } from "@/context/PageContext";
 import { useUser } from "@/hooks/useUser";
 import { errorToast, okToast } from "@/lib/client";
@@ -120,6 +120,7 @@ export default function FilesClient({ users }: Props) {
                             <div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-sky-500/15 bg-sky-500/[.07]"><FaFile className="text-[11px] text-sky-300"/></span><div className="min-w-0"><div className="flex items-center gap-1.5"><span className="truncate font-mono text-[12px] text-zinc-200">{pack.packId}</span>{pack.isPasswordProtected && <FaLock className="shrink-0 text-[10px] text-amber-400"/>}</div><p className="truncate text-[10px] text-zinc-600">{pack.source}</p></div></div>
                             <span className="truncate text-[11px] text-zinc-400">{pack.uploader?.username ?? "Anonymous"}</span><span className="text-[11px] tabular-nums text-zinc-500">{pack.totalFiles} {pack.totalFiles === 1 ? "file" : "files"}</span><span className="text-[11px] tabular-nums text-zinc-500 max-lg:hidden">{bytes(pack.totalSize)}</span><span className="text-right text-[10px] tabular-nums text-zinc-600 max-lg:hidden">{new Date(pack.uploadTime).toLocaleString()}</span>
                         </HoverDiv>
+                        <a href={`/files?appendPack=${encodeURIComponent(pack.packId)}`} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-emerald-800/70 bg-emerald-950/40 text-[10px] text-emerald-300 transition hover:border-emerald-500" title={`Add files to ${pack.packId}`} aria-label={`Add files to ${pack.packId}`}><FaPlus/></a>
                         <HoverDiv type="DELETE" className="h-7 w-7 shrink-0 !shadow-none text-[10px]" title={`Delete pack ${pack.packId}`} aria-label={`Delete pack ${pack.packId}`} disabled={busy !== null} onClick={() => remove(`/v1/admin/file-packs/${pack.packId}`, `pack ${pack.packId}`)} icon={<FaTrash/>}/>
                     </div>
                     {expanded === pack.packId && <div className="border-t border-zinc-800/60 bg-black/20 px-11 py-2"><p className="mb-2 text-[10px] text-zinc-500">{pack.description || "No description"}</p><div className="space-y-1">

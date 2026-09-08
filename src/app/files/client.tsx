@@ -80,6 +80,8 @@ export function FilesPageClient() {
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [registrationError, setRegistrationError] = useState<string | null>(null);
     const [packId, setPackId] = useState<string | null>(null);
+    const [appendPackId, setAppendPackId] = useState<string | null>(null);
+    const [existingPackUsage, setExistingPackUsage] = useState({files: 0, bytes: 0});
     const [filePackLimits, setFilePackLimits] = useState<EffectiveFilePackLimits>({maxFiles: DEFAULT_MAX_FILES, maxBytes: DEFAULT_MAX_PACK_SIZE});
 
     const [apiKey, setApiKey] = useState<string>("");
@@ -139,13 +141,13 @@ export function FilesPageClient() {
         const activeItems = uploadItems.filter(i => i.status !== "cancelled");
         const maxFiles = filePackLimits.maxFiles ?? Number.MAX_SAFE_INTEGER;
         const maxBytes = filePackLimits.maxBytes ?? Number.MAX_SAFE_INTEGER;
-        const remainingSlots = maxFiles - activeItems.length;
+        const remainingSlots = maxFiles - existingPackUsage.files - activeItems.length;
         if (remainingSlots <= 0) {
             errorToast("Maximum " + maxFiles + " files allowed in one pack");
             return;
         }
 
-        const queuedSize = activeItems.reduce((sum, item) => sum + item.file.size, 0);
+        const queuedSize = existingPackUsage.bytes + activeItems.reduce((sum, item) => sum + item.file.size, 0);
         let addedSize = 0;
         const validFiles: File[] = [];
 
@@ -187,6 +189,18 @@ export function FilesPageClient() {
             setIsKeyValid(true);
         }
     }, [loadingUser, user, router]);
+
+    useEffect(() => {
+        const target = new URLSearchParams(window.location.search).get("appendPack");
+        if (target) setAppendPackId(target);
+    }, []);
+
+    useEffect(() => {
+        if (!appendPackId || !isKeyValid || !apiKey) return;
+        axios.get<FileUploadResponse>(`${getApiUrl()}/v1/files/pack/${encodeURIComponent(appendPackId)}`, {headers: {"x-api-key": apiKey}})
+            .then(response => setExistingPackUsage({files: response.data.totalFiles, bytes: response.data.totalSize}))
+            .catch(err => { errorToast(apiErrorMessage(err, "Could not load the target pack")); setAppendPackId(null); });
+    }, [appendPackId, isKeyValid, apiKey]);
 
     useEffect(() => {
         if (!debouncedApiKey) {
@@ -485,7 +499,7 @@ export function FilesPageClient() {
             };
 
             const response = await axios.post<FileUploadResponse>(
-                getApiUrl() + "/v1/files/register",
+                appendPackId ? `${getApiUrl()}/v1/files/packs/${encodeURIComponent(appendPackId)}/append` : getApiUrl() + "/v1/files/register",
                 registerRequest,
                 {
                     headers: {
@@ -520,7 +534,7 @@ export function FilesPageClient() {
             return;
         }
 
-        if (isPasswordProtected && !packPassword.trim()) {
+        if (!appendPackId && isPasswordProtected && !packPassword.trim()) {
             errorToast("Please enter a password");
             return;
         }
@@ -555,7 +569,7 @@ export function FilesPageClient() {
 
         if (successfullyUploaded.length > 0) {
             const registration = await registerFilesWithBackend(successfullyUploaded);
-            if (registration) okToast("All files uploaded and registered!");
+            if (registration) okToast(appendPackId ? "Files added to the pack!" : "All files uploaded and registered!");
         } else {
             errorToast("No files successfully uploaded to register.");
         }
@@ -592,8 +606,8 @@ export function FilesPageClient() {
     const activeItems = uploadItems.filter(i => i.status !== "cancelled");
     const isMultiple = activeItems.length > 1;
     const allCompleted = uploadItems.every((i) => i.status === "completed" || i.status === "error" || i.status === "cancelled");
-    const canAddMore = (filePackLimits.maxFiles === null || activeItems.length < filePackLimits.maxFiles)
-        && (filePackLimits.maxBytes === null || activeItems.reduce((sum, item) => sum + item.file.size, 0) < filePackLimits.maxBytes);
+    const canAddMore = (filePackLimits.maxFiles === null || existingPackUsage.files + activeItems.length < filePackLimits.maxFiles)
+        && (filePackLimits.maxBytes === null || existingPackUsage.bytes + activeItems.reduce((sum, item) => sum + item.file.size, 0) < filePackLimits.maxBytes);
 
     const getPackUrl = () => {
         if (window.location.origin.includes("space.xap3y.eu")) {
@@ -774,12 +788,13 @@ export function FilesPageClient() {
                 <div className="box-primary shadow-2xl w-full max-w-md">
                     <div className="space-y-4 p-6">
                         <h1 className="text-2xl md:text-3xl font-bold text-center text-white">
-                            File Uploader
+                            {appendPackId ? "Add files to pack" : "File Uploader"}
                         </h1>
 
                         {/* Show effective pack limits */}
                         {activeItems.length === 0 && (
                             <p className="text-center text-xs text-gray-500">
+                                {appendPackId && <span className="mr-1 font-mono text-blue-300">{appendPackId}</span>}
                                 Max pack size: {filePackLimits.maxBytes === null ? "∞" : formatFileSize(filePackLimits.maxBytes)} • Max files: {filePackLimits.maxFiles ?? "∞"}
                             </p>
                         )}
@@ -850,7 +865,7 @@ export function FilesPageClient() {
                                     <div className="flex justify-between text-gray-400">
                                         <span>Total size:</span>
                                         <span className={filePackLimits.maxBytes !== null && getTotalUploadSize() > filePackLimits.maxBytes ? "text-red-400" : "text-gray-300"}>
-                                            {formatFileSize(getTotalUploadSize())} / {filePackLimits.maxBytes === null ? "∞" : formatFileSize(filePackLimits.maxBytes)}
+                                            {formatFileSize(existingPackUsage.bytes + getTotalUploadSize())} / {filePackLimits.maxBytes === null ? "∞" : formatFileSize(filePackLimits.maxBytes)}
                                         </span>
                                     </div>
                                 </div>
@@ -978,7 +993,7 @@ export function FilesPageClient() {
                                             className="w-full text-gray-400 hover:text-gray-300 transition flex items-center justify-center gap-2 text-sm"
                                         >
                                             <FaPlus size={14} />
-                                            Add More Files ({activeItems.length}/{filePackLimits.maxFiles ?? "∞"})
+                                            Add More Files ({existingPackUsage.files + activeItems.length}/{filePackLimits.maxFiles ?? "∞"})
                                         </button>
                                     </div>
                                 )}

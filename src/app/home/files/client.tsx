@@ -362,6 +362,7 @@ export default function FilesPageClient() {
                                         <div className="flex gap-3 flex-shrink-0">
                                             {layoutMode === "compact" && <>
                                                 <a data-pack-action href={`/files/pack/${pack.packId}`} aria-label="View pack" title="View" className="flex h-[26px] w-[26px] items-center justify-center rounded bg-blue-600 text-white transition hover:bg-blue-700"><FaExternalLinkAlt className="h-3 w-3"/></a>
+                                                <a data-pack-action href={`/files?appendPack=${encodeURIComponent(pack.packId)}`} aria-label="Add files to pack" title="Add files" className="flex h-[26px] w-[26px] items-center justify-center rounded bg-emerald-700 text-white transition hover:bg-emerald-600"><FaPlus className="h-3 w-3"/></a>
                                                 <HoverDiv data-pack-action type="INFO" aria-label="Copy pack link" title="Copy" onClick={() => copyToClipboard(getPackUrl(pack.packId), "Link copied!")} className="h-[26px] w-[26px] p-0"><FaCopy className="h-3 w-3"/></HoverDiv>
                                             </>}
                                             <span className="flex h-[26px] w-[26px] items-center justify-center" aria-hidden="true">
@@ -396,6 +397,8 @@ export default function FilesPageClient() {
                                         <FaExternalLinkAlt />
                                         View
                                     </a>
+
+                                    <a data-pack-action href={`/files?appendPack=${encodeURIComponent(pack.packId)}`} className="flex items-center gap-2 rounded bg-emerald-700 px-2 py-1 text-xs font-semibold text-white transition hover:bg-emerald-600 md:px-3 md:text-sm"><FaPlus/>Add files</a>
 
                                     <HoverDiv
                                         type="INFO"
