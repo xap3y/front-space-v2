@@ -66,6 +66,8 @@ interface FileUploadResponse {
     uploadTime: string;
 }
 
+interface AppendPackInfo {packId: string; totalFiles: number; totalSize: number; maxFiles: number | null; maxBytes: number | null}
+
 const DEFAULT_MAX_FILES = 10;
 const DEFAULT_MAX_PACK_SIZE = 1024 * 1024 * 1024 * 15;
 type EffectiveFilePackLimits = {maxFiles: number | null; maxBytes: number | null};
@@ -197,8 +199,11 @@ export function FilesPageClient() {
 
     useEffect(() => {
         if (!appendPackId || !isKeyValid || !apiKey) return;
-        axios.get<FileUploadResponse>(`${getApiUrl()}/v1/files/pack/${encodeURIComponent(appendPackId)}`, {headers: {"x-api-key": apiKey}})
-            .then(response => setExistingPackUsage({files: response.data.totalFiles, bytes: response.data.totalSize}))
+        axios.get<AppendPackInfo>(`${getApiUrl()}/v1/files/packs/${encodeURIComponent(appendPackId)}/append-info`, {headers: {"x-api-key": apiKey}})
+            .then(response => {
+                setExistingPackUsage({files: response.data.totalFiles, bytes: response.data.totalSize});
+                setFilePackLimits({maxFiles: response.data.maxFiles, maxBytes: response.data.maxBytes});
+            })
             .catch(err => { errorToast(apiErrorMessage(err, "Could not load the target pack")); setAppendPackId(null); });
     }, [appendPackId, isKeyValid, apiKey]);
 
@@ -386,7 +391,9 @@ export function FilesPageClient() {
             const activeCount = uploadItemsRef.current.filter(i => i.status !== "cancelled").length;
 
             // ✅ UPDATED: Check for custom name first
-            if (item.customName) {
+            if (appendPackId) {
+                filenameNew = `${Date.now()}-${crypto.randomUUID().replaceAll("-", "").slice(0, 16)}${extension}`;
+            } else if (item.customName) {
                 // File has custom name: use it
                 filenameNew = item.customName + extension;
             } else if (activeCount === 1 && uid) {
@@ -540,11 +547,11 @@ export function FilesPageClient() {
         }
 
         try {
-            await axios.post(getApiUrl() + "/v1/limits/preflight", {
-                type: "FILE",
-                count: pendingItems.length,
-                bytes: pendingItems.reduce((sum, item) => sum + item.file.size, 0),
-            }, {headers: {"x-api-key": apiKey}});
+            const incoming = {count: pendingItems.length, bytes: pendingItems.reduce((sum, item) => sum + item.file.size, 0)};
+            await axios.post(appendPackId
+                    ? `${getApiUrl()}/v1/files/packs/${encodeURIComponent(appendPackId)}/append/preflight`
+                    : getApiUrl() + "/v1/limits/preflight",
+                appendPackId ? incoming : {type: "FILE", ...incoming}, {headers: {"x-api-key": apiKey}});
         } catch (err) {
             errorToast(apiErrorMessage(err, "This upload is not allowed"));
             return;
@@ -643,7 +650,7 @@ export function FilesPageClient() {
                                 <FaCheck className="h-3.5 w-3.5 text-emerald-400" />
                             </div>
                             <div>
-                                <h1 className="text-lg font-semibold text-white">Upload complete</h1>
+                                <h1 className="text-lg font-semibold text-white">{appendPackId ? "Files added" : "Upload complete"}</h1>
                                 <p className="mt-1 text-xs text-zinc-500">
                                     {uploadedFiles.length} {uploadedFiles.length === 1 ? "file" : "files"} · {formatFileSize(completedUploadSize)} total
                                 </p>
@@ -1002,7 +1009,7 @@ export function FilesPageClient() {
 
                         {activeItems.length > 0 && (
                             <>
-                                {/* Password Protection Toggle */}
+                                {!appendPackId && <>{/* Password Protection Toggle */}
                                 <div className="flex flex-col gap-3 border-t border-gray-700 pt-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -1112,7 +1119,7 @@ export function FilesPageClient() {
                                             }`}
                                         />
                                     </label>
-                                </div>
+                                </div></>}
 
                                 <button
                                     onClick={handleUpload}
@@ -1127,7 +1134,7 @@ export function FilesPageClient() {
                                     ) : (
                                         <>
                                             <FaCheck size={16} />
-                                            Upload {activeItems.length > 1 ? `${activeItems.length} Files` : "File"}
+                                            {appendPackId ? "Add" : "Upload"} {activeItems.length > 1 ? `${activeItems.length} Files` : "File"}
                                         </>
                                     )}
                                 </button>
