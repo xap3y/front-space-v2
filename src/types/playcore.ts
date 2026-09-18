@@ -43,6 +43,37 @@ export type Code = {
     uniqueId?: string; // may exist for server-side deletes
 };
 
+export type KitEnchantment = { first: string; second: number } | [string, number];
+
+export type KitItem = {
+    item: string;
+    amount: number;
+    displayName: string;
+    lore?: string[] | null;
+    itemFlags?: string[] | null;
+    enchantments?: KitEnchantment[] | null;
+    hexString?: string | null;
+    customModelData?: number | null;
+    bannerPatterns?: string[] | null;
+    leatherColor?: number | null;
+    potionType?: string | null;
+    skullOwner?: string | null;
+    storedEnchants?: Record<string, number> | null;
+};
+
+export type Kit = {
+    name: string;
+    displayName: string;
+    icon: string;
+    createdAt?: number | string | null;
+    flags?: {
+        redeemTimes?: number | null;
+        allowedServers?: string[] | null;
+        commands?: string[] | null;
+    } | null;
+    content: KitItem[];
+};
+
 export type ApiPayload = {
     error?: boolean;
     message?: {
@@ -52,6 +83,7 @@ export type ApiPayload = {
         activePackages?: ActiveVIP[];
         pausedPackages?: PausedVIP[];
         codes?: Code[]; // NOTE: initial API will NOT include codes per spec
+        kits?: Kit[];
     };
     timestamp?: string;
     count?: number;
@@ -63,5 +95,6 @@ export type WsEnvelope =
     | { type: "ACTIVE_VIP"; data: ActiveVIP }
     | { type: "PAUSED_PACKAGE"; data: PausedVIP }
     | { type: "GROUPS"; data: string[] }
-    | { type: "DELETE"; data: { type: "CODE" | "VIP" | "ACTIVE_VIP"; uniqueId: string } }
+    | { type: "KIT"; data: Kit }
+    | { type: "DELETE"; data: { type: "CODE" | "VIP" | "ACTIVE_VIP" | "PAUSED_VIP" | "KIT"; uniqueId: string } }
     | { type: "ERROR"; data: { message: string, type: string } };

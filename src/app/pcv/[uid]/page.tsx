@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getApiUrl } from "@/lib/core";
 import { errorToast, infoToast, copyToClipboard, okToast, secondsToHuman, isValidDurationExpr } from "@/lib/client";
 import { LoadingDot } from "@/components/GlobalComponents";
-import { ActiveVIP, ApiPayload, Code, PausedVIP, VIPPackage } from "@/types/playcore";
+import { ActiveVIP, ApiPayload, Code, Kit, PausedVIP, VIPPackage } from "@/types/playcore";
 import { Callback, usePCVRealtime } from "@/hooks/usePCVRealtime";
 import { Panel } from "@/components/pcv/Panel";
 import { SectionSkeleton } from "@/components/pcv/SectionSkeleton";
@@ -19,6 +19,10 @@ import { SearchInput } from "@/components/pcv/SearchInput";
 import { SegmentedFilter } from "@/components/pcv/SegmentedFilter";
 import { toast, Id } from "react-toastify";
 import {tryParseDurationToSeconds} from "@/lib/pcv";
+import { KitsEditor } from "@/components/pcv/KitsEditor";
+import MainStringInput from "@/components/MainStringInput";
+import HoverDiv from "@/components/HoverDiv";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
 
 const AVATAR_URL = (name: string, size: number = 48) => `https://mineskin.eu/helm/${name}/${size}`;
 
@@ -55,6 +59,9 @@ export default function Page() {
     const [pausedVips, setPausedVips] = useState<PausedVIP[]>([]);
     const [groups, setGroups] = useState<string[]>([]);
     const [codes, setCodes] = useState<Code[]>([]);
+    const [kits, setKits] = useState<Kit[]>([]);
+    const [activeTab, setActiveTab] = useState<"VIP" | "KITS">("VIP");
+    const [expandedPlayers, setExpandedPlayers] = useState<Set<string>>(new Set());
     const [codesPage, setCodesPage] = useState(1);
     const pageSize = 100;
 
@@ -111,8 +118,7 @@ export default function Page() {
     const codesVisible = useMemo(() => codes.slice(0, codesPage * pageSize), [codes, codesPage]);
 
     const filteredActiveVips = useMemo(() => {
-        activeVips.forEach(a => console.log(`DURATION OF ${a.playerName} IS ${a.duration}`));
-        if (!searchActive.trim()) return activeVips.filter(a => a.duration > 1);
+        if (!searchActive.trim()) return activeVips.filter((active) => active.duration === 0 || active.duration > 1);
         const q = searchActive.toLowerCase();
         return activeVips.filter((a) => {
             const pkg = groupByPackage.get(a.packageName);
@@ -122,7 +128,7 @@ export default function Page() {
                 a.packageName.toLowerCase().includes(q) ||
                 (pkg?.group?.toLowerCase().includes(q) ?? false)
             );
-        }).filter(a => a.duration > 1);
+        }).filter((active) => active.duration === 0 || active.duration > 1);
     }, [searchActive, activeVips, groupByPackage]);
 
     const filteredCodes = useMemo(() => {
@@ -170,10 +176,12 @@ export default function Page() {
             const v = (data as any).message?.vipPackages ?? [];
             const a = (data as any).message?.activePackages ?? [];
             const p = (data as any).message?.pausedPackages ?? [];
+            const loadedKits = (data as any).message?.kits ?? [];
 
             setVipPackages(v);
             setActiveVips(a);
             setPausedVips(p);
+            setKits(loadedKits);
         } catch (e: any) {
             errorToast(e?.message || "Failed to load data");
         } finally {
@@ -269,6 +277,22 @@ export default function Page() {
         PAUSED_UPDATE: () => {
             setPausedVips([]);
             fetch(`${apiBase}/v1/pcv/scrape/${uid}/pausedvips`, { cache: "no-store", method: "POST" });
+            const id = updatingToastRef.current;
+            if (id != null) {
+                toast.update(id, { type: "success", isLoading: false, render: "Queued VIP updated.", closeOnClick: true, autoClose: 3000 });
+                updatingToastRef.current = null;
+                setHasUpdatingToast(false);
+            }
+        },
+        KIT_UPDATE: () => {
+            setKits([]);
+            fetch(`${apiBase}/v1/pcv/scrape/${uid}/kits`, { cache: "no-store", method: "POST" });
+            const id = updatingToastRef.current;
+            if (id != null) {
+                toast.update(id, { type: "success", isLoading: false, render: "Kit saved.", closeOnClick: true, autoClose: 3000 });
+                updatingToastRef.current = null;
+                setHasUpdatingToast(false);
+            }
         },
         CODE_UPDATE: () => {
             setCodes([]);
@@ -296,6 +320,7 @@ export default function Page() {
         setActiveVips,
         setPausedVips,
         setGroups,
+        setKits,
         callBacks,
         onError: handleWsError, // pass handler that reads the ref
     });
@@ -307,6 +332,7 @@ export default function Page() {
     useEffect(() => {
         if (!uid) return;
         fetch(`${apiBase}/v1/pcv/scrape/${uid}/groups`, { method: "POST", cache: "no-store" });
+        fetch(`${apiBase}/v1/pcv/scrape/${uid}/kits`, { method: "POST", cache: "no-store" });
     }, [apiBase, uid]);
 
     const openActiveEditor = (a: ActiveVIP) => {
@@ -500,34 +526,27 @@ export default function Page() {
         }
 
         if (newModalType === "CODE") {
-            if (newCodeType === "KIT") {
-                return errorToast("KIT creation UI is in construction.");
-            }
+            if (!newCodeVip.trim()) return errorToast(`Select a ${newCodeType === "VIP" ? "VIP package" : "kit"}.`);
             if (newCodeType === "VIP") {
-                if (!newCodeVip.trim()) return errorToast("Select a VIP package.");
                 if (newCodeDurationExpr && !isValidDurationExprWithDays(newCodeDurationExpr)) {
                     return errorToast("Invalid duration. Use e.g. 30d, 20m10s.");
                 }
-
-                const data = {
-                    type: "VIP",
-                    identifier: newCodeVip,
-                    code: "NEW",
-                    duration: newCodeDurationExpr ? tryParseDurationToSeconds(newCodeDurationExpr) || 0 : 0,
-                }
-
-                try {
-                    const res = await axios.post(`${apiBase}/v1/pcv/data/${uid}/code`, data);
-                    if (res.status.toString().startsWith("2")) {
-                        const id = toast.loading("Creating VIP code...");
-                        updatingToastRef.current = id;
-                        setHasUpdatingToast(true);
-                    } else {
-                        errorToast("Could not create VIP code.");
-                    }
-                } catch (e) {
-                    errorToast("Could not create VIP code: " + e);
-                }
+            }
+            const data = {
+                type: newCodeType,
+                identifier: newCodeVip,
+                code: "NEW",
+                duration: newCodeType === "VIP" && newCodeDurationExpr ? tryParseDurationToSeconds(newCodeDurationExpr) || 0 : 0,
+            };
+            try {
+                const res = await axios.post(`${apiBase}/v1/pcv/data/${uid}/code`, data);
+                if (res.status.toString().startsWith("2")) {
+                    const id = toast.loading(`Creating ${newCodeType} code...`);
+                    updatingToastRef.current = id;
+                    setHasUpdatingToast(true);
+                } else errorToast(`Could not create ${newCodeType} code.`);
+            } catch (e) {
+                errorToast(`Could not create ${newCodeType} code: ${e}`);
             }
         }
 
@@ -555,8 +574,7 @@ export default function Page() {
             );
         }
         if (newModalType === "CODE") {
-            if (newCodeType === "KIT") return true; // In construction -> disable save
-            return !newCodeVip.trim() || (newCodeDurationExpr.trim().length > 0 && !isValidDurationExprWithDays(newCodeDurationExpr));
+            return !newCodeVip.trim() || (newCodeType === "VIP" && newCodeDurationExpr.trim().length > 0 && !isValidDurationExprWithDays(newCodeDurationExpr));
         }
         return true;
     }, [
@@ -608,7 +626,7 @@ export default function Page() {
     }
 
     return (
-        <div className="mx-auto w-full sm:px-60 px-4 py-5">
+        <div className="mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-5">
             {/* Top bar - compact toolbar */}
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
@@ -667,10 +685,18 @@ export default function Page() {
                 </div>
             </div>
 
+            <nav className="mb-4 flex gap-1 rounded-lg border border-zinc-800 bg-zinc-950 p-1" aria-label="Editor sections">
+                <HoverDiv onClick={() => setActiveTab("VIP")} className={clsx("flex-1 px-3 py-1.5 text-xs sm:flex-none", activeTab === "VIP" && "border-indigo-500 bg-indigo-500/10 text-indigo-200")}>VIP &amp; Codes</HoverDiv>
+                <HoverDiv onClick={() => setActiveTab("KITS")} className={clsx("flex-1 px-3 py-1.5 text-xs sm:flex-none", activeTab === "KITS" && "border-indigo-500 bg-indigo-500/10 text-indigo-200")}>Kits <span className="text-zinc-500">{kits.length}</span></HoverDiv>
+            </nav>
+
             {/* LuckPerms-like layout */}
-            <div className="flex flex-col lg:flex-row gap-4 lg:grid-cols-12">
+            {activeTab === "KITS" ? (
+                <KitsEditor kits={kits} apiBase={apiBase} uid={String(uid)} onReload={() => fetch(`${apiBase}/v1/pcv/scrape/${uid}/kits`, { method: "POST", cache: "no-store" }).then(() => undefined)} />
+            ) : (
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
                 {/* Left/main column */}
-                <div className="lg:col-span-8 space-y-4 lg:min-w-[900px] max-w-[1000px]">
+                <div className="min-w-0 space-y-4">
                     {/* Active VIPs */}
                     <Panel
                         title="Active VIPs"
@@ -704,24 +730,18 @@ export default function Page() {
                             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                 {filteredActiveVips.map((a) => {
                                     const pkg = groupByPackage.get(a.packageName);
+                                    const queued = pausedVips
+                                        .filter((entry) => entry.uuid.replaceAll("-", "") === a.playerUniqueId.replaceAll("-", ""))
+                                        .sort((left, right) => right.priority - left.priority || left.id - right.id);
+                                    const expanded = expandedPlayers.has(a.playerUniqueId);
                                     return (
                                         <div
                                             key={`${a.playerUniqueId}-${a.packageName}`}
-                                            className="flex items-start gap-3 rounded border border-zinc-800 bg-zinc-950 p-3"
+                                            className="rounded border border-zinc-800 bg-zinc-950 p-3"
                                         >
-                                            <img
-                                                src={AVATAR_URL(a.playerName, 48)}
-                                                alt={a.playerName}
-                                                className="h-12 w-12 rounded"
-                                                onError={(e) => {
-                                                    (e.currentTarget as HTMLImageElement).src = AVATAR_URL(
-                                                        "00000000000000000000000000000000",
-                                                        48
-                                                    );
-                                                }}
-                                            />
-
-                                            <div className="min-w-0 flex-1">
+                                            <div className="flex items-start gap-3">
+                                                <img src={AVATAR_URL(a.playerName, 48)} alt={a.playerName} className="h-10 w-10 rounded" onError={(e) => { (e.currentTarget as HTMLImageElement).src = AVATAR_URL("00000000000000000000000000000000", 48); }} />
+                                                <div className="min-w-0 flex-1">
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="min-w-0">
                                                         <div className="truncate font-medium">{a.playerName}</div>
@@ -772,7 +792,7 @@ export default function Page() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-zinc-500">Duration:</span>
-                                                        <span>{secondsToHuman(a.duration)}</span>
+                                                        <span>{a.duration === 0 ? "Permanent" : secondsToHuman(a.duration)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-zinc-500">Group:</span>
@@ -780,37 +800,41 @@ export default function Page() {
                                                     </div>
                                                 </div>
                                             </div>
+                                            </div>
+                                            {queued.length > 0 && (
+                                                <>
+                                                    <HoverDiv
+                                                        onClick={() => setExpandedPlayers((current) => {
+                                                            const next = new Set(current);
+                                                            if (next.has(a.playerUniqueId)) next.delete(a.playerUniqueId); else next.add(a.playerUniqueId);
+                                                            return next;
+                                                        })}
+                                                        className="mt-2 w-full justify-between border-amber-900/60 bg-amber-950/20 px-2 py-1.5 text-xs text-amber-200"
+                                                    >
+                                                        <span>{queued.length} queued VIP{queued.length === 1 ? "" : "s"}</span>
+                                                        {expanded ? <FaChevronUp /> : <FaChevronDown />}
+                                                    </HoverDiv>
+                                                    {expanded && (
+                                                        <div className="mt-2 space-y-1.5 border-l-2 border-amber-700/50 pl-2">
+                                                            {queued.map((entry, queueIndex) => (
+                                                                <div key={`${entry.id}-${entry.packageUi}`} className="flex items-center justify-between gap-2 rounded bg-zinc-900 px-2 py-1.5 text-xs">
+                                                                    <div className="min-w-0">
+                                                                        <div className="truncate"><span className="mr-1 text-amber-400">#{queueIndex + 1}</span><McText text={entry.displayName || entry.packageUi} /> <span className="text-zinc-500">({entry.packageUi})</span></div>
+                                                                        <div className="text-zinc-500">{secondsToHuman(entry.duration)} · {entry.group || "no group"}</div>
+                                                                    </div>
+                                                                    <div className="flex shrink-0 gap-1">
+                                                                        <HoverDiv onClick={() => { setEditingQueued(entry); setQueuedEditExpr(""); }} disabled={hasUpdatingToast} className="h-7 w-7 p-0" title="Adjust queued time" icon={<FaPen />} />
+                                                                        <HoverDiv type="DELETE" onClick={() => deleteQueuedVip(entry)} disabled={hasUpdatingToast} className="h-7 w-7 p-0" title="Remove queued VIP" icon={<FaTrashCan />} />
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
                                     );
                                 })}
-                            </div>
-                        )}
-                    </Panel>
-
-                    <Panel title="Queued VIPs" subtitle={`${pausedVips.length} waiting`}>
-                        {loadingMain ? (
-                            <SectionSkeleton rows={3} />
-                        ) : pausedVips.length === 0 ? (
-                            <div className="text-sm text-zinc-400">No queued VIPs</div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                {pausedVips.map((p) => (
-                                    <div key={`${p.uuid}-${p.packageUi}`} className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm transition hover:border-zinc-700">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <span className="font-medium">{p.playerName}</span>
-                                            <div className="flex items-center gap-1">
-                                                <span className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300">Queued</span>
-                                                <button onClick={() => { setEditingQueued(p); setQueuedEditExpr(""); }} disabled={hasUpdatingToast} className="rounded p-1 hover:bg-zinc-800" title="Adjust duration"><FaPen className="h-3.5 w-3.5" /></button>
-                                                <button onClick={() => deleteQueuedVip(p)} disabled={hasUpdatingToast} className="rounded p-1 hover:bg-red-500/10" title="Remove queued VIP"><FaTrashCan className="h-3.5 w-3.5 text-red-500" /></button>
-                                            </div>
-                                        </div>
-                                        <div className="mt-2 text-xs text-zinc-400">
-                                            <div>{p.displayName || p.packageUi} ({p.packageUi})</div>
-                                            <div className="mt-1">Duration: {secondsToHuman(p.duration)}</div>
-                                            <div className="mt-1">Group: {p.group || "-"}</div>
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
                         )}
                     </Panel>
@@ -876,7 +900,7 @@ export default function Page() {
                 </div>
 
                 {/* Right/side panel (Codes) */}
-                <div className="lg:col-span-4 space-y-4">
+                <div className="min-w-0 space-y-4">
                     <Panel
                         title="Codes"
                         subtitle={codes.length ? `${codes.length} total` : "Not loaded initially"}
@@ -1106,6 +1130,7 @@ export default function Page() {
                     </Panel>
                 </div>
             </div>
+            )}
 
             {/* Footer */}
             <div className="mt-6 text-center text-xs text-zinc-500">
@@ -1159,29 +1184,29 @@ export default function Page() {
                         <div className="grid grid-cols-1 gap-3">
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Name</label>
-                                <input
+                                <MainStringInput
                                     value={newPkgName}
-                                    onChange={(e) => setNewPkgName(e.target.value)}
-                                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                    onChange={setNewPkgName}
+                                    className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                                 />
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Display Name</label>
-                                <input
+                                <MainStringInput
                                     value={newPkgDisplayName}
-                                    onChange={(e) => setNewPkgDisplayName(e.target.value)}
+                                    onChange={setNewPkgDisplayName}
                                     placeholder="Supports MC color codes (&a, &6, ...)"
-                                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                    className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                                 />
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">LuckPerms group</label>
-                                <input
+                                <MainStringInput
                                     list="pcv-luckperms-groups"
                                     value={newPkgGroup}
-                                    onChange={(e) => setNewPkgGroup(e.target.value)}
+                                    onChange={setNewPkgGroup}
                                     placeholder={groups.length ? "Select or enter a group" : "Loading LuckPerms groups..."}
-                                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                    className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                                 />
                                 <datalist id="pcv-luckperms-groups">
                                     {groups.map((group) => <option key={group} value={group} />)}
@@ -1189,24 +1214,25 @@ export default function Page() {
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Priority</label>
-                                <input
+                                <MainStringInput
                                     type="number"
                                     value={newPkgPriority}
-                                    onChange={(e) => setNewPkgPriority(e.target.value === "" ? "" : Number(e.target.value))}
-                                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                    onChange={(value) => setNewPkgPriority(value === "" ? "" : Number(value))}
+                                    className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                                 />
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Duration (e.g. 3d2h, 30m, 20s)</label>
-                                <input
+                                <MainStringInput
                                     value={newPkgDurationExpr}
-                                    onChange={(e) => setNewPkgDurationExpr(e.target.value)}
+                                    onChange={setNewPkgDurationExpr}
                                     className={clsx(
-                                        "w-full rounded border bg-zinc-900 px-3 py-2 text-sm outline-none",
+                                        "w-full bg-zinc-900",
                                         newPkgDurationExpr && !isValidDurationExprWithDays(newPkgDurationExpr)
                                             ? "border-red-600 focus:border-red-600"
                                             : "border-zinc-700 focus:border-zinc-500"
                                     )}
+                                    inputClassName="px-3 py-2 text-sm"
                                 />
                                 {newPkgDurationExpr && !isValidDurationExprWithDays(newPkgDurationExpr) && (
                                     <div className="mt-1 text-xs text-red-400">Invalid duration expression.</div>
@@ -1245,10 +1271,10 @@ export default function Page() {
                         <div className="grid grid-cols-1 gap-3">
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Player name</label>
-                                <input
+                                <MainStringInput
                                     value={newActivePlayer}
-                                    onChange={(e) => setNewActivePlayer(e.target.value)}
-                                    className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                    onChange={setNewActivePlayer}
+                                    className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                                 />
                             </div>
                             <div>
@@ -1271,15 +1297,16 @@ export default function Page() {
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Duration (optional, e.g. 30d or 20m10s)</label>
-                                <input
+                                <MainStringInput
                                     value={newActiveDurationExpr}
-                                    onChange={(e) => setNewActiveDurationExpr(e.target.value)}
+                                    onChange={setNewActiveDurationExpr}
                                     className={clsx(
-                                        "w-full rounded border bg-zinc-900 px-3 py-2 text-sm outline-none",
+                                        "w-full bg-zinc-900",
                                         newActiveDurationExpr && !isValidDurationExprWithDays(newActiveDurationExpr)
                                             ? "border-red-600 focus:border-red-600"
                                             : "border-zinc-700 focus:border-zinc-500"
                                     )}
+                                    inputClassName="px-3 py-2 text-sm"
                                 />
                                 {newActiveDurationExpr && !isValidDurationExprWithDays(newActiveDurationExpr) && (
                                     <div className="mt-1 text-xs text-red-400">Invalid duration expression.</div>
@@ -1301,7 +1328,7 @@ export default function Page() {
                                             type="radio"
                                             className="accent-indigo-500"
                                             checked={newCodeType === "VIP"}
-                                            onChange={() => setNewCodeType("VIP")}
+                                            onChange={() => { setNewCodeType("VIP"); setNewCodeVip(""); }}
                                         />
                                         VIP
                                     </label>
@@ -1310,55 +1337,48 @@ export default function Page() {
                                             type="radio"
                                             className="accent-indigo-500"
                                             checked={newCodeType === "KIT"}
-                                            onChange={() => setNewCodeType("KIT")}
+                                            onChange={() => { setNewCodeType("KIT"); setNewCodeVip(""); setNewCodeDurationExpr(""); }}
                                         />
                                         KIT
                                     </label>
                                 </div>
                             </div>
 
-                            {newCodeType === "VIP" ? (
-                                <>
-                                    <div>
-                                        <label className="mb-1 block text-xs text-zinc-400">VIP Package</label>
-                                        <select
-                                            value={newCodeVip}
-                                            onChange={(e) => setNewCodeVip(e.target.value)}
-                                            className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
-                                        >
-                                            <option value="">Select a package</option>
-                                            {vipPackages
-                                                .slice()
-                                                .sort((a, b) => a.name.localeCompare(b.name))
-                                                .map((v) => (
-                                                    <option key={v.name} value={v.name}>
-                                                        {v.name}
-                                                    </option>
-                                                ))}
-                                        </select>
-                                    </div>
+                            <>
+                                <div>
+                                    <label className="mb-1 block text-xs text-zinc-400">{newCodeType === "VIP" ? "VIP Package" : "Kit"}</label>
+                                    <select
+                                        value={newCodeVip}
+                                        onChange={(e) => setNewCodeVip(e.target.value)}
+                                        className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                    >
+                                        <option value="">Select {newCodeType === "VIP" ? "a package" : "a kit"}</option>
+                                        {(newCodeType === "VIP" ? vipPackages : kits)
+                                            .slice()
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map((entry) => <option key={entry.name} value={entry.name}>{entry.name}</option>)}
+                                    </select>
+                                </div>
+                                {newCodeType === "VIP" && (
                                     <div>
                                         <label className="mb-1 block text-xs text-zinc-400">Duration (optional, e.g. 30d, 20m10s)</label>
-                                        <input
+                                        <MainStringInput
                                             value={newCodeDurationExpr}
-                                            onChange={(e) => setNewCodeDurationExpr(e.target.value)}
+                                            onChange={setNewCodeDurationExpr}
                                             className={clsx(
-                                                "w-full rounded border bg-zinc-900 px-3 py-2 text-sm outline-none",
+                                                "w-full rounded bg-zinc-900",
                                                 newCodeDurationExpr && !isValidDurationExprWithDays(newCodeDurationExpr)
-                                                    ? "border-red-600 focus:border-red-600"
-                                                    : "border-zinc-700 focus:border-zinc-500"
+                                                    ? "border-red-600"
+                                                    : "border-zinc-700"
                                             )}
+                                            inputClassName="px-3 py-2 text-sm"
                                         />
                                         {newCodeDurationExpr && !isValidDurationExprWithDays(newCodeDurationExpr) && (
                                             <div className="mt-1 text-xs text-red-400">Invalid duration expression.</div>
                                         )}
                                     </div>
-                                </>
-                            ) : (
-                                <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
-                                    In construction
-                                </div>
-                            )}
+                                )}
+                            </>
                         </div>
                     </div>
                 )}
@@ -1376,7 +1396,7 @@ export default function Page() {
                     <div className="flex flex-wrap gap-2">
                         {["-7d", "-1d", "+1d", "+7d"].map((value) => <button key={value} onClick={() => setQueuedEditExpr(value)} className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs hover:bg-zinc-700">{value}</button>)}
                     </div>
-                    <input value={queuedEditExpr} onChange={(e) => setQueuedEditExpr(e.target.value)} placeholder="e.g. +2h or -30m" className={clsx("w-full rounded border bg-zinc-900 px-3 py-2 text-sm outline-none", queuedExprValid || !queuedEditExpr ? "border-zinc-700" : "border-red-600")} />
+                    <MainStringInput value={queuedEditExpr} onChange={setQueuedEditExpr} placeholder="e.g. +2h or -30m" className={clsx("w-full bg-zinc-900", queuedExprValid || !queuedEditExpr ? "border-zinc-700" : "border-red-600")} inputClassName="px-3 py-2 text-sm" />
                     {editingQueued && <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-400">Current duration: {secondsToHuman(editingQueued.duration)}</div>}
                 </div>
             </SlideOver>
@@ -1420,14 +1440,15 @@ export default function Page() {
 
                     <div>
                         <label className="mb-1 block text-xs text-zinc-400">Custom</label>
-                        <input
+                        <MainStringInput
                             value={activeEditExpr}
-                            onChange={(e) => setActiveEditExpr(e.target.value)}
+                            onChange={setActiveEditExpr}
                             placeholder='e.g. "3m12s" or "-2h10m2s"'
                             className={clsx(
-                                "w-full rounded border bg-zinc-900 px-3 py-2 text-sm outline-none",
+                                "w-full bg-zinc-900",
                                 activeExprValid ? "border-zinc-700 focus:border-zinc-500" : "border-red-600 focus:border-red-600"
                             )}
+                            inputClassName="px-3 py-2 text-sm"
                         />
                         {!activeExprValid && <div className="mt-1 text-xs text-red-400">Invalid duration expression.</div>}
                     </div>
@@ -1471,29 +1492,29 @@ export default function Page() {
                     <div className="grid grid-cols-1 gap-3">
                         <div>
                             <label className="mb-1 block text-xs text-zinc-400">Group</label>
-                            <input
+                            <MainStringInput
                                 value={pkgGroup}
-                                onChange={(e) => setPkgGroup(e.target.value)}
-                                className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                onChange={setPkgGroup}
+                                className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
                         </div>
 
                         <div>
                             <label className="mb-1 block text-xs text-zinc-400">Priority</label>
-                            <input
+                            <MainStringInput
                                 type="number"
                                 value={pkgPriority}
-                                onChange={(e) => setPkgPriority(e.target.value === "" ? "" : Number(e.target.value))}
-                                className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                onChange={(value) => setPkgPriority(value === "" ? "" : Number(value))}
+                                className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
                         </div>
 
                         <div>
                             <label className="mb-1 block text-xs text-zinc-400">Display Name</label>
-                            <input
+                            <MainStringInput
                                 value={pkgDisplayName}
-                                onChange={(e) => setPkgDisplayName(e.target.value)}
-                                className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                onChange={setPkgDisplayName}
+                                className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
                             <div className="mt-1 text-[11px] text-zinc-500">
                                 Minecraft color codes supported (e.g. &aGreen, &6Gold). Press Enter to save.
@@ -1502,11 +1523,11 @@ export default function Page() {
 
                         <div>
                             <label className="mb-1 block text-xs text-zinc-400">Duration (seconds)</label>
-                            <input
+                            <MainStringInput
                                 type="number"
                                 value={pkgDuration}
-                                onChange={(e) => setPkgDuration(e.target.value === "" ? "" : Number(e.target.value))}
-                                className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
+                                onChange={(value) => setPkgDuration(value === "" ? "" : Number(value))}
+                                className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
                         </div>
                     </div>

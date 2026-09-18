@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ActiveVIP, Code, PausedVIP, VIPPackage, WsEnvelope } from "@/types/playcore";
+import { ActiveVIP, Code, Kit, PausedVIP, VIPPackage, WsEnvelope } from "@/types/playcore";
 import { errorToast } from "@/lib/client";
 
 export type Callback = () => void | Promise<void>;
@@ -14,6 +14,7 @@ type Props = {
     setActiveVips: React.Dispatch<React.SetStateAction<ActiveVIP[]>>;
     setPausedVips?: React.Dispatch<React.SetStateAction<PausedVIP[]>>;
     setGroups?: React.Dispatch<React.SetStateAction<string[]>>;
+    setKits?: React.Dispatch<React.SetStateAction<Kit[]>>;
     callBacks?: Record<string, Callback>;
     onError?: (message: string, payload?: unknown) => void;
 };
@@ -38,6 +39,7 @@ export function usePCVRealtime({
                                    setActiveVips,
                                    setPausedVips,
                                    setGroups,
+                                   setKits,
                                    callBacks,
                                    onError,
                                }: Props) {
@@ -165,6 +167,15 @@ export function usePCVRealtime({
                         });
                     } else if (typed.type === "GROUPS" && Array.isArray(typed.data)) {
                         setGroups?.(typed.data.filter((group): group is string => typeof group === "string"));
+                    } else if (typed.type === "KIT") {
+                        setKits?.((prev) => {
+                            const incoming = typed.data;
+                            const index = prev.findIndex((kit) => kit.name === incoming.name);
+                            if (index < 0) return [...prev, incoming].sort((a, b) => a.name.localeCompare(b.name));
+                            const updated = [...prev];
+                            updated[index] = { ...prev[index], ...incoming };
+                            return updated;
+                        });
                     } else if (typed.type === "DELETE") {
                         const subtype = (typed as any).data?.type;
                         const u = (typed as any).data?.uniqueId;
@@ -174,6 +185,8 @@ export function usePCVRealtime({
                             setVipPackages((prev) => prev.filter((v) => v.name !== u && v.group !== u));
                         } else if (subtype === "ACTIVE_VIP") {
                             setActiveVips((prev) => prev.filter((a) => a.playerUniqueId !== u && a.packageName !== u));
+                        } else if (subtype === "KIT") {
+                            setKits?.((prev) => prev.filter((kit) => kit.name !== u));
                         }
                     } else if (typed.type === "ERROR") {
                         const message =
