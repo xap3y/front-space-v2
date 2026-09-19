@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import {useEffect} from "react";
 
 // Dynamically import RedocStandalone to prevent bundling it in the initial client bundle.
 const RedocStandalone = dynamic(
@@ -38,6 +39,26 @@ const RedocStandalone = dynamic(
 );
 
 export default function Page() {
+
+    useEffect(() => {
+        const removeLink = () => {
+            document
+                .querySelector('a[href^="https://redocly.com/redoc/"]')
+                ?.remove();
+        };
+
+        removeLink();
+
+        const observer = new MutationObserver(removeLink);
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div className="bg-transparent">
             <RedocStandalone 
