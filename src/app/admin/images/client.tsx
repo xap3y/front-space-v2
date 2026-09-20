@@ -20,8 +20,11 @@ import {
     FaRotateRight,
     FaChevronLeft,
     FaChevronRight,
-    FaTrash
+    FaTrash,
+    FaWandMagicSparkles
 } from "react-icons/fa6";
+import HoverDiv from "@/components/HoverDiv";
+import {getApiUrl} from "@/lib/core";
 
 interface ImagesClientProps {
     users: UserObj[];
@@ -39,6 +42,9 @@ export default function ImagesClient({ users }: ImagesClientProps) {
     const [loading, setLoading] = useState(false);
     const [layoutMode, setLayoutMode] = useLayoutMode("admin-images-layout");
     const [migratingId, setMigratingId] = useState<string | null>(null);
+    const [convertImage, setConvertImage] = useState<UploadedImage | null>(null);
+    const [convertFormat, setConvertFormat] = useState("avif");
+    const [converting, setConverting] = useState(false);
 
     // Upload Modal states
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -57,6 +63,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 if (enlargedImage) setEnlargedImage(null);
+                if (convertImage && !converting) setConvertImage(null);
                 if (isUploadModalOpen && !uploadingState) {
                     setIsUploadModalOpen(false);
                     setUploadFile(null);
@@ -68,7 +75,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [enlargedImage, isUploadModalOpen, uploadingState]);
+    }, [convertImage, converting, enlargedImage, isUploadModalOpen, uploadingState]);
 
     // Filters state
     const [uniqueId, setUniqueId] = useState("");
@@ -343,6 +350,39 @@ export default function ImagesClient({ users }: ImagesClientProps) {
             errorToast(e?.message ?? "Migration failed");
         } finally {
             setMigratingId(null);
+        }
+    };
+
+    const openConvertModal = (image: UploadedImage) => {
+        const current = image.type?.toLowerCase();
+        const firstAvailable = ["avif", "webp", "png", "jpg", "tiff", "bmp"]
+            .find(format => format !== current) ?? "avif";
+        setConvertImage(image);
+        setConvertFormat(firstAvailable);
+    };
+
+    const submitConversion = async () => {
+        if (!convertImage || !user?.apiKey) return;
+        try {
+            setConverting(true);
+            const response = await fetch(
+                `${getApiUrl()}/v1/admin/images/${encodeURIComponent(convertImage.uniqueId)}/convert?format=${encodeURIComponent(convertFormat)}`,
+                {
+                    method: "POST",
+                    headers: {"X-API-Key": user.apiKey, Accept: "application/json"},
+                }
+            );
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || payload?.error) {
+                throw new Error(String(payload?.message ?? "Conversion failed"));
+            }
+            okToast(`Image converted to ${convertFormat.toUpperCase()}`);
+            setConvertImage(null);
+            await fetchImages();
+        } catch (exception) {
+            errorToast(exception instanceof Error ? exception.message : "Conversion failed");
+        } finally {
+            setConverting(false);
         }
     };
 
@@ -742,6 +782,31 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                     >
                                                         <FaRotateRight className={`h-4 w-4 ${migratingId === img.uniqueId ? "animate-spin" : ""}`} />
                                                     </button>
+                                                    {[
+                                                        "png",
+                                                        "jpg",
+                                                        "jpeg",
+                                                        "jfif",
+                                                        "webp",
+                                                        "heic",
+                                                        "heif",
+                                                        "tif",
+                                                        "tiff",
+                                                        "bmp",
+                                                        "dng",
+                                                        "jxl",
+                                                        "avif",
+                                                    ].includes(img.type?.toLowerCase() || "") ? (
+                                                        <HoverDiv
+                                                            type="INFO"
+                                                            icon={<FaWandMagicSparkles className="h-4 w-4"/>}
+                                                            onClick={() => openConvertModal(img)}
+                                                            className="rounded-md px-3 py-2 text-xs text-sky-300"
+                                                            title="Convert image format"
+                                                        >
+                                                            Convert
+                                                        </HoverDiv>
+                                                    ) : null}
                                                     <button
                                                         onClick={() => deleteImage(img)}
                                                         className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-300 transition-all duration-200"
@@ -969,6 +1034,77 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {convertImage && (
+                <div
+                    className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                    onClick={() => !converting && setConvertImage(null)}
+                >
+                    <div
+                        className="box-primary w-full max-w-md p-5"
+                        onClick={event => event.stopPropagation()}
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-lg font-semibold">Convert image</h2>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    {convertImage.uniqueId}.{convertImage.type}
+                                </p>
+                            </div>
+                            <HoverDiv
+                                type="INFO"
+                                icon={<FaTimes/>}
+                                disabled={converting}
+                                onClick={() => setConvertImage(null)}
+                                className="h-9 w-9 rounded-lg p-0"
+                                aria-label="Close conversion dialog"
+                            />
+                        </div>
+
+                        <label className="mt-5 block">
+                            <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[.12em] text-gray-500">
+                                Target format
+                            </span>
+                            <select
+                                value={convertFormat}
+                                onChange={event => setConvertFormat(event.target.value)}
+                                disabled={converting}
+                                className="w-full rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-2.5 text-sm text-white outline-none focus:border-zinc-600"
+                            >
+                                {["avif", "webp", "png", "jpg", "tiff", "bmp"]
+                                    .filter(format => format !== convertImage.type?.toLowerCase())
+                                    .map(format => (
+                                        <option key={format} value={format}>{format.toUpperCase()}</option>
+                                    ))}
+                            </select>
+                        </label>
+
+                        <p className="mt-3 text-xs leading-5 text-gray-500">
+                            The stored file is replaced only after conversion succeeds. Its link and image ID stay the same.
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <HoverDiv
+                                type="INFO"
+                                disabled={converting}
+                                onClick={() => setConvertImage(null)}
+                                className="px-4 py-2 text-sm"
+                            >
+                                Cancel
+                            </HoverDiv>
+                            <HoverDiv
+                                type="SAVE"
+                                icon={<FaWandMagicSparkles/>}
+                                disabled={converting}
+                                onClick={submitConversion}
+                                className="px-4 py-2 text-sm font-semibold"
+                            >
+                                {converting ? "Converting…" : `Convert to ${convertFormat.toUpperCase()}`}
+                            </HoverDiv>
+                        </div>
                     </div>
                 </div>
             )}

@@ -22,6 +22,7 @@ export default function AdminShell({ children }: Props) {
             { title: "Limits", href: "/admin/limits", page: "limits", icon: <MdSpeed className="h-5 w-5" /> },
             { title: "Invites", href: "/admin/invites", page: "invites", icon: <FaUserCog className="h-5 w-5" /> },
             { title: "System", href: "/admin/system", page: "system", icon: <MdSettings className="h-5 w-5" /> },
+            { title: "Settings", href: "/admin/settings", page: "settings", icon: <MdSettings className="h-5 w-5" /> },
             { title: "Logs", href: "/admin/logs", page: "logs", icon: <MdHistory className="h-5 w-5" /> },
             { title: "Images", href: "/admin/images", page: "images", icon: <FaImage className="h-5 w-5" /> },
             { title: "Pastes", href: "/admin/pastes", page: "pastes", icon: <FaPaste className="h-5 w-5" /> },
