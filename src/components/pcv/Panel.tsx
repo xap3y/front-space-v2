@@ -12,12 +12,14 @@ export function Panel({
                           actions,
                           children,
                           className,
+                          collapsed = false,
                       }: {
     title: string;
     subtitle?: React.ReactNode;
     actions?: React.ReactNode;
     children: React.ReactNode;
     className?: string;
+    collapsed?: boolean;
 }) {
     return (
         <section className={clsx("flex flex-col overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900 shadow", className)}>
@@ -28,7 +30,7 @@ export function Panel({
                 </div>
                 {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
             </div>
-            <div className="p-3">{children}</div>
+            {!collapsed && <div className="p-3">{children}</div>}
         </section>
     );
 }

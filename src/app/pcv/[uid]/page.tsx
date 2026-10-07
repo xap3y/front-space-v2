@@ -62,6 +62,9 @@ export default function Page() {
     const [kits, setKits] = useState<Kit[]>([]);
     const [activeTab, setActiveTab] = useState<"VIP" | "KITS">("VIP");
     const [expandedPlayers, setExpandedPlayers] = useState<Set<string>>(new Set());
+    const [activeSectionCollapsed, setActiveSectionCollapsed] = useState<boolean | null>(null);
+    const isActiveSectionCollapsed = activeSectionCollapsed
+        ?? activeVips.filter((vip) => vip.duration === 0 || vip.duration > 1).length >= 7;
     const [codesPage, setCodesPage] = useState(1);
     const pageSize = 100;
 
@@ -700,6 +703,7 @@ export default function Page() {
                     {/* Active VIPs */}
                     <Panel
                         title="Active VIPs"
+                        collapsed={isActiveSectionCollapsed}
                         subtitle={`${filteredActiveVips.length} active`}
                         actions={
                             <div className="flex items-center gap-2">
@@ -719,6 +723,16 @@ export default function Page() {
                                     placeholder="Search players, UUIDs, packages, groups..."
                                     className="w-56"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveSectionCollapsed(!isActiveSectionCollapsed)}
+                                    aria-expanded={!isActiveSectionCollapsed}
+                                    aria-label={isActiveSectionCollapsed ? "Expand active VIPs" : "Collapse active VIPs"}
+                                    title={isActiveSectionCollapsed ? "Expand" : "Collapse"}
+                                    className="rounded border border-zinc-700 p-2 text-zinc-300 hover:bg-zinc-800"
+                                >
+                                    {isActiveSectionCollapsed ? <FaChevronDown /> : <FaChevronUp />}
+                                </button>
                             </div>
                         }
                     >
