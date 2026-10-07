@@ -1,0 +1,1552 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PlaycoreVIP API",
+    "version": "1.5.0",
+    "description": "Read synchronized PlaycoreVIP state and submit acknowledged VIP mutations. Every request requires a dedicated key in the `X-API-Key` header. Read endpoints use Space's stored snapshot and remain available while the Minecraft plugin is offline. POST, PUT, and DELETE require a live plugin WebSocket and return only after the plugin confirms the operation."
+  },
+  "servers": [
+    {
+      "url": "https://call.xap3y.eu",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "pcvApiKey": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Player",
+      "description": "Stored VIP data for one player UUID."
+    },
+    {
+      "name": "Admin",
+      "description": "Paginated server-wide data and acknowledged mutations."
+    }
+  ],
+  "paths": {
+    "/v1/pcv/player/{playerUUID}/active": {
+      "get": {
+        "tags": [
+          "Player"
+        ],
+        "summary": "Get a player's active VIPs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PlayerUuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Player and active VIPs. Each active VIP includes hasQueue.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerActiveEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/player/{playerUUID}/history": {
+      "get": {
+        "tags": [
+          "Player"
+        ],
+        "summary": "Get a player's paginated VIP event history",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PlayerUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Player and history page, newest first by default. State describes the event at that time, not current ownership.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerHistoryEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/player/{playerUUID}/queue": {
+      "get": {
+        "tags": [
+          "Player"
+        ],
+        "summary": "Get a player's queued VIPs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PlayerUuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Player and compact queued VIP list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerQueueEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/player/{playerUUID}/all": {
+      "get": {
+        "tags": [
+          "Player"
+        ],
+        "summary": "Get a player and all VIP data",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PlayerUuid"
+          },
+          {
+            "name": "excludeHistory",
+            "in": "query",
+            "description": "Return an empty history array when true.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Combined player record and compact VIP data wrapped in Space's standard response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerAllEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/admin/active": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List all active VIPs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/VipFilter"
+          },
+          {
+            "$ref": "#/components/parameters/ActiveFrom"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A wrapped Spring pageable result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveVipPageEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/admin/history": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List all VIP activation history",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/VipFilter"
+          },
+          {
+            "$ref": "#/components/parameters/ActiveFrom"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A wrapped Spring pageable result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VipHistoryPageEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/admin/queue": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List all queued VIPs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/VipFilter"
+          },
+          {
+            "$ref": "#/components/parameters/ActiveFrom"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/Size"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A wrapped Spring pageable result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuedVipPageEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/pcv/admin/status": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Get plugin WebSocket synchronization status",
+        "responses": {
+          "200": {
+            "description": "Wrapped connection and synchronization timestamps.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatusEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/MissingKey"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          }
+        }
+      }
+    },
+    "/v1/pcv/admin/player/{uuid}": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Add a new VIP to a player",
+        "description": "Duration is optional and defaults to the package duration. Silent is optional and defaults to false. The plugin is authoritative for duplicate ownership.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddVipRequest"
+              },
+              "example": {
+                "vip_name": "vip"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MutationAccepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/PluginOffline"
+          },
+          "504": {
+            "$ref": "#/components/responses/PluginTimeout"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Replace the remaining time of an active or queued VIP",
+        "description": "vip_name and the new duration are supplied in the body. Space waits for plugin confirmation.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVipRequest"
+              },
+              "example": {
+                "vip_name": "vip",
+                "duration": 86400
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MutationAccepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/PluginOffline"
+          },
+          "504": {
+            "$ref": "#/components/responses/PluginTimeout"
+          }
+        }
+      }
+    },
+    "/v1/pcv/admin/player/{uuid}/{vip_name}": {
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Remove an active or queued VIP",
+        "description": "Space waits for plugin confirmation before returning success.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          },
+          {
+            "$ref": "#/components/parameters/VipName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MutationAccepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidKey"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/PluginOffline"
+          },
+          "504": {
+            "$ref": "#/components/responses/PluginTimeout"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "pcvApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "A dedicated enabled key stored in `pcv_api_keys.key_code`. A normal Space user API key is not accepted."
+      }
+    },
+    "parameters": {
+      "PlayerUuid": {
+        "name": "playerUUID",
+        "in": "path",
+        "required": true,
+        "description": "Minecraft UUID in standard dashed or 32-character dashless form. Stored and returned UUIDs are normalized without dashes.",
+        "schema": {
+          "type": "string",
+          "pattern": "^([0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$",
+          "example": "8667ba71-b85a-4004-af54-457a9734eed7"
+        }
+      },
+      "Player": {
+        "name": "uuid",
+        "in": "path",
+        "required": true,
+        "description": "Known Minecraft player UUID in standard dashed or 32-character dashless form.",
+        "schema": {
+          "type": "string",
+          "pattern": "^([0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$",
+          "example": "8667ba71-b85a-4004-af54-457a9734eed7"
+        }
+      },
+      "VipName": {
+        "name": "vip_name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "vip"
+        }
+      },
+      "VipFilter": {
+        "name": "vip",
+        "in": "query",
+        "required": false,
+        "description": "Case-insensitive exact VIP package name.",
+        "schema": {
+          "type": "string",
+          "example": "vip"
+        }
+      },
+      "ActiveFrom": {
+        "name": "activeFrom",
+        "in": "query",
+        "required": false,
+        "description": "ISO-8601 lower bound, or a closed range written as `start..end` (a comma is also accepted). Queue filtering uses queued activation time.",
+        "schema": {
+          "type": "string",
+          "example": "2026-01-01T00:00:00Z..2026-12-31T23:59:59Z"
+        }
+      },
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "description": "Zero-based page number.",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "Size": {
+        "name": "size",
+        "in": "query",
+        "description": "Items per page.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 50
+        }
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "description": "Alias for size. When both are supplied, pageSize takes precedence. Values are limited to 1–500.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 50
+        }
+      },
+      "Sort": {
+        "name": "sort",
+        "in": "query",
+        "description": "Spring sort expression. May be repeated, for example `sort=activatedAt,desc`.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "activatedAt,desc"
+          ]
+        },
+        "style": "form",
+        "explode": true
+      }
+    },
+    "responses": {
+      "MutationAccepted": {
+        "description": "The connected plugin completed and acknowledged the mutation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MutationEnvelope"
+            }
+          }
+        }
+      },
+      "MissingKey": {
+        "description": "X-API-Key was not provided.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "InvalidKey": {
+        "description": "The PCV API key is invalid or disabled.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Invalid input, invalid time range, or a plugin-rejected mutation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Player or VIP was not found in the latest stored snapshot.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "PluginOffline": {
+        "description": "The plugin WebSocket is offline. Stored read endpoints still work; mutations are not accepted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "PluginTimeout": {
+        "description": "The plugin did not acknowledge the mutation within 15 seconds.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Player": {
+        "type": "object",
+        "required": [
+          "uuid",
+          "name"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "example": "8667ba71b85a4004af54457a9734eed7"
+          },
+          "name": {
+            "type": "string",
+            "example": "Notch"
+          }
+        }
+      },
+      "AdminActiveVip": {
+        "type": "object",
+        "required": [
+          "id",
+          "player",
+          "vipName",
+          "durationSeconds",
+          "activeFrom",
+          "serverName",
+          "syncedAt",
+          "hasQueue"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "player": {
+            "$ref": "#/components/schemas/Player"
+          },
+          "vipName": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "description": "Remaining seconds reported at the last sync."
+          },
+          "activeFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasQueue": {
+            "type": "boolean",
+            "description": "Whether this player currently has one or more queued VIPs."
+          }
+        }
+      },
+      "QueuedVip": {
+        "type": "object",
+        "required": [
+          "id",
+          "playerUuid",
+          "playerName",
+          "vipName",
+          "durationSeconds",
+          "activatedAt",
+          "pausedAt",
+          "serverName",
+          "syncedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "playerUuid": {
+            "type": "string"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "vipName": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "description": "Remaining queued duration in seconds."
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pausedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Null while the VIP is queued because its expiry countdown has not started."
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VipHistory": {
+        "type": "object",
+        "required": [
+          "id",
+          "externalId",
+          "playerUuid",
+          "playerName",
+          "vipName",
+          "activationReason",
+          "sourceServer",
+          "state",
+          "durationSeconds",
+          "activatedAt",
+          "syncedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "externalId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "History row ID assigned by the source plugin database."
+          },
+          "playerUuid": {
+            "type": "string"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "vipName": {
+            "type": "string"
+          },
+          "activationReason": {
+            "type": "string",
+            "example": "ADDVIP",
+            "description": "Origin such as ADDVIP, USEKEY, API, or UPGRADE."
+          },
+          "sourceServer": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "example": "ACTIVE",
+            "description": "State of this historical event (ACTIVE, QUEUED, or EXTENDED), not the player's current ownership state."
+          },
+          "durationSeconds": {
+            "type": "integer"
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CompactActiveVip": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "vipName": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer"
+          },
+          "activeFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasQueue": {
+            "type": "boolean",
+            "description": "Whether this player currently has one or more queued VIPs."
+          }
+        }
+      },
+      "CompactQueuedVip": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "vipName": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer"
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pausedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CompactVipHistory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "externalId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "vipName": {
+            "type": "string"
+          },
+          "activationReason": {
+            "type": "string"
+          },
+          "sourceServer": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer"
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlayerActive": {
+        "type": "object",
+        "required": [
+          "player",
+          "active"
+        ],
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/Player"
+          },
+          "active": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompactActiveVip"
+            }
+          }
+        }
+      },
+      "PlayerQueue": {
+        "type": "object",
+        "required": [
+          "player",
+          "queue"
+        ],
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/Player"
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompactQueuedVip"
+            }
+          }
+        }
+      },
+      "PlayerHistory": {
+        "type": "object",
+        "required": [
+          "player",
+          "history"
+        ],
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/Player"
+          },
+          "history": {
+            "$ref": "#/components/schemas/CompactVipHistoryPage"
+          }
+        }
+      },
+      "PlayerAll": {
+        "type": "object",
+        "required": [
+          "player",
+          "active",
+          "queue",
+          "history"
+        ],
+        "properties": {
+          "player": {
+            "$ref": "#/components/schemas/Player"
+          },
+          "active": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompactActiveVip"
+            }
+          },
+          "queue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompactQueuedVip"
+            }
+          },
+          "history": {
+            "type": "array",
+            "description": "Empty when excludeHistory=true.",
+            "items": {
+              "$ref": "#/components/schemas/CompactVipHistory"
+            }
+          }
+        }
+      },
+      "AddVipRequest": {
+        "type": "object",
+        "required": [
+          "vip_name"
+        ],
+        "properties": {
+          "vip_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "VIP duration in seconds. When omitted, the package default duration is used."
+          },
+          "silent": {
+            "type": "boolean",
+            "default": false,
+            "description": "Suppress normal plugin player/broadcast messages when supported."
+          }
+        }
+      },
+      "UpdateVipRequest": {
+        "type": "object",
+        "required": [
+          "vip_name",
+          "duration"
+        ],
+        "properties": {
+          "vip_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "New remaining duration in seconds."
+          }
+        }
+      },
+      "MutationResult": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "success",
+          "message"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "MutationEnvelope": {
+        "type": "object",
+        "required": [
+          "error",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/MutationResult"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "default": 0
+          }
+        }
+      },
+      "SyncStatus": {
+        "type": "object",
+        "required": [
+          "connected",
+          "connections",
+          "startedAt",
+          "lastMessageAt",
+          "lastDataSync",
+          "pendingMutations"
+        ],
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "connections": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "ISO-8601 time at which the current WebSocket connection started, or `never`."
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "description": "ISO-8601 timestamp, or `never`."
+          },
+          "lastDataSync": {
+            "type": "string",
+            "description": "ISO-8601 timestamp, or `never`."
+          },
+          "pendingMutations": {
+            "type": "integer"
+          }
+        }
+      },
+      "PageMetadata": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          },
+          "sort": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "PageBase": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "numberOfElements": {
+            "type": "integer"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "sort": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ActiveVipPage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AdminActiveVip"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "QueuedVipPage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/QueuedVip"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "VipHistoryPage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/VipHistory"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CompactVipHistoryPage": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CompactVipHistory"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ActiveVipListEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActiveVip"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "QueuedVipListEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueuedVip"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "VipHistoryListEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VipHistory"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlayerAllEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/PlayerAll"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlayerActiveEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/PlayerActive"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlayerQueueEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/PlayerQueue"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlayerHistoryEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/PlayerHistory"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "ActiveVipPageEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/ActiveVipPage"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "QueuedVipPageEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/QueuedVipPage"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "VipHistoryPageEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/VipHistoryPage"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "SyncStatusEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "$ref": "#/components/schemas/SyncStatus"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "default": 0
+          }
+        }
+      }
+    }
+  }
+}

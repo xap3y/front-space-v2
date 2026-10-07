@@ -32,7 +32,6 @@ export default function ToolsShell({ children }: Props) {
     );
 
     const { user, loadingUser } = useUser();
-
     useEffect(() => {
         if (!user && !loadingUser || (user && (user.role != "OWNER" && user.role != "ADMIN") && !loadingUser)) {
             router.replace("/login?after=/tools");
@@ -52,7 +51,9 @@ export default function ToolsShell({ children }: Props) {
       "
         >
             <AdminNavBar brandTitle="Tools" items={navItems} loading={loadingUser} />
-            <main className="flex-1 p-4 xl:p-6 xl:overflow-y-auto">
+            <main
+                className="flex-1 p-4 xl:p-6 xl:overflow-y-auto"
+            >
                 {loadingUser ? <LoadingPage /> : children}
             </main>
         </div>

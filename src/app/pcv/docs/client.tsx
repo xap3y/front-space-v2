@@ -53,7 +53,7 @@ export default function PcvApiDocsPage() {
     return (
         <div className="!bg-white">
             <RedocStandalone
-                specUrl="/pcv/openapi.json"
+                specUrl="/pcv/docs/openapi.json"
                 options={{ nativeScrollbars: true, hideDownloadButton: false, expandResponses: "200,201" }}
             />
         </div>

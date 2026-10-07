@@ -64,6 +64,7 @@ function Avatar({ src, username, compact = false }: { src: string | null | undef
 }
 
 const TYPE_OPTIONS: AuditLogType[] = [
+    "TOOL_ACTION",
     "USER_LOGIN",
     "USER_LOGOUT",
     "USER_REGISTER",
@@ -106,6 +107,7 @@ const TYPE_OPTIONS: AuditLogType[] = [
 ];
 
 const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
+    TOOL_ACTION: <FiSettings />,
     USER_LOGIN: <FiLogIn className={"text-green-400"} />,
     USER_LOGOUT: <FiLogOut className={"text-red-400"} />,
     USER_REGISTER: <FiUserPlus />,

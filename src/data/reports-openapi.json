@@ -1,0 +1,552 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Minecraft Reports API",
+    "version": "1.0.0",
+    "description": "Read-only API for report data synchronized from ReportSystem over WebSocket."
+  },
+  "servers": [
+    {
+      "url": "https://call.xap3y.eu",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "ReportsApiKey": []
+    }
+  ],
+  "paths": {
+    "/v1/mc/reports/get/id/{id}": {
+      "get": {
+        "summary": "Get a report by its ReportSystem ID",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ReportId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SingleReport"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/target/{uuid}": {
+      "get": {
+        "summary": "Get open reports for a target player",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          },
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/target/{uuid}/all": {
+      "get": {
+        "summary": "Get all reports for a target player",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          },
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/reporter/{uuid}": {
+      "get": {
+        "summary": "Get open reports created by a player",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          },
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/reporter/{uuid}/all": {
+      "get": {
+        "summary": "Get all reports created by a player",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Player"
+          },
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/closed": {
+      "get": {
+        "summary": "Get all closed reports",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/closed/{closedFrom}": {
+      "get": {
+        "summary": "Get closed reports by close source or closer",
+        "parameters": [
+          {
+            "name": "closedFrom",
+            "in": "path",
+            "required": true,
+            "description": "Close source, Discord user ID, player name, UUID, or console",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/open": {
+      "get": {
+        "summary": "Get all open reports",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/get/all": {
+      "get": {
+        "summary": "Get all reports",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SourceServer"
+          },
+          {
+            "$ref": "#/components/parameters/TargetServer"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ReportPage"
+          }
+        }
+      }
+    },
+    "/v1/mc/reports/status": {
+      "get": {
+        "summary": "Get plugin WebSocket synchronization status",
+        "responses": {
+          "200": {
+            "description": "WebSocket status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/DefaultResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "$ref": "#/components/schemas/ReportsStatus"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ReportsApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "parameters": {
+      "ReportId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "Player": {
+        "name": "uuid",
+        "in": "path",
+        "required": true,
+        "description": "Player name, dashed UUID, or UUID without dashes",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "SourceServer": {
+        "name": "sourceServer",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TargetServer": {
+        "name": "targetServer",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 25
+        }
+      }
+    },
+    "responses": {
+      "SingleReport": {
+        "description": "Report found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/DefaultResponse"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/Report"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ReportPage": {
+        "description": "A page of reports",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/DefaultResponse"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/PageReport"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Report not found"
+      }
+    },
+    "schemas": {
+      "DefaultResponse": {
+        "type": "object",
+        "required": [
+          "error",
+          "timestamp"
+        ],
+        "properties": {
+          "error": {
+            "type": "boolean"
+          },
+          "message": {},
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlayerInfo": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "server": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CloseInfo": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "from": {
+            "type": "string",
+            "description": "DISCORD, INGAME, CONSOLE, or another plugin-provided source"
+          },
+          "closedBy": {
+            "type": "string",
+            "description": "Discord user ID, in-game player name, UUID, or console"
+          }
+        }
+      },
+      "Report": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sourceServer": {
+            "type": "string"
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/PlayerInfo"
+          },
+          "target": {
+            "$ref": "#/components/schemas/PlayerInfo"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "REVIEW",
+              "CLOSED",
+              "DELETED"
+            ]
+          },
+          "discordChannelId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "reportTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "close": {
+            "$ref": "#/components/schemas/CloseInfo"
+          }
+        }
+      },
+      "PageReport": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Report"
+            }
+          },
+          "pageable": {
+            "type": "object",
+            "properties": {
+              "pageNumber": {
+                "type": "integer"
+              },
+              "pageSize": {
+                "type": "integer"
+              }
+            }
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReportsStatus": {
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "connectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastDataSync": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}
