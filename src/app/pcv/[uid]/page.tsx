@@ -626,7 +626,7 @@ export default function Page() {
     }
 
     return (
-        <div className="mx-auto w-full max-w-[1500px] px-3 py-4 sm:px-5">
+        <div className="w-full min-w-0 px-3 py-4 sm:px-5">
             {/* Top bar - compact toolbar */}
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3">
@@ -694,7 +694,7 @@ export default function Page() {
             {activeTab === "KITS" ? (
                 <KitsEditor kits={kits} apiBase={apiBase} uid={String(uid)} onReload={() => fetch(`${apiBase}/v1/pcv/scrape/${uid}/kits`, { method: "POST", cache: "no-store" }).then(() => undefined)} />
             ) : (
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+            <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                 {/* Left/main column */}
                 <div className="min-w-0 space-y-4">
                     {/* Active VIPs */}
@@ -745,9 +745,10 @@ export default function Page() {
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="min-w-0">
                                                         <div className="truncate font-medium">{a.playerName}</div>
-                                                        <span className="mt-1 inline-block rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">
-                              {a.packageName}
-                            </span>
+                                                        <span className="mt-1 inline-block max-w-full break-words rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">
+                                                            <McText text={pkg?.displayName || a.packageName} />
+                                                            <span className="ml-1 text-zinc-500">({a.packageName})</span>
+                                                        </span>
                                                     </div>
 
                                                     <div className="flex items-center gap-1">
@@ -965,8 +966,8 @@ export default function Page() {
                         ) : (
                             <>
                                 {/* Desktop/tablet: table with sticky header and scroll */}
-                                <div className="hidden max-h-[520px] overflow-auto rounded border border-zinc-800 md:block">
-                                    <table className="min-w-full text-left text-xs">
+                                <div className="hidden max-h-[520px] overflow-y-auto rounded border border-zinc-800 md:block">
+                                    <table className="w-full table-fixed break-words text-left text-xs">
                                         <thead className="sticky top-0 z-10 bg-zinc-900 text-zinc-400">
                                         <tr className="border-b border-zinc-800">
                                             <th className="px-3 py-2">Code</th>
@@ -982,7 +983,7 @@ export default function Page() {
                                         <tbody>
                                         {filteredCodes.map((c) => (
                                             <tr key={c.uniqueId || c.code} className="border-b border-zinc-800">
-                                                <td className="whitespace-nowrap px-3 py-2 font-mono">{c.code}</td>
+                                                <td className="break-all px-3 py-2 font-mono">{c.code}</td>
                                                 <td className="px-3 py-2">
                             <span
                                 className={clsx(
@@ -1489,11 +1490,23 @@ export default function Page() {
                 onSave={savePackageEditor}
             >
                 <div className="space-y-4">
+                    {editingPackage && (
+                        <div>
+                            <label className="mb-1 block text-xs text-zinc-400">VIP uniqueID</label>
+                            <MainStringInput
+                                value={editingPackage.name}
+                                readOnly
+                                className="w-full border-zinc-700 bg-zinc-900"
+                                inputClassName="px-3 py-2 text-sm"
+                            />
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 gap-3">
                         <div>
                             <label className="mb-1 block text-xs text-zinc-400">Group</label>
                             <MainStringInput
                                 value={pkgGroup}
+                                placeholder="e.g. gvip"
                                 onChange={setPkgGroup}
                                 className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
@@ -1504,6 +1517,7 @@ export default function Page() {
                             <MainStringInput
                                 type="number"
                                 value={pkgPriority}
+                                placeholder="e.g. 30"
                                 onChange={(value) => setPkgPriority(value === "" ? "" : Number(value))}
                                 className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
@@ -1513,11 +1527,13 @@ export default function Page() {
                             <label className="mb-1 block text-xs text-zinc-400">Display Name</label>
                             <MainStringInput
                                 value={pkgDisplayName}
+                                placeholder="e.g. &#FFAA00&lGVIP"
                                 onChange={setPkgDisplayName}
                                 className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />
                             <div className="mt-1 text-[11px] text-zinc-500">
-                                Minecraft color codes supported (e.g. &aGreen, &6Gold). Press Enter to save.
+                                Minecraft colors, RGB and MiniMessage supported (e.g. &aGreen, &#FFAA00&lGVIP).
+                                Press Enter to save.
                             </div>
                         </div>
 
@@ -1526,6 +1542,7 @@ export default function Page() {
                             <MainStringInput
                                 type="number"
                                 value={pkgDuration}
+                                placeholder="e.g. 2592000 (30 days), 0 for permanent"
                                 onChange={(value) => setPkgDuration(value === "" ? "" : Number(value))}
                                 className="w-full border-zinc-700 bg-zinc-900" inputClassName="px-3 py-2 text-sm"
                             />

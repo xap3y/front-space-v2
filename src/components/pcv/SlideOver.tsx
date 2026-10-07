@@ -14,7 +14,7 @@ export function SlideOver({
                               saveLabel = "Save",
                               saveDisabled,
                               children,
-                              widthClass = "w-full sm:w-[480px]",
+                              widthClass = "w-full sm:w-[min(85vw,560px)] lg:w-[min(45vw,640px)]",
                           }: {
     title: React.ReactNode;
     open: boolean;
