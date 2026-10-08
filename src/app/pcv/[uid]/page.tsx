@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import { pcvAxios as axios, pcvFetch as fetch } from "@/lib/pcvDevice";
 import { useParams, useRouter } from "next/navigation";
 import { getApiUrl } from "@/lib/core";
 import { errorToast, infoToast, copyToClipboard, okToast, secondsToHuman, isValidDurationExpr } from "@/lib/client";
@@ -23,6 +23,7 @@ import { KitsEditor } from "@/components/pcv/KitsEditor";
 import MainStringInput from "@/components/MainStringInput";
 import HoverDiv from "@/components/HoverDiv";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
+import { LuClock3, LuInfinity, LuRefreshCw, LuShield, LuPlus, LuKeyRound, LuPackage } from "react-icons/lu";
 
 const AVATAR_URL = (name: string, size: number = 48) => `https://mineskin.eu/helm/${name}/${size}`;
 
@@ -48,6 +49,55 @@ type NewModalType = "VIP" | "ACTIVE" | "CODE" | null;
 export default function Page() {
     const { uid } = useParams<{ uid: string }>();
     const apiBase = getApiUrl();
+    const [trustedDevice, setTrustedDevice] = useState(false);
+    const [trustCommand, setTrustCommand] = useState("");
+    const [trustError, setTrustError] = useState("");
+    const [trustAttempt, setTrustAttempt] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+        let timer: ReturnType<typeof setTimeout>;
+        let expiresAt = Infinity;
+        setTrustedDevice(false);
+        setTrustError("");
+        setTrustCommand("");
+        const check = async (request: boolean) => {
+            try {
+                const response = await fetch(`${apiBase}/v1/pcv/editor/${uid}/device`, {
+                    method: request ? "POST" : "GET",
+                    cache: "no-store",
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) {
+                    throw new Error(typeof data.message === "string" ? data.message : "Device confirmation failed");
+                }
+                if (cancelled) {
+                    return;
+                }
+                if (data.message.trusted) {
+                    setTrustedDevice(true);
+                    return;
+                }
+                if (data.message.expiresAt) {
+                    expiresAt = Date.parse(data.message.expiresAt);
+                }
+                if (Date.now() >= expiresAt) {
+                    throw new Error("Confirmation expired. Request confirmation again.");
+                }
+                setTrustCommand(data.message.command || "");
+                timer = setTimeout(() => check(false), 2000);
+            } catch (error) {
+                if (!cancelled) {
+                    setTrustError(error instanceof Error ? error.message : "Device confirmation failed");
+                }
+            }
+        };
+        check(true);
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [apiBase, uid, trustAttempt]);
 
     const [loadingMain, setLoadingMain] = useState(true);
     const [loadingVip, setLoadingVip] = useState(false);
@@ -72,6 +122,13 @@ export default function Page() {
     const [searchActive, setSearchActive] = useState("");
     const [searchCodes, setSearchCodes] = useState("");
     const [codesTypeFilter, setCodesTypeFilter] = useState<CodeTypeFilter>("BOTH");
+    const [codesUsedFilter, setCodesUsedFilter] = useState("ALL");
+    const [codesEmailFilter, setCodesEmailFilter] = useState("ALL");
+    const [codesPackageFilter, setCodesPackageFilter] = useState("");
+
+    useEffect(() => {
+        setCodesPage(1);
+    }, [searchCodes, codesTypeFilter, codesUsedFilter, codesEmailFilter, codesPackageFilter]);
 
     // Editors
     const [editingActive, setEditingActive] = useState<ActiveVIP | null>(null);
@@ -118,7 +175,6 @@ export default function Page() {
         return m;
     }, [vipPackages]);
 
-    const codesVisible = useMemo(() => codes.slice(0, codesPage * pageSize), [codes, codesPage]);
 
     const filteredActiveVips = useMemo(() => {
         if (!searchActive.trim()) return activeVips.filter((active) => active.duration === 0 || active.duration > 1);
@@ -134,11 +190,11 @@ export default function Page() {
         }).filter((active) => active.duration === 0 || active.duration > 1);
     }, [searchActive, activeVips, groupByPackage]);
 
-    const filteredCodes = useMemo(() => {
+    const matchingCodes = useMemo(() => {
         const bySearch = (() => {
-            if (!searchCodes.trim()) return codesVisible;
-            const q = searchCodes.toLowerCase();
-            return codesVisible.filter((c) => {
+            if (!searchCodes.trim()) return codes;
+            const q = searchCodes.trim().toLowerCase();
+            return codes.filter((c) => {
                 return (
                     c.code.toLowerCase().includes(q) ||
                     c.identifier.toLowerCase().includes(q) ||
@@ -150,12 +206,32 @@ export default function Page() {
             });
         })();
 
-        if (codesTypeFilter === "BOTH") return bySearch;
-        return bySearch.filter((c) => (c.type || "").toUpperCase() === codesTypeFilter);
-    }, [searchCodes, codesVisible, codesTypeFilter]);
+        return bySearch.filter((code) => {
+            const hasEmail = Boolean(code.email?.trim())
+                && !["n/a", "null", "undefined"].includes(code.email!.trim().toLowerCase());
+            return (codesTypeFilter === "BOTH" || code.type?.toUpperCase() === codesTypeFilter)
+                && (codesUsedFilter === "ALL" || Boolean(code.used) === (codesUsedFilter === "USED"))
+                && (codesEmailFilter === "ALL" || hasEmail === (codesEmailFilter === "WITH"))
+                && (!codesPackageFilter || code.identifier === codesPackageFilter);
+        });
+    }, [searchCodes, codes, codesTypeFilter, codesUsedFilter, codesEmailFilter, codesPackageFilter]);
+
+    const filteredCodes = matchingCodes.slice(0, codesPage * pageSize);
+    const codeIdentifiers = Array.from(new Set(codes.map((code) => code.identifier))).sort();
+    const hasCodeFilters = Boolean(searchCodes.trim() || codesTypeFilter !== "BOTH"
+        || codesUsedFilter !== "ALL" || codesEmailFilter !== "ALL" || codesPackageFilter);
+
+    const resetCodeFilters = () => {
+        setSearchCodes("");
+        setCodesTypeFilter("BOTH");
+        setCodesUsedFilter("ALL");
+        setCodesEmailFilter("ALL");
+        setCodesPackageFilter("");
+        setCodesPage(1);
+    };
 
     const fetchMain = useCallback(async () => {
-        if (!uid) return;
+        if (!uid || !trustedDevice) return;
         setApiError(false);
         setLoadingMain(true);
         try {
@@ -190,7 +266,7 @@ export default function Page() {
         } finally {
             setLoadingMain(false);
         }
-    }, [uid, apiBase]);
+    }, [uid, apiBase, trustedDevice]);
 
     const deleteResource = async (type: "CODE" | "VIP" | "ACTIVE_VIP", code: string) => {
         const res = await fetch(
@@ -316,6 +392,7 @@ export default function Page() {
     };
 
     const { status: wsStatus, isOpen: isWsOpen, lastError: wsLastError, reconnect } = usePCVRealtime({
+        enabled: trustedDevice,
         apiBaseUrl: apiBase,
         uid: String(uid || ""),
         setCodes,
@@ -333,10 +410,10 @@ export default function Page() {
     }, [fetchMain]);
 
     useEffect(() => {
-        if (!uid) return;
+        if (!uid || !trustedDevice) return;
         fetch(`${apiBase}/v1/pcv/scrape/${uid}/groups`, { method: "POST", cache: "no-store" });
         fetch(`${apiBase}/v1/pcv/scrape/${uid}/kits`, { method: "POST", cache: "no-store" });
-    }, [apiBase, uid]);
+    }, [apiBase, uid, trustedDevice]);
 
     const openActiveEditor = (a: ActiveVIP) => {
         setEditingActive(a);
@@ -595,6 +672,30 @@ export default function Page() {
         newPkgDisplayName,
     ]);
 
+    if (!trustedDevice) {
+        return (
+            <div className="mx-auto flex min-h-[65vh] max-w-lg items-center px-4">
+                <div className="w-full space-y-4 rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+                    <h1 className="text-lg font-semibold">Trust this device</h1>
+                    <p className="text-sm text-zinc-400">
+                        Confirm this browser in-game using the player who opened the editor.
+                        Click the chat message or enter the command below. Only confirm a request you initiated.
+                    </p>
+                    {trustCommand && (
+                        <HoverDiv onClick={() => copyToClipboard(trustCommand)} className="w-full break-all p-3 text-left text-xs" icon={<IoMdClipboard />}>
+                            {trustCommand}
+                        </HoverDiv>
+                    )}
+                    <p className="text-xs text-zinc-500">Confirmation expires after 5 minutes. The editor opens automatically once approved.</p>
+                    {trustError && <p role="alert" className="text-sm text-red-400">{trustError}</p>}
+                    <HoverDiv onClick={() => setTrustAttempt((value) => value + 1)} icon={<LuRefreshCw />}>
+                        Request confirmation again
+                    </HoverDiv>
+                </div>
+            </div>
+        );
+    }
+
     if ((apiError || !isWsOpen) && !loadingMain) {
         return (
             <div className="mx-auto flex min-h-[60vh] w-full max-w-3xl flex-col items-center justify-center gap-4 px-4">
@@ -632,15 +733,25 @@ export default function Page() {
         <div className="w-full min-w-0 px-3 py-4 sm:px-5">
             {/* Top bar - compact toolbar */}
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
                     <h1 className="text-lg font-semibold">Playcore Editor</h1>
-                    <span className="rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">UID: {uid}</span>
+                    <button
+                        type="button"
+                        onClick={() => copyToClipboard(String(uid))}
+                        title="Copy editor ID"
+                        className="inline-flex min-w-0 items-center gap-2 rounded border border-zinc-800 px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+                    >
+                        <span className="truncate">UID: {uid}</span>
+                        <IoMdClipboard className="shrink-0" />
+                    </button>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={refreshAll}
-                        className="rounded border border-blue-600 bg-blue-500 px-3 py-1.5 text-sm text-white hover:bg-blue-600"
+                        disabled={loadingMain || hasUpdatingToast}
+                        className="inline-flex items-center gap-2 rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800 disabled:cursor-wait disabled:opacity-50"
                     >
+                        <LuRefreshCw className={loadingMain ? "animate-spin" : ""} />
                         Refresh
                     </button>
                     {!isWsOpen && (
@@ -706,7 +817,7 @@ export default function Page() {
                         collapsed={isActiveSectionCollapsed}
                         subtitle={`${filteredActiveVips.length} active`}
                         actions={
-                            <div className="flex items-center gap-2">
+                            <div className="flex max-w-full flex-wrap items-center gap-2">
                                 <button
                                     onClick={() => openNewModal("ACTIVE")}
                                     disabled={hasUpdatingToast}
@@ -715,13 +826,18 @@ export default function Page() {
                                         hasUpdatingToast ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-600"
                                     )}
                                 >
-                                    New
+                                    <span className="inline-flex items-center gap-1.5"><LuPlus /> Add VIP</span>
                                 </button>
                                 <SearchInput
                                     value={searchActive}
-                                    onChange={setSearchActive}
+                                    onChange={(value) => {
+                                        setSearchActive(value);
+                                        if (value.trim()) {
+                                            setActiveSectionCollapsed(false);
+                                        }
+                                    }}
                                     placeholder="Search players, UUIDs, packages, groups..."
-                                    className="w-56"
+                                    className="w-48 max-w-full sm:w-56"
                                 />
                                 <button
                                     type="button"
@@ -806,11 +922,11 @@ export default function Page() {
                                                         </button>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-zinc-500">Duration:</span>
+                                                        {a.duration === 0 ? <LuInfinity className="shrink-0 text-zinc-500" /> : <LuClock3 className="shrink-0 text-zinc-500" />}
                                                         <span>{a.duration === 0 ? "Permanent" : secondsToHuman(a.duration)}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-zinc-500">Group:</span>
+                                                        <LuShield className="shrink-0 text-zinc-500" title="LuckPerms group" />
                                                         <span>{pkg?.group || "-"}</span>
                                                     </div>
                                                 </div>
@@ -835,7 +951,10 @@ export default function Page() {
                                                                 <div key={`${entry.id}-${entry.packageUi}`} className="flex items-center justify-between gap-2 rounded bg-zinc-900 px-2 py-1.5 text-xs">
                                                                     <div className="min-w-0">
                                                                         <div className="truncate"><span className="mr-1 text-amber-400">#{queueIndex + 1}</span><McText text={entry.displayName || entry.packageUi} /> <span className="text-zinc-500">({entry.packageUi})</span></div>
-                                                                        <div className="text-zinc-500">{secondsToHuman(entry.duration)} · {entry.group || "no group"}</div>
+                                                                        <div className="mt-1 flex items-center gap-1.5 text-zinc-500">
+                                                                            <LuClock3 className="shrink-0" />
+                                                                            <span>{secondsToHuman(entry.duration)} · {entry.group || "no group"}</span>
+                                                                        </div>
                                                                     </div>
                                                                     <div className="flex shrink-0 gap-1">
                                                                         <HoverDiv onClick={() => { setEditingQueued(entry); setQueuedEditExpr(""); }} disabled={hasUpdatingToast} className="h-7 w-7 p-0" title="Adjust queued time" icon={<FaPen />} />
@@ -867,7 +986,7 @@ export default function Page() {
                                     hasUpdatingToast ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-600"
                                 )}
                             >
-                                New
+                                <span className="inline-flex items-center gap-1.5"><LuPackage /> New package</span>
                             </button>
                         }
                     >
@@ -881,7 +1000,7 @@ export default function Page() {
                                     .slice()
                                     .sort((a, b) => b.priority - a.priority)
                                     .map((v) => (
-                                        <div key={v.name} className="rounded border border-zinc-800 bg-zinc-950 p-3">
+                                        <div key={v.name} className="rounded border border-zinc-800 bg-zinc-950 p-3 transition-colors hover:border-zinc-700">
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="min-w-0">
                                                     <div className="truncate font-medium">
@@ -894,7 +1013,10 @@ export default function Page() {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <div className="text-right text-xs text-zinc-300">
-                                                        <div>{secondsToHuman(v.duration)}</div>
+                                                        <div className="flex items-center gap-1.5" title="Default package duration">
+                                                            {v.duration === 0 ? <LuInfinity /> : <LuClock3 />}
+                                                            <span>{secondsToHuman(v.duration)}</span>
+                                                        </div>
                                                     </div>
                                                     <button
                                                         type="button"
@@ -918,7 +1040,7 @@ export default function Page() {
                 <div className="min-w-0 space-y-4">
                     <Panel
                         title="Codes"
-                        subtitle={codes.length ? `${codes.length} total` : "Not loaded initially"}
+                        subtitle={codes.length ? `${matchingCodes.length} matching / ${codes.length} total` : "Not loaded initially"}
                         actions={
                             <div className="flex flex-wrap items-center gap-2">
                                 {(codes.length > 0 && !loadingCodes) && (
@@ -948,7 +1070,7 @@ export default function Page() {
                                         (hasUpdatingToast || codes.length === 0 || loadingCodes) ? "opacity-50 cursor-not-allowed" : "hover:bg-emerald-600"
                                     )}
                                 >
-                                    New
+                                    <span className="inline-flex items-center gap-1.5"><LuKeyRound /> New code</span>
                                 </button>
                                 <button
                                     onClick={fetchCodes}
@@ -969,6 +1091,37 @@ export default function Page() {
                             </div>
                         }
                     >
+                        {codes.length > 0 && (
+                            <div className="mb-3 flex flex-wrap items-end gap-2 border-b border-zinc-800 pb-3">
+                                {[
+                                    { label: "Usage", value: codesUsedFilter, change: setCodesUsedFilter, options: [["ALL", "All codes"], ["USED", "Used"], ["UNUSED", "Unused"]] },
+                                    { label: "Email", value: codesEmailFilter, change: setCodesEmailFilter, options: [["ALL", "Any email"], ["WITH", "With email"], ["WITHOUT", "Without email"]] },
+                                    { label: "Package / kit", value: codesPackageFilter, change: setCodesPackageFilter, options: [["", "All packages / kits"], ...codeIdentifiers.map((identifier) => [identifier, identifier])] },
+                                ].map((filter) => (
+                                    <label key={filter.label} className="flex min-w-0 flex-col gap-1 text-xs text-zinc-400">
+                                        <span>{filter.label}</span>
+                                        <select
+                                            value={filter.value}
+                                            onChange={(event) => filter.change(event.target.value)}
+                                            className="max-w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-200 outline-none focus:border-zinc-500"
+                                        >
+                                            {filter.options.map(([value, label]) => (
+                                                <option key={value} value={value}>{label}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                ))}
+                                {hasCodeFilters && (
+                                    <button
+                                        type="button"
+                                        onClick={resetCodeFilters}
+                                        className="rounded px-2 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                                    >
+                                        Clear filters
+                                    </button>
+                                )}
+                            </div>
+                        )}
                         {loadingCodes ? (
                             <SectionSkeleton rows={8} rowHeight="h-10" />
                         ) : filteredCodes.length === 0 ? (
@@ -996,8 +1149,18 @@ export default function Page() {
                                         </thead>
                                         <tbody>
                                         {filteredCodes.map((c) => (
-                                            <tr key={c.uniqueId || c.code} className="border-b border-zinc-800">
-                                                <td className="break-all px-3 py-2 font-mono">{c.code}</td>
+                                            <tr key={c.uniqueId || c.code} className="border-b border-zinc-800 transition-colors hover:bg-zinc-800/40">
+                                                <td className="break-all px-3 py-2 font-mono">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => copyToClipboard(c.code)}
+                                                        title="Copy code"
+                                                        className="inline-flex items-center gap-1.5 text-left hover:text-white"
+                                                    >
+                                                        <span>{c.code}</span>
+                                                        <IoMdClipboard className="shrink-0 text-zinc-500" />
+                                                    </button>
+                                                </td>
                                                 <td className="px-3 py-2">
                             <span
                                 className={clsx(
@@ -1130,7 +1293,7 @@ export default function Page() {
                                     </div>
                                 </div>
 
-                                {filteredCodes.length < codesVisible.length && (
+                                {filteredCodes.length < matchingCodes.length && (
                                     <div className="mt-3 flex justify-center">
                                         <button
                                             onClick={() => setCodesPage((p) => p + 1)}
@@ -1577,7 +1740,10 @@ export default function Page() {
                                     </div>
                                 </div>
                                 <div className="text-right text-xs text-zinc-300">
-                                    <div>{secondsToHuman(Number(pkgDuration) || 0)}</div>
+                                    <div className="flex items-center gap-1.5">
+                                        {Number(pkgDuration) === 0 ? <LuInfinity /> : <LuClock3 />}
+                                        <span>{secondsToHuman(Number(pkgDuration) || 0)}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

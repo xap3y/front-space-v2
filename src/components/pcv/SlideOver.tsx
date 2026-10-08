@@ -39,6 +39,14 @@ export function SlideOver({
     }, [open]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Escape") {
+            e.preventDefault();
+            onClose();
+            return;
+        }
+        if ((e.target as HTMLElement).tagName === "TEXTAREA") {
+            return;
+        }
         if (e.key === "Enter" && onSave && !saveDisabled) {
             e.preventDefault();
             e.stopPropagation();
@@ -66,6 +74,8 @@ export function SlideOver({
             {/* Panel */}
             <div
                 ref={panelRef}
+                role="dialog"
+                aria-modal={open}
                 tabIndex={-1}
                 onKeyDown={handleKeyDown}
                 className={clsx(

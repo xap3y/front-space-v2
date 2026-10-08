@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { ActiveVIP, Code, Kit, PausedVIP, VIPPackage, WsEnvelope } from "@/types/playcore";
 import { errorToast } from "@/lib/client";
+import { getPcvDeviceToken } from "@/lib/pcvDevice";
 
 export type Callback = () => void | Promise<void>;
 
 type Props = {
+    enabled?: boolean;
     apiBaseUrl: string;
     uid: string;
     setCodes: React.Dispatch<React.SetStateAction<Code[]>>;
@@ -32,6 +34,7 @@ function toWsUrl(httpUrl: string): string {
 }
 
 export function usePCVRealtime({
+                                   enabled = true,
                                    apiBaseUrl,
                                    uid,
                                    setCodes,
@@ -78,7 +81,7 @@ export function usePCVRealtime({
     };
 
     const connect = () => {
-        if (!uid) return;
+        if (!uid || !enabled) return;
         if (reconnectTimerRef.current) {
             clearTimeout(reconnectTimerRef.current);
             reconnectTimerRef.current = null;
@@ -86,7 +89,7 @@ export function usePCVRealtime({
         setLastError(null);
         setStatus("connecting");
 
-        const wsUrl = toWsUrl(`${apiBaseUrl}/ws/playcore/out?uniqueId=${uid}`);
+        const wsUrl = toWsUrl(`${apiBaseUrl}/ws/playcore/out?uniqueId=${encodeURIComponent(uid)}&deviceToken=${encodeURIComponent(getPcvDeviceToken())}`);
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
 
@@ -238,6 +241,9 @@ export function usePCVRealtime({
     };
 
     useEffect(() => {
+        if (!enabled) {
+            return;
+        }
         shouldReconnectRef.current = true;
         connect();
         return () => {
@@ -249,7 +255,7 @@ export function usePCVRealtime({
             wsRef.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [apiBaseUrl, uid]);
+    }, [apiBaseUrl, uid, enabled]);
 
     return {
         status,

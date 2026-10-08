@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import { pcvAxios as axios, pcvFetch as fetch } from "@/lib/pcvDevice";
 import { FaArrowDown, FaArrowUp, FaPlus, FaTrashCan } from "react-icons/fa6";
 import { Kit, KitItem } from "@/types/playcore";
 import MainStringInput from "@/components/MainStringInput";
