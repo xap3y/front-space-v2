@@ -8,9 +8,14 @@ export function useUser() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let active = true;
+
         const fetchUser = async () => {
             try {
                 const user: UserObj | null = await getUser();
+                if (!active) {
+                    return;
+                }
                 if (!user) {
                     setError("User not found.");
                     setUser(null);
@@ -18,14 +23,22 @@ export function useUser() {
                 }
                 setUser(user);
             } catch (err) {
+                if (!active) {
+                    return;
+                }
                 console.error("Failed to fetch user:", err);
                 setError("Failed to fetch user data.");
             } finally {
-                setLoadingUser(false);
+                if (active) {
+                    setLoadingUser(false);
+                }
             }
         };
 
         fetchUser();
+        return () => {
+            active = false;
+        };
     }, []);
 
     return { user, loadingUser, error };

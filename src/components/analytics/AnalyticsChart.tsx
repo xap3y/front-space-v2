@@ -1,6 +1,7 @@
 "use client";
 
-import ReactECharts from "echarts-for-react";
+import ReactECharts from "echarts-for-react/lib/core";
+import echarts from "@/lib/echarts";
 import type {EChartsOption} from "echarts";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 export default function AnalyticsChart({option, height = 360, className = ""}: Props) {
     return (
         <ReactECharts
+            echarts={echarts}
             option={option}
             notMerge
             lazyUpdate

@@ -3,7 +3,6 @@
 import HoverDiv from "@/components/HoverDiv";
 
 import {useEffect, useState} from "react";
-import QRCode from "qrcode";
 import {FaCopy, FaDownload, FaKey, FaShieldHalved, FaXmark} from "react-icons/fa6";
 import {getApiUrl} from "@/lib/core";
 import {responseErrorMessage} from "@/lib/apiError";
@@ -33,8 +32,28 @@ export default function TwoFactorClient({apiKey}: {apiKey: string}) {
 
     const begin = async () => {
         setBusy(true);
-        try { const data = await request("/v1/user/me/2fa/setup", "POST"); setSetup(data.message); setQr(await QRCode.toDataURL(data.message.otpauthUri, {width: 240, margin: 2, color: {dark: "#09090b", light: "#ffffff"}})); setCode(""); }
-        catch (e) { errorToast(e instanceof Error ? e.message : "Could not start 2FA setup"); } finally { setBusy(false); }
+        try {
+            const [{default: QRCode}, data] = await Promise.all([
+                import("qrcode"),
+                request("/v1/user/me/2fa/setup", "POST"),
+            ]);
+            const qrImage = await QRCode.toDataURL(data.message.otpauthUri, {
+                width: 240,
+                margin: 2,
+                color: {
+                    dark: "#09090b",
+                    light: "#ffffff",
+                },
+            });
+
+            setSetup(data.message);
+            setQr(qrImage);
+            setCode("");
+        } catch (error) {
+            errorToast(error instanceof Error ? error.message : "Could not start 2FA setup");
+        } finally {
+            setBusy(false);
+        }
     };
 
     const confirm = async () => {

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import ReactECharts from 'echarts-for-react';
+import ReactECharts from 'echarts-for-react/lib/core';
+import echarts from '@/lib/echarts';
 
 type Dataset = {
     label: string;
@@ -85,6 +86,7 @@ export default function DateChartECharts({ data }: { data: ChartData }) {
 
     return (
         <ReactECharts
+            echarts={echarts}
             option={option}
             notMerge
             lazyUpdate

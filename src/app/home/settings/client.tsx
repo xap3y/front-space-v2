@@ -6,11 +6,28 @@ import { useState, useEffect, useMemo } from "react";
 import { usePage } from "@/context/PageContext";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
-import EmbedTabContent from "@/app/home/settings/pages/embed";
+import dynamic from "next/dynamic";
 import LoadingPage from "@/components/LoadingPage";
 
-import UrlPreferencesTabContent from "@/app/home/settings/pages/url";
 import { PiPaintBrushBold, PiPlugsBold, PiLinkSimpleBold, PiGearBold } from "react-icons/pi";
+
+const EmbedTabContent = dynamic(() => import("@/app/home/settings/pages/embed"), {
+    loading: () => <SettingsTabLoading />,
+});
+
+const UrlPreferencesTabContent = dynamic(() => import("@/app/home/settings/pages/url"), {
+    loading: () => <SettingsTabLoading />,
+});
+
+function SettingsTabLoading() {
+    return (
+        <div className="animate-pulse space-y-4" aria-label="Loading settings">
+            <div className="h-6 w-1/4 rounded bg-white/10" />
+            <div className="h-24 w-full rounded-xl bg-white/5" />
+            <div className="h-10 w-32 rounded-xl bg-white/10" />
+        </div>
+    );
+}
 
 const TABS = [
     { key: "webhook", label: "Embed", icon: <PiPlugsBold /> },

@@ -13,8 +13,14 @@ import { errorToast, infoToast, okToast } from "@/lib/client";
 import { getApiUrl, getStorageUrl } from "@/lib/core";
 import HoverDiv from "@/components/HoverDiv";
 import LayoutModeSwitch from "@/components/LayoutModeSwitch";
-import FilePackManagement from "@/components/FilePackManagement";
+import dynamic from "next/dynamic";
 import {FaEye, FaUserSecret} from "react-icons/fa6";
+
+const FilePackManagement = dynamic(() => import("@/components/FilePackManagement"), {
+    loading: () => (
+        <div className="h-8 animate-pulse rounded bg-white/5" aria-label="Loading pack controls" />
+    ),
+});
 
 interface FileInfo {
     uniqueId: string;
@@ -81,16 +87,12 @@ export default function FilesPageClient() {
         try {
             setFetchingPacks(true);
 
-            // ✅ CHANGED: Enforce a minimum 300ms delay to prevent UI flickering on fast networks
-            const [response] = await Promise.all([
-                axios.get<PacksResponse>(
-                    getApiUrl() + `/v1/files/packs?page=${page}&size=${pageSize}`,
-                    {
-                        withCredentials: true,
-                    }
-                ),
-                new Promise((resolve) => setTimeout(resolve, 300))
-            ]);
+            const response = await axios.get<PacksResponse>(
+                getApiUrl() + `/v1/files/packs?page=${page}&size=${pageSize}`,
+                {
+                    withCredentials: true,
+                }
+            );
 
             setPacks([...response.data.packs].sort((a, b) => new Date(b.uploadTime).getTime() - new Date(a.uploadTime).getTime()));
             setCurrentPage(response.data.currentPage);

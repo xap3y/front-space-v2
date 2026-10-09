@@ -10,9 +10,14 @@ import MainStringInput from "@/components/MainStringInput";
 import HoverDiv from "@/components/HoverDiv";
 import type { UserObj } from "@/types/user";
 import type { AdminFilePack } from "@/types/filePack";
-import FilePackManagement from "@/components/FilePackManagement";
+import dynamic from "next/dynamic";
 import {FaCopy, FaEye, FaArrowUpRightFromSquare} from "react-icons/fa6";
 
+const FilePackManagement = dynamic(() => import("@/components/FilePackManagement"), {
+    loading: () => (
+        <div className="h-8 animate-pulse rounded bg-white/5" aria-label="Loading pack controls" />
+    ),
+});
 type Props = { users: UserObj[] };
 
 export default function FilesClient({ users }: Props) {

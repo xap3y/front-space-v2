@@ -10,4 +10,4 @@ const useStore = create<ApiStatusStore>((set) => ({
     setIsApiUp: (status) => set({ isApiUp: status }),
 }));
 
-export const useApiStatusStore = () => useStore();
+export const useApiStatusStore = useStore;

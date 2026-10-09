@@ -2,13 +2,15 @@
 
 import { Tooltip } from "react-tooltip";
 import { HeartbeatChecker } from "./HeartbeatChecker";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import dynamic from "next/dynamic";
 import {GoogleAnalytics} from "@next/third-parties/google";
 import { Analytics } from '@vercel/analytics/next';
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {MdErrorOutline} from "react-icons/md";
 import { useEffect, useState } from "react";
 import { ActiveSocketProvider } from "@/components/ActiveSocketProvider";
+
+const LanguageSwitcher = dynamic(() => import("@/components/LanguageSwitcher"));
 
 export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
 
@@ -20,7 +22,7 @@ export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
         setCookies(localStorage.getItem("cookie_consent") === "granted");
     }, []);
 
-    const { isApiUp } =  useApiStatusStore();
+    const isApiUp = useApiStatusStore(state => state.isApiUp);
 
     return (
         <>

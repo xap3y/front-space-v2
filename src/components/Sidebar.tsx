@@ -58,7 +58,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
         setPage(item.page);
         router.push(`/home${item.href}`);
         setMobileOpen(false);
-    }, [router]);
+    }, [router, setPage]);
 
     // Route-based highlight as fallback
     const activePage = useMemo(() => {
@@ -84,6 +84,8 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     <li key={item.page}>
                         <button
                             onClick={() => onItemClick(item)}
+                            onMouseEnter={() => router.prefetch(`/home${item.href}`)}
+                            onFocus={() => router.prefetch(`/home${item.href}`)}
                             aria-current={isActive ? 'page' : undefined}
                             className={`
                 group relative w-full flex items-center gap-3 px-3 py-2.5

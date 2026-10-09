@@ -1,100 +1,97 @@
 'use client';
 
-import {deleteCookie} from "cookies-next/client";
-import {TrUserObj, UserObj} from "@/types/user";
+import {deleteCookie, getCookie} from "cookies-next/client";
+import type {TrUserObj, UserObj} from "@/types/user";
 import {getApiUrl} from "@/lib/core";
 import {deleteVerifyToken} from "@/lib/client";
-import {logToServer} from "@/lib/serverFuncs";
 
-export async function getUser(): Promise<UserObj | null> {
+type AuthRequest<T> = {
+    session: string;
+    promise: Promise<T | null>;
+};
 
-    await logToServer("Fetching user data...");
-    await logToServer("API URL: " + getApiUrl() + "/v1/auth/me");
-    let res;
+let userRequest: AuthRequest<UserObj> | null = null;
+let trUserRequest: AuthRequest<TrUserObj> | null = null;
+
+async function fetchAuthUser<T>(path: string): Promise<T | null> {
+    let response: Response;
+
     try {
-        res = await fetch(getApiUrl() + "/v1/auth/me", {
+        response = await fetch(getApiUrl() + path, {
             method: "GET",
             headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
+                Accept: "application/json",
             },
             credentials: "include",
+            cache: "no-store",
         });
-    } catch (e) {
-        await logToServer("Error fetching user data: " + e);
-    }
-
-    await logToServer("Done fetching user data.");
-
-    if (!res || !res.ok) {
-        await logToServer("Data fetch failed with status: " + (res ? res.status : "No response"));
+    } catch (error) {
+        console.error("Failed to fetch authenticated user:", error);
         return null;
     }
 
-    const data = await res.json();
-
-    if (data.error) {
-        await logToServer("Data fetch returned error: " + data.error);
+    if (!response.ok) {
         return null;
     }
 
-    const user = data["message"] as UserObj;
-
-    await logToServer("User fetched successfully: " + user.username);
-    await logToServer("==GET USER END==");
-
-    return user;
+    const data = await response.json();
+    return data.error ? null : data.message as T;
 }
 
-export async function getTrUser(): Promise<TrUserObj | null> {
+export function getUser(): Promise<UserObj | null> {
+    const session = JSON.stringify([
+        getCookie("auth_token"),
+        getCookie("session_token"),
+    ]);
 
-    await logToServer("Fetching TR user data...");
-    await logToServer("API URL: " + getApiUrl() + "/v1/auth/tr/me");
-    let res;
-    try {
-        res = await fetch(getApiUrl() + "/v1/auth/tr/me", {
-            method: "GET",
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            },
-            credentials: "include",
-        });
-    } catch (e) {
-        await logToServer("Error fetching TR user data: " + e);
+    if (userRequest?.session === session) {
+        return userRequest.promise;
     }
 
-    await logToServer("Done fetching tr user data.");
+    // Share only pending requests. Later mounts still validate the current session.
+    const request: AuthRequest<UserObj> = {
+        session,
+        promise: fetchAuthUser<UserObj>("/v1/auth/me").finally(() => {
+            if (userRequest === request) {
+                userRequest = null;
+            }
+        }),
+    };
 
-    if (!res || !res.ok) {
-        await logToServer("Data fetch failed with status: " + (res ? res.status : "No response"));
-        return null;
+    userRequest = request;
+    return request.promise;
+}
+
+export function getTrUser(): Promise<TrUserObj | null> {
+    const session = String(getCookie("tr_token") ?? "");
+
+    if (trUserRequest?.session === session) {
+        return trUserRequest.promise;
     }
 
-    const data = await res.json();
+    const request: AuthRequest<TrUserObj> = {
+        session,
+        promise: fetchAuthUser<TrUserObj>("/v1/auth/tr/me").finally(() => {
+            if (trUserRequest === request) {
+                trUserRequest = null;
+            }
+        }),
+    };
 
-    if (data.error) {
-        await logToServer("Data fetch returned error: " + data.error);
-        return null;
-    }
-
-    const user = data["message"] as TrUserObj;
-
-    await logToServer("User fetched successfully: " + user.serverName);
-    await logToServer("==GET USER END==");
-
-    return user;
+    trUserRequest = request;
+    return request.promise;
 }
 
 export function logout() {
+    userRequest = null;
+    trUserRequest = null;
     deleteCookie("auth_token");
     deleteCookie("session_token");
     deleteCookie("tr_token");
-    deleteVerifyToken()
+    deleteVerifyToken();
 }
 
 export function logoutTr() {
+    trUserRequest = null;
     deleteCookie("tr_token");
 }

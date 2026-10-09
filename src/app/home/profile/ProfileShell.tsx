@@ -1,9 +1,8 @@
 import {FaCalendarDays, FaEnvelope, FaFileLines, FaHardDrive, FaImage, FaLink, FaShieldHalved} from "react-icons/fa6";
 import {getUserRoleBadgeServer} from "@/lib/server";
 import {RoleType, UserObj} from "@/types/user";
-import {DiscordConnection} from "@/types/discord";
+import type {ReactNode} from "react";
 import ApiKeyClient from "./clients/ApiKeyClient";
-import DiscordClient from "./clients/DiscordClient";
 import AvatarClient from "./clients/AvatarClient";
 import TwoFactorClient from "./clients/TwoFactorClient";
 import PasswordClient from "./clients/PasswordClient";
@@ -11,7 +10,7 @@ import EmailClient from "./clients/EmailClient";
 import Link from "next/link";
 import {PiShareNetworkBold} from "react-icons/pi";
 
-type Props = { user: UserObj; discordConnection: DiscordConnection | null };
+type Props = { user: UserObj; discordContent: ReactNode };
 
 function storage(bytes: number) {
     if (!bytes) return "0 MB";
@@ -19,7 +18,7 @@ function storage(bytes: number) {
     return mb >= 1024 ? `${(mb / 1024).toFixed(2)} GB` : `${mb.toFixed(mb < 10 ? 1 : 0)} MB`;
 }
 
-export default function ProfileShell({user, discordConnection}: Props) {
+export default function ProfileShell({user, discordContent}: Props) {
     const cards = [
         {label: "Uploads", value: user.stats.totalUploads, icon: FaImage, color: "text-violet-400 bg-violet-500/10"},
         {label: "Pastes", value: user.stats.pastesCreated, icon: FaFileLines, color: "text-amber-400 bg-amber-500/10"},
@@ -57,7 +56,7 @@ export default function ProfileShell({user, discordConnection}: Props) {
                 </div>
                 <div className="box-primary p-5 md:p-6">
                     <div className="mb-5"><h2 className="font-semibold">Connected accounts</h2><p className="text-xs text-zinc-500">Manage integrations linked to Space</p></div>
-                    <DiscordClient discordConnection={discordConnection} fallbackHandle="/home/connections" />
+                    {discordContent}
                     <div className="mt-4 grid gap-2">
                         <Link href="/home/profile/socials" className="flex items-center justify-between box-primary px-4 py-3 text-sm text-zinc-300 transition hover:border-zinc-700 hover:text-white"><span className="flex items-center gap-2.5"><PiShareNetworkBold className="text-sky-400" />Social profiles</span><span className="text-xs text-zinc-600">Edit</span></Link>
                         <div className="box-primary px-4 py-3 text-xs text-zinc-500">More integrations are available from the Connections page.</div>

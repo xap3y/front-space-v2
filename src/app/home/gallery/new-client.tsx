@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle, FaTimes } from 'react-icons/fa';
 import { FaPlus, FaRotateRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
@@ -15,9 +15,6 @@ import { useGalleryRows } from "@/hooks/useGalleryRow";
 import { useTranslation } from "@/hooks/useTranslation";
 import LanguageModel from "@/types/LanguageModel";
 import HoverDiv, {DeleteButton} from "@/components/HoverDiv";
-
-const ITEMS_PER_STAGGER = 4;
-const STAGGER_DELAY_MS = 120;
 
 function TimeDropdownShell({label, children}: {label: string; children: ReactNode}) {
     const [open, setOpen] = useState(false);
@@ -49,7 +46,8 @@ export default function GalleryPage() {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(21); // ✅ Dynamic page size
-    const [visibleCount, setVisibleCount] = useState(0);
+    const requestSequence = useRef(0);
+    const previousQuery = useRef("");
     const [isMobile, setIsMobile] = useState(false);
 
     const lang = useTranslation();
@@ -113,7 +111,7 @@ export default function GalleryPage() {
     }, []);
 
     // Construct query string helper
-    const getQueryString = () => {
+    const queryString = useMemo(() => {
         const params = new URLSearchParams();
         if (selectedFormats.length > 0) {
             params.append("formats", selectedFormats.join(","));
@@ -145,15 +143,22 @@ export default function GalleryPage() {
         if (toStr) params.append("to", toStr);
 
         return params.toString();
-    };
+    }, [selectedFormats, timeFilterMode, fromDate, fromTime, toDate, toTime, exactDate, dayDate, dayStartTime, dayEndTime]);
 
     // ✅ Fetch with page number and filters
-    async function fetchImages(page: number = 0) {
-        if (!user?.uid) return;
+    const fetchImages = useCallback(async (page: number = 0) => {
+        if (!user?.uid) {
+            return;
+        }
 
+        const sequence = ++requestSequence.current;
         setLoading(true);
         try {
-            const res = await getUserImages(String(user.uid), page, pageSize, getQueryString());
+            const res = await getUserImages(String(user.uid), page, pageSize, queryString);
+
+            if (sequence !== requestSequence.current) {
+                return;
+            }
 
             if (res?.error === true) {
                 if (res.message !== 'Resource not found') {
@@ -174,29 +179,37 @@ export default function GalleryPage() {
                 setTotalPages(1);
             }
         } catch (error) {
+            if (sequence !== requestSequence.current) {
+                return;
+            }
             console.error('Error fetching images:', error);
             setItems([]);
             errorToast('Failed to load images');
         } finally {
-            setTimeout(() => {
+            if (sequence === requestSequence.current) {
                 setLoading(false);
-            }, 200);
+            }
         }
-    }
+    }, [user?.uid, pageSize, queryString]);
 
-    // Reset to page 0 when filters change
+    // Reset pagination before fetching new filters, without requesting the old page.
     useEffect(() => {
-        if (canLoad) {
-            setCurrentPage(0);
+        if (previousQuery.current !== queryString) {
+            previousQuery.current = queryString;
+            if (currentPage !== 0) {
+                setCurrentPage(0);
+                return;
+            }
         }
-    }, [selectedFormats, timeFilterMode, fromDate, fromTime, toDate, toTime, exactDate, dayDate, dayStartTime, dayEndTime]);
 
-    // Live refetch effect
-    useEffect(() => {
         if (canLoad) {
             fetchImages(currentPage);
         }
-    }, [canLoad, currentPage, pageSize, selectedFormats, timeFilterMode, fromDate, fromTime, toDate, toTime, exactDate, dayDate, dayStartTime, dayEndTime]);
+
+        return () => {
+            requestSequence.current += 1;
+        };
+    }, [canLoad, currentPage, queryString, fetchImages]);
 
     // Auth check
     useEffect(() => {
@@ -218,22 +231,11 @@ export default function GalleryPage() {
         }
     }, [user?.apiKey]);
 
-    // Reset visible count when page changes
-    useEffect(() => {
-        setVisibleCount(0);
-    }, [currentPage]);
-
-    // Staggered loading animation
-    useEffect(() => {
-        if (loading || items.length === 0) return;
-
-        if (visibleCount < items.length) {
-            const timer = setTimeout(() => {
-                setVisibleCount(prev => Math.min(prev + ITEMS_PER_STAGGER, items.length));
-            }, STAGGER_DELAY_MS);
-            return () => clearTimeout(timer);
-        }
-    }, [visibleCount, items.length, loading]);
+    const openPasswordModal = useCallback((image: UploadedImagePage) => {
+        setPasswordModalImage(image);
+        setNewPasswordVal("");
+        setPasswordModalOpen(true);
+    }, []);
 
     const goToNextPage = () => {
         if (currentPage >= totalPages - 1) {
@@ -525,33 +527,18 @@ export default function GalleryPage() {
                             </div>
                         )}
 
-                        {/* Content with staggered animation */}
+                        {/* Render available results immediately. */}
                         {!loading && items.length > 0 && (
                             <ul className={gridClasses}>
-                                {items.map((img, index) => {
-                                    const isVisible = index < visibleCount;
+                                {items.map((img) => {
                                     return (
                                         <li key={img.uniqueId} className="relative group">
-                                            {/* Skeleton layer */}
-                                            <div
-                                                className={`absolute inset-0 z-0 transition-opacity duration-500 ease-in-out ${isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-                                            >
-                                                <SkeletonCard animate={!isVisible} />
-                                            </div>
-
-                                            {/* Content layer */}
-                                            <div
-                                                className={`relative z-10 h-full w-full transition-all duration-500 ease-out transform ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
-                                            >
+                                            <div className="relative h-full w-full">
                                                 <MediaCard
                                                     item={img}
-                                                    onDelete={() => handleDelete(img)}
-                                                    onPasswordChange={() => {
-                                                        setPasswordModalImage(img);
-                                                        setNewPasswordVal("");
-                                                        setPasswordModalOpen(true);
-                                                    }}
-                                                    onEnlarge={() => setEnlargedImage(img)}
+                                                    onDelete={handleDelete}
+                                                    onPasswordChange={openPasswordModal}
+                                                    onEnlarge={setEnlargedImage}
                                                     lang={lang}
                                                 />
                                             </div>
@@ -721,7 +708,7 @@ export default function GalleryPage() {
 }
 
 // MediaCard component
-function MediaCard({
+const MediaCard = memo(function MediaCard({
     item,
     onDelete,
     onPasswordChange,
@@ -729,9 +716,9 @@ function MediaCard({
     lang
 }: {
     item: UploadedImagePage;
-    onDelete: () => void;
-    onPasswordChange: () => void;
-    onEnlarge: () => void;
+    onDelete: (item: UploadedImagePage) => void;
+    onPasswordChange: (item: UploadedImagePage) => void;
+    onEnlarge: (item: UploadedImagePage) => void;
     lang: LanguageModel;
 }) {
     const isVideo = isVideoFile(item.type || '');
@@ -757,7 +744,7 @@ function MediaCard({
             <div 
                 className="relative w-full aspect-[4/3] overflow-hidden bg-black/60 flex-shrink-0 cursor-pointer" 
                 style={{ minHeight: 0 }}
-                onClick={onEnlarge}
+                onClick={() => onEnlarge(item)}
             >
                 {showPlaceholder ? (
                     <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary to-black/80 text-white/80 p-2">
@@ -785,6 +772,7 @@ function MediaCard({
                         alt={title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         loading="lazy"
+                        decoding="async"
                         style={{ minHeight: 0 }}
                         onError={() => setImgFailed(true)}
                     />
@@ -816,7 +804,7 @@ function MediaCard({
             {/* Body */}
             <div className="p-3 space-y-1.5 flex-1 flex flex-col justify-between">
                 <div className="min-w-0 flex items-center justify-between gap-2 h-[16px]">
-                    <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors cursor-pointer" onClick={onEnlarge} title={title}>
+                    <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors cursor-pointer" onClick={() => onEnlarge(item)} title={title}>
                         {title}.{item.type}
                     </p>
                     <p className="text-[10px] text-gray-500 group-hover:text-gray-300 flex-shrink-0 font-medium transition-colors">({size})</p>
@@ -845,7 +833,7 @@ function MediaCard({
                         </a>
                         {/* Lock Button to modify password */}
                         <HoverDiv
-                            onClick={onPasswordChange}
+                            onClick={() => onPasswordChange(item)}
                             type={item.requiresPassword ? "WARN" : "INFO"}
                             icon={<FaLock className="h-3.5 w-3.5"/>}
                             className="px-2 py-1.5 text-xs"
@@ -854,7 +842,7 @@ function MediaCard({
                         />
                     </div>
                     <DeleteButton
-                        onClick={onDelete}
+                        onClick={() => onDelete(item)}
                         icon={<FaRegTrashAlt className="h-3.5 w-3.5"/>}
                         className="px-2 py-1.5 text-xs"
                         inputClassName="flex-shrink-0"
@@ -865,7 +853,7 @@ function MediaCard({
             </div>
         </div>
     );
-}
+});
 
 function deriveTitle(item: UploadedImagePage, originalUrl: string): string {
     if (item.description) return item.description;
