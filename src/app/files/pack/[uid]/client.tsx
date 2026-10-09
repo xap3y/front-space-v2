@@ -11,6 +11,7 @@ import MainStringInput from "@/components/MainStringInput";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import {getApiUrl, getR2VideoUrl, getStorageUrl} from "@/lib/core";
 import {UserObjShort} from "@/types/user";
+import HoverDiv from "@/components/HoverDiv";
 
 interface FileInfo {
     uniqueId: string;
@@ -29,6 +30,7 @@ interface PackInfo {
     totalSize: number;
     uploadTime: string;
     isPasswordProtected: boolean;
+    hasAccess: boolean;
     uploader: UserObjShort | null;
 }
 
@@ -60,8 +62,26 @@ export function PackPageClient() {
     const [previewPassword, setPreviewPassword] = useState("");
 
     const cancelTokenRef = useRef<CancelTokenSource | null>(null);
+    const requestedPackRef = useRef<string | null>(null);
+
+    const downloadFile = async (file: FileInfo) => {
+        try {
+            const response = await axios.post(
+                `${getApiUrl()}/v1/files/pack/public/${packId}/file/${file.uniqueId}/download`,
+                {password},
+                {withCredentials: true}
+            );
+            window.location.assign(response.data.url);
+        } catch (error: any) {
+            errorToast(error.response?.data?.message || "Failed to download file");
+        }
+    };
 
     useEffect(() => {
+        if (requestedPackRef.current === packId) {
+            return;
+        }
+        requestedPackRef.current = packId;
         fetchPackInfo();
     }, [packId]);
 
@@ -152,7 +172,7 @@ export function PackPageClient() {
                 ? { password: previewPassword || password }
                 : {};
 
-            if (packInfo?.isPasswordProtected && !previewPassword && !password) {
+            if (packInfo?.isPasswordProtected && !packInfo.hasAccess && !previewPassword && !password) {
                 errorToast("Password required to download");
                 setDownloading(false);
                 return;
@@ -502,15 +522,14 @@ export function PackPageClient() {
                                         </button>
 
                                         {/* Download */}
-                                        <a
-                                            href={getStorageUrl() + "/files/" + file.uniqueId + "?download=true"}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <HoverDiv
+                                            type="INFO"
+                                            onClick={() => downloadFile(file)}
                                             className="p-2 hover:bg-green-500 hover:bg-opacity-20 rounded transition"
                                             title="Download"
+                                            icon={<FaDownload className="w-4 h-4 text-green-400" />}
                                         >
-                                            <FaDownload className="w-4 h-4 text-green-400" />
-                                        </a>
+                                        </HoverDiv>
                                     </div>
                                 </div>
                             </div>
@@ -681,13 +700,14 @@ export function PackPageClient() {
                                     <FaExternalLinkAlt className="w-4 h-4" />
                                     Open
                                 </a>
-                                <a
-                                    href={getStorageUrl() + "/files/" + previewFile.uniqueId + "?download=true"}
+                                <HoverDiv
+                                    type="INFO"
+                                    onClick={() => downloadFile(previewFile)}
+                                    icon={<FaDownload className="w-4 h-4" />}
                                     className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded transition flex items-center justify-center gap-2"
                                 >
-                                    <FaDownload className="w-4 h-4" />
                                     Download
-                                </a>
+                                </HoverDiv>
                             </div>
                         </div>
                     </div>

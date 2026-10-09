@@ -21,4 +21,6 @@ export interface AdminFilePack {
     source: string;
     uploader?: UserObj | null;
     files: AdminPackFile[];
+    views: number;
+    anonymous: boolean;
 }

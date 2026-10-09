@@ -13,6 +13,8 @@ import { errorToast, infoToast, okToast } from "@/lib/client";
 import { getApiUrl, getStorageUrl } from "@/lib/core";
 import HoverDiv from "@/components/HoverDiv";
 import LayoutModeSwitch from "@/components/LayoutModeSwitch";
+import FilePackManagement from "@/components/FilePackManagement";
+import {FaEye} from "react-icons/fa6";
 
 interface FileInfo {
     uniqueId: string;
@@ -22,6 +24,7 @@ interface FileInfo {
 }
 
 interface PackInfo {
+    views: number;
     packId: string;
     isComplete: boolean;
     totalFiles: number;
@@ -352,6 +355,7 @@ export default function FilesPageClient() {
                                                 )}
                                             </div>
                                             <div className="text-xs text-gray-500 font-mono truncate flex gap-2 items-center">
+                                                <span className="inline-flex items-center gap-1" title="Pack views"><FaEye />{pack.views ?? 0}</span>
                                                 <span>{pack.packId}</span>
                                                 <FaCopy data-pack-action className={"cursor-pointer hover:text-blue-600 duration-500 transition-all"} onClick={
                                                     () => copyToClipboard(pack.packId, "Link copied!")
@@ -417,6 +421,12 @@ export default function FilesPageClient() {
                                     <div className="overflow-hidden">
                                         {pack.files && pack.files.length > 0 ? (
                                             <div className="bg-black/30 p-2.5">
+                                                <FilePackManagement
+                                                    packId={pack.packId}
+                                                    apiKey={user.apiKey}
+                                                    protectedPack={pack.isPasswordProtected}
+                                                    onUpdate={() => fetchPacks(currentPage)}
+                                                />
                                                 <p className="text-xs md:text-sm font-semibold text-gray-300 mb-2">
                                                     Files ({pack.files.length})
                                                 </p>

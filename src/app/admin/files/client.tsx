@@ -10,6 +10,8 @@ import MainStringInput from "@/components/MainStringInput";
 import HoverDiv from "@/components/HoverDiv";
 import type { UserObj } from "@/types/user";
 import type { AdminFilePack } from "@/types/filePack";
+import FilePackManagement from "@/components/FilePackManagement";
+import {FaCopy, FaEye, FaArrowUpRightFromSquare} from "react-icons/fa6";
 
 type Props = { users: UserObj[] };
 
@@ -117,13 +119,45 @@ export default function FilesClient({ users }: Props) {
                 {packs.map((pack, index) => <article key={pack.packId} className={index ? "border-t border-zinc-800/70" : ""}>
                     <div className="flex items-center gap-1.5 px-1.5 py-1">
                         <HoverDiv type="INFO" className="grid min-w-0 flex-1 grid-cols-[minmax(15rem,1fr)_8rem_5rem_6rem_11rem] items-center justify-start gap-3 !border-0 !bg-transparent !shadow-none px-2 py-1 text-left hover:bg-white/[.035] max-lg:grid-cols-[minmax(12rem,1fr)_7rem_5rem]" onClick={() => setExpanded(expanded === pack.packId ? null : pack.packId)}>
-                            <div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-sky-500/15 bg-sky-500/[.07]"><FaFile className="text-[11px] text-sky-300"/></span><div className="min-w-0"><div className="flex items-center gap-1.5"><span className="truncate font-mono text-[12px] text-zinc-200">{pack.packId}</span>{pack.isPasswordProtected && <FaLock className="shrink-0 text-[10px] text-amber-400"/>}</div><p className="truncate text-[10px] text-zinc-600">{pack.source}</p></div></div>
-                            <span className="truncate text-[11px] text-zinc-400">{pack.uploader?.username ?? "Anonymous"}</span><span className="text-[11px] tabular-nums text-zinc-500">{pack.totalFiles} {pack.totalFiles === 1 ? "file" : "files"}</span><span className="text-[11px] tabular-nums text-zinc-500 max-lg:hidden">{bytes(pack.totalSize)}</span><span className="text-right text-[10px] tabular-nums text-zinc-600 max-lg:hidden">{new Date(pack.uploadTime).toLocaleString()}</span>
+                            <div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-sky-500/15 bg-sky-500/[.07]"><FaFile className="text-[11px] text-sky-300"/></span><div className="min-w-0"><div className="flex items-center gap-1.5"><span className="truncate font-mono text-[12px] text-zinc-200">{pack.packId}</span>{pack.isPasswordProtected && <FaLock className="shrink-0 text-[10px] text-amber-400"/>}
+                                <HoverDiv
+                                    type="INFO"
+                                    className="group h-4 w-4 shrink-0 !border-0 !bg-transparent !text-zinc-500 !shadow-none hover:!text-zinc-400"
+                                    title="Copy pack URL"
+                                    icon={<FaCopy className="h-2.5 w-2.5 text-zinc-500 group-hover:text-zinc-400" />}
+                                    onClick={event => {
+                                        event.stopPropagation();
+                                        navigator.clipboard.writeText(getPackUrl(pack.packId))
+                                            .then(() => okToast("Pack URL copied"))
+                                            .catch(() => errorToast("Copy failed"));
+                                    }}
+                                />
+                                <a
+                                    href={getPackUrl(pack.packId)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Open pack"
+                                    className="flex h-4 w-4 shrink-0 items-center justify-center text-zinc-500 transition-colors hover:text-zinc-400"
+                                    onClick={event => event.stopPropagation()}
+                                >
+                                    <FaArrowUpRightFromSquare className="h-2.5 w-2.5" />
+                                </a>
+                                <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-zinc-500">
+                                    <FaEye />{pack.views ?? 0}
+                                </span></div><p className="truncate text-[10px] text-zinc-600">{pack.source}</p></div></div>
+                            <span className="truncate text-[11px] text-zinc-400">{pack.uploader?.username ?? "Anonymous"}{pack.anonymous ? " (anonymous upload)" : ""}</span><span className="text-[11px] tabular-nums text-zinc-500">{pack.totalFiles} {pack.totalFiles === 1 ? "file" : "files"}</span><span className="text-[11px] tabular-nums text-zinc-500 max-lg:hidden">{bytes(pack.totalSize)}</span><span className="text-right text-[10px] tabular-nums text-zinc-600 max-lg:hidden">{new Date(pack.uploadTime).toLocaleString()}</span>
                         </HoverDiv>
                         <a href={`/files?appendPack=${encodeURIComponent(pack.packId)}`} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-emerald-800/70 bg-emerald-950/40 text-[10px] text-emerald-300 transition hover:border-emerald-500" title={`Add files to ${pack.packId}`} aria-label={`Add files to ${pack.packId}`}><FaPlus/></a>
                         <HoverDiv type="DELETE" className="h-7 w-7 shrink-0 !shadow-none text-[10px]" title={`Delete pack ${pack.packId}`} aria-label={`Delete pack ${pack.packId}`} disabled={busy !== null} onClick={() => remove(`/v1/admin/file-packs/${pack.packId}`, `pack ${pack.packId}`)} icon={<FaTrash/>}/>
                     </div>
-                    {expanded === pack.packId && <div className="border-t border-zinc-800/60 bg-black/20 px-11 py-2"><p className="mb-2 text-[10px] text-zinc-500">{pack.description || "No description"}</p><div className="space-y-1">
+                    {expanded === pack.packId && <div className="border-t border-zinc-800/60 bg-black/20 px-11 py-2"><FilePackManagement
+                            packId={pack.packId}
+                            apiKey={user?.apiKey}
+                            protectedPack={pack.isPasswordProtected}
+                            admin
+                            onUpdate={() => fetchPacks()}
+                        />
+                        <p className="mb-2 text-[10px] text-zinc-500">{pack.description || "No description"}</p><div className="space-y-1">
                         {pack.files.map(file => <div key={file.uniqueId} className="flex items-center gap-3 rounded-md border border-zinc-800/70 bg-zinc-950/60 px-2.5 py-1.5"><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-medium text-zinc-300">{file.fileName}</p><p className="truncate text-[10px] text-zinc-600">{file.uniqueId} · {file.fileType} · {bytes(file.size)}</p></div><HoverDiv type="DELETE" className="h-6 w-6 !shadow-none text-[9px]" title={`Delete ${file.fileName}`} disabled={busy !== null} onClick={() => remove(`/v1/admin/file-packs/${pack.packId}/files/${file.uniqueId}`, `file ${file.fileName}`)} icon={<FaTrash/>}/></div>)}
                     </div></div>}
                 </article>)}
