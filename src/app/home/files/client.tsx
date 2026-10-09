@@ -14,7 +14,7 @@ import { getApiUrl, getStorageUrl } from "@/lib/core";
 import HoverDiv from "@/components/HoverDiv";
 import LayoutModeSwitch from "@/components/LayoutModeSwitch";
 import FilePackManagement from "@/components/FilePackManagement";
-import {FaEye} from "react-icons/fa6";
+import {FaEye, FaUserSecret} from "react-icons/fa6";
 
 interface FileInfo {
     uniqueId: string;
@@ -24,6 +24,7 @@ interface FileInfo {
 }
 
 interface PackInfo {
+    anonymous: boolean;
     views: number;
     packId: string;
     isComplete: boolean;
@@ -349,6 +350,13 @@ export default function FilesPageClient() {
                                                 </span>
                                                 {pack.isPasswordProtected && (
                                                     <FaLock className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 flex-shrink-0 ml-auto md:ml-0" />
+                                                )}
+                                                {pack.anonymous && (
+                                                    <FaUserSecret
+                                                        className="h-3 w-3 shrink-0 text-violet-400 md:h-4 md:w-4"
+                                                        title="Uploaded anonymously"
+                                                        aria-label="Uploaded anonymously"
+                                                    />
                                                 )}
                                                 {!pack.isPasswordProtected && (
                                                     <FaLink className="w-3 h-3 md:w-4 md:h-4 text-blue-400 flex-shrink-0 ml-auto md:ml-0 hidden md:block" />
