@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {MdLogout, MdMenu, MdClose, MdOutlineAdminPanelSettings} from 'react-icons/md';
 import {useUser} from "@/hooks/useUser";
+import {firstAdminPath} from "@/lib/permissions";
 
 type SidebarItem = {
     title: string;
@@ -187,8 +188,8 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                         </div>
                     ) : (
                         <>
-                            {user && user.role === "OWNER" && (
-                                <a href="/admin" className="w-full block">
+                            {firstAdminPath(user) && (
+                                <a href={firstAdminPath(user) ?? "/admin"} className="w-full block">
                                     <button
                                         className="
                         w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm

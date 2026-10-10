@@ -17,6 +17,7 @@ import { UserObj } from "@/types/user";
 import { UserPopupCard } from "@/components/UserPopupCard";
 import {BundledTheme} from "shiki/themes";
 import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
+import ResourceDeleteButton from "@/components/ResourceDeleteButton";
 
 const zoomOptions = [75, 90, 100, 110, 125, 150];
 
@@ -400,6 +401,7 @@ export default function Page() {
                                     {paste.title}
                                 </h1>
                                 <p className="text-sm text-white/60 break-all">({paste.uniqueId})</p>
+                                <ResourceDeleteButton kind="paste" id={paste.uniqueId} ownerId={paste.uploader?.uid} />
                             </div>
                             <div className="flex flex-wrap items-center gap-3 text-sm sm:text-base">
                                 <div className="flex items-center gap-2 text-white/80">

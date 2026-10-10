@@ -12,6 +12,7 @@ import { errorToast, infoToast, okToast } from "@/lib/client";
 import {getApiUrl, getR2VideoUrl, getStorageUrl} from "@/lib/core";
 import {UserObjShort} from "@/types/user";
 import HoverDiv from "@/components/HoverDiv";
+import ResourceDeleteButton from "@/components/ResourceDeleteButton";
 
 interface FileInfo {
     uniqueId: string;
@@ -31,6 +32,7 @@ interface PackInfo {
     uploadTime: string;
     isPasswordProtected: boolean;
     hasAccess: boolean;
+    canDelete: boolean;
     uploader: UserObjShort | null;
 }
 
@@ -335,6 +337,9 @@ export function PackPageClient() {
                             <h1 className="text-2xl font-bold text-white">
                                 Password Protected
                             </h1>
+                            <div className="mt-3 flex justify-center">
+                                <ResourceDeleteButton kind="pack" id={String(packId)} canDelete={packInfo.canDelete} />
+                            </div>
                             <p className="text-gray-400 mt-2">
                                 {packInfo.description ||
                                     "This pack is password protected"}
@@ -440,6 +445,9 @@ export function PackPageClient() {
                         <h1 className="text-3xl font-bold text-white">
                             File Pack
                         </h1>
+                        <div className="mt-3 flex justify-center">
+                            <ResourceDeleteButton kind="pack" id={String(packId)} canDelete={packInfo.canDelete} />
+                        </div>
                         {packInfo.description && (
                             <p className="text-gray-400 mt-2">
                                 {packInfo.description}

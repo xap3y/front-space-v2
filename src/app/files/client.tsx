@@ -405,7 +405,7 @@ export function FilesPageClient() {
                 filenameNew = uid + extension;
             }
 
-            const uploadUrl = await generatePresignedPutUrl(filenameNew, item.file.type);
+            const uploadUrl = await generatePresignedPutUrl(filenameNew, item.file.type, apiKey);
 
             if (uploadUrl.error || !uploadUrl.data || typeof uploadUrl.data !== "string") {
                 setUploadItems((prev) =>

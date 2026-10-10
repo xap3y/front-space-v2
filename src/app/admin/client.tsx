@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import {useUser} from "@/hooks/useUser";
+import {canAccessAdminPath} from "@/lib/permissions";
 import { FaArrowRight, FaDatabase, FaEnvelope, FaImage, FaLink, FaPaste, FaUsers } from "react-icons/fa6";
 import { FaFileArchive, FaUserCog } from "react-icons/fa";
 import { MdDashboard, MdHistory, MdSettings, MdSpeed } from "react-icons/md";
@@ -21,6 +23,7 @@ const adminSections = [
 ];
 
 export default function AdminPage() {
+    const {user} = useUser();
     return (
         <div className="mx-auto min-h-full max-w-6xl px-1 py-2 sm:px-4 sm:py-5">
             <header className="mb-5 text-center sm:mb-6">
@@ -29,7 +32,7 @@ export default function AdminPage() {
             </header>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {adminSections.map((section) => (
+                    {adminSections.filter(section => canAccessAdminPath(user, section.href)).map((section) => (
                     <Link key={section.href} href={section.href} className="group box-primary flex min-h-36 flex-col rounded-xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500/30 hover:shadow-xl hover:shadow-black/30">
                         <div className="mb-3 flex items-start justify-between">
                             <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-black/30 text-blue-300 transition group-hover:border-blue-500/30 group-hover:bg-blue-500/10">{section.icon}</div>

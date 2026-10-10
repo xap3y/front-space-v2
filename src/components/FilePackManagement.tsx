@@ -122,7 +122,8 @@ export default function FilePackManagement({packId, apiKey, protectedPack, admin
                             )}
                             <span>{log.viewer?.username ?? "Anonymous"}</span>
                             <time className="text-zinc-500">{new Date(log.time).toLocaleString()}</time>
-                            {admin && <span className="break-all text-zinc-400">{log.ip || "Unknown IP"} · {log.userAgent || "Unknown browser"}</span>}
+                            {log.ip && <span className="break-all text-zinc-400">IP: {log.ip}</span>}
+                            {log.userAgent && <span className="break-all text-zinc-400">UA: {log.userAgent}</span>}
                         </div>
                     ))}
                     <div className="flex items-center gap-2">

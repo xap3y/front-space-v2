@@ -1,5 +1,6 @@
 'use server';
-import {getApiKey, getApiUrl, getCurlHeaders, getValidatedResponse} from "@/lib/core";
+import {getApiUrl, getCurlHeaders} from "@/lib/core";
+import {getAuthenticatedResponse as getValidatedResponse, sessionHeaders} from "@/lib/authenticatedApi";
 import {UploadedImage} from "@/types/image";
 import {PasteDto} from "@/types/paste";
 import {ShortUrlDto, ShortUrlLog} from "@/types/url";
@@ -44,6 +45,10 @@ export async function getUsers(): Promise<DefaultResponse> {
     return data;
 }
 
+export async function getAdminUserOptions(): Promise<DefaultResponse> {
+    return getValidatedResponse("/v1/admin/permissions/user-options");
+}
+
 export async function getAuditLogs(): Promise<DefaultResponse> {
     console.log("Calling getAuditLog")
 
@@ -84,7 +89,7 @@ export async function revokeUserDiscordConnectionToken(token: string): Promise<b
         const url = '/v1/discord/token/' + token;
         const response = await fetch(getApiUrl() + url, {
             method: 'DELETE',
-            headers: getCurlHeaders()
+            headers: await sessionHeaders(true)
         });
         const data = await response.json();
         return !data.error
@@ -126,7 +131,7 @@ export async function getUserImages(
 
     const qs = queryString ? `&${queryString}` : "";
     const data = await getValidatedResponse(
-        `/v1/admin/user/${uid}/images/pageable?page=${page}&size=${size}${qs}`
+        `/v1/user/me/images/pageable?page=${page}&size=${size}${qs}`
     );
 
     console.log("DATA: " + JSON.stringify(data))
@@ -144,14 +149,14 @@ export async function getDiscordTranscript(uid: string, apiKey: string): Promise
 }
 
 export async function getUserShortUrls(uid: string): Promise<ShortUrlDto[] | DefaultResponse> {
-    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/urls");
+    const data = await getValidatedResponse('/v1/user/me/urls');
     //console.log("DATA IS " + JSON.stringify(data))
     if (data.error) return {error: true, message: data.message} as DefaultResponse;
     return data["data"] as ShortUrlDto[];
 }
 
 export async function getUserPastes(uid: string): Promise<PasteDto[] | DefaultResponse> {
-    const data = await getValidatedResponse('/v1/admin/user/' + uid + "/pastes");
+    const data = await getValidatedResponse('/v1/user/me/pastes');
     if (data.error) return {error: true, message: data.message} as DefaultResponse;
     return data["data"] as PasteDto[];
 }
@@ -204,7 +209,7 @@ export async function getAllEmails(): Promise<DefaultResponse> {
         const url = "/v1/email/getall";
         const response = await fetch(getApiUrl() + url, {
             method: "GET",
-            headers: getCurlHeaders(getApiKey()),
+            headers: await sessionHeaders(),
             cache: "no-store",
         });
 
@@ -235,10 +240,7 @@ export async function getEmailInfo(email: string): Promise<DefaultResponse | nul
 
     try {
         const response = await axios.get(getApiUrl() + "/v1/email/getinfo?email=" + email, {
-            headers: {
-                'x-api-key': getApiKey(),
-                'Content-Type': 'application/json',
-            },
+            headers: await sessionHeaders(),
             timeout: 6000,
         });
         if (!response.status.toString().startsWith("2") || !response.data) {

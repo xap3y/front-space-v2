@@ -1,7 +1,7 @@
 'use server';
 
 import {ShortUrlDto} from "@/types/url";
-import {getApiKey, getApiUrl, getCurlHeaders, postApi} from "@/lib/core";
+import {getApiUrl, getCurlHeaders, postApi} from "@/lib/core";
 import {PasteDto} from "@/types/paste";
 import {DefaultResponse} from "@/types/core";
 import {DiscordConnection, KeyRequest} from "@/types/discord";
@@ -9,6 +9,7 @@ import defaultPeriodStats, {PeriodStats} from "@/types/stats";
 import axios, {CancelToken} from "axios";
 import {headers} from "next/headers";
 import {responseErrorMessage} from "@/lib/apiError";
+import {sessionHeaders} from "@/lib/authenticatedApi";
 
 
 export type CreateShortUrlResult = {
@@ -41,7 +42,7 @@ export async function createShortUrl(url: string, apikey: string, uniqueId: stri
 
 export async function getAdminUserTwoFactorStatus(uid: number): Promise<DefaultResponse> {
     try {
-        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/2fa`, {headers: getCurlHeaders()});
+        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/2fa`, {headers: await sessionHeaders(true)});
         const data = await response.json();
         return response.ok ? data as DefaultResponse : {error: true, message: data?.message || "Failed to load 2FA status"} as DefaultResponse;
     } catch {
@@ -51,7 +52,7 @@ export async function getAdminUserTwoFactorStatus(uid: number): Promise<DefaultR
 
 export async function removeAdminUserTwoFactor(uid: number): Promise<DefaultResponse> {
     try {
-        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/2fa`, {method: "DELETE", headers: getCurlHeaders()});
+        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/2fa`, {method: "DELETE", headers: await sessionHeaders(true)});
         const data = await response.json();
         return response.ok ? data as DefaultResponse : {error: true, message: data?.message || "Failed to remove 2FA"} as DefaultResponse;
     } catch {
@@ -59,7 +60,11 @@ export async function removeAdminUserTwoFactor(uid: number): Promise<DefaultResp
     }
 }
 
-export async function generatePresignedPutUrl(fileName: string, contentType: string): Promise<DefaultResponse> {
+export async function generatePresignedPutUrl(
+    fileName: string,
+    contentType: string,
+    apiKey: string
+): Promise<DefaultResponse> {
 
     const headersList = await headers();
     const clientIp = getClientIp(headersList);
@@ -72,7 +77,7 @@ export async function generatePresignedPutUrl(fileName: string, contentType: str
         {},
         {
             headers: {
-                "x-api-key": getApiKey(),
+                ...getCurlHeaders(apiKey),
                 'x-forwarded-for': clientIp,
                 'x-real-ip': clientIp,
             },
@@ -121,6 +126,7 @@ export async function createMinecraftServerApiKey(req: KeyRequest): Promise<Defa
                 token: req.token,
                 password: req.password
             }),
+            // Public registration is validated by the backend's Turnstile check.
             headers: getCurlHeaders()
         })
 
@@ -138,7 +144,7 @@ export async function createInvites(count: number, prefix?: string, creator?: nu
     try {
         const response = await fetch(getApiUrl() + "/v1/admin/invite/create?amount=" + count + ((prefix !== undefined) ? "&prefix=" + prefix : ""), {
             method: "POST",
-            headers: getCurlHeaders()
+            headers: await sessionHeaders(true)
         })
 
         if (!response) return {error: true, message: "Failed to create codes!"} as DefaultResponse;
@@ -194,10 +200,14 @@ export async function authorizeDiscordConnection(tokenData: any, apiKey: string,
 export async function getPeriodStats(preset: string = "TODAY"): Promise<PeriodStats> {
 
     console.log("GETTING PERIOD DATA")
-    const data = await postApi('/v1/stats/get', {preset: preset}, getApiKey());
-    if (!data) return defaultPeriodStats;
-
-    return data as PeriodStats;
+    const response = await fetch(getApiUrl() + "/v1/stats/get", {
+        method: "POST",
+        headers: await sessionHeaders(true),
+        body: JSON.stringify({preset}),
+        cache: "no-store",
+    });
+    const data = await response.json();
+    return response.ok && !data.error ? data.message as PeriodStats : defaultPeriodStats;
 }
 
 export async function updateMinecraftServer(
@@ -216,7 +226,7 @@ export async function updateMinecraftServer(
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                'X-API-Key': getApiKey() || "",
+                ...await sessionHeaders(true),
             },
             body: JSON.stringify(updates),
         });
@@ -235,7 +245,7 @@ export async function updateMinecraftServer(
 
 export async function rotateUserApiKey(uid: number): Promise<DefaultResponse> {
     try {
-        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/api-key/rotate`, {method: "POST", headers: getCurlHeaders(getApiKey())});
+        const response = await fetch(getApiUrl() + `/v1/admin/user/${uid}/api-key/rotate`, {method: "POST", headers: await sessionHeaders(true)});
         return await response.json() as DefaultResponse;
     } catch { return {error: true, message: "Server error"} as DefaultResponse; }
 }
@@ -248,7 +258,7 @@ export async function deleteMinecraftServer(serverId: string): Promise<boolean> 
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
-                'X-API-Key': getApiKey() || "",
+                ...await sessionHeaders(true),
             },
         });
 
@@ -301,7 +311,7 @@ export async function updateUser(
     try {
         const response = await fetch(getApiUrl() + "/v1/admin/user/" + uid, {
             method: "PUT",
-            headers: getCurlHeaders(getApiKey()),
+            headers: await sessionHeaders(true),
             body: JSON.stringify(body),
         });
 
@@ -324,7 +334,7 @@ export async function createAdminUser(body: {
     try {
         const response = await fetch(getApiUrl() + "/v1/admin/user/create", {
             method: "POST",
-            headers: getCurlHeaders(getApiKey()),
+            headers: await sessionHeaders(true),
             body: JSON.stringify(body),
         });
 
@@ -342,7 +352,7 @@ export async function deleteUser(uid: number): Promise<DefaultResponse> {
     try {
         const response = await fetch(getApiUrl() + "/v1/admin/user/" + uid, {
             method: "DELETE",
-            headers: getCurlHeaders(getApiKey()),
+            headers: await sessionHeaders(true),
         });
 
         if (!response) return { error: true, message: "Failed to delete user" } as DefaultResponse;
@@ -359,7 +369,7 @@ export async function updateImagePassword(uniqueId: string, password?: string): 
         const response = await fetch(getApiUrl() + "/v1/image/password/" + uniqueId, {
             method: "PUT",
             headers: {
-                ...getCurlHeaders(getApiKey()),
+                ...await sessionHeaders(true),
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ password: password || "" })

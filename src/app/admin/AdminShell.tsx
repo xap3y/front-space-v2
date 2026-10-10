@@ -5,7 +5,8 @@ import {useEffect, useMemo} from "react";
 import AdminNavBar, { type AdminNavItem } from "@/app/admin/AdminNavBar";
 import {useUser} from "@/hooks/useUser";
 import LoadingPage from "@/components/LoadingPage";
-import {useRouter} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
+import {canAccessAdminPath, firstAdminPath} from "@/lib/permissions";
 import {FaDatabase, FaEnvelope, FaFileArchive, FaImage, FaLink, FaPaste, FaUserCog, FaUsers} from "react-icons/fa";
 import {MdDashboard, MdHistory, MdSettings, MdSpeed} from "react-icons/md";
 
@@ -15,6 +16,7 @@ type Props = {
 
 export default function AdminShell({ children }: Props) {
     const router = useRouter();
+    const pathname = usePathname();
     const navItems: AdminNavItem[] = useMemo(
         () => [
             { title: "Overview", href: "/admin", page: "overview", icon: <MdDashboard className="h-5 w-5" /> },
@@ -31,19 +33,22 @@ export default function AdminShell({ children }: Props) {
             { title: "Emails", href: "/admin/emails", page: "emails", icon: <FaEnvelope className="h-5 w-5" /> },
             { title: "Mc-Reports", href: "/admin/mc-reports", page: "mc-reports", icon: <FaDatabase className="h-5 w-5" /> },
             { title: "Active Sessions", href: "/admin/sessions", page: "sessions", icon: <MdHistory className="h-5 w-5" /> },
+            { title: "Permissions", href: "/admin/permissions", page: "permissions", icon: <FaUserCog className="h-5 w-5" /> },
         ],
         []
     );
 
     const { user, loadingUser } = useUser();
+    const allowed = canAccessAdminPath(user, pathname);
+    const visibleItems = navItems.filter(item => canAccessAdminPath(user, item.href));
 
     useEffect(() => {
-        if (!user && !loadingUser || (user && (user.role != "OWNER" && user.role != "ADMIN") && !loadingUser)) {
-            router.replace("/login");
+        if (!loadingUser && !allowed) {
+            router.replace(user ? firstAdminPath(user) ?? "/home/dashboard" : "/login");
         }
-    }, [user, loadingUser, router]);
+    }, [user, loadingUser, allowed, router]);
 
-    if (!loadingUser && (!user || (user.role != "OWNER" && user.role != "ADMIN"))) {
+    if (!loadingUser && !allowed) {
         return <LoadingPage />;
     }
 
@@ -55,7 +60,7 @@ export default function AdminShell({ children }: Props) {
         xl:h-[100dvh] xl:overflow-hidden
       "
         >
-            <AdminNavBar brandTitle="ADMIN" items={navItems} loading={loadingUser} />
+            <AdminNavBar brandTitle="ADMIN" items={loadingUser ? navItems : visibleItems} loading={loadingUser} />
             <main className="flex-1 p-4 xl:p-6 xl:overflow-y-auto">
                 {loadingUser ? <LoadingPage /> : children}
             </main>

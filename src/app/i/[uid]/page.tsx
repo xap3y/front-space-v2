@@ -20,6 +20,8 @@ import {copyToClipboard, deleteImageApi, errorToast, infoToast} from "@/lib/clie
 import {FaEye, FaEyeSlash} from "react-icons/fa";
 import MainStringInput from "@/components/MainStringInput";
 import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
+import {hasPermission} from "@/lib/permissions";
+import ResourceDeleteButton from "@/components/ResourceDeleteButton";
 
 export default function Page() {
 
@@ -93,9 +95,9 @@ export default function Page() {
             const imageDto: UploadedImage | null = await getImageInfoApi(uid + "");
             //console.log("IMGAGE DTO: ", imageDto)
             if ((imageDto?.requiresPassword || !imageDto?.isPublic)) {
-                if (user && imageDto?.uploader?.uid == user.uid) {
+                if (imageDto && user && (imageDto.uploader?.uid == user.uid || hasPermission(user, "BYPASS_IMAGE_PASSWORD"))) {
                     console.log("USER IS UPLOADER, NO PASS NEEDED")
-                    const url = imageDto.location == "LOCAL" ? `/api/images/` + imageDto.uniqueId : imageDto.urlSet.rawUrl;
+                    const url = imageDto.location == "LOCAL" ? `/api/images/${imageDto.uniqueId}?id=${encodeURIComponent(imageDto.uniqueId)}` : imageDto.urlSet.rawUrl;
                     setimageUrl(url);
                     setShowImage(true);
                     setImage(imageDto);
@@ -126,6 +128,15 @@ export default function Page() {
             fetchImage();
         } else if (image) {
             if (image.requiresPassword || !image.isPublic) {
+                if (user && (image.uploader?.uid === user.uid || hasPermission(user, "BYPASS_IMAGE_PASSWORD"))) {
+                    setimageUrl(image.location === "LOCAL"
+                        ? `/api/images/${image.uniqueId}?id=${encodeURIComponent(image.uniqueId)}`
+                        : image.urlSet.rawUrl);
+                    setPasswordRequired(false);
+                    setShowImage(true);
+                    setLoading(false);
+                    return;
+                }
                 if (savedPassword) {
                     setPassword(savedPassword);
                     setPasswordRequired(false);
@@ -434,12 +445,7 @@ export default function Page() {
                                     </button>*/}
 
                                     {/* TODO - DELETE */}
-                                    {(user && image.uploader && user.uid == image.uploader.uid) && (
-                                        <button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-700 text-white px-2 rounded"} onClick={deleteImage} >
-                                            <IoMdTrash />
-                                            {"DELETE"}
-                                        </button>
-                                    )}
+                                    <ResourceDeleteButton kind="image" id={image.uniqueId} ownerId={image.uploader?.uid} />
 
                                 </div>
 
@@ -470,6 +476,7 @@ export default function Page() {
                                 <h1 className="text-base sm:text-xl font-bold leading-tight text-whitesmoke">
                                     {lang?.pages?.image_viewer?.password_required}
                                 </h1>
+                                <ResourceDeleteButton kind="image" id={String(uid)} ownerId={image.uploader?.uid} />
                             </div>
 
                             {/* Form */}

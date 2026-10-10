@@ -13,6 +13,9 @@ import {FaArrowDown, FaArrowRight, FaIdCardClip, FaPencil, FaChevronLeft, FaChev
 import { IoIdCardSharp } from "react-icons/io5";
 import {RiLockPasswordLine} from "react-icons/ri";
 import {IoIosArrowDown} from "react-icons/io";
+import {useUser} from "@/hooks/useUser";
+import HoverDiv from "@/components/HoverDiv";
+import {FaShieldHalved} from "react-icons/fa6";
 
 const ALL_ROLES = ["OWNER", "ADMIN", "MODERATOR", "USER", "TESTER", "GUEST", "BANNED", "DELETED"] as const;
 
@@ -112,6 +115,7 @@ export default function UsersClient({
     fetchedAt?: string;
 }) {
     const router = useRouter();
+    const {user: actor} = useUser();
     const [layoutMode, setLayoutMode] = useLayoutMode("admin-users-layout");
 
     const [error, setError] = useState(initialError);
@@ -577,10 +581,22 @@ export default function UsersClient({
                                                     <FaPencil />
                                                     Rename
                                                 </ActionButton>
-                                                <ActionButton onClick={() => openModal("role", u.uid, u.role)}>
-                                                    <FaIdCardClip />
-                                                    Change role
-                                                </ActionButton>
+                                                {actor?.role === "OWNER" && (
+                                                    <>
+                                                        <ActionButton onClick={() => openModal("role", u.uid, u.role)}>
+                                                            <FaIdCardClip />
+                                                            Change role
+                                                        </ActionButton>
+                                                        <HoverDiv
+                                                            type="INFO"
+                                                            icon={<FaShieldHalved />}
+                                                            className="px-3 py-2 text-sm rounded-lg"
+                                                            onClick={() => router.push(`/admin/permissions?user=${u.uid}`)}
+                                                        >
+                                                            Permissions
+                                                        </HoverDiv>
+                                                    </>
+                                                )}
                                                 <ActionButton onClick={() => openModal("apiKey", u.uid, u.username)}>
                                                     <FaKey />
                                                     Change API Key

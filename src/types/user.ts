@@ -3,6 +3,7 @@ export interface UserObj {
     email: string;
     username: string;
     role: RoleType;
+    permissions?: import("@/lib/permissions").Permission[];
     avatar?: string;
     createdAt: string;
     invitor?: UserInvitor;

@@ -7,6 +7,7 @@ import { PasteDto } from "@/types/paste";
 import { UserObj } from "@/types/user";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
+import {hasPermission} from "@/lib/permissions";
 import { createPaste } from "@/lib/apiPoster";
 import MainStringInput from "@/components/MainStringInput";
 import LayoutModeSwitch, {useLayoutMode} from "@/components/LayoutModeSwitch";
@@ -561,6 +562,7 @@ export default function PastesClient({ users }: PastesClientProps) {
                                                 </button>
                                                 <button
                                                     onClick={() => deletePaste(p)}
+                                                    disabled={p.uploader?.uid !== user?.uid && !hasPermission(user, "DELETE_PASTES")}
                                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 transition-all duration-200 text-red-300"
                                                     title="Delete Paste"
                                                 >

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FaChevronDown, FaChevronLeft, FaChevronRight, FaFile, FaLock, FaPlus, FaRotateRight, FaTrash } from "react-icons/fa6";
 import { usePage } from "@/context/PageContext";
 import { useUser } from "@/hooks/useUser";
+import {hasPermission} from "@/lib/permissions";
 import { errorToast, okToast } from "@/lib/client";
 import { getApiUrl } from "@/lib/core";
 import MainStringInput from "@/components/MainStringInput";
@@ -153,7 +154,17 @@ export default function FilesClient({ users }: Props) {
                             <span className="truncate text-[11px] text-zinc-400">{pack.uploader?.username ?? "Anonymous"}{pack.anonymous ? " (anonymous upload)" : ""}</span><span className="text-[11px] tabular-nums text-zinc-500">{pack.totalFiles} {pack.totalFiles === 1 ? "file" : "files"}</span><span className="text-[11px] tabular-nums text-zinc-500 max-lg:hidden">{bytes(pack.totalSize)}</span><span className="text-right text-[10px] tabular-nums text-zinc-600 max-lg:hidden">{new Date(pack.uploadTime).toLocaleString()}</span>
                         </HoverDiv>
                         <a href={`/files?appendPack=${encodeURIComponent(pack.packId)}`} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-emerald-800/70 bg-emerald-950/40 text-[10px] text-emerald-300 transition hover:border-emerald-500" title={`Add files to ${pack.packId}`} aria-label={`Add files to ${pack.packId}`}><FaPlus/></a>
-                        <HoverDiv type="DELETE" className="h-7 w-7 shrink-0 !shadow-none text-[10px]" title={`Delete pack ${pack.packId}`} aria-label={`Delete pack ${pack.packId}`} disabled={busy !== null} onClick={() => remove(`/v1/admin/file-packs/${pack.packId}`, `pack ${pack.packId}`)} icon={<FaTrash/>}/>
+                        {hasPermission(user, "DELETE_FILE_PACKS") && (
+                            <HoverDiv
+                                type="DELETE"
+                                className="h-7 w-7 shrink-0 !shadow-none text-[10px]"
+                                title={`Delete pack ${pack.packId}`}
+                                aria-label={`Delete pack ${pack.packId}`}
+                                disabled={busy !== null}
+                                onClick={() => remove(`/v1/admin/file-packs/${pack.packId}`, `pack ${pack.packId}`)}
+                                icon={<FaTrash />}
+                            />
+                        )}
                     </div>
                     {expanded === pack.packId && <div className="border-t border-zinc-800/60 bg-black/20 px-11 py-2"><FilePackManagement
                             packId={pack.packId}
@@ -163,7 +174,24 @@ export default function FilesClient({ users }: Props) {
                             onUpdate={() => fetchPacks()}
                         />
                         <p className="mb-2 text-[10px] text-zinc-500">{pack.description || "No description"}</p><div className="space-y-1">
-                        {pack.files.map(file => <div key={file.uniqueId} className="flex items-center gap-3 rounded-md border border-zinc-800/70 bg-zinc-950/60 px-2.5 py-1.5"><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-medium text-zinc-300">{file.fileName}</p><p className="truncate text-[10px] text-zinc-600">{file.uniqueId} · {file.fileType} · {bytes(file.size)}</p></div><HoverDiv type="DELETE" className="h-6 w-6 !shadow-none text-[9px]" title={`Delete ${file.fileName}`} disabled={busy !== null} onClick={() => remove(`/v1/admin/file-packs/${pack.packId}/files/${file.uniqueId}`, `file ${file.fileName}`)} icon={<FaTrash/>}/></div>)}
+                        {pack.files.map(file => (
+                            <div key={file.uniqueId} className="flex items-center gap-3 rounded-md border border-zinc-800/70 bg-zinc-950/60 px-2.5 py-1.5">
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-[11px] font-medium text-zinc-300">{file.fileName}</p>
+                                    <p className="truncate text-[10px] text-zinc-600">{file.uniqueId} · {file.fileType} · {bytes(file.size)}</p>
+                                </div>
+                                {hasPermission(user, "DELETE_FILE_PACKS") && (
+                                    <HoverDiv
+                                        type="DELETE"
+                                        className="h-6 w-6 !shadow-none text-[9px]"
+                                        title={`Delete ${file.fileName}`}
+                                        disabled={busy !== null}
+                                        onClick={() => remove(`/v1/admin/file-packs/${pack.packId}/files/${file.uniqueId}`, `file ${file.fileName}`)}
+                                        icon={<FaTrash />}
+                                    />
+                                )}
+                            </div>
+                        ))}
                     </div></div>}
                 </article>)}
                 {!loading && packs.length === 0 && <div className="p-10 text-center text-sm text-zinc-500">No file packs match these filters.</div>}

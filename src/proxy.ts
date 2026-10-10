@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import type { UserObj } from "@/types/user";
 import supportedLocales, { getDefaultLocale } from "@/lib/core";
 import { validateUserAgent } from "@/lib/uaValidator";
+import {canAccessAdminPath, firstAdminPath} from "@/lib/permissions";
+import {getApiUrl} from "@/lib/core";
 
 const PROTECTED_ROUTES = ["/home", "/admin"] as const;
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -28,11 +30,6 @@ function languageMiddleware(req: NextRequest, res: NextResponse) {
 }
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
-    const bypassMiddleware = req.headers.get("X-Bypass-Middleware");
-    if (bypassMiddleware === "true") {
-        return res;
-    }
-
     if (!isProtectedRoute(req.nextUrl.pathname)) {
         return res;
     }
@@ -64,9 +61,23 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    // Optional: Check role if required for admin
-    if (req.nextUrl.pathname.startsWith("/admin") && user.role !== "ADMIN" && user.role !== "OWNER") {
-        return NextResponse.redirect(new URL("/", req.url));
+    if (path === "/admin" || path.startsWith("/admin/")) {
+        try {
+            const response = await fetch(getApiUrl() + "/v1/auth/me", {
+                headers: {Cookie: req.headers.get("cookie") ?? ""},
+                cache: "no-store",
+            });
+            const result = await response.json();
+            const currentUser = response.ok && !result.error ? result.message as UserObj : null;
+            if (!currentUser) {
+                return NextResponse.redirect(new URL("/login", req.url));
+            }
+            if (!canAccessAdminPath(currentUser, path)) {
+                return NextResponse.redirect(new URL(firstAdminPath(currentUser) ?? "/home/dashboard", req.url));
+            }
+        } catch {
+            return NextResponse.redirect(new URL("/home/dashboard", req.url));
+        }
     }
 
     return res;
