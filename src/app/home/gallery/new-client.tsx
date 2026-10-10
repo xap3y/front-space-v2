@@ -804,15 +804,15 @@ const MediaCard = memo(function MediaCard({
             {/* Body */}
             <div className="p-3 space-y-1.5 flex-1 flex flex-col justify-between">
                 <div className="min-w-0 flex items-center justify-between gap-2 h-[16px]">
+                    {item.type?.toLowerCase() === "mp4" && (
+                        <VideoConversionControl compact kind="image" id={item.uniqueId} size={item.size} apiKey={apiKey} onComplete={setVideoVersion} />
+                    )}
                     <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors cursor-pointer" onClick={() => onEnlarge(item)} title={title}>
                         {title}.{item.type}
                     </p>
                     <p className="text-[10px] text-gray-500 group-hover:text-gray-300 flex-shrink-0 font-medium transition-colors">({size})</p>
                 </div>
 
-                {item.type?.toLowerCase() === "mp4" && (
-                    <VideoConversionControl kind="image" id={item.uniqueId} size={item.size} apiKey={apiKey} onComplete={setVideoVersion} />
-                )}
 
                 {/* Actions */}
                 <div className="mt-2.5 flex items-center justify-between gap-1 pt-1.5 border-t border-white/5">

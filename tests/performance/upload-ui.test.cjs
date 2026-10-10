@@ -23,3 +23,9 @@ test("local gallery previews use the authenticated same-origin image proxy", () 
     assert.match(proxy, /Cookie: `session_token=\$\{session\}`/);
     assert.match(proxy, /private, no-store/);
 });
+
+test("expanded uploader settings do not clip the call server dropdown", () => {
+    const uploader = source("app/a/image/client.tsx");
+    assert.match(uploader, /showAdvanced \? "overflow-visible max-h-\[500px\] mt-4" : "overflow-hidden max-h-0"/);
+    assert.match(uploader, /isOpen && <Surface/);
+});

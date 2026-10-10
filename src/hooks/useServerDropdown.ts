@@ -19,6 +19,10 @@ export function useServerDropdown() {
             if (server.type == CallServerEnum.UNKNOWN || server.type == CallServerEnum.S3) {
                 setStatus(prev => ({ ...prev, [server.url]: true }));
             } else if (server.type == CallServerEnum.ALLOWED) {
+                // Never probe a visitor's localhost just by opening the uploader.
+                if (!["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)) {
+                    return;
+                }
                 fetch(`${server.url}/status`)
                     .then(res => setStatus(prev => ({ ...prev, [server.url]: res.ok })))
                     .catch(() => setStatus(prev => ({ ...prev, [server.url]: false })));

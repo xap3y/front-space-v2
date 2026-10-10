@@ -7,7 +7,8 @@ import { conversionRequest, startVideoConversion, type VideoConversionState, typ
 
 const changedEvent = "space-video-conversion-changed";
 
-export default function VideoConversionControl({ kind, id, size, apiKey, onComplete }: {
+export default function VideoConversionControl({ kind, id, size, apiKey, onComplete, compact = false }: {
+    compact?: boolean;
     kind: VideoKind;
     id: string;
     size: number;
@@ -86,6 +87,39 @@ export default function VideoConversionControl({ kind, id, size, apiKey, onCompl
         }
     }
 
+    if (compact) {
+        const tooltip = running
+            ? `${state.status === "QUEUED" ? "Waiting to convert" : "Converting to H.264"} · ${state.progress}%`
+            : ["This video may not play on some devices.", reason || "Convert to H.264", error || state.error].filter(Boolean).join(" ");
+        return (
+            <span className="inline-flex shrink-0 items-center" onClick={(event) => event.stopPropagation()}>
+                {running ? (
+                    <span role="status" title={tooltip} aria-label={tooltip} className="text-blue-400">
+                        <FaSpinner className="h-3 w-3 motion-safe:animate-spin" />
+                    </span>
+                ) : (
+                    <span
+                        role={reason ? undefined : "button"}
+                        tabIndex={0}
+                        title={tooltip}
+                        aria-label={tooltip}
+                        aria-disabled={busy || Boolean(reason)}
+                        className="inline-flex cursor-help text-amber-500"
+                        onClick={() => !reason && !busy && void convert()}
+                        onKeyDown={(event) => {
+                            if (!reason && !busy && (event.key === "Enter" || event.key === " ")) {
+                                event.preventDefault();
+                                void convert();
+                            }
+                        }}
+                    >
+                        <FaTriangleExclamation className="h-3 w-3" />
+                    </span>
+                )}
+            </span>
+        );
+    }
+
     return (
         <div className="space-y-1.5 text-left" onClick={(event) => event.stopPropagation()}>
             {running ? (
@@ -104,7 +138,7 @@ export default function VideoConversionControl({ kind, id, size, apiKey, onCompl
                         <span
                             tabIndex={0}
                             aria-label="Video compatibility warning"
-                            title="This video may not play on some devices. Convert to H.264 for better compatibility."
+                            title={["This video may not play on some devices. Convert to H.264 for better compatibility.", reason, error || state.error].filter(Boolean).join(" ")}
                             className="inline-flex cursor-help text-amber-500"
                         >
                             <FaTriangleExclamation aria-hidden="true" className="h-3 w-3" />
@@ -115,10 +149,8 @@ export default function VideoConversionControl({ kind, id, size, apiKey, onCompl
                             </Button>
                         )}
                     </div>
-                    {reason && <p className="text-[10px] leading-4 text-zinc-500">{reason}</p>}
                 </>
             )}
-            {(error || state.error) && <p role="status" className="text-[10px] leading-4 text-amber-500">{error || state.error}</p>}
         </div>
     );
 }

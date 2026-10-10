@@ -461,7 +461,7 @@ export default function ImageUploader() {
                                     </NativeButton>
                                 </div>
                                 <div
-                                    className={`transition-all duration-500 overflow-hidden w-full md:pl-2 pl-0 ${showAdvanced ? "max-h-[500px] mt-4" : "max-h-0"}`}
+                                    className={`transition-all duration-500 w-full md:pl-2 pl-0 ${showAdvanced ? "overflow-visible max-h-[500px] mt-4" : "overflow-hidden max-h-0"}`}
                                 >
                                     {/* TODO: LOCALE */}
                                     <span className={"text-gray-500 italic text-xs"}>Following fields are optional</span>
@@ -621,17 +621,19 @@ export default function ImageUploader() {
                                                     </svg>
                                                 </NativeButton>
 
-                                                <Surface
-                                                    className={`absolute left-0 top-full mt-1 w-full box-primary z-50 overflow-hidden transform transition-all duration-150 ease-in-out origin-top ${
-                                                        isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
-                                                    }`}
+                                                {isOpen && <Surface
+                                                    className="absolute left-0 top-full mt-1 w-full z-50 overflow-hidden border"
                                                 >
                                                     {callServers.map(server => (
                                                         <NativeButton
                                                             layout="row"
                                                             type="button"
                                                             key={server.url}
-                                                            onClick={() => select(server)}
+                                                            onClick={() => {
+                                                                setHoverServer(null);
+                                                                handleMouseLeave();
+                                                                select(server);
+                                                            }}
                                                             onMouseEnter={() => {
                                                                 setHoverServer(server)
                                                                 handleMouseEnter()
@@ -640,7 +642,7 @@ export default function ImageUploader() {
                                                                 setHoverServer(null)
                                                                 handleMouseLeave()
                                                             }}
-                                                            className="w-full px-2! py-1! text-left text-xs hover:bg-zinc-700 flex! items-center justify-between! gap-2"
+                                                            className="w-full !px-2 !py-1 text-left text-xs hover:bg-zinc-700 !flex items-center !justify-between gap-2"
                                                         >
                                                             <div className="flex items-center gap-2 truncate">
                                                                 {server.flag && <img src={server.flag} alt={""} className="w-4 h-3" />}
@@ -661,7 +663,7 @@ export default function ImageUploader() {
                                                             )}
                                                         </NativeButton>
                                                     ))}
-                                                </Surface>
+                                                </Surface>}
                                             </div>
 
                                             <IoMdRefresh onClick={handlePingButtonClick} className={`w-[25px] h-[25px] cursor-pointer rounded-full ${isPingButtonClicked ? "rotate-180" : ""} ${isMobile ? "" : "hover:bg-white hover:bg-opacity-10"} duration-150`} />
@@ -752,7 +754,7 @@ export default function ImageUploader() {
                 } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
                 style={{ top: position.y + 10, left: position.x + 20 }}
             >
-                {hoverServer && (
+                {isOpen && hoverServer && (
                     <div className={"flex flex-col"}>
                         <div className={"flex items-center gap-2"}>
                             {hoverServer.flag && <img src={hoverServer.flag} alt={""} className="w-4 h-3" />}
