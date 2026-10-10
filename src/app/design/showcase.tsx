@@ -66,6 +66,7 @@ export default function DesignShowcase() {
                     <a href="#inputs" className="hover:text-white">Vstupy a nastavení</a>
                     <a href="#layouts" className="hover:text-white">Karty a gridy</a>
                     <a href="#states" className="hover:text-white">Stavy a loading</a>
+                    <a href="/design/convert" className="hover:text-white">Kompatibilita videa →</a>
                 </nav>
             </header>
 
