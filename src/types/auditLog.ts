@@ -11,6 +11,11 @@ export type AuditLog = {
 };
 
 export type AuditLogType =
+    | "TASK_CANCEL"
+    | "TASK_RETRY"
+    | "VIDEO_CONVERSION_REQUEST"
+    | "VIDEO_CONVERSION_COMPLETE"
+    | "VIDEO_CONVERSION_FAILED"
     | "IP_MAPPER_CHANGE"
     | "PERMISSION_CHANGE"
     | "USER_LOGIN"

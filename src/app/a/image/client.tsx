@@ -1,4 +1,5 @@
 "use client";
+import VideoUploadCompatibility from "@/components/VideoUploadCompatibility";
 import Surface from "@/components/ui/Surface";
 
 import { NativeButton } from "@/components/ui/NativeButton";
@@ -35,6 +36,7 @@ import HoverDiv from "@/components/HoverDiv";
 export default function ImageUploader() {
 
     const [file, setFile] = useState<File | null>(null);
+    const [convertVideo, setConvertVideo] = useState(false);
     const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
     const [showTransparencyGrid, setShowTransparencyGrid] = useState(false);
 
@@ -228,6 +230,7 @@ export default function ImageUploader() {
         formData.append("file", file);
         formData.append("apiKey", apiKey);
         formData.append("source", "PORTAL");
+        formData.append("convertToH264", String(convertVideo));
 
         if (withPassword && password.length > 2) formData.append("password", password)
         if (description) formData.append("desc", description)
@@ -409,7 +412,10 @@ export default function ImageUploader() {
                                         <img src={filePreviewUrl} alt={`Preview of ${file.name}`} className="block h-auto max-h-40 w-auto max-w-full rounded-lg object-contain shadow-lg" />
                                     </div>}
                                     <div className="flex min-w-0 items-center justify-between gap-3 p-2.5">
-                                        <div className="min-w-0"><span className="block truncate text-sm text-zinc-200" title={file.name}>{cleanText(file.name)}</span><span className="mt-0.5 block text-[10px] uppercase tracking-wider text-zinc-500">{file.type.startsWith("video/") ? "Video" : "Image"} · {file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`}</span></div>
+                                        <div className="min-w-0">
+                                            <VideoUploadCompatibility fileName={cleanText(file.name)} file={file} checked={convertVideo} onChange={setConvertVideo} disabled={uploading} />
+                                            <span className="mt-0.5 block text-[10px] uppercase tracking-wider text-zinc-500">{file.type.startsWith("video/") ? "Video" : "Image"} · {file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`}</span>
+                                        </div>
                                         <NativeButton type="button" aria-label="Remove selected file" className="ml-2 shrink-0 rounded-lg p-1.5 transition hover:bg-red-500/10" onClick={handleRemoveFile}> <MdOutlineDelete className="h-6 w-6 text-red-500" /> </NativeButton>
                                     </div>
                                     {supportsTransparency && <div className="flex items-center justify-between border-t border-white/10 px-2.5 py-2"><span className="text-[11px] text-zinc-400">Transparency grid</span><HoverDiv type={showTransparencyGrid ? "SAVE" : "INFO"} role="switch" aria-checked={showTransparencyGrid} aria-label="Toggle transparency grid" onClick={() => setShowTransparencyGrid(value => !value)} style={{justifyContent: showTransparencyGrid ? "flex-end" : "flex-start"}} className="h-6 w-11 shrink-0 rounded-full p-[3px]"><span className={`block h-4 w-4 shrink-0 rounded-full transition-colors ${showTransparencyGrid ? "bg-emerald-300" : "bg-zinc-500"}`}/></HoverDiv></div>}
@@ -592,7 +598,7 @@ export default function ImageUploader() {
 
 
                                         <div className={"flex items-center gap-1"}>
-                                            <div className="overflow-visible min-w-52 text-white">
+                                            <div className="relative w-52 shrink-0 overflow-visible text-white">
                                                 <NativeButton
                                                     type="button"
                                                     onClick={() => {
@@ -616,12 +622,13 @@ export default function ImageUploader() {
                                                 </NativeButton>
 
                                                 <Surface
-                                                    className={`absolute mt-1 min-w-52 box-primary z-50 overflow-hidden transform transition-all duration-500 ease-in-out origin-top ${
+                                                    className={`absolute left-0 top-full mt-1 w-full box-primary z-50 overflow-hidden transform transition-all duration-150 ease-in-out origin-top ${
                                                         isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                                                     }`}
                                                 >
                                                     {callServers.map(server => (
                                                         <NativeButton
+                                                            layout="row"
                                                             type="button"
                                                             key={server.url}
                                                             onClick={() => select(server)}
@@ -633,7 +640,7 @@ export default function ImageUploader() {
                                                                 setHoverServer(null)
                                                                 handleMouseLeave()
                                                             }}
-                                                            className="w-full px-2 py-1 text-left text-xs hover:bg-zinc-700 flex items-center justify-between gap-2"
+                                                            className="w-full px-2! py-1! text-left text-xs hover:bg-zinc-700 flex! items-center justify-between! gap-2"
                                                         >
                                                             <div className="flex items-center gap-2 truncate">
                                                                 {server.flag && <img src={server.flag} alt={""} className="w-4 h-3" />}

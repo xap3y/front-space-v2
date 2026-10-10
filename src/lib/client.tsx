@@ -323,6 +323,7 @@ export async function uploadImageBucket(formData: FormData, apiKey: string,  cal
         spaceFormData.append('fileType', type);
         spaceFormData.append('source', "PORTAL");
         spaceFormData.append('size', file.size + "");
+        spaceFormData.append("convertToH264", String(formData.get("convertToH264") === "true"));
         const response = await axios.post(getApiUrl() + "/v1/image/register", spaceFormData, {
             headers: {
                 'x-api-key': apiKey,

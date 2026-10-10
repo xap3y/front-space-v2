@@ -10,9 +10,9 @@ function isSafeId(id: string) {
 
 export async function GET(
     req: NextRequest,
+    context: { params: Promise<{ id: string }> },
 ) {
-    const { searchParams } = new URL(req.url)
-    const id = searchParams.get('id')
+    const { id } = await context.params;
 
     if (!id || !isSafeId(id)) {
         return new Response("Invalid id", { status: 400 });
@@ -30,11 +30,16 @@ export async function GET(
         return new Response("Missing session_token", { status: 401 });
     }
 
-    const upstreamUrl = `${base}/v1/image/get/${encodeURIComponent(id)}`;
+    const upstreamUrl = new URL(`${base}/v1/image/get/${encodeURIComponent(id)}`);
+    if (req.nextUrl.searchParams.get("download") === "true") {
+        upstreamUrl.searchParams.set("download", "true");
+    }
 
     const headers: HeadersInit = {
         Cookie: `session_token=${session}`,
     };
+    const range = req.headers.get("range");
+    if (range) headers.Range = range;
 
     const upstreamRes = await fetch(upstreamUrl, {
         headers,
@@ -51,14 +56,18 @@ export async function GET(
     const contentType =
         upstreamRes.headers.get("content-type") ?? "application/octet-stream";
 
-    const cacheControl =
-        upstreamRes.headers.get("cache-control") ?? "private, no-store, max-age=0";
+    const responseHeaders = new Headers({
+        "content-type": contentType,
+        "cache-control": "private, no-store, max-age=0",
+        "X-Content-Type-Options": "nosniff",
+    });
+    for (const name of ["content-length", "content-range", "accept-ranges", "content-disposition"]) {
+        const value = upstreamRes.headers.get(name);
+        if (value) responseHeaders.set(name, value);
+    }
 
     return new Response(upstreamRes.body, {
         status: upstreamRes.status,
-        headers: {
-            "content-type": contentType,
-            "cache-control": cacheControl,
-        },
+        headers: responseHeaders,
     });
 }

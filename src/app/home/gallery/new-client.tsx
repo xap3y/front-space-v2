@@ -1,4 +1,6 @@
 'use client';
+import VideoConversionControl from "@/components/VideoConversionControl";
+import { versionedVideoUrl } from "@/lib/videoConversion";
 import Surface from "@/components/ui/Surface";
 
 import { NativeButton } from "@/components/ui/NativeButton";
@@ -544,6 +546,7 @@ export default function GalleryPage() {
                                             <div className="relative h-full w-full">
                                                 <MediaCard
                                                     item={img}
+                                                    apiKey={user?.apiKey}
                                                     onDelete={handleDelete}
                                                     onPasswordChange={openPasswordModal}
                                                     onEnlarge={setEnlargedImage}
@@ -561,6 +564,7 @@ export default function GalleryPage() {
                     <Pagination
                             page={currentPage + 1}
                             pages={totalPages}
+                            onChange={(page) => setCurrentPage(page - 1)}
                             onPrevious={goToPrevPage}
                             onNext={goToNextPage}
                             disabled={loading}
@@ -643,11 +647,11 @@ export default function GalleryPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <HoverDiv
-                                    onClick={() => copyToClipboard(enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || '', lang)}
+                                    onClick={() => copyToClipboard(enlargedImage.urls?.portalUrl || `${window.location.origin}/i/${encodeURIComponent(enlargedImage.uniqueId)}`, lang)}
                                     icon={<FaCopy className="h-4 w-4"/>}
                                     className="p-2 text-xs"
-                                    title="Copy direct link"
-                                    aria-label="Copy direct link"
+                                    title="Copy portal URL"
+                                    aria-label="Copy portal URL"
                                 />
                                 <a
                                     href={(enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || '') + "?download=true"}
@@ -672,8 +676,8 @@ export default function GalleryPage() {
                                 <video
                                     src={enlargedImage.location === "R2"
                                         ? getR2VideoUrl("media", enlargedImage.uniqueId)
-                                        : (enlargedImage.location === "LOCAL" && !enlargedImage.public)
-                                            ? enlargedImage.urls?.webUrl || undefined
+                                        : enlargedImage.location === "LOCAL"
+                                            ? `/api/images/${encodeURIComponent(enlargedImage.uniqueId)}`
                                             : enlargedImage.urls?.userPreference || enlargedImage.urls?.rawUrl || undefined}
                                     controls
                                     autoPlay
@@ -683,7 +687,7 @@ export default function GalleryPage() {
                                 />
                             ) : (
                                 <img
-                                    src={(enlargedImage.location === "LOCAL" && !enlargedImage.public) ? (enlargedImage.urls?.webUrl || undefined) : (enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || undefined)}
+                                    src={enlargedImage.location === "LOCAL" ? `/api/images/${encodeURIComponent(enlargedImage.uniqueId)}` : (enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || undefined)}
                                     alt={enlargedImage.uniqueId}
                                     className="max-h-[70vh] max-w-full rounded-lg object-contain"
                                 />
@@ -700,12 +704,14 @@ export default function GalleryPage() {
 // MediaCard component
 const MediaCard = memo(function MediaCard({
     item,
+    apiKey,
     onDelete,
     onPasswordChange,
     onEnlarge,
     lang
 }: {
     item: UploadedImagePage;
+    apiKey?: string;
     onDelete: (item: UploadedImagePage) => void;
     onPasswordChange: (item: UploadedImagePage) => void;
     onEnlarge: (item: UploadedImagePage) => void;
@@ -713,6 +719,7 @@ const MediaCard = memo(function MediaCard({
 }) {
     const isVideo = isVideoFile(item.type || '');
     const [imgFailed, setImgFailed] = useState(false);
+    const [videoVersion, setVideoVersion] = useState("");
 
     // Handle new URL structure from pageable endpoint
     const urls = {
@@ -725,7 +732,7 @@ const MediaCard = memo(function MediaCard({
     const size = formatBytes(item.size || 0);
 
     const showPlaceholder = imgFailed || !urls.original || item.size === 0;
-    const rawUrl = (item.location === "LOCAL" && !item.public) ? item.urls?.webUrl : urls.original;
+    const rawUrl = item.location === "LOCAL" ? `/api/images/${encodeURIComponent(item.uniqueId)}` : urls.original;
     const videoUrl = item.location === "R2" ? getR2VideoUrl("media", item.uniqueId) : rawUrl;
 
     return (
@@ -745,7 +752,7 @@ const MediaCard = memo(function MediaCard({
                     </div>
                 ) : isVideo ? (
                     <video
-                        src={videoUrl || undefined}
+                        src={videoUrl ? versionedVideoUrl(videoUrl, videoVersion) : undefined}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         preload="metadata"
                         poster={item.location === "R2" ? undefined : item.urls?.posterUrl || undefined}
@@ -774,9 +781,12 @@ const MediaCard = memo(function MediaCard({
                         <FaInfoCircle className="h-3 w-3" />
                     </span>
                     <span
-                        onClick={(e) => { e.stopPropagation(); copyToClipboard(urls.original, lang); }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(urls.portalUrl || `${window.location.origin}/i/${encodeURIComponent(item.uniqueId)}`, lang);
+                        }}
                         className="cursor-pointer inline-flex items-center gap-1 bg-black/60 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-white/10 text-gray-300 hover:text-white transition-colors"
-                        title="Copy direct URL"
+                        title="Copy portal URL"
                     >
                         <FaCopy className="h-3 w-3" />
                     </span>
@@ -799,6 +809,10 @@ const MediaCard = memo(function MediaCard({
                     </p>
                     <p className="text-[10px] text-gray-500 group-hover:text-gray-300 flex-shrink-0 font-medium transition-colors">({size})</p>
                 </div>
+
+                {item.type?.toLowerCase() === "mp4" && (
+                    <VideoConversionControl kind="image" id={item.uniqueId} size={item.size} apiKey={apiKey} onComplete={setVideoVersion} />
+                )}
 
                 {/* Actions */}
                 <div className="mt-2.5 flex items-center justify-between gap-1 pt-1.5 border-t border-white/5">

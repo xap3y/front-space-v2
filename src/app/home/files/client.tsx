@@ -1,4 +1,5 @@
 "use client";
+import VideoConversionControl from "@/components/VideoConversionControl";
 import Surface from "@/components/ui/Surface";
 import {DeleteButton} from "@/components/HoverDiv";
 
@@ -458,6 +459,9 @@ export default function FilesPageClient() {
                                                                     {file.fileName}
                                                                 </p>
                                                                 <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
+                                                                {/\.mp4$/i.test(file.uniqueId) && (
+                                                                    <VideoConversionControl kind="file" id={file.uniqueId} size={file.size} apiKey={user?.apiKey} />
+                                                                )}
                                                             </div>
                                                             <div className="flex gap-1 md:gap-3 flex-shrink-0">
                                                                 <HoverDiv

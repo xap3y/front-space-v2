@@ -73,6 +73,11 @@ function Avatar({ src, username, compact = false }: { src: string | null | undef
 }
 
 const TYPE_OPTIONS: AuditLogType[] = [
+    "TASK_CANCEL",
+    "TASK_RETRY",
+    "VIDEO_CONVERSION_REQUEST",
+    "VIDEO_CONVERSION_COMPLETE",
+    "VIDEO_CONVERSION_FAILED",
     "IP_MAPPER_CHANGE",
     "PERMISSION_CHANGE",
     "TOOL_ACTION",
@@ -118,6 +123,11 @@ const TYPE_OPTIONS: AuditLogType[] = [
 ];
 
 const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
+    TASK_CANCEL: <FiSettings className="text-amber-400" />,
+    TASK_RETRY: <FiSettings className="text-blue-400" />,
+    VIDEO_CONVERSION_REQUEST: <FiSettings className="text-blue-400" />,
+    VIDEO_CONVERSION_COMPLETE: <FiSettings className="text-emerald-400" />,
+    VIDEO_CONVERSION_FAILED: <FiSettings className="text-amber-400" />,
     IP_MAPPER_CHANGE: <FiShield className="text-sky-400" />,
     PERMISSION_CHANGE: <FiShield className="text-violet-400" />,
     TOOL_ACTION: <FiSettings />,

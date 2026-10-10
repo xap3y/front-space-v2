@@ -16,6 +16,7 @@ export const PERMISSIONS = [
     {key: "ADMIN_LIMITS", label: "Limits", path: "/admin/limits"},
     {key: "ADMIN_INVITES", label: "Invites", path: "/admin/invites"},
     {key: "ADMIN_SYSTEM", label: "System", path: "/admin/system"},
+    {key: "ADMIN_MONITORING", label: "Event monitoring", path: "/admin/monitoring"},
     {key: "ADMIN_SETTINGS", label: "Settings", path: "/admin/settings"},
     {key: "ADMIN_LOGS", label: "Logs", path: "/admin/logs"},
     {key: "ADMIN_IMAGES", label: "Images", path: "/admin/images"},

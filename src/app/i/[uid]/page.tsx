@@ -1,4 +1,6 @@
 'use client';
+import VideoConversionControl from "@/components/VideoConversionControl";
+import { versionedVideoUrl } from "@/lib/videoConversion";
 import Surface from "@/components/ui/Surface";
 
 import { NativeButton } from "@/components/ui/NativeButton";
@@ -40,11 +42,11 @@ export default function Page() {
     const [showImage, setShowImage] = useState(false);
     const [error, setError] = useState("");
     const [imageUrl, setimageUrl] = useState<string | null>(null);
+    const [videoVersion, setVideoVersion] = useState("");
     const [isReadOnly, setIsReadOnly] = useState(true);
     const [open, setOpen] = useState(false);
     const [copiedOption, setCopiedOption] = useState<string | null>(null);
     const copyMenuRef = useRef<HTMLDivElement>(null);
-    const [isFocused, setIsFocused] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const toggleDropdown = () => setOpen(!open);
@@ -63,9 +65,10 @@ export default function Page() {
     const router = useRouter();
 
     const isMobile = useIsMobile();
-    const videoUrl = image?.location === "R2" && !imageUrl?.startsWith("blob:")
+    const rawVideoUrl = image?.location === "R2" && !imageUrl?.startsWith("blob:")
         ? getR2VideoUrl("media", image.uniqueId)
         : imageUrl;
+    const videoUrl = rawVideoUrl ? versionedVideoUrl(rawVideoUrl, videoVersion) : rawVideoUrl;
 
     const {
         showCard,
@@ -335,7 +338,14 @@ export default function Page() {
                                 {
                                     image.uploader ? (
                                         <>
-                                            <a onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className={"font-bold underline text-telegram hover:underline"} href={"/user/" + image.uploader.username}>{image.uploader.username}</a>
+                                            <a
+                                                onMouseEnter={handleMouseEnter}
+                                                onMouseLeave={handleMouseLeave}
+                                                className="font-bold underline text-telegram hover:underline"
+                                                href={`/user/${image.uploader.uid}`}
+                                            >
+                                                {image.uploader.username}
+                                            </a>
                                         </>
                                     ) : (
                                         <>
@@ -389,7 +399,9 @@ export default function Page() {
 
                                     <a
                                         className={"lg:h-11 h-9 flex items-center gap-2 text-white px-2 rounded border border-white/10 bg-primary hover:bg-secondary"}
-                                        href={image.urlSet.rawUrl + "?download=true&password="+password || ""}
+                                        href={user?.uid === image.uploader?.uid && image.location === "LOCAL"
+                                            ? `/api/images/${encodeURIComponent(image.uniqueId)}?download=true`
+                                            : `${image.urlSet.rawUrl}${image.urlSet.rawUrl?.includes("?") ? "&" : "?"}download=true&password=${encodeURIComponent(password)}`}
                                         target={"_self"}
                                         rel="noopener noreferrer"
                                         onClick={(e) => {
@@ -449,7 +461,21 @@ export default function Page() {
                                     </button>*/}
 
                                     {/* TODO - DELETE */}
-                                    <ResourceDeleteButton kind="image" id={image.uniqueId} ownerId={image.uploader?.uid} />
+                                    <ResourceDeleteButton
+                                        kind="image"
+                                        id={image.uniqueId}
+                                        ownerId={image.uploader?.uid}
+                                        className="h-9! lg:h-11! px-3! text-xs!"
+                                    />
+                                    {image.type?.toLowerCase() === "mp4" && user?.uid === image.uploader?.uid && (
+                                        <VideoConversionControl
+                                            kind="image"
+                                            id={image.uniqueId}
+                                            size={image.size}
+                                            apiKey={user?.apiKey}
+                                            onComplete={setVideoVersion}
+                                        />
+                                    )}
 
                                 </div>
 
@@ -500,33 +526,33 @@ export default function Page() {
                                 <div className="relative">
                                     <MainStringInput
                                         placeholder={lang?.pages?.image_viewer?.password_placeholder}
-                                        className={`w-full sm:text-sm text-xs ${(isFocused && !showPassword) ? "text-dots" : ""}`}
+                                        className="w-full sm:text-sm text-xs"
+                                        inputClassName="pr-12"
                                         required
                                         autoComplete="off"
-                                        type="text"
+                                        type={showPassword ? "text" : "password"}
                                         name="image"
-                                        onFocus={() => {
-                                            setTimeout(() => setIsFocused(true), 100);
-                                        }}
                                         id="image"
                                         value={password}
                                         aria-invalid={!!error}
                                         onChange={(e) => setPassword(e)}
                                     />
 
-                                    <NativeButton
-                                        type="button"
-                                        onClick={() => setShowPassword((s) => !s)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition"
-                                        aria-label={showPassword ? "Hide password" : "Show password"}
-                                        tabIndex={-1}
-                                    >
-                                        {showPassword ? (
-                                            <FaEyeSlash className="h-5 w-5" />
-                                        ) : (
-                                            <FaEye className="h-5 w-5" />
-                                        )}
-                                    </NativeButton>
+                                    <div className="absolute inset-y-0 right-2 flex items-center">
+                                        <NativeButton
+                                            type="button"
+                                            onClick={() => setShowPassword((s) => !s)}
+                                            variant="ghost"
+                                            className="text-gray-300 hover:text-white"
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showPassword ? (
+                                                <FaEyeSlash className="h-3 w-3" />
+                                            ) : (
+                                                <FaEye className="h-3 w-3" />
+                                            )}
+                                        </NativeButton>
+                                    </div>
                                 </div>
 
                                 {error ? (

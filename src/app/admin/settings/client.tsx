@@ -15,15 +15,18 @@ import IpMapperSettings from "@/components/IpMapperSettings";
 
 type BooleanSettingKey = "autoAvifConvert" | "imageUploadingEnabled" | "localStorageUploadsEnabled" |
     "r2StorageUploadsEnabled" | "pasteCreatingEnabled" | "tempMailEnabled" | "filePackEnabled" |
-    "urlShortenerEnabled" | "nonAdminLoginEnabled";
+    "urlShortenerEnabled" | "nonAdminLoginEnabled" | "videoConversionEnabled";
 
 type SettingPreset = Record<BooleanSettingKey, boolean> & {
     id: number;
     presetName: string;
     active: boolean;
+    videoConversionMaxSizeMb: number;
+    videoConversionMaxConcurrent: number;
 };
 
 const settingRows: Array<{key: BooleanSettingKey; title: string; description: string; child?: boolean}> = [
+    {key: "videoConversionEnabled", title: "Enable H.264 video conversion", description: "Allow optional conversion of MP4 uploads and existing videos. Failed conversions keep the original."},
     {key: "autoAvifConvert", title: "Automatically convert images to AVIF", description: "Return the original immediately, then replace supported static images in the background."},
     {key: "imageUploadingEnabled", title: "Enable image uploading", description: "Master switch for all new image uploads."},
     {key: "localStorageUploadsEnabled", title: "Enable local storage uploads", description: "Allow images to be stored on the server filesystem.", child: true},
@@ -188,6 +191,41 @@ export default function SettingsClient() {
                                 const parentDisabled = Boolean(row.child && !draft.imageUploadingEnabled);
                                 return <div key={row.key} className={`flex items-center justify-between gap-4 p-4 ${row.child ? "pl-7 md:pl-10" : ""}`}><div className={parentDisabled ? "opacity-45" : ""}><p className="text-sm font-semibold text-gray-100">{row.title}</p><p className="mt-1 text-xs leading-5 text-gray-500">{row.description}</p></div><SettingSwitch enabled={draft[row.key]} disabled={saving || parentDisabled} onChange={enabled => setDraft(current => current ? {...current, [row.key]: enabled} : current)}/></div>;
                             })}
+                            <div className="grid gap-4 p-4 sm:grid-cols-2">
+                                <div className="space-y-2">
+                                    <label htmlFor="video-convert-size" className="text-xs text-zinc-300">Maximum source video size (MB)</label>
+                                    <MainStringInput
+                                        id="video-convert-size"
+                                        type="number"
+                                        min={1}
+                                        max={16384}
+                                        step={1}
+                                        value={String(draft.videoConversionMaxSizeMb)}
+                                        disabled={saving}
+                                        onChange={(value) => setDraft((current) => current ? {
+                                            ...current,
+                                            videoConversionMaxSizeMb: Number(value),
+                                        } : current)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="video-convert-concurrent" className="text-xs text-zinc-300">Concurrent conversions per user</label>
+                                    <MainStringInput
+                                        id="video-convert-concurrent"
+                                        type="number"
+                                        min={1}
+                                        max={10}
+                                        step={1}
+                                        value={String(draft.videoConversionMaxConcurrent)}
+                                        disabled={saving}
+                                        onChange={(value) => setDraft((current) => current ? {
+                                            ...current,
+                                            videoConversionMaxConcurrent: Number(value),
+                                        } : current)}
+                                    />
+                                    <p className="text-[10px] text-zinc-500">Shared across uploads, gallery and file packs. Default: 1.</p>
+                                </div>
+                            </div>
                         </div>
                         <div className="mt-5 flex justify-between gap-3 border-t border-white/10 pt-4"><DeleteButton disabled={saving} onClick={deletePreset} className="px-3 py-2 text-xs font-semibold">Delete preset</DeleteButton><SaveButton disabled={saving} onClick={savePreset} className="px-4 py-2 text-xs font-semibold">Save preset</SaveButton></div>
                     </> : <p className="text-sm text-gray-500">No preset is available.</p>}

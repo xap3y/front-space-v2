@@ -1,4 +1,7 @@
 "use client";
+import VideoConversionControl from "@/components/VideoConversionControl";
+import { useUser } from "@/hooks/useUser";
+import { versionedVideoUrl } from "@/lib/videoConversion";
 import Surface from "@/components/ui/Surface";
 
 import { NativeButton } from "@/components/ui/NativeButton";
@@ -50,6 +53,7 @@ interface PackResponse {
 }
 
 export function PackPageClient() {
+    const { user } = useUser();
     const { uid } = useParams();
     const packId = uid as string;
 
@@ -65,6 +69,7 @@ export function PackPageClient() {
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [downloadError, setDownloadError] = useState<string | null>(null);
     const [previewFile, setPreviewFile] = useState<FileInfo | null>(null);
+    const [videoVersion, setVideoVersion] = useState("");
     const [previewPassword, setPreviewPassword] = useState("");
 
     const cancelTokenRef = useRef<CancelTokenSource | null>(null);
@@ -488,6 +493,9 @@ export function PackPageClient() {
                                         <p className="text-white font-semibold truncate">
                                             {file.fileName}
                                         </p>
+                                        {/\.mp4$/i.test(file.uniqueId) && (
+                                            <VideoConversionControl kind="file" id={file.uniqueId} size={file.size} apiKey={user?.apiKey} onComplete={setVideoVersion} />
+                                        )}
                                         <div className="flex gap-2 mt-1 text-xs text-gray-400">
                                             <span>{formatFileSize(file.size)}</span>
                                             <span>•</span>
@@ -644,9 +652,9 @@ export function PackPageClient() {
                                         />
                                     ) : previewFile.fileType.startsWith('video/') ? (
                                         <video
-                                            src={previewFile.location === "R2" || previewFile.location == null
+                                            src={versionedVideoUrl(previewFile.location === "R2" || previewFile.location == null
                                                 ? getR2VideoUrl("files", previewFile.uniqueId)
-                                                : getStorageUrl() + "/files/" + previewFile.uniqueId}
+                                                : getStorageUrl() + "/files/" + previewFile.uniqueId, videoVersion)}
                                             controls
                                             preload={previewFile.location === "R2" || previewFile.location == null ? "metadata" : "none"}
                                             playsInline

@@ -22,6 +22,13 @@ test("OWNER has every permission without a supplied permission list", () => {
     }
 });
 
+test("task monitoring needs its section permission and the admin master switch", () => {
+    assert.equal(canAccessAdminPath({role: "OWNER"}, "/admin/monitoring"), true);
+    assert.equal(canAccessAdminPath({role: "ADMIN", permissions: ["ADMIN_ACCESS", "ADMIN_SYSTEM"]}, "/admin/monitoring"), false);
+    assert.equal(canAccessAdminPath({role: "ADMIN", permissions: ["ADMIN_MONITORING"]}, "/admin/monitoring"), false);
+    assert.equal(canAccessAdminPath({role: "ADMIN", permissions: ["ADMIN_ACCESS", "ADMIN_MONITORING"]}, "/admin/monitoring"), true);
+});
+
 test("missing rights and disabled accounts fail closed", () => {
     assert.equal(hasPermission(null, "DELETE_IMAGES"), false);
     assert.equal(hasPermission({role: "ADMIN"}, "ADMIN_IMAGES"), false);

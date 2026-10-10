@@ -77,7 +77,7 @@ export default function ConvertShowcase() {
                 }
             }
         } catch {
-            setNotice("Lokální ukázku nešlo obnovit. Používám výchozí stav.");
+            setNotice("Could not restore the local preview. Using defaults.");
         }
         setReady(true);
     }, []);
@@ -87,7 +87,7 @@ export default function ConvertShowcase() {
         try {
             localStorage.setItem(storageKey, JSON.stringify(demo));
         } catch {
-            setNotice("Prohlížeč nepovolil uložení ukázky. Stav po obnovení nezůstane.");
+            setNotice("The browser blocked local storage. Preview state will not survive reload.");
         }
     }, [demo, ready]);
 
@@ -127,16 +127,16 @@ export default function ConvertShowcase() {
             uploads: [...current.uploads, video],
             running: uploadEligible && convertUpload ? [...current.running, video.id] : current.running,
         }));
-        setNotice(`Pouze simulace: ${video.name} přidáno do ${destination === "gallery" ? "galerie" : "packu"}.`);
+        setNotice(`Simulation only: ${video.name} added to ${destination === "gallery" ? "gallery" : "pack"}.`);
         setConvertUpload(false);
     }
 
     function warning() {
         return (
-            <span tabIndex={0} className="group relative inline-flex cursor-help text-amber-500" aria-label="Video není H.264 a nemusí se přehrát na všech zařízeních.">
+            <span tabIndex={0} className="group relative inline-flex cursor-help text-amber-500" aria-label="This video is not H.264 and may not play on some devices.">
                 <FaTriangleExclamation aria-hidden="true" className="h-3 w-3" />
                 <span role="tooltip" className="pointer-events-none absolute left-0 top-full z-30 mt-2 hidden w-52 max-w-[60vw] rounded border border-zinc-700 bg-zinc-950 p-2 text-[11px] leading-5 text-zinc-300 group-hover:block group-focus-within:block">
-                    Video není H.264 a nemusí se přehrát na všech zařízeních. Převod je volitelný.
+                    This video is not H.264 and may not play on some devices. Conversion is optional.
                 </span>
             </span>
         );
@@ -148,26 +148,26 @@ export default function ConvertShowcase() {
         if (running) {
             return (
                 <div role="status" className="space-y-1 text-[11px] text-blue-400">
-                    <span className="inline-flex items-center gap-2"><FaSpinner aria-hidden="true" className="motion-safe:animate-spin" /> Konvertuje se na H.264</span>
-                    <p className="text-[10px] text-zinc-500">Stav zůstane i po obnovení stránky.</p>
+                    <span className="inline-flex items-center gap-2"><FaSpinner aria-hidden="true" className="motion-safe:animate-spin" /> Converting to H.264</span>
+                    <p className="text-[10px] text-zinc-500">Status persists after reload.</p>
                 </div>
             );
         }
         if (completed || video.codec === "H.264") {
-            return <span className="text-[11px] text-emerald-400">{completed ? "Převedeno · H.264 / AAC" : "H.264 · konverze není potřeba"}</span>;
+            return null;
         }
         const reason = !demo.enabled
-            ? "Konverze je správcem vypnutá."
+            ? "Conversion is disabled by the administrator."
             : video.size > limit
-                ? `Nad limitem konverze ${demo.maxSize || "0"} MB.`
+                ? `Above the conversion limit of ${demo.maxSize || "0"} MB.`
                 : !concurrency
-                    ? "Nastav platný limit souběžných konverzí."
+                    ? "Set a valid concurrent conversion limit."
                     : full
-                        ? `Probíhá ${demo.running.length}/${concurrency} konverzí. Počkej na dokončení.`
+                        ? `Running ${demo.running.length}/${concurrency} conversions. Wait for one to finish.`
                         : "";
         return (
             <div className="space-y-1.5">
-                <Button size="small" disabled={!ready || Boolean(reason)} onClick={() => start(video)}>Převést na H.264</Button>
+                <Button size="small" disabled={!ready || Boolean(reason)} onClick={() => start(video)}>Convert to H.264</Button>
                 {reason && <p className="text-[10px] leading-4 text-zinc-500">{reason}</p>}
             </div>
         );
@@ -176,15 +176,15 @@ export default function ConvertShowcase() {
     return (
         <main className="mx-auto max-w-6xl space-y-5 px-4 py-8 text-zinc-200 sm:px-6">
             <header className="space-y-2">
-                <a href="/design" className="text-xs text-zinc-500 hover:text-white">← Design katalog</a>
-                <h1 className="text-xl">Konverze videí <span className="text-xs text-amber-500">MOCK</span></h1>
-                <p className="text-xs leading-6 text-zinc-400">Žádná skutečná média, uploady ani API. Simulace sdílí limit pro galerii, packy a uploady. Stav se ukládá jen v tomto prohlížeči.</p>
-                <nav className="flex flex-wrap gap-4 text-xs text-zinc-400" aria-label="Ukázky konverze">
-                    <a href="#mock-settings">Nastavení</a>
+                <a href="/design" className="text-xs text-zinc-500 hover:text-white">← Design catalog</a>
+                <h1 className="text-xl">Video conversion <span className="text-xs text-amber-500">MOCK</span></h1>
+                <p className="text-xs leading-6 text-zinc-400">No real media, uploads or API calls. The gallery, packs and uploads share one limit. Preview state is stored only in this browser.</p>
+                <nav className="flex flex-wrap gap-4 text-xs text-zinc-400" aria-label="Conversion previews">
+                    <a href="#mock-settings">Settings</a>
                     <a href="#mock-upload">Upload</a>
-                    <a href="#mock-gallery">Galerie</a>
+                    <a href="#mock-gallery">Gallery</a>
                     <a href="#mock-pack">File pack</a>
-                    <a href="#video-compatibility">Původní návrh 07</a>
+                    <a href="#video-compatibility">Original preview 07</a>
                 </nav>
             </header>
 
@@ -192,13 +192,13 @@ export default function ConvertShowcase() {
                 <Panel title="MOCK /admin/settings">
                     <div className="space-y-4">
                         <Toggle
-                            label="Povolit konverzi videí na H.264"
+                            label="Enable H.264 video conversion"
                             checked={demo.enabled}
                             onChange={(enabled) => setDemo((current) => ({ ...current, enabled }))}
                         />
                         <div className="grid gap-3 sm:grid-cols-2">
                             <Field
-                                label="Maximální velikost videa (MB)"
+                                label="Maximum source video size (MB)"
                                 type="number"
                                 min={1}
                                 step={1}
@@ -206,46 +206,46 @@ export default function ConvertShowcase() {
                                 onChange={(maxSize) => setDemo((current) => ({ ...current, maxSize }))}
                             />
                             <Field
-                                label="Souběžné konverze na uživatele"
+                                label="Concurrent conversions per user"
                                 type="number"
                                 min={1}
                                 step={1}
                                 value={demo.maxConcurrent}
                                 onChange={(maxConcurrent) => setDemo((current) => ({ ...current, maxConcurrent }))}
-                                hint="Výchozí 1. Společně pro všechny uploady, galerii a packy."
+                                hint="Default: 1. Shared across uploads, gallery and file packs."
                             />
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Badge>Aktivní {demo.running.length} / {concurrency}</Badge>
-                            <Button size="small" disabled={!ready || !demo.running.length} onClick={() => setDemo((current) => ({ ...current, completed: [...current.completed, ...current.running], running: [] }))}>Simulovat dokončení</Button>
+                            <Badge>Active {demo.running.length} / {concurrency}</Badge>
+                            <Button size="small" disabled={!ready || !demo.running.length} onClick={() => setDemo((current) => ({ ...current, completed: [...current.completed, ...current.running], running: [] }))}>Simulate completion</Button>
                             <Button size="small" disabled={!ready} onClick={() => {
                                 setDemo(initialState);
                                 setConvertUpload(false);
-                                setNotice("Mock data resetována. Žádná skutečná data se nemění.");
-                            }}>Reset mock dat</Button>
+                                setNotice("Mock data reset. No real data was changed.");
+                            }}>Reset mock data</Button>
                         </div>
-                        <p className="text-[10px] leading-5 text-zinc-500">Konverze v ukázce zůstává běžet, dokud nestiskneš „Simulovat dokončení“. Zkus spustit video a obnovit stránku. Vypnutí funkce blokuje nové úlohy, již běžící pokračují.</p>
-                        <p role="status" className="text-xs text-zinc-400">{ready ? notice : "Obnovuji stav ukázky…"}</p>
+                        <p className="text-[10px] leading-5 text-zinc-500">Preview conversions keep running until you click “Simulate completion”. Start a conversion and reload the page. Disabling conversion blocks new jobs; active jobs continue.</p>
+                        <p role="status" className="text-xs text-zinc-400">{ready ? notice : "Restoring preview state…"}</p>
                     </div>
                 </Panel>
             </section>
 
             <section id="mock-upload">
-                <Panel title="MOCK /a/image a upload do file packu">
+                <Panel title="MOCK /a/image and file pack upload">
                     <div className="space-y-3">
                         <SegmentedControl
-                            label="Cíl uploadu"
+                            label="Upload destination"
                             value={destination}
                             onChange={setDestination}
                             options={[
-                                { value: "gallery", label: "Galerie /a/image" },
+                                { value: "gallery", label: "Gallery /a/image" },
                                 { value: "pack", label: "File pack" },
                             ]}
                         />
-                        <div className="rounded-md border border-dashed border-zinc-700 p-5 text-center text-xs text-zinc-500">Sem budeš přetahovat videa. V mocku vyber předpřipravený soubor níže — žádný přístup k tvým souborům.</div>
-                        <Field label="Ukázkový název souboru" value={mockName} onChange={setMockName} />
+                        <div className="rounded-md border border-dashed border-zinc-700 p-5 text-center text-xs text-zinc-500">Drop videos here. In this mock, choose an example below — your files are not accessed.</div>
+                        <Field label="Example filename" value={mockName} onChange={setMockName} />
                         <SegmentedControl
-                            label="Mock kodek a velikost"
+                            label="Mock codec and size"
                             value={uploadScenario}
                             onChange={(value) => {
                                 setUploadScenario(value);
@@ -259,23 +259,23 @@ export default function ConvertShowcase() {
                         />
                         {uploadScenario !== "h264" && (
                             <div className="space-y-2">
-                                <p className="flex items-center gap-2 text-[11px] text-amber-500">{warning()} Video nemusí být kompatibilní s některými zařízeními.</p>
+                                <p className="flex items-center gap-2 text-[11px] text-amber-500">{warning()} This video may not play on some devices.</p>
                                 {uploadEligible ? (
-                                    <Checkbox label="Po nahrání převést na H.264" checked={convertUpload} onChange={setConvertUpload} />
+                                    <Checkbox label="Convert to H.264 after upload" checked={convertUpload} onChange={setConvertUpload} />
                                 ) : (
-                                    <p className="text-[10px] text-zinc-500">{!demo.enabled ? "Konverze je vypnutá." : `Soubor přesahuje limit ${demo.maxSize || "0"} MB.`} Lze nahrát originál.</p>
+                                    <p className="text-[10px] text-zinc-500">{!demo.enabled ? "Conversion is disabled." : `File exceeds the limit of ${demo.maxSize || "0"} MB.`} You can upload the original.</p>
                                 )}
                             </div>
                         )}
-                        {uploadEligible && convertUpload && full && <p className="text-[11px] text-amber-500">Limit konverzí je obsazený. Počkej nebo zruš volbu konverze a nahraj originál.</p>}
-                        <p className="text-[10px] text-zinc-500">Vysoká vizuální kvalita, stejné rozlišení a FPS. Kompatibilní AAC zvuk se kopíruje. Výsledná velikost se může změnit.</p>
-                        <Button variant="primary" disabled={!ready || !mockName.trim() || (uploadEligible && convertUpload && full)} onClick={simulateUpload}>Simulovat nahrání</Button>
+                        {uploadEligible && convertUpload && full && <p className="text-[11px] text-amber-500">The conversion limit is reached. Wait or uncheck conversion to upload the original.</p>}
+                        <p className="text-[10px] text-zinc-500">High visual quality, original resolution and frame rate. Compatible AAC audio is copied. File size may change.</p>
+                        <Button variant="primary" disabled={!ready || !mockName.trim() || (uploadEligible && convertUpload && full)} onClick={simulateUpload}>Simulate upload</Button>
                     </div>
                 </Panel>
             </section>
 
             <section id="mock-gallery">
-                <Panel title="MOCK /home/gallery — již nahraná videa">
+                <Panel title="MOCK /home/gallery — existing videos">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                         {allVideos.filter((video) => video.location === "gallery").map((video, index) => (
                             <article key={video.id} className="min-w-0 rounded-md border border-zinc-800 bg-[#0a0a0a]">
@@ -295,11 +295,11 @@ export default function ConvertShowcase() {
             </section>
 
             <section id="mock-pack">
-                <Panel title="MOCK /home/files — nahraná videa v packu">
+                <Panel title="MOCK /home/files — existing pack videos">
                     <div className="rounded-md border border-zinc-800 bg-[#0a0a0a]">
                         <div className="border-b border-zinc-800 px-3 py-2">
-                            <p className="text-xs">Holiday pack <span className="text-zinc-500">· {allVideos.filter((video) => video.location === "pack").length} soubory</span></p>
-                            <p className="mt-1 text-[10px] text-zinc-600">Ukázkový pack · rozbaleno</p>
+                            <p className="text-xs">Holiday pack <span className="text-zinc-500">· {allVideos.filter((video) => video.location === "pack").length} files</span></p>
+                            <p className="mt-1 text-[10px] text-zinc-600">Example pack · expanded</p>
                         </div>
                         {allVideos.filter((video) => video.location === "pack").map((video) => (
                             <div key={video.id} className="flex flex-col gap-3 border-b border-zinc-800/60 px-3 py-2.5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">

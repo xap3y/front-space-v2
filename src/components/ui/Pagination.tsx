@@ -69,6 +69,22 @@ export default function Pagination({
                     onClick={() => onNext ? onNext() : onChange?.(total === undefined ? page + 1 : Math.min(total, page + 1))}
                     icon={<FaChevronRight aria-hidden="true" />}
                 />
+                {total !== undefined && total > 2 && (onChange || disabled) && (
+                    <SelectControl
+                        compact
+                        aria-label="Go to page"
+                        title="Go to page"
+                        value={page}
+                        disabled={disabled || !onChange}
+                        onChange={(event) => onChange?.(Number(event.target.value))}
+                    >
+                        {Array.from({ length: total }, (_, index) => (
+                            <option key={index + 1} value={index + 1}>
+                                {index + 1}
+                            </option>
+                        ))}
+                    </SelectControl>
+                )}
             </div>
         </nav>
     );

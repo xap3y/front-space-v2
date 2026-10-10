@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import {useRouter} from "next/navigation";
-import {DeleteButton} from "@/components/HoverDiv";
+import {NativeDeleteButton} from "@/components/ui/NativeButton";
 import {useUser} from "@/hooks/useUser";
 import {hasPermission, type Permission} from "@/lib/permissions";
 import {getApiUrl} from "@/lib/core";
@@ -19,9 +19,10 @@ type Props = {
     id: string;
     ownerId?: number;
     canDelete?: boolean;
+    className?: string;
 };
 
-export default function ResourceDeleteButton({kind, id, ownerId, canDelete = false}: Props) {
+export default function ResourceDeleteButton({kind, id, ownerId, canDelete = false, className}: Props) {
     const {user} = useUser();
     const router = useRouter();
     const [busy, setBusy] = useState(false);
@@ -57,8 +58,13 @@ export default function ResourceDeleteButton({kind, id, ownerId, canDelete = fal
     };
 
     return (
-        <DeleteButton className="px-3 py-1.5 text-xs" disabled={busy} onClick={remove}>
+        <NativeDeleteButton
+            type="button"
+            className={className ?? "px-3 py-1.5 text-xs"}
+            disabled={busy}
+            onClick={remove}
+        >
             {busy ? "Deleting…" : "Delete"}
-        </DeleteButton>
+        </NativeDeleteButton>
     );
 }

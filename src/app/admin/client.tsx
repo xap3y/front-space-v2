@@ -8,6 +8,7 @@ import { FaFileArchive, FaUserCog } from "react-icons/fa";
 import { MdDashboard, MdHistory, MdSettings, MdSpeed } from "react-icons/md";
 
 const adminSections = [
+    { title: "Event monitoring", description: "Track background tasks, logs and retry history.", href: "/admin/monitoring", icon: <MdHistory className="h-6 w-6" /> },
     { title: "Users", description: "Manage accounts, roles, and access.", href: "/admin/users", icon: <FaUsers className="h-6 w-6" /> },
     { title: "Limits", description: "Configure platform quotas and restrictions.", href: "/admin/limits", icon: <MdSpeed className="h-6 w-6" /> },
     { title: "Invites", description: "Create and manage account invitations.", href: "/admin/invites", icon: <FaUserCog className="h-6 w-6" /> },

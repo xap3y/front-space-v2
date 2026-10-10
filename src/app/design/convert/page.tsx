@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ConvertShowcase from "./showcase";
 
 export const metadata: Metadata = {
-    title: "Konverze videa / Design / Space",
+    title: "Video conversion / Design / Space",
     robots: { index: false, follow: false },
 };
 

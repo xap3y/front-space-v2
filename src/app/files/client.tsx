@@ -1,8 +1,10 @@
 "use client";
+import VideoUploadCompatibility from "@/components/VideoUploadCompatibility";
+import VideoConversionControl from "@/components/VideoConversionControl";
 import Surface from "@/components/ui/Surface";
+import { Toggle } from "@/components/ui";
 
 import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
-import { SelectionInput } from "@/components/ui/SelectionInput";
 
 
 import { useEffect, useState, useRef } from "react";
@@ -24,6 +26,7 @@ import {generatePresignedPutUrl} from "@/lib/apiPoster";
 import {apiErrorMessage} from "@/lib/apiError";
 
 interface UploadItem {
+    convertToH264?: boolean;
     id: string;
     file: File;
     realFileName: string;
@@ -37,6 +40,7 @@ interface UploadItem {
 }
 
 interface UploadedFile {
+    convertToH264?: boolean;
     uniqueId: string;
     fileName: string;
     originalFileName: string;
@@ -48,6 +52,7 @@ interface UploadedFile {
 
 interface FileRegisterRequest {
     items: {
+        convertToH264?: boolean;
         uniqueId: string;
         fileName?: string;
         fileType: string;
@@ -96,7 +101,6 @@ export function FilesPageClient() {
     const [isKeyValidating, setIsKeyValidating] = useState<boolean>(false);
     const [validatedApiKeyRole, setValidatedApiKeyRole] = useState<string | null>(null);
     const [isFocused, setIsFocused] = useState(false);
-    const [isPassFocused, setIsPassFocused] = useState(false);
 
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editingName, setEditingName] = useState<string>("");
@@ -461,6 +465,7 @@ export function FilesPageClient() {
             );
 
             const newUploadedFile: UploadedFile = {
+                convertToH264: item.convertToH264,
                 uniqueId: filenameNew,
                 fileName: filenameNew,
                 originalFileName: originalName, // ✅ Keep original fileName
@@ -500,6 +505,7 @@ export function FilesPageClient() {
 
             const registerRequest: FileRegisterRequest = {
                 items: filesToRegister.map(file => ({
+                    convertToH264: Boolean(file.convertToH264),
                     uniqueId: file.uniqueId,
                     fileName: file.originalFileName,
                     fileType: file.fileType || "application/octet-stream",
@@ -719,6 +725,9 @@ export function FilesPageClient() {
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate text-xs font-semibold text-zinc-100" title={file.originalFileName}>{file.originalFileName}</p>
                                             <p className="mt-0.5 text-[10px] tabular-nums text-zinc-500">{formatFileSize(file.size)}</p>
+                                            {/\.mp4$/i.test(file.uniqueId) && (
+                                                <VideoConversionControl kind="file" id={file.uniqueId} size={file.size} apiKey={apiKey} />
+                                            )}
                                         </div>
                                         <HoverDiv
                                             onClick={() => copyToClipboard(file.fileUrl)}
@@ -901,13 +910,24 @@ export function FilesPageClient() {
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     {/* ✅ CHANGED: Show customName if exists, otherwise show realFileName */}
-                                                    <p
+                                                    {item.status !== "pending" && <p
                                                         className={`font-semibold truncate ${
                                                             isMultiple ? "text-gray-300" : "text-white"
                                                         } ${item.status === "cancelled" ? "line-through text-red-400" : ""}`}
                                                     >
                                                         {item.customName || item.realFileName}
-                                                    </p>
+                                                    </p>}
+                                                    {item.status === "pending" && (
+                                                        <VideoUploadCompatibility
+                                                            fileName={item.customName || item.realFileName}
+                                                            file={item.file}
+                                                            checked={Boolean(item.convertToH264)}
+                                                            disabled={uploading}
+                                                            onChange={(convertToH264) => setUploadItems((current) => current.map((entry) =>
+                                                                entry.id === item.id ? { ...entry, convertToH264 } : entry
+                                                            ))}
+                                                        />
+                                                    )}
                                                     <p className={`text-gray-500 text-xs ${item.status === "cancelled" ? "line-through text-red-400" : ""}`}>
                                                         {!isMultiple ? formatFileSize(item.file.size) : "(" + formatFileSize(item.file.size) + ")"}
                                                     </p>
@@ -921,12 +941,12 @@ export function FilesPageClient() {
                                             )}
 
                                             {!uploading && item.status === "pending" && (
-                                                <div className="flex gap-1">
-                                                    <NativeButton variant="primary"
+                                                <div className="flex shrink-0 gap-1">
+                                                    <NativeButton type="button"
                                                         onClick={() => handleEditFile(item.id)}
-                                                        className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
+                                                        title="Edit file name"
                                                     >
-                                                        <FaPen className="w-3 h-3 text-blue-400" />
+                                                        <FaPen className="w-3 h-3" />
                                                     </NativeButton>
                                                     <NativeButton
                                                         onClick={() => handleRemoveFile(item.id)}
@@ -1029,28 +1049,18 @@ export function FilesPageClient() {
                                         </div>
 
                                         {/* Toggle Switch */}
-                                        <NativeButton data-active={isPasswordProtected}
-                                            onClick={() => {
-                                                setIsPasswordProtected(!isPasswordProtected);
-                                                if (isPasswordProtected) {
+                                        <Toggle
+                                            label="Password Protected"
+                                            hideLabel
+                                            checked={isPasswordProtected}
+                                            onChange={(checked) => {
+                                                setIsPasswordProtected(checked);
+                                                if (!checked) {
                                                     setPackPassword("");
                                                 }
                                             }}
                                             disabled={uploading}
-                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                                isPasswordProtected
-                                                    ? "bg-blue-600"
-                                                    : "bg-gray-700"
-                                            } ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                                        >
-                                            <span
-                                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                                    isPasswordProtected
-                                                        ? "translate-x-6"
-                                                        : "translate-x-1"
-                                                }`}
-                                            />
-                                        </NativeButton>
+                                        />
                                     </div>
 
                                     {/* Password Input - Animated */}
@@ -1062,23 +1072,22 @@ export function FilesPageClient() {
                                         }`}
                                     >
                                         <div className="relative">
+                                            <div className="flex items-center gap-2">
                                             <MainStringInput
-                                                type={"text"}
+                                                type={showPassword ? "text" : "password"}
                                                 id={"image"}
                                                 autoComplete={"off"}
                                                 value={packPassword}
                                                 onChange={(e) => setPackPassword(purifyText(e))}
                                                 placeholder="Enter pack password..."
                                                 disabled={uploading}
-                                                onFocus={() => {
-                                                    setTimeout(() => setIsPassFocused(true), 100);
-                                                }}
-                                                className={`xl:text-base text-xs w-full pr-10 ${isPassFocused && !showPassword ? "text-dots" : ""}`}
+                                                className="xl:text-base text-xs min-w-0 flex-1"
                                             />
                                             <NativeButton
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-700 hover:bg-opacity-30 rounded transition"
+                                                variant="ghost"
+                                                className="shrink-0"
                                                 title={showPassword ? "Hide password" : "Show password"}
                                             >
                                                 {showPassword ? (
@@ -1087,6 +1096,7 @@ export function FilesPageClient() {
                                                     <FaEye className="w-3.5 h-3.5 text-gray-400" />
                                                 )}
                                             </NativeButton>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1100,30 +1110,13 @@ export function FilesPageClient() {
                                         </label>
                                     </div>
 
-                                    <label
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                            isAnonymous
-                                                ? "bg-purple-600"
-                                                : "bg-gray-700"
-                                        } ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                                    >
-                                        <SelectionInput
-                                            type="checkbox"
-                                            role="switch"
-                                            aria-label="Upload anonymously"
-                                            checked={isAnonymous}
-                                            onChange={(event) => setIsAnonymous(event.target.checked)}
-                                            disabled={uploading}
-                                            className="sr-only"
-                                        />
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                                isAnonymous
-                                                    ? "translate-x-6"
-                                                    : "translate-x-1"
-                                            }`}
-                                        />
-                                    </label>
+                                    <Toggle
+                                        label="Anonymous Upload"
+                                        hideLabel
+                                        checked={isAnonymous}
+                                        onChange={setIsAnonymous}
+                                        disabled={uploading}
+                                    />
                                 </div></>}
 
                                 <NativeButton variant="primary"
