@@ -1,4 +1,10 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useUser } from "@/hooks/useUser";
@@ -185,25 +191,25 @@ export default function AdminSessionsClient() {
                             Live browser connections — {sessions.length} online
                         </p>
                     </div>
-                    <button
+                    <NativeButton
                         onClick={() => fetchSessions()}
                         className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                         disabled={loading}
                     >
                         <FaRotateRight className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                         <span className="hidden sm:inline">Refresh</span>
-                    </button>
+                    </NativeButton>
                 </div>
 
                 {/* Sessions list */}
-                <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
+                <Surface className="flex flex-col box-primary p-3 md:p-4 gap-3">
                     {sessions.length === 0 ? (
                         <div className="py-10 text-center text-gray-400 text-sm">
                             {loading ? "Loading…" : "No active browser sessions right now."}
                         </div>
                     ) : (
                         sessions.map((s) => (
-                            <div
+                            <Surface
                                 key={s.wsSessionId}
                                 className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3"
                             >
@@ -263,52 +269,52 @@ export default function AdminSessionsClient() {
                                     {/* Right: actions */}
                                     <div className="flex flex-wrap gap-2 shrink-0">
                                         {/* Send Toast */}
-                                        <button
+                                        <NativeButton
                                             onClick={() => setToastModal({ wsId: s.wsSessionId, username: s.username })}
                                             className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200"
                                             title="Send Toast Notification"
                                         >
                                             <FaBell className="h-3.5 w-3.5" />
                                             <span className="hidden sm:inline">Toast</span>
-                                        </button>
+                                        </NativeButton>
 
                                         {/* Redirect */}
-                                        <button
+                                        <NativeButton
                                             onClick={() => setRedirectModal({ wsId: s.wsSessionId, username: s.username })}
                                             className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200"
                                             title="Redirect to Route"
                                         >
                                             <FaArrowRight className="h-3.5 w-3.5" />
                                             <span className="hidden sm:inline">Redirect</span>
-                                        </button>
+                                        </NativeButton>
 
                                         {/* Logout */}
                                         {s.userId && (
-                                            <button
+                                            <NativeButton variant="warning"
                                                 onClick={() => doLogout(s.wsSessionId)}
                                                 className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-yellow-500/40 hover:border-yellow-500 hover:in-shadow bg-yellow-600/10 transition-all duration-200 text-yellow-300"
                                                 title="Force Logout"
                                             >
                                                 <FaSignOutAlt className="h-3.5 w-3.5" />
                                                 <span className="hidden sm:inline">Logout</span>
-                                            </button>
+                                            </NativeButton>
                                         )}
 
                                         {/* Close WS */}
-                                        <button
+                                        <NativeButton
                                             onClick={() => doClose(s.wsSessionId)}
                                             className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 transition-all duration-200 text-red-300"
                                             title="Close WS Connection"
                                         >
                                             <FaBan className="h-3.5 w-3.5" />
                                             <span className="hidden sm:inline">Close</span>
-                                        </button>
+                                        </NativeButton>
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))
                     )}
-                </div>
+                </Surface>
             </div>
 
             {/* Toast Modal */}
@@ -317,16 +323,16 @@ export default function AdminSessionsClient() {
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
                     onClick={() => setToastModal(null)}
                 >
-                    <div
+                    <Surface
                         className="relative w-full max-w-md mx-4 rounded-2xl border-2 border-zinc-800 bg-primary1 p-6 shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
+                        <NativeButton
                             onClick={() => setToastModal(null)}
                             className="absolute top-4 right-4 p-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all text-gray-400 hover:text-white"
                         >
                             <FaTimes className="h-3.5 w-3.5" />
-                        </button>
+                        </NativeButton>
                         <h2 className="text-base font-semibold mb-1">Send Toast</h2>
                         <p className="text-xs text-gray-400 mb-4">
                             To: <span className="text-white">{toastModal.username ?? "Anonymous"}</span>
@@ -334,7 +340,7 @@ export default function AdminSessionsClient() {
 
                         <div className="flex flex-col gap-3 mb-4">
                             <div className="flex gap-2">
-                                <select
+                                <SelectControl
                                     value={toastType}
                                     onChange={(e) => setToastType(e.target.value as any)}
                                     className="flex-1 rounded-lg border-2 border-zinc-800 bg-primary1 text-sm text-white px-3 py-2 focus:outline-none focus:border-zinc-700"
@@ -343,8 +349,8 @@ export default function AdminSessionsClient() {
                                     <option value="info">Info (infoToast)</option>
                                     <option value="warning">Warning</option>
                                     <option value="error">Error (errorToast)</option>
-                                </select>
-                                <select
+                                </SelectControl>
+                                <SelectControl
                                     value={toastPos}
                                     onChange={(e) => setToastPos(e.target.value)}
                                     className="flex-1 rounded-lg border-2 border-zinc-800 bg-primary1 text-sm text-white px-3 py-2 focus:outline-none focus:border-zinc-700"
@@ -355,34 +361,34 @@ export default function AdminSessionsClient() {
                                     <option value="bottom-left">Bottom Left</option>
                                     <option value="top-center">Top Center</option>
                                     <option value="bottom-center">Bottom Center</option>
-                                </select>
+                                </SelectControl>
                             </div>
-                            <textarea
+                            <MainStringInput multiline className="w-full"
                                 autoFocus
                                 value={toastMsg}
-                                onChange={(e) => setToastMsg(e.target.value)}
+                                onChange={(_value, e) => setToastMsg(e.target.value)}
                                 rows={3}
                                 placeholder="Type your message…"
-                                className="w-full rounded-lg border-2 border-zinc-800 focus:border-zinc-700 bg-primary1 text-sm text-white px-3 py-2 focus:outline-none resize-none placeholder-gray-500"
+                                inputClassName="w-full rounded-lg border-2 border-zinc-800 focus:border-zinc-700 bg-primary1 text-sm text-white px-3 py-2 focus:outline-none resize-none placeholder-gray-500"
                             />
                         </div>
 
                         <div className="flex gap-2 justify-end">
-                            <button
+                            <NativeButton
                                 onClick={() => setToastModal(null)}
                                 className="px-4 py-2 text-sm rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 transition-all"
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 onClick={doSendToast}
                                 disabled={!toastMsg.trim()}
                                 className="px-4 py-2 text-sm rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-emerald-300 transition-all disabled:opacity-50"
                             >
                                 Send
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
 
@@ -392,16 +398,16 @@ export default function AdminSessionsClient() {
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
                     onClick={() => setRedirectModal(null)}
                 >
-                    <div
+                    <Surface
                         className="relative w-full max-w-md mx-4 rounded-2xl border-2 border-zinc-800 bg-primary1 p-6 shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
+                        <NativeButton
                             onClick={() => setRedirectModal(null)}
                             className="absolute top-4 right-4 p-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all text-gray-400 hover:text-white"
                         >
                             <FaTimes className="h-3.5 w-3.5" />
-                        </button>
+                        </NativeButton>
                         <h2 className="text-base font-semibold mb-1">Redirect Client</h2>
                         <p className="text-xs text-gray-400 mb-4">
                             Target: <span className="text-white">{redirectModal.username ?? "Anonymous"}</span>
@@ -416,21 +422,21 @@ export default function AdminSessionsClient() {
                             inputClassName="text-sm px-3 py-2"
                         />
                         <div className="flex gap-2 justify-end mt-4">
-                            <button
+                            <NativeButton
                                 onClick={() => setRedirectModal(null)}
                                 className="px-4 py-2 text-sm rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 transition-all"
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 onClick={doRedirect}
                                 disabled={!redirectRoute.trim()}
                                 className="px-4 py-2 text-sm rounded-lg border-2 border-blue-600/40 hover:border-blue-500 hover:in-shadow bg-primary1 text-blue-300 transition-all disabled:opacity-50"
                             >
                                 Redirect
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
         </section>

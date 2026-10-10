@@ -1,4 +1,8 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import {notFound, useParams, useRouter} from "next/navigation";
 import {useEffect, useRef, useState} from "react";
@@ -274,7 +278,7 @@ export default function Page() {
     if (loading) {
         return (
             <div className="flex min-h-screen w-full items-center justify-center pb-56 bg-primaryDottedSize bg-primaryDotted">
-                <div className="p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary w-full max-w-lg animate-pulse">
+                <Surface className="p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary w-full max-w-lg animate-pulse">
                     <div className="flex flex-col items-center justify-center p-2 w-full space-y-2">
                         <div className="h-7 w-48 bg-zinc-700 rounded" />
                         <div className="h-5 w-24 bg-zinc-800 rounded" />
@@ -286,7 +290,7 @@ export default function Page() {
                         <div className="h-10 w-28 bg-zinc-700 rounded-md" />
                         <div className="h-10 w-28 bg-zinc-700 rounded-md" />
                     </div>
-                </div>
+                </Surface>
             </div>
         );
     }
@@ -316,7 +320,7 @@ export default function Page() {
                     <div className={"overflow-y-scroll overflow-x-hidden"}>
 
                         <div className={"flex min-h-screen w-full items-center justify-center lg:mb-0 pb-56"}>
-                            <div className={"p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary"} onMouseMove={handleMouseMove}>
+                            <Surface className={"p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary"} onMouseMove={handleMouseMove}>
                                 <div className={"flex flex-col items-center justify-center p-2"}>
                                     <h1 className={"lg:text-3xl text-xl font-bold"}>{image.uniqueId + "." + image.type}</h1>
 
@@ -402,7 +406,7 @@ export default function Page() {
                                     </button>*/}
 
                                     <div ref={copyMenuRef} className="relative inline-block text-left">
-                                        <button
+                                        <NativeButton data-active={open}
                                             type="button"
                                             aria-haspopup="menu"
                                             aria-expanded={open}
@@ -412,9 +416,9 @@ export default function Page() {
                                             <FaLink className="h-4 w-4" />
                                             {lang.pages.image_viewer.copy_button_text}
                                             <FaArrowDown className={`ml-1 h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-                                        </button>
+                                        </NativeButton>
 
-                                        <div
+                                        <Surface
                                             role="menu"
                                             className={`absolute bottom-full right-0 z-50 mb-2 max-h-[calc(100vh-2rem)] w-[min(290px,calc(100vw-1.5rem))] origin-bottom-right overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 text-left shadow-2xl shadow-black/60 backdrop-blur-xl transition duration-150 ${
                                                 open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-1 scale-[.98] opacity-0"
@@ -425,7 +429,7 @@ export default function Page() {
                                                 {key: "Short URL", description: "Compact link for sharing", value: image?.urlSet.shortUrl || "", icon: <FaLink/>},
                                                 {key: "Portal URL", description: "Opens this image viewer", value: image?.urlSet.portalUrl || `https://space.xap3y.eu/i/${uid}`, icon: <FaGlobe/>},
                                                 {key: "Raw URL", description: "Direct link to the media file", value: image?.urlSet.rawUrl || "", icon: <FaImage/>},
-                                            ].map(option => <button
+                                            ].map(option => <NativeButton
                                                 type="button"
                                                 role="menuitem"
                                                 key={option.key}
@@ -435,8 +439,8 @@ export default function Page() {
                                             >
                                                 <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border transition ${copiedOption === option.key ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-white/10 bg-white/[.035] text-zinc-400 group-hover:text-white"}`}>{copiedOption === option.key ? <FaCheck/> : option.icon}</span>
                                                 <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-zinc-100">{copiedOption === option.key ? "Copied" : option.key}</span><span className="block truncate text-[11px] font-normal text-zinc-500">{option.description}</span></span>
-                                            </button>)}
-                                        </div>
+                                            </NativeButton>)}
+                                        </Surface>
                                     </div>
 
                                     {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-600 text-white px-2 rounded"} onClick={reportImage} >
@@ -449,7 +453,7 @@ export default function Page() {
 
                                 </div>
 
-                            </div>
+                            </Surface>
                         </div>
 
                     </div>
@@ -470,7 +474,7 @@ export default function Page() {
             ) : passwordRequired ? (
                 <>
                     <section className="min-h-screen w-full flex items-center justify-center px-4 py-8">
-                        <div className="w-full max-w-md box-primary rounded-2xl shadow-xl p-5 sm:p-6">
+                        <Surface className="w-full max-w-md box-primary rounded-2xl shadow-xl p-5 sm:p-6">
                             {/* Header */}
                             <div className="flex items-center gap-3 mb-4">
                                 <h1 className="text-base sm:text-xl font-bold leading-tight text-whitesmoke">
@@ -510,7 +514,7 @@ export default function Page() {
                                         onChange={(e) => setPassword(e)}
                                     />
 
-                                    <button
+                                    <NativeButton
                                         type="button"
                                         onClick={() => setShowPassword((s) => !s)}
                                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition"
@@ -522,7 +526,7 @@ export default function Page() {
                                         ) : (
                                             <FaEye className="h-5 w-5" />
                                         )}
-                                    </button>
+                                    </NativeButton>
                                 </div>
 
                                 {error ? (
@@ -536,14 +540,14 @@ export default function Page() {
                                     <></>
                                 )}
 
-                                <button
+                                <NativeButton variant="primary"
                                     type="submit"
                                     className="w-full bg-blue-500 text-white px-4 py-2.5 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-500/30 transition"
                                 >
                                     {lang?.pages?.image_viewer?.view_image_button_placeholder}
-                                </button>
+                                </NativeButton>
                             </form>
-                        </div>
+                        </Surface>
                     </section>
                 </>
             ) : null}

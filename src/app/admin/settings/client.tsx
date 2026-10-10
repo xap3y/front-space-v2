@@ -1,4 +1,7 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+import { Toggle } from "@/components/ui";
+
 
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {FaBolt, FaPlus} from "react-icons/fa6";
@@ -34,17 +37,13 @@ const settingRows: Array<{key: BooleanSettingKey; title: string; description: st
 
 function SettingSwitch({enabled, disabled, onChange}: {enabled: boolean; disabled?: boolean; onChange: (value: boolean) => void}) {
     return (
-        <HoverDiv
-            type="INFO"
-            role="switch"
-            aria-checked={enabled}
-            aria-label={enabled ? "Disable setting" : "Enable setting"}
+        <Toggle
+            label="Enable setting"
+            hideLabel
+            checked={enabled}
             disabled={disabled}
-            onClick={() => onChange(!enabled)}
-            className={`relative h-7 w-12 shrink-0 rounded-full border p-0 ${enabled ? "border-emerald-400/50 bg-emerald-400/20" : "border-white/10 bg-white/[.05]"}`}
-        >
-            <span className={`absolute top-1 h-5 w-5 rounded-full transition-all ${enabled ? "left-6 bg-emerald-300" : "left-1 bg-gray-500"}`}/>
-        </HoverDiv>
+            onChange={onChange}
+        />
     );
 }
 
@@ -181,7 +180,7 @@ export default function SettingsClient() {
                     </div>
                 </aside>
 
-                <div className="box-primary p-4 md:p-5">
+                <Surface className="box-primary p-4 md:p-5">
                     {loading ? <div className="space-y-3 animate-pulse"><div className="h-7 w-40 rounded bg-white/[.06]"/>{[1, 2, 3, 4, 5].map(item => <div key={item} className="h-16 rounded-xl bg-white/[.04]"/>)}</div> : draft ? <>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-[10px] font-semibold uppercase tracking-[.14em] text-gray-500">Selected preset</p><h2 className="mt-1 text-lg font-semibold">{draft.presetName}</h2></div>{!selected?.active ? <HoverDiv type="INFO" icon={<FaBolt/>} disabled={saving} onClick={activatePreset} className="px-3 py-2 text-xs font-semibold">Make active</HoverDiv> : null}</div>
                         <div className="mt-5 divide-y divide-white/[.07] overflow-hidden rounded-xl border border-white/10 bg-black/10">
@@ -192,7 +191,7 @@ export default function SettingsClient() {
                         </div>
                         <div className="mt-5 flex justify-between gap-3 border-t border-white/10 pt-4"><DeleteButton disabled={saving} onClick={deletePreset} className="px-3 py-2 text-xs font-semibold">Delete preset</DeleteButton><SaveButton disabled={saving} onClick={savePreset} className="px-4 py-2 text-xs font-semibold">Save preset</SaveButton></div>
                     </> : <p className="text-sm text-gray-500">No preset is available.</p>}
-                </div>
+                </Surface>
             </div>
             <IpMapperSettings />
         </section>

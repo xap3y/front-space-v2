@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useMemo, useState } from "react";
 import LoadingPage from "@/components/LoadingPage";
@@ -179,7 +183,7 @@ export default function ReportGetApiKey() {
         return (
             <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
                 <div className="max-w-lg w-full mx-3">
-                    <div className="box-primary shadow-xl overflow-hidden">
+                    <Surface className="box-primary shadow-xl overflow-hidden">
                         <div className="p-3 lg:p-8">
                             <h2 className="text-center text-3xl font-extrabold text-white">
                                 Your API Key
@@ -189,7 +193,7 @@ export default function ReportGetApiKey() {
                                 page in about 1 hour.
                             </p>
 
-                            <div className="box-primary mt-6 p-4">
+                            <Surface className="box-primary mt-6 p-4">
                                 <p className="text-sm text-gray-300 mb-2">Save it now:</p>
                                 <div className="flex items-center gap-2">
                                     <code className="flex-1 break-all rounded-md bg-black/30 px-3 py-2 text-base text-white">
@@ -209,7 +213,7 @@ export default function ReportGetApiKey() {
                                         Copy
                                     </HoverDiv>
                                 </div>
-                            </div>
+                            </Surface>
 
                             <div className={"text-center mt-4 text-gray-400"}>
                                 <span>
@@ -231,7 +235,7 @@ export default function ReportGetApiKey() {
                                 I saved it — generate a new key
                             </button>*/}
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             </main>
         );
@@ -242,7 +246,7 @@ export default function ReportGetApiKey() {
     return (
         <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
             <div className="max-w-lg w-full mx-3">
-                <div className="box-primary shadow-xl overflow-hidden">
+                <Surface className="box-primary shadow-xl overflow-hidden">
                     <div className="p-3 lg:p-8">
                         <h2 className="text-center text-3xl font-extrabold text-white">
                             Generate API Key
@@ -394,17 +398,17 @@ export default function ReportGetApiKey() {
                             </div>
 
                             <div>
-                                <button
+                                <NativeButton
                                     className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                     type="submit"
                                     disabled={!token || !serverName.trim() || serverName.trim().length < MIN_NAME_LENGTH || loading || generating || !isMailValid || !isNameValid}
                                 >
                                     Generate key
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
                     </div>
-                </div>
+                </Surface>
             </div>
         </main>
     );

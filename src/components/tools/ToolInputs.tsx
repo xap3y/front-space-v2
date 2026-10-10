@@ -1,4 +1,6 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
 
 import React, {useEffect, useState} from "react";
 import MainStringInput from "@/components/MainStringInput";
@@ -136,7 +138,7 @@ export function SelectInput({
     return (
         <div>
             <label className="text-[10px] text-neutral-500 uppercase font-semibold mb-1 block">{label}</label>
-            <select
+            <SelectControl
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={disabled}
@@ -147,7 +149,7 @@ export function SelectInput({
                         {opt.label}
                     </option>
                 ))}
-            </select>
+            </SelectControl>
         </div>
     );
 }

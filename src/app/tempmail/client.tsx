@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useState } from "react";
 import LoadingPage from "@/components/LoadingPage";
@@ -140,7 +144,7 @@ export default function TempMailPage() {
     return (
         <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
             <div className="max-w-lg w-full mx-3">
-                <div className="box-primary shadow-xl overflow-hidden">
+                <Surface className="box-primary shadow-xl overflow-hidden">
                     <div className="p-3 lg:p-8">
                         <h2 className="text-center text-3xl font-extrabold text-white">
                             Temp Mail
@@ -172,7 +176,7 @@ export default function TempMailPage() {
                                 />
                             </div>
 
-                            <button
+                            <NativeButton
                                 className="w-full flex justify-center py-3 px-4 border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow text-sm font-medium rounded-lg text-emerald-300 bg-primary1 transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                 type="submit"
                                 disabled={!token || generating}
@@ -185,14 +189,14 @@ export default function TempMailPage() {
                                 ) : (
                                     "Create Temp Mail"
                                 )}
-                            </button>
+                            </NativeButton>
                         </form>
 
                         <div className="mt-6 text-center text-xs text-gray-500">
                             <p>No sign-up required. Your email expires in 7 days.</p>
                         </div>
                     </div>
-                </div>
+                </Surface>
             </div>
         </main>
     );

@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import {JSX, useEffect, useMemo, useState} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -283,7 +292,7 @@ export default function LogsClient({
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="box-primary p-4">
+            <Surface className="box-primary p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
                         <h1 className="text-xl font-semibold">Audit logs</h1>
@@ -294,12 +303,12 @@ export default function LogsClient({
                             ) : null}
                         </p>
                     </div>
-                    <div className="flex gap-2"><LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/><button
+                    <div className="flex gap-2"><LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/><NativeButton
                         onClick={() => router.refresh()}
                         className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 font-medium"
                     >
                         Refresh
-                    </button></div>
+                    </NativeButton></div>
                 </div>
 
                 {error ? (
@@ -307,10 +316,10 @@ export default function LogsClient({
                         {error}
                     </div>
                 ) : null}
-            </div>
+            </Surface>
 
             {/* Compact Filters Panel */}
-            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+            <Surface className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
                 <MainStringInput
                     type="text"
                     placeholder="Search user / type / desc / source..."
@@ -320,7 +329,7 @@ export default function LogsClient({
                     inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
-                <select
+                <SelectControl
                     className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={typeFilter}
                     onChange={(e) => onType(e.target.value)}
@@ -330,9 +339,9 @@ export default function LogsClient({
                     {TYPE_OPTIONS.map((t) => (
                         <option key={t} value={t}>{t}</option>
                     ))}
-                </select>
+                </SelectControl>
 
-                <select
+                <SelectControl
                     className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={userFilter}
                     onChange={(e) => onUser(e.target.value)}
@@ -342,9 +351,9 @@ export default function LogsClient({
                     {userOptions.map((u) => (
                         <option key={u} value={u}>{u}</option>
                     ))}
-                </select>
+                </SelectControl>
 
-                <select
+                <SelectControl
                     className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
@@ -352,33 +361,33 @@ export default function LogsClient({
                 >
                     <option value="time_desc">Time: newest</option>
                     <option value="time_asc">Time: oldest</option>
-                </select>
+                </SelectControl>
 
                 <div className="flex gap-1.5 ml-auto">
-                    <button
+                    <NativeButton
                         onClick={() => { onSearch(""); onType(""); onUser(""); setSort("time_desc"); onPage(1); }}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
-                    </button>
-                    <button
+                    </NativeButton>
+                    <NativeButton
                         onClick={() => router.refresh()}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
-                    </button>
+                    </NativeButton>
                 </div>
-            </div>
+            </Surface>
 
             {/* List */}
-            <div className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-1.5" : "p-3 md:p-4"}`}>
+            <ResourceList className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-1.5" : "p-3 md:p-4"}`}>
                 <div className={`grid ${layoutMode === "compact" ? "gap-1" : "mt-2 gap-3"}`}>
                     {pageLogs.map((log) => {
                         const isOpen = openId === log.id;
                         const icon = TYPE_ICONS[log.type] ?? <FiHash />;
 
                         return (
-                            <div
+                            <Surface
                                 key={log.id}
                                 className={`${layoutMode === "compact" ? "rounded-lg p-1.5" : "rounded-xl p-3"} border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 transition-all duration-200 shadow-sm shadow-black/30`}
                             >
@@ -469,7 +478,7 @@ export default function LogsClient({
                                         ) : null}
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         );
                     })}
 
@@ -479,49 +488,18 @@ export default function LogsClient({
                 </div>
 
                 {/* Pagination Footer */}
-                {totalPages > 1 && (
-                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                        <div className="flex items-center gap-4">
-                            <div className="text-xs text-gray-400">
-                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                <select
-                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                    value={pageSize}
-                                    onChange={(e) => {
-                                        setPageSize(Number(e.target.value));
-                                        onPage(1);
-                                    }}
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => onPage(Math.max(1, page - 1))}
-                                disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                            >
-                                <FaChevronLeft className="h-3 w-3" />
-                                <span>Prev</span>
-                            </button>
-                            <button
-                                onClick={() => onPage(Math.min(totalPages, page + 1))}
-                                disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                            >
-                                <span>Next</span>
-                                <FaChevronRight className="h-3 w-3" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={onPage}
+                            pageSize={pageSize}
+                            pageSizes={[10, 25, 50]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                onPage(1);
+                            }}
+                        />
+            </ResourceList>
         </div>
     );
 }

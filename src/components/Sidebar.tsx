@@ -1,4 +1,9 @@
 'use client';
+import styles from "@/components/ui/ui.module.css";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -83,12 +88,12 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 const isActive = activePage ? item.page === activePage : false;
                 return (
                     <li key={item.page}>
-                        <button
+                        <NativeButton variant="ghost" data-active={isActive}
                             onClick={() => onItemClick(item)}
                             onMouseEnter={() => router.prefetch(`/home${item.href}`)}
                             onFocus={() => router.prefetch(`/home${item.href}`)}
                             aria-current={isActive ? 'page' : undefined}
-                            className={`
+                            className={`${styles.navItem}
                 group relative w-full flex items-center gap-3 px-3 py-2.5
                 text-sm transition-colors duration-200
                 ${isActive ? 'bg-primary_light/25 text-white' : 'text-gray-200 hover:bg-primary_light/15'}
@@ -97,12 +102,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                         >
                             {/* Left accent bar animates in on hover/active */}
                             <span
-                                className={`
-                  pointer-events-none absolute left-0 top-1/2 -translate-y-1/2
-                  h-5 w-[3px] rounded-full bg-primary_light
-                  opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                  ${isActive ? 'opacity-100' : ''}
-                `}
+className={styles.navIndicator}
                             />
                             {/* Icon with subtle lift on hover */}
                             <span
@@ -114,7 +114,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 {item.icon}
               </span>
                             <span className="truncate">{item.title}</span>
-                        </button>
+                        </NativeButton>
                     </li>
                 );
             })}
@@ -130,13 +130,13 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
             {/* Mobile top bar */}
             <div className="xl:hidden sticky top-0 z-30 bg-primary1 border-b border-white/10">
                 <div className="h-14 px-3 flex items-center justify-between">
-                    <button
+                    <NativeButton variant="ghost"
                         aria-label="Open menu"
                         className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-primary0 transition-colors"
                         onClick={() => setMobileOpen(true)}
                     >
                         <MdMenu className="h-6 w-6" />
-                    </button>
+                    </NativeButton>
                     <SidebarBrand title={brandTitle} compact />
                     <div className="w-9" />
                 </div>
@@ -162,7 +162,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     {showSkeleton ? (
                         <ul className="divide-y divide-white/5 animate-pulse">
                             {sidebar.map((item) => (
-                                <li key={item.page} className="flex items-center gap-3 px-3 py-2.5">
+                                <li key={item.page} className={styles.navItem}>
                                     <div className="h-5 w-5 rounded bg-white/5 shrink-0" />
                                     <div className="h-3.5 rounded bg-white/5" style={{width: `${Math.min(116, Math.max(52, item.title.length * 7))}px`}} />
                                 </li>
@@ -177,11 +177,11 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 <div className="border-t border-white/10 p-3">
                     {showSkeleton ? (
                         <div className="animate-pulse space-y-0">
-                            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                            <div className={styles.navItem}>
                                 <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
                                 <div className="h-3.5 w-14 bg-white/5 rounded" />
                             </div>
-                            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                            <div className={styles.navItem}>
                                 <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
                                 <div className="h-3.5 w-16 bg-white/5 rounded" />
                             </div>
@@ -190,32 +190,32 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                         <>
                             {firstAdminPath(user) && (
                                 <a href={firstAdminPath(user) ?? "/admin"} className="w-full block">
-                                    <button
-                                        className="
+                                    <NativeButton variant="ghost"
+                                        className={`${styles.navItem}
                         w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
                         text-gray-200 hover:bg-cyan-600/15 hover:text-white transition-colors
-                      "
+                      `}
                                         aria-label={"Admin"}
                                         title={"Admin"}
                                     >
                                         <MdOutlineAdminPanelSettings className="h-5 w-5" />
                                         <span>Admin</span>
-                                    </button>
+                                    </NativeButton>
                                 </a>
                             )}
                             {user && (
                                 <a href="/logout" className="w-full block">
-                                    <button
-                                        className="
+                                    <NativeButton variant="ghost"
+                                        className={`${styles.navItem}
                         w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
                         text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors
-                      "
+                      `}
                                         aria-label={logout_text}
                                         title={logout_text}
                                     >
                                         <MdLogout className="h-5 w-5" />
                                         <span>{logout_text}</span>
-                                    </button>
+                                    </NativeButton>
                                 </a>
                             )}
                         </>
@@ -242,7 +242,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                 />
 
                 {/* Drawer panel */}
-                <div
+                <Surface
                     role="dialog"
                     aria-modal="true"
                     className={`
@@ -259,13 +259,13 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     {/* Drawer header with close and brand */}
                     <div className="h-14 px-3 flex items-center justify-between border-b border-white/10">
                         <SidebarBrand title={brandTitle} compact />
-                        <button
+                        <NativeButton variant="ghost"
                             aria-label="Close menu"
                             className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
                             onClick={() => setMobileOpen(false)}
                         >
                             <MdClose className="h-6 w-6" />
-                        </button>
+                        </NativeButton>
                     </div>
 
                     {/* Drawer nav (scrolls, with thin separators) */}
@@ -273,7 +273,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                         {showSkeleton ? (
                             <ul className="divide-y divide-white/5 animate-pulse">
                                 {sidebar.map((item) => (
-                                    <li key={item.page} className="flex items-center gap-3 px-3 py-2.5">
+                                    <li key={item.page} className={styles.navItem}>
                                         <div className="h-5 w-5 rounded bg-white/5 shrink-0" />
                                         <div className="h-3.5 rounded bg-white/5" style={{width: `${Math.min(116, Math.max(52, item.title.length * 7))}px`}} />
                                     </li>
@@ -288,11 +288,11 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                     <div className="border-t border-white/10 p-3">
                         {showSkeleton ? (
                             <div className="animate-pulse space-y-0">
-                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                                <div className={styles.navItem}>
                                     <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
                                     <div className="h-3.5 w-14 bg-white/5 rounded" />
                                 </div>
-                                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
+                                <div className={styles.navItem}>
                                     <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
                                     <div className="h-3.5 w-16 bg-white/5 rounded" />
                                 </div>
@@ -300,22 +300,19 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
                         ) : (
                             user && (
                                 <a href="/logout" className="w-full block">
-                                    <button
-                                        className="
-                      w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm
-                      text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors
-                    "
+                                    <NativeButton variant="ghost"
+                                        className={[styles.navItem, "\n                      w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm\n                      text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors\n                    "].join(" ")}
                                         aria-label={logout_text}
                                         title={logout_text}
                                     >
                                         <MdLogout className="h-5 w-5" />
                                         <span>{logout_text}</span>
-                                    </button>
+                                    </NativeButton>
                                 </a>
                             )
                         )}
                     </div>
-                </div>
+                </Surface>
             </div>
         </>
     );

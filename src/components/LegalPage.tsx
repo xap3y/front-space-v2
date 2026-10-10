@@ -1,4 +1,6 @@
 'use client';
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
@@ -39,13 +41,13 @@ export default function LegalPage({
                         >
                             Zpět
                         </Link>
-                        <button
+                        <NativeButton
                             onClick={handlePrint}
                             className="px-3 py-1.5 rounded-md border border-white/10 bg-[#151a21] hover:bg-[#1b212a] text-xs transition-colors"
                             title="Tisk nebo uložení do PDF"
                         >
                             Tisk / PDF
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
             </header>

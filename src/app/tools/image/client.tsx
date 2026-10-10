@@ -1,4 +1,7 @@
 "use client";
+import { NativeButton } from "@/components/ui/NativeButton";
+import MainStringInput from "@/components/MainStringInput";
+
 
 import React, { useState, useCallback } from "react";
 import { NumberInput, SelectInput, TextInput, CheckboxInput } from "@/components/tools/ToolInputs";
@@ -205,10 +208,10 @@ export default function ImageToolsClient() {
                                 <label className="text-[10px] text-neutral-500 uppercase font-semibold mb-1 block">
                                     Width <span className="text-neutral-600">px</span>
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="number"
                                     value={resizeWidth}
-                                    onChange={(e) => handleResizeWidth(Math.max(1, Number(e.target.value)))}
+                                    onChange={(_value, e) => handleResizeWidth(Math.max(1, Number(e.target.value)))}
                                     min={1}
                                     max={7680}
                                     disabled={disabled}
@@ -219,10 +222,10 @@ export default function ImageToolsClient() {
                                 <label className="text-[10px] text-neutral-500 uppercase font-semibold mb-1 block">
                                     Height <span className="text-neutral-600">px</span>
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="number"
                                     value={resizeHeight}
-                                    onChange={(e) => handleResizeHeight(Math.max(1, Number(e.target.value)))}
+                                    onChange={(_value, e) => handleResizeHeight(Math.max(1, Number(e.target.value)))}
                                     min={1}
                                     max={4320}
                                     disabled={disabled}
@@ -245,7 +248,7 @@ export default function ImageToolsClient() {
                                     { label: "50%", w: Math.round(resizeWidth / 2), h: Math.round(resizeHeight / 2) },
                                     { label: "25%", w: Math.round(resizeWidth / 4), h: Math.round(resizeHeight / 4) },
                                 ].map((p) => (
-                                    <button
+                                    <NativeButton
                                         key={p.label}
                                         onClick={() => {
                                             setResizeWidth(p.w);
@@ -256,7 +259,7 @@ export default function ImageToolsClient() {
                                         className="rounded-lg bg-neutral-800 border border-neutral-700 px-2.5 py-1.5 text-[10px] font-bold text-neutral-400 hover:bg-neutral-700 transition disabled:opacity-40"
                                     >
                                         {p.label}
-                                    </button>
+                                    </NativeButton>
                                 ))}
                             </div>
                         </div>
@@ -315,10 +318,10 @@ export default function ImageToolsClient() {
                                 <label className="text-[10px] text-neutral-500 uppercase font-semibold mb-1 block">
                                     {item.label} <span className="text-neutral-600">px</span>
                                 </label>
-                                <input
+                                <MainStringInput
                                     type="number"
                                     value={item.value}
-                                    onChange={(e) => item.onChange(Math.max(0, Number(e.target.value)))}
+                                    onChange={(_value, e) => item.onChange(Math.max(0, Number(e.target.value)))}
                                     min={0}
                                     max={9999}
                                     disabled={disabled}

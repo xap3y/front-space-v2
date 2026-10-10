@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import {useState} from "react";
 import {toast} from "react-toastify";
@@ -36,7 +40,7 @@ export default function PlaycoreVipEditor() {
         <>
             <main className="flex items-center justify-center min-h-screen">
                 <div className="max-w-lg w-full mx-3">
-                    <div
+                    <Surface
                         className="box-primary overflow-hidden"
                     >
                         <div className="p-4">
@@ -52,15 +56,15 @@ export default function PlaycoreVipEditor() {
                                 />
                             </div>
                             <div>
-                                <button
+                                <NativeButton
                                     type="submit"
                                     className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-telegram hover:bg-telegram_dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-telegram"
                                 >
                                     Connect
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
-                    </div>
+                    </Surface>
                 </div>
             </main>
         </>

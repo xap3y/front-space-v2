@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+
 
 import React, { useEffect, useRef, useState } from "react";
 import { TempMail, TempMailHistoryEntry } from "@/hooks/useTempMail";
@@ -52,7 +56,7 @@ export function TempMailHistoryPanel({ history, activeMail, onReopen, onDelete }
     return (
         <div ref={ref} className="relative">
             {/* Toggle button — overflow-visible so badge isn't clipped */}
-            <button
+            <NativeButton data-active={open}
                 onClick={() => setOpen(v => !v)}
                 style={{ overflow: "visible" }}
                 className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 transition-all duration-200 text-xs font-medium select-none
@@ -69,22 +73,22 @@ export function TempMailHistoryPanel({ history, activeMail, onReopen, onDelete }
                         {count > 9 ? "9+" : count}
                     </span>
                 )}
-            </button>
+            </NativeButton>
 
             {/* Dropdown panel */}
             {open && (
-                <div className="absolute right-0 mt-2 w-80 rounded-xl border-2 border-zinc-800 bg-primary1 shadow-2xl z-[9999] overflow-hidden">
+                <Surface className="absolute right-0 mt-2 w-80 rounded-xl border-2 border-zinc-800 bg-primary1 shadow-2xl z-[9999] overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-800 bg-primary2">
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 select-none">
                             Previous Sessions ({count})
                         </span>
-                        <button
+                        <NativeButton
                             onClick={() => setOpen(false)}
                             className="text-gray-500 hover:text-gray-200 transition-colors p-0.5 rounded"
                         >
                             <MdClose className="w-3.5 h-3.5" />
-                        </button>
+                        </NativeButton>
                     </div>
 
                     {/* List */}
@@ -137,27 +141,27 @@ export function TempMailHistoryPanel({ history, activeMail, onReopen, onDelete }
 
                                         {/* Actions — always visible (not hover-only, for mobile) */}
                                         <div className="flex gap-1 shrink-0">
-                                            <button
+                                            <NativeButton
                                                 onClick={() => { onReopen(entry); setOpen(false); }}
                                                 className="p-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-600 hover:in-shadow bg-primary1 text-gray-400 hover:text-gray-100 transition-all duration-150"
                                                 title="Reopen session"
                                             >
                                                 <MdRestoreFromTrash className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeDeleteButton
                                                 onClick={() => { onDelete(entry.email); }}
                                                 className="p-1.5 rounded-lg border-2 border-red-500/30 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-400 hover:text-red-300 transition-all duration-150"
                                                 title="Remove from history"
                                             >
-                                                <MdDeleteOutline className="w-3.5 h-3.5" />
-                                            </button>
+
+                                            </NativeDeleteButton>
                                         </div>
                                     </div>
                                 );
                             })
                         )}
                     </div>
-                </div>
+                </Surface>
             )}
         </div>
     );

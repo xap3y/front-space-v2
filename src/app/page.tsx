@@ -1,3 +1,5 @@
+
+import { NativeButton } from "@/components/ui/NativeButton";
 import './space.css';
 import Link from "next/link";
 import "./debug.css"
@@ -18,28 +20,28 @@ export default function Home() {
                     </h1>
                     <div className="flex flex-row gap-2 sm:gap-4 w-full max-w-lg justify-center items-center">
                         <Link href="/login" passHref>
-                            <button
+                            <NativeButton
                                 className="box-primary p-3"
                                 type="button"
                             >
                                 Login
-                            </button>
+                            </NativeButton>
                         </Link>
                         <Link href="/home/profile" passHref>
-                            <button
+                            <NativeButton
                                 className="box-primary p-3"
                                 type="button"
                             >
                                 Portal
-                            </button>
+                            </NativeButton>
                         </Link>
                         <Link href="/tempmail" passHref>
-                            <button
+                            <NativeButton
                                 className="box-primary p-3"
                                 type="button"
                             >
                                 Temp Mail
-                            </button>
+                            </NativeButton>
                         </Link>
                         {/*<Link href="/tempmail" passHref>
                             <button

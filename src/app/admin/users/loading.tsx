@@ -1,8 +1,10 @@
+
+import Surface from "@/components/ui/Surface";
 export default function UsersLoading() {
     return (
         <div className="flex flex-col gap-4 animate-pulse">
             {/* Header skeleton */}
-            <div className="box-primary p-4">
+            <Surface className="box-primary p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="space-y-2">
                         <div className="h-7 w-24 bg-white/10 rounded" />
@@ -10,10 +12,10 @@ export default function UsersLoading() {
                     </div>
                     <div className="flex gap-2"><div className="h-9 w-[154px] bg-white/5 rounded-md"/><div className="h-9 w-24 bg-white/5 rounded-md"/><div className="h-9 w-24 bg-white/5 rounded-md"/></div>
                 </div>
-            </div>
+            </Surface>
 
             {/* List Skeleton */}
-            <div className="box-primary p-4 space-y-4">
+            <Surface className="box-primary p-4 space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                     <div className="flex items-center gap-4">
                         <div className="h-5 w-24 bg-white/10 rounded" />
@@ -30,7 +32,7 @@ export default function UsersLoading() {
                 {/* Card list skeleton */}
                 <div className="mt-2 grid gap-1.5">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30 flex items-center gap-3">
+                        <Surface key={i} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30 flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-white/10 flex-shrink-0" />
                             <div className="flex-1 min-w-0 space-y-2">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -44,10 +46,10 @@ export default function UsersLoading() {
                                 </div>
                             </div>
                             <div className="h-5 w-5 bg-white/5 rounded-full ml-auto" />
-                        </div>
+                        </Surface>
                     ))}
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }

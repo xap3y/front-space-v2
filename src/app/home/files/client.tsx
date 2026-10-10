@@ -1,4 +1,11 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+import {DeleteButton} from "@/components/HoverDiv";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+
+import Pagination from "@/components/ui/Pagination";
 
 import { useUser } from "@/hooks/useUser";
 import { useEffect, useState } from "react";
@@ -203,8 +210,8 @@ export default function FilesPageClient() {
     };
 
     const PackSkeleton = () => (
-        <div className={`box-primary overflow-hidden rounded-lg shadow-lg animate-pulse ${layoutMode === "compact" ? "h-[76px]" : "h-[123px]"}`}>
-            <div className="flex h-[76px] flex-col justify-center border-b border-gray-700 p-2.5">
+        <Surface className="box-primary overflow-hidden animate-pulse">
+            <div className="flex min-h-[74px] flex-col justify-center border-b border-gray-700 p-2.5">
                 <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
                         <div className="mb-1 flex h-7 flex-wrap items-center gap-1 md:gap-2">
@@ -224,18 +231,18 @@ export default function FilesPageClient() {
                     <div className="flex shrink-0 gap-1">
                         {layoutMode === "compact" && <>
                             <div className="h-[26px] w-[26px] rounded bg-blue-600/35" />
-                            <div className="h-[26px] w-[26px] rounded border-2 border-zinc-800 bg-primary1" />
+                            <Surface className="h-[26px] w-[26px] rounded border-2 border-zinc-800 bg-primary1" />
                         </>}
-                        <div className="h-[26px] w-[26px] rounded border-2 border-zinc-800 bg-primary1" />
+                        <Surface className="h-[26px] w-[26px] rounded border-2 border-zinc-800 bg-primary1" />
                         <div className="h-[26px] w-[26px] rounded border-2 border-red-800/70 bg-red-950/45" />
                     </div>
                 </div>
             </div>
             {layoutMode === "detailed" && <div className="flex h-[47px] flex-wrap items-center gap-1 p-2.5 md:gap-2">
                 <div className="h-7 w-[75px] rounded bg-blue-600/35" />
-                <div className="h-7 w-9 rounded border-2 border-zinc-800 bg-primary1" />
+                <Surface className="h-7 w-9 rounded border-2 border-zinc-800 bg-primary1" />
             </div>}
-        </div>
+        </Surface>
     );
 
     if (loading || !user || loadingUser) {
@@ -249,9 +256,12 @@ export default function FilesPageClient() {
                         </div>
                         <div className="flex gap-2"><div className="h-9 w-16 rounded-lg border-2 border-zinc-800 bg-white/[.04] sm:w-[154px]"/><div className="h-9 w-[126px] rounded-lg bg-blue-600/30" /></div>
                     </div>
-                    <div className="mb-5 space-y-2">
-                        {Array.from({ length: 3 }).map((_, i) => <PackSkeleton key={i} />)}
-                    </div>
+                    <ResourceList aria-busy="true">
+                        <div className="space-y-3">
+                            {Array.from({length: 3}).map((_, index) => <PackSkeleton key={index} />)}
+                        </div>
+                        <Pagination page={currentPage + 1} pages={totalPages} disabled />
+                    </ResourceList>
                 </div>
             </div>
         );
@@ -284,16 +294,17 @@ export default function FilesPageClient() {
                     </div>
                 </div>
 
-                {/* ✅ CHANGED: Ghost Skeletons showing while fetching */}
+                <ResourceList aria-busy={fetchingPacks}>
+                {/* Loading pack list */}
                 {fetchingPacks && (
-                    <div className="mb-5 space-y-2">
+                    <div className="space-y-3">
                         {Array.from({ length: 3 }).map((_, i) => <PackSkeleton key={i} />)}
                     </div>
                 )}
 
                 {/* Empty State */}
                 {!fetchingPacks && packs.length === 0 && (
-                    <div className="box-primary shadow-2xl rounded-lg p-6 md:p-12 text-center">
+                    <Surface className="box-primary shadow-2xl rounded-lg p-6 md:p-12 text-center">
                         <p className="text-gray-400 text-sm md:text-lg mb-3">No packs yet</p>
                         <a
                             href="/files"
@@ -302,19 +313,19 @@ export default function FilesPageClient() {
                             <FaPlus />
                             Create Pack
                         </a>
-                    </div>
+                    </Surface>
                 )}
 
                 {/* Packs List */}
                 {!fetchingPacks && packs.length > 0 && (
-                    <div className="mb-5 space-y-2">
+                    <div className="space-y-3">
                         {packs.map((pack) => (
-                            <div
+                            <Surface
                                 key={pack.packId}
-                                className="box-primary overflow-hidden rounded-lg shadow-lg"
+                                className="box-primary overflow-hidden"
                             >
                                 <div
-                                    className="cursor-pointer border-b border-gray-700 p-2.5 transition-colors hover:bg-white/[.025]"
+                                    className="min-h-[74px] cursor-pointer border-b border-gray-700 p-2.5 transition-colors hover:bg-white/[.025]"
                                     role="button"
                                     tabIndex={0}
                                     aria-expanded={expandedPackId === pack.packId}
@@ -386,19 +397,15 @@ export default function FilesPageClient() {
                                                     }`}
                                                 />
                                             </span>
-                                            <HoverDiv
+                                            <DeleteButton
                                                 data-pack-action
-                                                type="DELETE"
+
                                                 onClick={() => handleDeletePack(pack.packId)}
                                                 disabled={deletingPackId === pack.packId}
+                                                loading={deletingPackId === pack.packId}
                                                 className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition disabled:opacity-50"
                                             >
-                                                {deletingPackId === pack.packId ? (
-                                                    <LoadingDot size="w-3.5" />
-                                                ) : (
-                                                    <FaTrash className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400" />
-                                                )}
-                                            </HoverDiv>
+                                            </DeleteButton>
                                         </div>
                                     </div>
                                 </div>
@@ -442,7 +449,7 @@ export default function FilesPageClient() {
                                                 </p>
                                                 <div className="space-y-1 md:space-y-2 max-h-64 md:max-h-96 overflow-y-auto">
                                                     {pack.files.map((file, idx) => (
-                                                        <div
+                                                        <Surface
                                                             key={idx}
                                                             className="box-primary flex items-center justify-between gap-1 p-2 md:gap-2 transition"
                                                         >
@@ -468,20 +475,16 @@ export default function FilesPageClient() {
                                                                 >
                                                                     <FaExternalLinkAlt className="w-2.5 h-2.5 md:w-3 md:h-3 text-cyan-400" />
                                                                 </a>
-                                                                <HoverDiv
-                                                                    type="DELETE"
+                                                                <DeleteButton
+
                                                                     onClick={() => handleDeleteFile(pack.packId, file.uniqueId, file.fileName)}
                                                                     disabled={deletingFileId === file.uniqueId}
+                                                                    loading={deletingFileId === file.uniqueId}
                                                                     className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition disabled:opacity-50"
                                                                 >
-                                                                    {deletingFileId === file.uniqueId ? (
-                                                                        <LoadingDot size="w-2.5" />
-                                                                    ) : (
-                                                                        <FaTrash className="w-2.5 h-2.5 md:w-3 md:h-3 text-red-400" />
-                                                                    )}
-                                                                </HoverDiv>
+                                                                </DeleteButton>
                                                             </div>
-                                                        </div>
+                                                        </Surface>
                                                     ))}
                                                 </div>
                                             </div>
@@ -492,65 +495,20 @@ export default function FilesPageClient() {
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))}
                     </div>
                 )}
 
                 {/* Pagination */}
-                {packs.length > 0 && totalPages > 1 && !fetchingPacks && (
-                    <div className="flex items-center justify-center gap-1 md:gap-4">
-                        <HoverDiv
-                            type="INFO"
-                            onClick={() => {
-                                if (currentPage > 0) {
-                                    fetchPacks(currentPage - 1);
-                                }
-                            }}
-                            disabled={currentPage === 0}
-                            className="p-1 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed rounded transition"
-                        >
-                            <FaChevronLeft className="w-3.5 h-3.5 md:w-5 md:h-5 text-white" />
-                        </HoverDiv>
+                <Pagination
+                            page={currentPage + 1}
+                            pages={totalPages}
+                            onChange={(page) => fetchPacks(page - 1)}
+                            disabled={fetchingPacks}
+                        />
 
-                        <div className="flex items-center gap-0.5 md:gap-2">
-                            {Array.from({ length: totalPages }, (_, i) => (
-                                <HoverDiv
-                                    type="INFO"
-                                    key={i}
-                                    onClick={() => fetchPacks(i)}
-                                    className={`px-2 md:px-3 py-1 rounded transition text-xs md:text-sm font-semibold ${
-                                        i === currentPage
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-gray-700 hover:bg-gray-600 text-gray-200"
-                                    }`}
-                                >
-                                    {i + 1}
-                                </HoverDiv>
-                            ))}
-                        </div>
-
-                        <HoverDiv
-                            type="INFO"
-                            onClick={() => {
-                                if (currentPage < totalPages - 1) {
-                                    fetchPacks(currentPage + 1);
-                                }
-                            }}
-                            disabled={currentPage === totalPages - 1}
-                            className="p-1 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed rounded transition"
-                        >
-                            <FaChevronRight className="w-3.5 h-3.5 md:w-5 md:h-5 text-white" />
-                        </HoverDiv>
-                    </div>
-                )}
-
-                {/* Pagination Info */}
-                {packs.length > 0 && !fetchingPacks && (
-                    <div className="text-center mt-4 text-xs md:text-sm text-gray-400">
-                        Page {currentPage + 1}/{totalPages}
-                    </div>
-                )}
+                </ResourceList>
             </div>
         </div>
     );

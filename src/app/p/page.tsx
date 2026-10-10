@@ -1,4 +1,8 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import {useState} from "react";
 import {toast} from "react-toastify";
@@ -49,7 +53,7 @@ export default function PasteFinder() {
             {!loading && (
                 <main className="flex items-center justify-center min-h-screen">
                     <div className="max-w-lg w-full mx-3">
-                        <div
+                        <Surface
                             className="box-primary overflow-hidden"
                         >
                             <div className="p-4">
@@ -70,16 +74,16 @@ export default function PasteFinder() {
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <button
+                                    <NativeButton
                                         type="submit"
                                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-telegram hover:bg-telegram-brightest hover:text-primary focus:outline-none transition-all duration-200 transform"
                                         onClick={findPaste}
                                     >
                                         Lookup Paste
-                                    </button>
+                                    </NativeButton>
                                 </div>
                             </form>
-                        </div>
+                        </Surface>
                     </div>
                 </main>
             )}

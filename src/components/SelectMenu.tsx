@@ -1,4 +1,6 @@
 "use client";
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -138,7 +140,7 @@ export default function SelectMenu<T extends string>({
 
     return (
         <div className={`relative ${className}`}>
-            <button
+            <NativeButton
                 id={id}
                 ref={btnRef}
                 type="button"
@@ -172,7 +174,7 @@ export default function SelectMenu<T extends string>({
                         clipRule="evenodd"
                     />
                 </svg>
-            </button>
+            </NativeButton>
 
             {open && (
                 <div

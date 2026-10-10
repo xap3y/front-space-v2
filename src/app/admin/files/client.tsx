@@ -1,4 +1,7 @@
 "use client";
+import Disclosure from "@/components/ui/Disclosure";
+import Surface from "@/components/ui/Surface";
+
 
 import { useCallback, useEffect, useState } from "react";
 import { FaChevronDown, FaChevronLeft, FaChevronRight, FaFile, FaLock, FaPlus, FaRotateRight, FaTrash } from "react-icons/fa6";
@@ -8,7 +11,10 @@ import {hasPermission} from "@/lib/permissions";
 import { errorToast, okToast } from "@/lib/client";
 import { getApiUrl } from "@/lib/core";
 import MainStringInput from "@/components/MainStringInput";
-import HoverDiv from "@/components/HoverDiv";
+import HoverDiv, {DeleteButton} from "@/components/HoverDiv";
+import Pagination from "@/components/ui/Pagination";
+import ResourceList from "@/components/ui/ResourceList";
+import {Skeleton} from "@/components/ui";
 import type { UserObj } from "@/types/user";
 import type { AdminFilePack } from "@/types/filePack";
 import dynamic from "next/dynamic";
@@ -29,7 +35,7 @@ export default function FilesClient({ users }: Props) {
     const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState<string | null>(null);
     const [busy, setBusy] = useState<string | null>(null);
     const [packId, setPackId] = useState("");
@@ -109,23 +115,45 @@ export default function FilesClient({ users }: Props) {
                 <div className="flex items-center gap-2.5"><h1 className="text-xl font-semibold tracking-tight md:text-2xl">File Packs</h1><span className="rounded-full border border-zinc-800 bg-zinc-900/80 px-2 py-0.5 text-[10px] font-medium text-zinc-400">{totalElements}</span></div>
                 <HoverDiv type="INFO" className="h-8 px-2.5 text-[11px]" title="Refresh file packs" onClick={() => fetchPacks()} disabled={loading} icon={<FaRotateRight className={loading ? "animate-spin" : ""}/>}>Refresh</HoverDiv>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-zinc-950/75 p-1.5 text-xs shadow-[0_8px_30px_rgba(0,0,0,.16)]">
+            <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-800/80 bg-[#0a0a0a] p-3 text-xs">
                 <MainStringInput type="text" placeholder="Search pack ID" value={packId} onChange={setPackId} className="w-44 !border-zinc-800" inputClassName="px-2.5 py-1 text-[11px]" />
                 <div className="relative">
                 <HoverDiv type="INFO" className="h-7 px-2.5 text-[11px]" onClick={() => setUsersOpen(!usersOpen)} icon={<FaChevronDown className="text-[9px]"/>}>Users{includedUsers.length + excludedUsers.length ? ` · ${includedUsers.length + excludedUsers.length}` : ""}</HoverDiv>
-                    {usersOpen && <><div className="fixed inset-0 z-30" onClick={() => setUsersOpen(false)}/><div className="absolute left-0 z-40 mt-1 w-64 rounded-lg border-2 border-zinc-800 bg-primary1 p-2 shadow-xl">
+                    {usersOpen && <><div className="fixed inset-0 z-30" onClick={() => setUsersOpen(false)}/><Surface className="absolute left-0 z-40 mt-1 w-64 rounded-lg border-2 border-zinc-800 bg-primary1 p-2 shadow-xl">
                         <p className="mb-1.5 px-1 text-[10px] text-zinc-500">+ include · − exclude</p><div className="max-h-56 overflow-y-auto">{users.map(item => <div key={item.uid} className="flex items-center justify-between px-1 py-1.5 hover:bg-white/5"><span className="truncate">{item.username}</span><div className="flex gap-1"><HoverDiv className="h-6 w-6 text-sm" type={includedUsers.some(u => u.uid === item.uid) ? "SAVE" : "INFO"} onClick={() => toggleUser(item, "include")}>+</HoverDiv><HoverDiv className="h-6 w-6 text-sm" type={excludedUsers.some(u => u.uid === item.uid) ? "DELETE" : "INFO"} onClick={() => toggleUser(item, "exclude")}>−</HoverDiv></div></div>)}</div>
-                    </div></>}
+                    </Surface></>}
                 </div>
                 <span className="ml-1 text-[10px] uppercase tracking-wider text-zinc-600">From</span><MainStringInput type="date" aria-label="From date" value={fromDate} onChange={setFromDate} className="w-[8.25rem] !border-zinc-800" inputClassName="px-2 py-1 text-[11px]" /><MainStringInput type="time" aria-label="From time" value={fromTime} onChange={setFromTime} className="w-[5.5rem] !border-zinc-800" inputClassName="px-2 py-1 text-[11px]" />
                 <span className="ml-1 text-[10px] uppercase tracking-wider text-zinc-600">To</span><MainStringInput type="date" aria-label="To date" value={toDate} onChange={setToDate} className="w-[8.25rem] !border-zinc-800" inputClassName="px-2 py-1 text-[11px]" /><MainStringInput type="time" aria-label="To time" value={toTime} onChange={setToTime} className="w-[5.5rem] !border-zinc-800" inputClassName="px-2 py-1 text-[11px]" />
                 <div className="ml-auto flex gap-1.5"><HoverDiv type="INFO" className="h-7 px-2.5 text-[11px] text-zinc-400" onClick={reset}>Clear</HoverDiv><HoverDiv type="SAVE" className="h-7 px-3 text-[11px] font-medium" onClick={() => { setPageIndex(1); fetchPacks(1); }}>Apply</HoverDiv></div>
             </div>
-            <div className="overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/70 shadow-[0_12px_40px_rgba(0,0,0,.2)]">
+            <ResourceList aria-busy={loading}>
+                {loading && packs.length === 0 && Array.from({length: pageSize}).map((_, index) => (
+                    <div key={index} className="flex min-h-11 items-center gap-3 border-b border-zinc-800/70 px-2 py-2" aria-label="Loading file pack">
+                        <Skeleton width={28} height={28} />
+                        <div className="min-w-0 flex-1 space-y-1">
+                            <Skeleton width="min(100%, 252px)" />
+                            <div><Skeleton width={48} height={10} /></div>
+                        </div>
+                        <div className="hidden lg:block"><Skeleton width={100} /></div>
+                        <Skeleton width={26} height={26} />
+                        {hasPermission(user, "DELETE_FILE_PACKS") && <Skeleton width={26} height={26} />}
+                    </div>
+                ))}
                 {packs.map((pack, index) => <article key={pack.packId} className={index ? "border-t border-zinc-800/70" : ""}>
                     <div className="flex items-center gap-1.5 px-1.5 py-1">
-                        <HoverDiv type="INFO" className="grid min-w-0 flex-1 grid-cols-[minmax(15rem,1fr)_8rem_5rem_6rem_11rem] items-center justify-start gap-3 !border-0 !bg-transparent !shadow-none px-2 py-1 text-left hover:bg-white/[.035] max-lg:grid-cols-[minmax(12rem,1fr)_7rem_5rem]" onClick={() => setExpanded(expanded === pack.packId ? null : pack.packId)}>
-                            <div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-sky-500/15 bg-sky-500/[.07]"><FaFile className="text-[11px] text-sky-300"/></span><div className="min-w-0"><div className="flex items-center gap-1.5"><span className="truncate font-mono text-[12px] text-zinc-200">{pack.packId}</span>{pack.isPasswordProtected && <FaLock className="shrink-0 text-[10px] text-amber-400"/>}
+                        <div className="grid min-w-0 flex-1 grid-cols-[minmax(15rem,1fr)_8rem_5rem_6rem_11rem] items-center justify-start gap-3 !border-0 !bg-transparent !shadow-none px-2 py-1 text-left hover:bg-white/[.035] max-lg:grid-cols-[minmax(0,1fr)_5rem] max-sm:grid-cols-1 cursor-pointer rounded" onClick={() => setExpanded(expanded === pack.packId ? null : pack.packId)}>
+                            <div className="flex min-w-0 items-center gap-2.5"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-sky-500/15 bg-sky-500/[.07]"><FaFile className="text-[11px] text-sky-300"/></span><div className="min-w-0"><div className="flex items-center gap-1.5"><HoverDiv
+                                    className="min-w-0 truncate !border-0 !bg-transparent font-mono text-xs text-zinc-200"
+                                    title={expanded === pack.packId ? "Collapse pack" : "Expand pack"}
+                                    aria-expanded={expanded === pack.packId}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        setExpanded(expanded === pack.packId ? null : pack.packId);
+                                    }}
+                                >
+                                    {pack.packId}
+                                </HoverDiv>{pack.isPasswordProtected && <FaLock className="shrink-0 text-[10px] text-amber-400"/>}
                                 <HoverDiv
                                     type="INFO"
                                     className="group h-4 w-4 shrink-0 !border-0 !bg-transparent !text-zinc-500 !shadow-none hover:!text-zinc-400"
@@ -152,21 +180,20 @@ export default function FilesClient({ users }: Props) {
                                     <FaEye />{pack.views ?? 0}
                                 </span></div><p className="truncate text-[10px] text-zinc-600">{pack.source}</p></div></div>
                             <span className="truncate text-[11px] text-zinc-400">{pack.uploader?.username ?? "Anonymous"}{pack.anonymous ? " (anonymous upload)" : ""}</span><span className="text-[11px] tabular-nums text-zinc-500">{pack.totalFiles} {pack.totalFiles === 1 ? "file" : "files"}</span><span className="text-[11px] tabular-nums text-zinc-500 max-lg:hidden">{bytes(pack.totalSize)}</span><span className="text-right text-[10px] tabular-nums text-zinc-600 max-lg:hidden">{new Date(pack.uploadTime).toLocaleString()}</span>
-                        </HoverDiv>
+                        </div>
                         <a href={`/files?appendPack=${encodeURIComponent(pack.packId)}`} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-emerald-800/70 bg-emerald-950/40 text-[10px] text-emerald-300 transition hover:border-emerald-500" title={`Add files to ${pack.packId}`} aria-label={`Add files to ${pack.packId}`}><FaPlus/></a>
                         {hasPermission(user, "DELETE_FILE_PACKS") && (
-                            <HoverDiv
-                                type="DELETE"
+                            <DeleteButton
                                 className="h-7 w-7 shrink-0 !shadow-none text-[10px]"
                                 title={`Delete pack ${pack.packId}`}
                                 aria-label={`Delete pack ${pack.packId}`}
                                 disabled={busy !== null}
                                 onClick={() => remove(`/v1/admin/file-packs/${pack.packId}`, `pack ${pack.packId}`)}
-                                icon={<FaTrash />}
                             />
                         )}
                     </div>
-                    {expanded === pack.packId && <div className="border-t border-zinc-800/60 bg-black/20 px-11 py-2"><FilePackManagement
+                    <Disclosure open={expanded === pack.packId}>
+                        <div className="border-t border-zinc-800/60 bg-[#101010] px-3 py-3 sm:px-11"><FilePackManagement
                             packId={pack.packId}
                             apiKey={user?.apiKey}
                             protectedPack={pack.isPasswordProtected}
@@ -175,28 +202,38 @@ export default function FilesClient({ users }: Props) {
                         />
                         <p className="mb-2 text-[10px] text-zinc-500">{pack.description || "No description"}</p><div className="space-y-1">
                         {pack.files.map(file => (
-                            <div key={file.uniqueId} className="flex items-center gap-3 rounded-md border border-zinc-800/70 bg-zinc-950/60 px-2.5 py-1.5">
+                            <div key={file.uniqueId} className="flex items-center gap-3 rounded-md border border-zinc-800/70 bg-[#0a0a0a] px-2.5 py-1.5">
                                 <div className="min-w-0 flex-1">
                                     <p className="truncate text-[11px] font-medium text-zinc-300">{file.fileName}</p>
                                     <p className="truncate text-[10px] text-zinc-600">{file.uniqueId} · {file.fileType} · {bytes(file.size)}</p>
                                 </div>
                                 {hasPermission(user, "DELETE_FILE_PACKS") && (
-                                    <HoverDiv
-                                        type="DELETE"
+                                    <DeleteButton
                                         className="h-6 w-6 !shadow-none text-[9px]"
                                         title={`Delete ${file.fileName}`}
                                         disabled={busy !== null}
                                         onClick={() => remove(`/v1/admin/file-packs/${pack.packId}/files/${file.uniqueId}`, `file ${file.fileName}`)}
-                                        icon={<FaTrash />}
-                                    />
+                                            />
                                 )}
                             </div>
                         ))}
-                    </div></div>}
+                    </div></div>
+                    </Disclosure>
                 </article>)}
                 {!loading && packs.length === 0 && <div className="p-10 text-center text-sm text-zinc-500">No file packs match these filters.</div>}
-            </div>
-            <div className="flex items-center justify-between pb-4 pt-0.5"><select value={pageSize} onChange={event => { setPageSize(Number(event.target.value)); setPageIndex(1); }} className="h-7 rounded-md border border-zinc-800 bg-zinc-950 px-2 text-[10px] text-zinc-400 outline-none"><option value={10}>10 / page</option><option value={25}>25 / page</option><option value={50}>50 / page</option></select><div className="flex items-center gap-1.5"><HoverDiv type="INFO" className="h-7 w-7 text-[9px]" disabled={page <= 1 || loading} onClick={() => setPageIndex(page - 1)} icon={<FaChevronLeft/>}/><span className="min-w-20 text-center text-[10px] text-zinc-500">{page} / {totalPages}</span><HoverDiv type="INFO" className="h-7 w-7 text-[9px]" disabled={page >= totalPages || loading} onClick={() => setPageIndex(page + 1)} icon={<FaChevronRight/>}/></div></div>
+                <Pagination
+                    page={page}
+                    pages={totalPages}
+                    disabled={loading}
+                    onChange={setPageIndex}
+                    pageSize={pageSize}
+                    pageSizes={[10, 25, 50]}
+                    onPageSizeChange={(size) => {
+                        setPageSize(size);
+                        setPageIndex(1);
+                    }}
+                />
+            </ResourceList>
         </div>
     </section>;
 }

@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -153,7 +157,7 @@ export default function PasteCreator() {
             {!isApiUp && <ErrorToast type="ERROR" message="MAIN API SERVER IS DOWN!" />}
 
             <form onSubmit={handleSubmit} className="flex items-center justify-center bg-opacity-50 select-none">
-                <div className={`xl:mt-40 mt-28 transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]`}>
+                <Surface className={`xl:mt-40 mt-28 transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]`}>
                     <div className="space-y-6">
 
                         <h1 className="text-2xl font-bold text-center">
@@ -190,13 +194,13 @@ export default function PasteCreator() {
 
                         {/* Content */}
                         <div>
-                          <textarea
+                          <MainStringInput multiline className="w-full"
                               placeholder={"Content"}
                               value={content}
                               disabled={creating}
-                              onChange={(e) => setContent(e.target.value)}
+                              onChange={(_value, e) => setContent(e.target.value)}
                               rows={12}
-                              className="xl:text-base text-xs w-full in-primary"
+                              inputClassName="xl:text-base text-xs w-full in-primary"
                           />
                         </div>
 
@@ -223,9 +227,9 @@ export default function PasteCreator() {
 
                         {/* Create button */}
                         {!creating ? (
-                            <button type="submit" disabled={creating} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
+                            <NativeButton variant="primary" type="submit" disabled={creating} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
                                 {"Create"}
-                            </button>
+                            </NativeButton>
                         ) : (
                             <div className="w-full flex items-center justify-center gap-3 border-2 border-blue-600 bg-blue-500 text-white p-2 rounded">
                                 <LoadingDot />
@@ -233,7 +237,7 @@ export default function PasteCreator() {
                             </div>
                         )}
                     </div>
-                </div>
+                </Surface>
             </form>
         </>
     );

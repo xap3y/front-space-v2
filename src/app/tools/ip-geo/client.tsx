@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import Image from "next/image";
 import {useRef, useState} from "react";
@@ -56,14 +58,14 @@ export default function IpGeoClient() {
             <p className="mt-1 text-sm text-zinc-500">Compare approximate location and network data from nine independent providers.</p>
         </header>
 
-        <div className="box-primary rounded-xl p-4 sm:p-5">
+        <Surface className="box-primary rounded-xl p-4 sm:p-5">
             <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Public IPv4 or IPv6 address</label>
             <div className="flex flex-col gap-2 sm:flex-row">
                 <MainStringInput type="text" value={ip} onChange={setIp} onKeyDown={event => {if (event.key === "Enter") void lookup();}} placeholder="8.8.8.8" className="min-w-0 flex-1 rounded-lg border-zinc-800 bg-black/25" inputClassName="py-2.5 font-mono text-sm"/>
                 <HoverDiv type="INFO" icon={loading ? <FaArrowRotateRight className="animate-spin"/> : <FaMagnifyingGlass/>} onClick={lookup} disabled={!ip.trim()} className="px-5 py-2.5 text-sm font-semibold">{loading ? "Checking 9 sources…" : "Locate IP"}</HoverDiv>
             </div>
             <p className="mt-2 text-[10px] leading-4 text-zinc-600">Only public IP addresses are accepted. The address is sent to the listed geolocation providers to obtain their results.</p>
-        </div>
+        </Surface>
 
         {error && <div className="mt-3 rounded-xl border border-red-900/60 bg-red-950/30 p-4 text-sm text-red-300">{error}</div>}
         {cards.length > 0 && <div className="mt-4">

@@ -1,4 +1,6 @@
 "use client";
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import React, { useEffect, useRef } from "react";
 
@@ -88,12 +90,12 @@ export function SlideOver({
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
                     <div className="text-sm font-semibold truncate">{title}</div>
-                    <button
+                    <NativeButton
                         onClick={onClose}
                         className="rounded px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
                     >
                         Close
-                    </button>
+                    </NativeButton>
                 </div>
 
                 {/* Body */}
@@ -101,14 +103,14 @@ export function SlideOver({
 
                 {/* Footer */}
                 <div className="sticky bottom-0 flex items-center justify-end gap-2 border-t border-zinc-800 bg-zinc-950 px-4 py-3">
-                    <button
+                    <NativeButton
                         onClick={onClose}
                         className="rounded border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700"
                     >
                         Cancel
-                    </button>
+                    </NativeButton>
                     {onSave && (
-                        <button
+                        <NativeButton data-active={saveDisabled}
                             onClick={onSave}
                             disabled={saveDisabled}
                             className={clsx(
@@ -120,7 +122,7 @@ export function SlideOver({
                             title="Press Enter to save"
                         >
                             {saveLabel}
-                        </button>
+                        </NativeButton>
                     )}
                 </div>
             </div>

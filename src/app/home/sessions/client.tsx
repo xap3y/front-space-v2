@@ -1,4 +1,7 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+import {DeleteButton} from "@/components/HoverDiv";
+
 
 import HoverDiv from "@/components/HoverDiv";
 
@@ -10,18 +13,18 @@ import { getUserSessions } from "@/lib/apiGetters";
 import { SessionDto } from "@/types/session";
 import { errorToast, okToast, infoToast } from "@/lib/client";
 import { getApiUrl } from "@/lib/core";
-import { 
-    FaWindows, 
-    FaApple, 
-    FaLinux, 
-    FaAndroid, 
+import {
+    FaWindows,
+    FaApple,
+    FaLinux,
+    FaAndroid,
     FaMobileAlt,
-    FaChrome, 
-    FaFirefox, 
-    FaSafari, 
-    FaEdge, 
-    FaOpera, 
-    FaGlobe, 
+    FaChrome,
+    FaFirefox,
+    FaSafari,
+    FaEdge,
+    FaOpera,
+    FaGlobe,
     FaLaptop,
     FaTrash,
     FaTimes,
@@ -31,7 +34,7 @@ import { FaRotateRight } from "react-icons/fa6";
 
 function parseUserAgent(ua: string) {
     const uaLower = ua.toLowerCase();
-    
+
     // Detect OS
     let osName = "Unknown OS";
     let osIcon = null;
@@ -51,11 +54,11 @@ function parseUserAgent(ua: string) {
         osName = "Linux";
         osIcon = "linux";
     }
-    
+
     // Detect Browser
     let browserName = "Unknown Browser";
     let browserIcon = "globe";
-    
+
     if (uaLower.includes("opr/") || uaLower.includes("opera")) {
         browserName = "Opera";
         browserIcon = "opera";
@@ -72,7 +75,7 @@ function parseUserAgent(ua: string) {
         browserName = "Safari";
         browserIcon = "safari";
     }
-    
+
     return { osName, osIcon, browserName, browserIcon };
 }
 
@@ -229,7 +232,7 @@ export default function HomeSessionsPage() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {loading && sessions.length === 0 ? (
                         Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-4 animate-pulse space-y-3">
+                            <Surface key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-4 animate-pulse space-y-3">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded bg-white/5" />
                                     <div className="space-y-1.5 flex-1">
@@ -238,21 +241,21 @@ export default function HomeSessionsPage() {
                                     </div>
                                 </div>
                                 <div className="h-10 bg-white/5 rounded" />
-                            </div>
+                            </Surface>
                         ))
                     ) : sessions.length === 0 ? (
-                        <div className="col-span-full box-primary p-8 text-center text-sm text-gray-400">
+                        <Surface className="col-span-full box-primary p-8 text-center text-sm text-gray-400">
                             No active sessions found.
-                        </div>
+                        </Surface>
                     ) : (
                         sessions.map((s) => {
                             const { osName, osIcon, browserName, browserIcon } = parseUserAgent(s.userAgent);
                             return (
-                                <div 
-                                    key={s.id} 
+                                <Surface
+                                    key={s.id}
                                     className={`rounded-xl p-4 relative flex flex-col justify-between gap-4 border-2 transition-all duration-200 bg-primary1 ${
-                                        s.isCurrent 
-                                            ? "border-emerald-500/40 bg-emerald-500/[0.02]" 
+                                        s.isCurrent
+                                            ? "border-emerald-500/40 bg-emerald-500/[0.02]"
                                             : "border-zinc-800 hover:border-zinc-700 hover:in-shadow"
                                     }`}
                                 >
@@ -309,17 +312,17 @@ export default function HomeSessionsPage() {
                                                 Protected current session
                                             </div>
                                         ) : (
-                                            <HoverDiv
-                                                type="DELETE"
+                                            <DeleteButton
+
                                                 onClick={() => setSelectedSession(s)}
                                                 className="w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all duration-200 border-2 border-zinc-800 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400 bg-primary1 text-gray-300"
                                             >
-                                                <FaTrash className="h-3 w-3" />
+
                                                 <span>Revoke Session</span>
-                                            </HoverDiv>
+                                            </DeleteButton>
                                         )}
                                     </div>
-                                </div>
+                                </Surface>
                             );
                         })
                     )}
@@ -328,11 +331,11 @@ export default function HomeSessionsPage() {
 
             {/* Revoke Confirmation Modal */}
             {selectedSession && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={() => setSelectedSession(null)}
                 >
-                    <div 
+                    <Surface
                         className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -361,10 +364,10 @@ export default function HomeSessionsPage() {
                                 )}
                             </p>
 
-                            <div className="p-3 rounded-lg bg-primary3/40 border border-white/5 text-[11px] space-y-1 text-gray-400">
+                            <Surface className="p-3 rounded-lg bg-primary3/40 border border-white/5 text-[11px] space-y-1 text-gray-400">
                                 <div>IP Address: <span className="text-white font-mono">{selectedSession.ipAddress}</span></div>
                                 <div className="truncate">User Agent: <span className="text-white font-mono">{selectedSession.userAgent}</span></div>
-                            </div>
+                            </Surface>
 
                             <div className="flex justify-end gap-2 pt-1">
                                 <HoverDiv
@@ -385,7 +388,7 @@ export default function HomeSessionsPage() {
                                 </HoverDiv>
                             </div>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
         </section>

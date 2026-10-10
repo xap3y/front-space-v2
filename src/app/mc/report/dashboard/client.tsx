@@ -1,4 +1,10 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+
+import Pagination from "@/components/ui/Pagination";
 
 import {useCallback, useEffect, useState} from "react";
 import ApiKeyAccess, {dashboardRequest, displayDate, RowsLoading} from "@/components/dashboard/ApiKeyAccess";
@@ -105,9 +111,9 @@ function Dashboard({apiKey, logout}: {apiKey: string; logout: () => void}) {
             </div>
             <div className="my-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 <MainStringInput value={player} onChange={setPlayer} placeholder="Player name or UUID" className="bg-zinc-950"/>
-                <select aria-label="Player role" value={role} onChange={event => setRole(event.target.value)} className="rounded border-2 border-zinc-800 bg-zinc-950 px-3 text-sm">
+                <SelectControl aria-label="Player role" value={role} onChange={event => setRole(event.target.value)} className="rounded border-2 border-zinc-800 bg-zinc-950 px-3 text-sm">
                     <option value="target">Reported player</option><option value="reporter">Reporter</option>
-                </select>
+                </SelectControl>
                 <MainStringInput value={sourceServer} onChange={setSourceServer} placeholder="Source server" className="bg-zinc-950"/>
                 <MainStringInput value={targetServer} onChange={setTargetServer} placeholder="Target server" className="bg-zinc-950"/>
                 <HoverDiv type="INFO" icon={<FiSearch/>} onClick={() => {setPage(0); setFilter({player: player.trim(), role, sourceServer: sourceServer.trim(), targetServer: targetServer.trim(), closedFrom: closedFrom.trim()});}} className="px-4 py-2 text-sm">Apply filters</HoverDiv>
@@ -115,7 +121,7 @@ function Dashboard({apiKey, logout}: {apiKey: string; logout: () => void}) {
             </div>
             {filter.player && tab === "closed" && <p className="mb-3 text-xs text-zinc-500">Player searches show all states, as provided by the Reports API.</p>}
             {error && <p role="alert" className="mb-4 text-sm text-red-400">{error}</p>}
-            <div className="overflow-hidden rounded border border-zinc-800 bg-zinc-950">
+            <ResourceList className="overflow-hidden">
                 {loading ? <RowsLoading/> : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
@@ -136,14 +142,13 @@ function Dashboard({apiKey, logout}: {apiKey: string; logout: () => void}) {
                         {!data?.content.length && <p className="p-10 text-center text-sm text-zinc-500">No reports for these filters.</p>}
                     </div>
                 )}
-            </div>
-            <footer className="mt-4 flex items-center justify-between text-xs text-zinc-500">
-                <span>Page {page + 1}</span>
-                <div className="flex gap-2">
-                    <HoverDiv type="INFO" disabled={loading || page === 0} onClick={() => setPage(value => value - 1)} className="px-3 py-2">Previous</HoverDiv>
-                    <HoverDiv type="INFO" disabled={loading || !data || data.last} onClick={() => setPage(value => value + 1)} className="px-3 py-2">Next</HoverDiv>
-                </div>
-            </footer>
+            <Pagination
+                page={page + 1}
+                hasNext={Boolean(data && !data.last)}
+                disabled={loading || !data}
+                onChange={(nextPage) => setPage(nextPage - 1)}
+            />
+            </ResourceList>
             {selected && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setSelected(null)}>
                     <section role="dialog" aria-modal="true" aria-label="Report details" onClick={event => event.stopPropagation()} className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded border border-zinc-700 bg-zinc-950 p-6">

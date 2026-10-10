@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { useCallback, useEffect, useState } from "react";
 import { usePage } from "@/context/PageContext";
@@ -304,13 +313,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         <p className="text-sm text-gray-400">Total Found: {totalElements}</p>
                     </div>
                     <div className="flex gap-2">
-                        <button
+                        <NativeButton
                             onClick={() => setIsUrlModalOpen(true)}
                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-emerald-300"
                         >
                             Shorten URL
-                        </button>
-                        <button
+                        </NativeButton>
+                        <NativeButton
                             onClick={() => fetchUrls()}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
@@ -318,13 +327,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         >
                             <FaRotateRight className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                             <span className="hidden sm:inline">Refresh</span>
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
 
                 {/* Compact Filters Panel */}
                 <div className="flex flex-col gap-1.5">
-                    <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
+                    <Surface className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
                         {/* Search uniqueId */}
                         <MainStringInput
                             type="text"
@@ -337,18 +346,18 @@ export default function UrlsClient({ users }: UrlsClientProps) {
 
                         {/* Users Dropdown */}
                         <div className="relative">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Users ({includedUsers.length + excludedUsers.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
+                            </NativeButton>
                             {userDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
+                                    <Surface className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
                                         {users.length === 0 ? (
                                             <div className="p-2 text-xs text-gray-500 text-center">No users available</div>
                                         ) : (
@@ -359,87 +368,87 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                                     <div key={u.uid} className="flex items-center justify-between px-2.5 py-1.5 hover:bg-white/5 text-xs gap-2">
                                                         <span className="text-gray-300 truncate">{u.username}</span>
                                                         <div className="flex gap-1 shrink-0">
-                                                            <button
+                                                            <NativeButton data-active={isInc}
                                                                 type="button"
                                                                 onClick={() => handleAddUserFilter(u, "include")}
                                                                 className={`w-5 h-5 flex items-center justify-center rounded text-[10px] font-bold transition-colors ${isInc ? "bg-emerald-600 text-white" : "bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/35"}`}
                                                                 title="Include User"
                                                             >
                                                                 +
-                                                            </button>
-                                                            <button
+                                                            </NativeButton>
+                                                            <NativeButton data-active={isExc}
                                                                 type="button"
                                                                 onClick={() => handleAddUserFilter(u, "exclude")}
                                                                 className={`w-5 h-5 flex items-center justify-center rounded text-[10px] font-bold transition-colors ${isExc ? "bg-rose-600 text-white" : "bg-rose-600/20 text-rose-300 hover:bg-rose-600/35"}`}
                                                                 title="Exclude User"
                                                             >
                                                                 -
-                                                            </button>
+                                                            </NativeButton>
                                                         </div>
                                                     </div>
                                                 );
                                             })
                                         )}
-                                    </div>
+                                    </Surface>
                                 </>
                             )}
                         </div>
 
                         {/* Time Filter Dropdown */}
                         <div className="relative">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
+                            </NativeButton>
                             {timeDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setTimeDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-72 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-3 space-y-3">
+                                    <Surface className="absolute left-0 mt-1 w-72 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-3 space-y-3">
                                         <div className="flex gap-1 border-b border-white/5 pb-2">
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("range")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "range" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 Range
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("exact")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "exact" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 Exact Date
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("time-day")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "time-day" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 One Day
-                                            </button>
+                                            </NativeButton>
                                         </div>
 
                                         {timeFilterMode === "range" && (
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Date</span>
-                                                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={fromDate} onChange={(_value, e) => setFromDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Time</span>
-                                                    <input type="time" value={fromTime} onChange={e => setFromTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={fromTime} onChange={(_value, e) => setFromTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Date</span>
-                                                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={toDate} onChange={(_value, e) => setToDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Time</span>
-                                                    <input type="time" value={toTime} onChange={e => setToTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={toTime} onChange={(_value, e) => setToTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
@@ -447,7 +456,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                         {timeFilterMode === "exact" && (
                                             <div className="text-[10px]">
                                                 <span className="text-gray-400 block mb-0.5">Date</span>
-                                                <input type="date" value={exactDate} onChange={e => setExactDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                <MainStringInput type="date" value={exactDate} onChange={(_value, e) => setExactDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                             </div>
                                         )}
 
@@ -455,21 +464,21 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div className="col-span-2">
                                                     <span className="text-gray-400 block mb-0.5">Date</span>
-                                                    <input type="date" value={dayDate} onChange={e => setDayDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={dayDate} onChange={(_value, e) => setDayDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">Start Time</span>
-                                                    <input type="time" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={dayStartTime} onChange={(_value, e) => setDayStartTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">End Time</span>
-                                                    <input type="time" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={dayEndTime} onChange={(_value, e) => setDayEndTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
 
                                         <div className="flex justify-end gap-1.5 pt-1.5 border-t border-white/5">
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => {
                                                     setFromDate(""); setFromTime(""); setToDate(""); setToTime("");
@@ -478,9 +487,9 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                                 className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[10px] font-medium transition-colors"
                                             >
                                                 Clear
-                                            </button>
+                                            </NativeButton>
                                         </div>
-                                    </div>
+                                    </Surface>
                                 </>
                             )}
                         </div>
@@ -506,7 +515,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         />
 
                         {/* Expiration status */}
-                        <select
+                        <SelectControl
                             value={expiredFilter}
                             onChange={e => setExpiredFilter(e.target.value)}
                             className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
@@ -514,24 +523,24 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             <option value="">Expiration...</option>
                             <option value="false">Active</option>
                             <option value="true">Expired</option>
-                        </select>
+                        </SelectControl>
 
                         {/* Search and Reset button */}
                         <div className="flex gap-1.5 ml-auto">
-                            <button
+                            <NativeButton
                                 onClick={resetFilters}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 onClick={() => { setPageIdx(1); fetchUrls(1); }}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Search
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
 
                     {/* Filter Badges */}
                     {(includedUsers.length > 0 || excludedUsers.length > 0) && (
@@ -539,13 +548,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             {includedUsers.map(u => (
                                 <span key={`inc-${u.uid}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                                     <span>+ {u.username}</span>
-                                    <button onClick={() => removeUserFilter(u.uid, "include")} className="hover:text-white">×</button>
+                                    <NativeButton onClick={() => removeUserFilter(u.uid, "include")} className="hover:text-white">×</NativeButton>
                                 </span>
                             ))}
                             {excludedUsers.map(u => (
                                 <span key={`exc-${u.uid}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
                                     <span>- {u.username}</span>
-                                    <button onClick={() => removeUserFilter(u.uid, "exclude")} className="hover:text-white">×</button>
+                                    <NativeButton onClick={() => removeUserFilter(u.uid, "exclude")} className="hover:text-white">×</NativeButton>
                                 </span>
                             ))}
                         </div>
@@ -553,10 +562,10 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                 </div>
 
                 {/* List */}
-                <div className="flex flex-col box-primary p-3 md:p-4 gap-3">
+                <ResourceList className="flex flex-col box-primary p-3 md:p-4 gap-3">
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
+                            <Surface key={i} className="rounded-xl border-2 border-zinc-800 bg-primary1 p-3 animate-pulse">
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -565,7 +574,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))
                     ) : urls.length === 0 ? (
                         <div className="px-2 py-6 text-center text-sm text-gray-400">
@@ -575,7 +584,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                         urls.map((u) => {
                             const portalUrl = u.urlSet.portalUrl || u.urlSet.webUrl || u.urlSet.shortUrl || "";
                             return (
-                                <div key={u.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
+                                <Surface key={u.uniqueId} className="rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 p-3">
                                     <div className="flex flex-col gap-2">
                                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                             <div className="min-w-0 flex flex-col gap-1">
@@ -608,97 +617,66 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                             </div>
 
                                             <div className="flex flex-wrap gap-2">
-                                                <button
+                                                <NativeButton
                                                     onClick={() => (portalUrl ? window.open(portalUrl, "_blank") : null)}
                                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                     title="Open Link"
                                                 >
                                                     <FaExternalLinkAlt className="h-4 w-4" />
-                                                </button>
-                                                <button
+                                                </NativeButton>
+                                                <NativeButton
                                                     onClick={() => copy(portalUrl)}
                                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                     disabled={!portalUrl}
                                                     title="Copy Link"
                                                 >
                                                     <FaRegCopy className="h-4 w-4" />
-                                                </button>
-                                                <button
+                                                </NativeButton>
+                                                <NativeButton
                                                     onClick={() => handleViewLogs(u)}
                                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200"
                                                     title="View Access History"
                                                 >
                                                     <FaHistory className="h-4 w-4" />
-                                                </button>
-                                                <button
+                                                </NativeButton>
+                                                <NativeDeleteButton
                                                     onClick={() => deleteUrl(u)}
                                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 transition-all duration-200 text-red-300"
                                                     title="Delete URL"
                                                 >
-                                                    <FaTrash className="h-4 w-4" />
-                                                </button>
+
+                                                </NativeDeleteButton>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Surface>
                             );
                         })
                     )}
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                            <div className="flex items-center gap-4">
-                                <div className="text-xs text-gray-400">
-                                    Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                    <select
-                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                        value={pageSize}
-                                        onChange={(e) => {
-                                            setPageSize(Number(e.target.value));
-                                            setPageIdx(1);
-                                        }}
-                                    >
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPageIdx((p) => Math.max(1, p - 1))}
-                                    disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                                >
-                                    <FaChevronLeft className="h-3 w-3" />
-                                    <span>Prev</span>
-                                </button>
-                                <button
-                                    onClick={() => setPageIdx((p) => Math.min(totalPages, p + 1))}
-                                    disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                                >
-                                    <span>Next</span>
-                                    <FaChevronRight className="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPageIdx}
+                            pageSize={pageSize}
+                            pageSizes={[10, 20, 50]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPageIdx(1);
+                            }}
+                        />
+                </ResourceList>
             </div>
 
             {/* URL Modal */}
             {isUrlModalOpen && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={() => { if (!creatingUrl) { setIsUrlModalOpen(false); setOriginalUrl(""); setCustomUid(""); } }}
                 >
-                    <div 
+                    <Surface
                         className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -708,13 +686,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 <h2 className="text-base font-semibold text-white">Shorten URL</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Create a shortened redirect link</p>
                             </div>
-                            <button
+                            <NativeButton
                                 onClick={() => { if (!creatingUrl) { setIsUrlModalOpen(false); setOriginalUrl(""); setCustomUid(""); } }}
                                 className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
                                 disabled={creatingUrl}
                             >
                                 <FaTimes className="h-3.5 w-3.5" />
-                            </button>
+                            </NativeButton>
                         </div>
 
                         <form onSubmit={handleUrlSubmit} className="p-5 space-y-4">
@@ -752,37 +730,37 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             )}
 
                             <div className="flex justify-end gap-2 pt-1">
-                                <button
+                                <NativeButton
                                     type="button"
                                     onClick={() => { setIsUrlModalOpen(false); setOriginalUrl(""); setCustomUid(""); }}
                                     className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={creatingUrl}
                                 >
                                     Cancel
-                                </button>
-                                <button
+                                </NativeButton>
+                                <NativeButton variant="save"
                                     type="submit"
                                     className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={creatingUrl || !originalUrl.trim()}
                                 >
                                     {creatingUrl ? "Shortening…" : "Shorten URL"}
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
-                    </div>
+                    </Surface>
                 </div>
             )}
 
             {/* Logs / History Modal */}
             {isLogsModalOpen && selectedUrl && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={() => {
                         setIsLogsModalOpen(false);
                         setSelectedUrl(null);
                     }}
                 >
-                    <div 
+                    <Surface
                         className="w-full max-w-2xl bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -797,7 +775,7 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                     Showing redirect usage history for this short link
                                 </p>
                             </div>
-                            <button
+                            <NativeButton
                                 onClick={() => {
                                     setIsLogsModalOpen(false);
                                     setSelectedUrl(null);
@@ -805,13 +783,13 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors text-sm"
                             >
                                 <FaTimes className="h-3.5 w-3.5" />
-                            </button>
+                            </NativeButton>
                         </div>
 
                         <div className="flex-1 overflow-y-auto px-4 pb-4">
                             <UrlViewHistory key={selectedUrl.uniqueId} urlId={selectedUrl.uniqueId} admin defaultOpen />
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
         </section>

@@ -1,4 +1,6 @@
 'use client';
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 // @ts-ignore
 import { EmbedVisualizer } from 'embed-visualizer';
@@ -268,14 +270,14 @@ const AttachmentDisplay = ({ attachment }: { attachment: DiscordAttachment }) =>
                 )}
 
                 {textContent !== null && textPreview.expandable && (
-                    <button
+                    <NativeButton
                         type="button"
                         onClick={() => setTextExpanded((expanded) => !expanded)}
                         className="w-full border-t border-[#1e1f22] px-3 py-2 text-left text-xs font-medium text-blue-400 transition-colors hover:bg-[#35373c] hover:text-blue-300"
                         aria-expanded={textExpanded}
                     >
                         {textExpanded ? 'Collapse' : 'Expand'}
-                    </button>
+                    </NativeButton>
                 )}
             </div>
         );

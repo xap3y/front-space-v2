@@ -1,4 +1,6 @@
 "use client";
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import {useEffect, useMemo, useState, useTransition} from "react";
 import {useRouter} from "next/navigation";
@@ -6,6 +8,7 @@ import {FaRotateRight} from "react-icons/fa6";
 import MainStringInput from "@/components/MainStringInput";
 import HoverDiv from "@/components/HoverDiv";
 import type {SystemSnapshot} from "@/types/system";
+import styles from "@/components/ui/ui.module.css";
 
 type Row = {
     key: string;
@@ -186,11 +189,11 @@ export default function SystemPageClient({initialMetrics, initialError = ""}: {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-[11px] text-zinc-500">
                     <label className="flex items-center gap-1.5">
-                        <input type="checkbox" checked={autoRefresh} onChange={event => setAutoRefresh(event.target.checked)} className="accent-sky-500" />
+                        <SelectionInput type="checkbox" checked={autoRefresh} onChange={event => setAutoRefresh(event.target.checked)} className="accent-sky-500" />
                         Refresh every 15s
                     </label>
                     <label className="flex items-center gap-1.5">
-                        <input type="checkbox" checked={raw} onChange={event => setRaw(event.target.checked)} className="accent-sky-500" />
+                        <SelectionInput type="checkbox" checked={raw} onChange={event => setRaw(event.target.checked)} className="accent-sky-500" />
                         Raw keys
                     </label>
                     <HoverDiv
@@ -205,9 +208,9 @@ export default function SystemPageClient({initialMetrics, initialError = ""}: {
                 </div>
             </header>
             {initialError && <p role="alert" className="text-xs text-red-400">{initialError}</p>}
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 xl:grid-cols-8">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
                 {summaries.map(summary => (
-                    <div key={summary.name} className="rounded-md border border-zinc-800 bg-black/20 px-2.5 py-2">
+                    <div key={summary.name} className={styles.metricTile}>
                         <p className="text-[9px] uppercase tracking-wide text-zinc-600">{summary.name}</p>
                         <p className="mt-1 truncate text-xs font-medium tabular-nums text-zinc-200">
                             {summary.text ?? (summary.value === undefined ? "—"
@@ -230,13 +233,13 @@ export default function SystemPageClient({initialMetrics, initialError = ""}: {
                     {groups.reduce((total, [, items]) => total + items.length, 0)} / {rows.length}
                 </span>
             </div>
-            <div className="grid items-start gap-2 md:grid-cols-2 2xl:grid-cols-3">
+            <div className={styles.metricGrid}>
                 {groups.map(([group, items]) => (
-                    <section key={group} className="min-w-0 overflow-hidden rounded-md border border-zinc-800 bg-primary1">
+                    <section key={group} className={styles.metricPanel}>
                         <h2 className="flex justify-between gap-2 border-b border-zinc-800 bg-white/[.02] px-2.5 py-2 text-xs font-medium text-zinc-300">
                             {group}<span className="text-[10px] text-zinc-600">{items.length}</span>
                         </h2>
-                        <dl className="divide-y divide-white/[.035]">
+                        <dl className="divide-y divide-zinc-800/60" tabIndex={0} aria-label={`${group} metrics`}>
                             {items.map(row => (
                                 <div key={row.key} className="flex items-start justify-between gap-3 px-2.5 py-1.5 text-[10px]">
                                     <dt className="min-w-0 flex-1 text-zinc-500" title={row.name}>

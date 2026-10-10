@@ -1,3 +1,5 @@
+
+import { NativeButton } from "@/components/ui/NativeButton";
 import LanguageModel from "@/types/LanguageModel";
 
 import { IoMdRefresh } from "react-icons/io";
@@ -18,10 +20,10 @@ export function ErrorPage({message, lang, callBack}: Props) {
 
                 {
                     callBack && (
-                        <button onClick={callBack} className={"items-center gap-3 flex p-4 rounded-lg bg-secondary hover:-translate-y-1 duration-200"} >
+                        <NativeButton onClick={callBack} className={"items-center gap-3 flex p-4 rounded-lg bg-secondary hover:-translate-y-1 duration-200"} >
                             <span className={"text-blue-600 font-extrabold"}>GO BACK</span>
                             <FaArrowLeft className={"w-6 h-6"} />
-                        </button>
+                        </NativeButton>
                     )
                 }
             </div>

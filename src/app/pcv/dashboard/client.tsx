@@ -1,4 +1,12 @@
 "use client";
+import {DeleteButton} from "@/components/HoverDiv";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+
+import Pagination from "@/components/ui/Pagination";
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import {useEffect, useState} from "react";
 import ApiKeyAccess, {dashboardRequest, displayDate, RowsLoading} from "@/components/dashboard/ApiKeyAccess";
@@ -167,7 +175,7 @@ function Dashboard({apiKey, logout}: {apiKey: string; logout: () => void}) {
             </div>
             {error && <p role="alert" className="mb-4 text-sm text-red-400">{error}</p>}
             {notice && <p role="status" className="mb-4 text-sm text-emerald-400">{notice}</p>}
-            <div className="overflow-hidden rounded border border-zinc-800 bg-zinc-950">
+            <ResourceList className="overflow-hidden">
                 {loading ? <RowsLoading/> : <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead className="border-b border-zinc-800 text-xs text-zinc-500"><tr>{["Player", "Package", "Duration at sync", "Server", tab === "history" ? "Event" : "Expires", "Actions"].map(label => <th key={label} className="px-4 py-3 font-normal">{label}</th>)}</tr></thead>
@@ -178,14 +186,19 @@ function Dashboard({apiKey, logout}: {apiKey: string; logout: () => void}) {
                                 <td className="whitespace-nowrap px-4 py-4 text-zinc-400">{durationText(row.durationSeconds)}</td>
                                 <td className="px-4 py-4 text-zinc-500">{row.serverName || row.sourceServer}</td>
                                 <td className="px-4 py-4 text-xs text-zinc-500">{tab === "history" ? `${row.state} · ${row.activationReason}` : displayDate(row.expiresAt)}<p className="mt-1">{displayDate(row.activeFrom || row.activatedAt)}</p></td>
-                                <td className="px-4 py-4">{tab !== "history" && <div className="flex gap-2"><HoverDiv type="INFO" disabled={!status?.connected} onClick={() => openMutation("update", row)} className="px-2 py-1 text-xs">Edit</HoverDiv><HoverDiv type="DELETE" disabled={!status?.connected} onClick={() => openMutation("remove", row)} className="px-2 py-1 text-xs">Remove</HoverDiv></div>}</td>
+                                <td className="px-4 py-4">{tab !== "history" && <div className="flex gap-2"><HoverDiv type="INFO" disabled={!status?.connected} onClick={() => openMutation("update", row)} className="px-2 py-1 text-xs">Edit</HoverDiv><DeleteButton  disabled={!status?.connected} onClick={() => openMutation("remove", row)} className="px-2 py-1 text-xs">Remove</DeleteButton></div>}</td>
                             </tr>)}
                         </tbody>
                     </table>
                     {!data?.content.length && <p className="p-10 text-center text-sm text-zinc-500">No VIP records for these filters.</p>}
                 </div>}
-            </div>
-            <footer className="mt-4 flex justify-between text-xs text-zinc-500"><span>{data?.totalElements ?? 0} records · Page {page + 1}</span><div className="flex gap-2"><HoverDiv type="INFO" disabled={loading || page === 0} onClick={() => setPage(value => value - 1)} className="px-3 py-2">Previous</HoverDiv><HoverDiv type="INFO" disabled={loading || !data || data.last} onClick={() => setPage(value => value + 1)} className="px-3 py-2">Next</HoverDiv></div></footer>
+            <Pagination
+                page={page + 1}
+                pages={data?.totalPages ?? 1}
+                disabled={loading || !data}
+                onChange={(nextPage) => setPage(nextPage - 1)}
+            />
+            </ResourceList>
 
             {mutation && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4">
                 <section role="dialog" aria-modal="true" aria-label="Change VIP" className="w-full max-w-md rounded border border-zinc-700 bg-zinc-950 p-6">
@@ -194,7 +207,7 @@ function Dashboard({apiKey, logout}: {apiKey: string; logout: () => void}) {
                         <MainStringInput value={mutation.uuid} onChange={uuid => setMutation({...mutation, uuid})} placeholder="Player UUID" disabled={mutationBusy || mutation.mode !== "add"} className="bg-zinc-900"/>
                         <MainStringInput value={mutation.vip} onChange={vip => setMutation({...mutation, vip})} placeholder="VIP package name" disabled={mutationBusy || mutation.mode !== "add"} className="bg-zinc-900"/>
                         {mutation.mode !== "remove" && <><MainStringInput value={mutation.duration} onChange={duration => setMutation({...mutation, duration})} placeholder={mutation.mode === "add" ? "Duration: 30d, 2h, or seconds (optional)" : "New remaining duration: 30d or seconds"} disabled={mutationBusy} className="bg-zinc-900"/><p className="text-xs text-zinc-500">{mutation.mode === "add" ? "Leave duration blank to use the package default." : "This sets the remaining time; it does not add time."}</p></>}
-                        {mutation.mode === "add" && <label className="flex items-center gap-2 text-xs text-zinc-400"><input type="checkbox" checked={mutation.silent} onChange={event => setMutation({...mutation, silent: event.target.checked})} disabled={mutationBusy}/>Silent activation</label>}
+                        {mutation.mode === "add" && <label className="flex items-center gap-2 text-xs text-zinc-400"><SelectionInput type="checkbox" checked={mutation.silent} onChange={event => setMutation({...mutation, silent: event.target.checked})} disabled={mutationBusy}/>Silent activation</label>}
                         {mutation.mode === "remove" && <p className="text-sm text-zinc-400">Remove this VIP from the player? The plugin must confirm the removal.</p>}
                         {mutationError && <p role="alert" className="text-sm text-red-400">{mutationError}</p>}
                         <HoverDiv type={mutation.mode === "remove" ? "DELETE" : "SAVE"} disabled={mutationBusy} onClick={() => void submitMutation()} className="w-full px-4 py-3 text-sm">{mutationBusy ? "Waiting for plugin…" : `Confirm ${mutation.mode}`}</HoverDiv>

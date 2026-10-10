@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
@@ -272,7 +276,7 @@ export function PackPageClient() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8 bg-primaryDottedSize bg-primaryDotted">
-                <div className="box-primary shadow-2xl w-full max-w-2xl p-6 space-y-6 animate-pulse">
+                <Surface className="box-primary shadow-2xl w-full max-w-2xl p-6 space-y-6 animate-pulse">
                     <div className="text-center space-y-2">
                         <div className="h-8 w-48 bg-zinc-700 rounded mx-auto" />
                         <div className="h-4 w-64 bg-zinc-800 rounded mx-auto" />
@@ -281,7 +285,7 @@ export function PackPageClient() {
 
                     <div className="space-y-3">
                         {Array.from({ length: 4 }).map((_, idx) => (
-                            <div key={idx} className="box-primary p-4 rounded-lg flex justify-between items-center gap-3 border border-white/5 bg-zinc-900/10">
+                            <Surface key={idx} className="box-primary p-4 rounded-lg flex justify-between items-center gap-3 border border-white/5 bg-zinc-900/10">
                                 <div className="flex-1 space-y-2 min-w-0">
                                     <div className="h-4 w-2/3 bg-zinc-700 rounded" />
                                     <div className="flex gap-2">
@@ -294,10 +298,10 @@ export function PackPageClient() {
                                     <div className="h-8 w-8 bg-zinc-800 rounded" />
                                     <div className="h-8 w-8 bg-zinc-800 rounded" />
                                 </div>
-                            </div>
+                            </Surface>
                         ))}
                     </div>
-                </div>
+                </Surface>
             </div>
         );
     }
@@ -305,7 +309,7 @@ export function PackPageClient() {
     if (error) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8">
-                <div className="box-primary shadow-2xl w-full max-w-md">
+                <Surface className="box-primary shadow-2xl w-full max-w-md">
                     <div className="space-y-6 p-6">
                         <div className="text-center">
                             <h1 className="text-2xl font-bold text-white">
@@ -322,7 +326,7 @@ export function PackPageClient() {
                             Back to Upload
                         </a>
                     </div>
-                </div>
+                </Surface>
             </div>
         );
     }
@@ -330,7 +334,7 @@ export function PackPageClient() {
     if (requiresPassword && packInfo) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8">
-                <div className="box-primary shadow-2xl w-full max-w-md">
+                <Surface className="box-primary shadow-2xl w-full max-w-md">
                     <div className="space-y-6 p-6">
                         <div className="text-center">
                             <FaLock className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
@@ -377,7 +381,7 @@ export function PackPageClient() {
                                 </div>
                             )}
 
-                            <button
+                            <NativeButton variant="primary"
                                 type="submit"
                                 disabled={loading}
                                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-semibold rounded transition flex items-center justify-center gap-2"
@@ -393,7 +397,7 @@ export function PackPageClient() {
                                         Unlock Pack
                                     </>
                                 )}
-                            </button>
+                            </NativeButton>
                         </form>
 
                         <a
@@ -404,7 +408,7 @@ export function PackPageClient() {
                             Back to Upload
                         </a>
                     </div>
-                </div>
+                </Surface>
             </div>
         );
     }
@@ -412,7 +416,7 @@ export function PackPageClient() {
     if (!packInfo || files.length === 0) {
         return (
             <div className="flex items-center justify-center min-h-screen px-4 py-8">
-                <div className="box-primary shadow-2xl w-full max-w-md">
+                <Surface className="box-primary shadow-2xl w-full max-w-md">
                     <div className="space-y-6 p-6">
                         <div className="text-center">
                             <h1 className="text-2xl font-bold text-white">
@@ -431,14 +435,14 @@ export function PackPageClient() {
                             Back to Upload
                         </a>
                     </div>
-                </div>
+                </Surface>
             </div>
         );
     }
 
     return (
         <div className="flex items-center justify-center min-h-screen px-4 py-8">
-            <div className="box-primary shadow-2xl w-full max-w-2xl">
+            <Surface className="box-primary shadow-2xl w-full max-w-2xl">
                 <div className="space-y-6 p-6">
                     {/* Header */}
                     <div className="text-center">
@@ -475,7 +479,7 @@ export function PackPageClient() {
                     {/* Files List */}
                     <div className="space-y-3 max-h-[600px] overflow-y-auto">
                         {files.map((file, idx) => (
-                            <div
+                            <Surface
                                 key={idx}
                                 className="box-primary p-4 rounded-lg hover:bg-opacity-80 transition"
                             >
@@ -498,13 +502,13 @@ export function PackPageClient() {
                                     <div className="flex gap-1 flex-wrap justify-end">
                                         {/* Preview button for media/pdf/doc */}
                                         {(isMediaPreviewable(file.fileType) || isMp3(file) || isPdfOrDoc(file.fileType)) && (
-                                            <button
+                                            <NativeButton
                                                 onClick={() => setPreviewFile(file)}
                                                 className="p-2 hover:bg-purple-500 hover:bg-opacity-20 rounded transition"
                                                 title="Preview"
                                             >
                                                 <FaEye className="w-4 h-4 text-purple-400" />
-                                            </button>
+                                            </NativeButton>
                                         )}
 
                                         {/* Open in new tab */}
@@ -519,7 +523,7 @@ export function PackPageClient() {
                                         </a>
 
                                         {/* Copy URL */}
-                                        <button
+                                        <NativeButton variant="primary"
                                             onClick={() =>
                                                 copyToClipboard(file.uniqueId)
                                             }
@@ -527,7 +531,7 @@ export function PackPageClient() {
                                             title="Copy URL"
                                         >
                                             <FaCopy className="w-4 h-4 text-blue-400" />
-                                        </button>
+                                        </NativeButton>
 
                                         {/* Download */}
                                         <HoverDiv
@@ -540,13 +544,13 @@ export function PackPageClient() {
                                         </HoverDiv>
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))}
                     </div>
 
                     {/* Download as ZIP button */}
                     {files.length > 1 && (
-                        <button
+                        <NativeButton
                             onClick={handleDownloadZip}
                             disabled={downloading}
                             className="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-semibold rounded transition flex items-center justify-center gap-2"
@@ -562,7 +566,7 @@ export function PackPageClient() {
                                     Download All as .zip
                                 </>
                             )}
-                        </button>
+                        </NativeButton>
                     )}
 
                     {/* Download Progress Bar */}
@@ -576,13 +580,13 @@ export function PackPageClient() {
                             </div>
                             <div className="flex items-center justify-between text-xs text-gray-400">
                                 <span>{downloadProgress}% complete</span>
-                                <button
+                                <NativeButton
                                     onClick={handleCancelDownload}
                                     className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition flex items-center gap-1"
                                 >
                                     <FaTimes className="w-3 h-3" />
                                     Cancel
-                                </button>
+                                </NativeButton>
                             </div>
                         </div>
                     )}
@@ -612,7 +616,7 @@ export function PackPageClient() {
                         className="fixed inset-0 flex items-center justify-center p-4 z-50"
                         onClick={() => setPreviewFile(null)}
                     >
-                        <div
+                        <Surface
                             className="box-primary shadow-2xl w-full max-w-4xl min-h-[90vh] overflow-auto flex flex-col"
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -621,12 +625,12 @@ export function PackPageClient() {
                                 <h2 className="text-white font-semibold truncate flex-1">
                                     {previewFile.fileName}
                                 </h2>
-                                <button
+                                <NativeButton
                                     onClick={() => setPreviewFile(null)}
                                     className="p-2 hover:bg-gray-800 rounded transition ml-4"
                                 >
                                     <FaTimes className="w-5 h-5 text-white" />
-                                </button>
+                                </NativeButton>
                             </div>
 
                             {/* Modal Content */}
@@ -717,10 +721,10 @@ export function PackPageClient() {
                                     Download
                                 </HoverDiv>
                             </div>
-                        </div>
+                        </Surface>
                     </div>
                 )}
-            </div>
+            </Surface>
         </div>
     );
 }

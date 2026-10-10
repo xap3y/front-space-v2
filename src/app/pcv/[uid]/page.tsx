@@ -1,4 +1,12 @@
 'use client';
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+import {DeleteButton} from "@/components/HoverDiv";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { pcvAxios as axios, pcvFetch as fetch } from "@/lib/pcvDevice";
@@ -675,7 +683,7 @@ export default function Page() {
     if (!trustedDevice) {
         return (
             <div className="mx-auto flex min-h-[65vh] max-w-lg items-center px-4">
-                <div className="w-full space-y-4 rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+                <Surface className="w-full space-y-4 rounded-lg border border-zinc-800 bg-zinc-950 p-6">
                     <h1 className="text-lg font-semibold">Trust this device</h1>
                     <p className="text-sm text-zinc-400">
                         Confirm this browser in-game using the player who opened the editor.
@@ -691,7 +699,7 @@ export default function Page() {
                     <HoverDiv onClick={() => setTrustAttempt((value) => value + 1)} icon={<LuRefreshCw />}>
                         Request confirmation again
                     </HoverDiv>
-                </div>
+                </Surface>
             </div>
         );
     }
@@ -699,13 +707,13 @@ export default function Page() {
     if ((apiError || !isWsOpen) && !loadingMain) {
         return (
             <div className="mx-auto flex min-h-[60vh] w-full max-w-3xl flex-col items-center justify-center gap-4 px-4">
-                <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-6 text-center">
+                <Surface className="rounded-lg border border-zinc-800 bg-zinc-950 p-6 text-center">
                     <h2 className="text-lg font-semibold">
                         {!apiError && !isWsOpen ? "WebSocket is not connected" : "No sessions under this uniqueId"}
                     </h2>
                     <p className="mt-1 text-sm text-zinc-400">UID: {String(uid)}</p>
                     <div className="mt-4 flex items-center justify-center gap-2">
-                        <button
+                        <NativeButton variant="primary"
                             onClick={() => {
                                 setApiError(false);
                                 router.refresh();
@@ -713,18 +721,18 @@ export default function Page() {
                             className="rounded border border-blue-600 bg-blue-500 px-3 py-1.5 text-sm text-white hover:bg-blue-600"
                         >
                             Retry
-                        </button>
-                        <button
+                        </NativeButton>
+                        <NativeButton variant="warning"
                             onClick={reconnect}
                             className="rounded border border-amber-600 bg-amber-500 px-3 py-1.5 text-sm text-white hover:bg-amber-600"
                         >
                             Reconnect WS
-                        </button>
+                        </NativeButton>
                     </div>
                     <div className="mt-3 text-xs text-zinc-500">
                         If this persists, ensure the UID is correct and a session is active.
                     </div>
-                </div>
+                </Surface>
             </div>
         );
     }
@@ -735,7 +743,7 @@ export default function Page() {
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex min-w-0 flex-wrap items-center gap-3">
                     <h1 className="text-lg font-semibold">Playcore Editor</h1>
-                    <button
+                    <NativeButton
                         type="button"
                         onClick={() => copyToClipboard(String(uid))}
                         title="Copy editor ID"
@@ -743,24 +751,24 @@ export default function Page() {
                     >
                         <span className="truncate">UID: {uid}</span>
                         <IoMdClipboard className="shrink-0" />
-                    </button>
+                    </NativeButton>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
+                    <NativeButton
                         onClick={refreshAll}
                         disabled={loadingMain || hasUpdatingToast}
                         className="inline-flex items-center gap-2 rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800 disabled:cursor-wait disabled:opacity-50"
                     >
                         <LuRefreshCw className={loadingMain ? "animate-spin" : ""} />
                         Refresh
-                    </button>
+                    </NativeButton>
                     {!isWsOpen && (
-                        <button
+                        <NativeButton variant="warning"
                             onClick={reconnect}
                             className="rounded border border-amber-600 bg-amber-500 px-3 py-1.5 text-sm text-white hover:bg-amber-600"
                         >
                             Reconnect WS
-                        </button>
+                        </NativeButton>
                     )}
                     <div
                         className={clsx(
@@ -818,7 +826,7 @@ export default function Page() {
                         subtitle={`${filteredActiveVips.length} active`}
                         actions={
                             <div className="flex max-w-full flex-wrap items-center gap-2">
-                                <button
+                                <NativeButton
                                     onClick={() => openNewModal("ACTIVE")}
                                     disabled={hasUpdatingToast}
                                     className={clsx(
@@ -827,7 +835,7 @@ export default function Page() {
                                     )}
                                 >
                                     <span className="inline-flex items-center gap-1.5"><LuPlus /> Add VIP</span>
-                                </button>
+                                </NativeButton>
                                 <SearchInput
                                     value={searchActive}
                                     onChange={(value) => {
@@ -839,7 +847,7 @@ export default function Page() {
                                     placeholder="Search players, UUIDs, packages, groups..."
                                     className="w-48 max-w-full sm:w-56"
                                 />
-                                <button
+                                <NativeButton
                                     type="button"
                                     onClick={() => setActiveSectionCollapsed(!isActiveSectionCollapsed)}
                                     aria-expanded={!isActiveSectionCollapsed}
@@ -848,7 +856,7 @@ export default function Page() {
                                     className="rounded border border-zinc-700 p-2 text-zinc-300 hover:bg-zinc-800"
                                 >
                                     {isActiveSectionCollapsed ? <FaChevronDown /> : <FaChevronUp />}
-                                </button>
+                                </NativeButton>
                             </div>
                         }
                     >
@@ -865,7 +873,7 @@ export default function Page() {
                                         .sort((left, right) => right.priority - left.priority || left.id - right.id);
                                     const expanded = expandedPlayers.has(a.playerUniqueId);
                                     return (
-                                        <div
+                                        <Surface
                                             key={`${a.playerUniqueId}-${a.packageName}`}
                                             className="rounded border border-zinc-800 bg-zinc-950 p-3"
                                         >
@@ -882,7 +890,7 @@ export default function Page() {
                                                     </div>
 
                                                     <div className="flex items-center gap-1">
-                                                        <button
+                                                        <NativeButton
                                                             type="button"
                                                             onClick={() => openActiveEditor(a)}
                                                             className={`rounded p-1 ${hasUpdatingToast ? "opacity-50 cursor-not-allowed" : "hover:bg-zinc-800"}`}
@@ -890,8 +898,8 @@ export default function Page() {
                                                             title="Edit"
                                                         >
                                                             <IoEllipsisHorizontal className="h-5 w-5 text-zinc-300" />
-                                                        </button>
-                                                        <button
+                                                        </NativeButton>
+                                                        <NativeDeleteButton
                                                             type="button"
                                                             onClick={() =>
                                                                 deleteResource("ACTIVE_VIP", `${a.playerUniqueId}`)
@@ -900,8 +908,8 @@ export default function Page() {
                                                             className={`rounded p-1 ${hasUpdatingToast ? "opacity-50 cursor-not-allowed" : "hover:bg-red-500/10"}`}
                                                             title="Delete"
                                                         >
-                                                            <FaTrashCan className="h-4 w-4 text-red-500" />
-                                                        </button>
+
+                                                        </NativeDeleteButton>
                                                     </div>
                                                 </div>
 
@@ -912,14 +920,14 @@ export default function Page() {
                                                         <span className="truncate" title={a.playerUniqueId}>
                               {a.playerUniqueId}
                             </span>
-                                                        <button
+                                                        <NativeButton
                                                             type="button"
                                                             aria-label="Copy UUID"
                                                             onClick={() => copyToClipboard(a.playerUniqueId)}
                                                             className="inline-flex items-center rounded p-1 hover:bg-zinc-800"
                                                         >
                                                             <IoMdClipboard className="h-3 w-3 text-zinc-400" />
-                                                        </button>
+                                                        </NativeButton>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         {a.duration === 0 ? <LuInfinity className="shrink-0 text-zinc-500" /> : <LuClock3 className="shrink-0 text-zinc-500" />}
@@ -958,7 +966,7 @@ export default function Page() {
                                                                     </div>
                                                                     <div className="flex shrink-0 gap-1">
                                                                         <HoverDiv onClick={() => { setEditingQueued(entry); setQueuedEditExpr(""); }} disabled={hasUpdatingToast} className="h-7 w-7 p-0" title="Adjust queued time" icon={<FaPen />} />
-                                                                        <HoverDiv type="DELETE" onClick={() => deleteQueuedVip(entry)} disabled={hasUpdatingToast} className="h-7 w-7 p-0" title="Remove queued VIP" icon={<FaTrashCan />} />
+                                                                        <DeleteButton  onClick={() => deleteQueuedVip(entry)} disabled={hasUpdatingToast} className="h-7 w-7 p-0" title="Remove queued VIP"  />
                                                                     </div>
                                                                 </div>
                                                             ))}
@@ -966,7 +974,7 @@ export default function Page() {
                                                     )}
                                                 </>
                                             )}
-                                        </div>
+                                        </Surface>
                                     );
                                 })}
                             </div>
@@ -978,7 +986,7 @@ export default function Page() {
                         title="VIP Packages"
                         subtitle={`${vipPackages.length} packages`}
                         actions={
-                            <button
+                            <NativeButton
                                 onClick={() => openNewModal("VIP")}
                                 disabled={hasUpdatingToast}
                                 className={clsx(
@@ -987,7 +995,7 @@ export default function Page() {
                                 )}
                             >
                                 <span className="inline-flex items-center gap-1.5"><LuPackage /> New package</span>
-                            </button>
+                            </NativeButton>
                         }
                     >
                         {(loadingMain || loadingVip) ? (
@@ -1000,7 +1008,7 @@ export default function Page() {
                                     .slice()
                                     .sort((a, b) => b.priority - a.priority)
                                     .map((v) => (
-                                        <div key={v.name} className="rounded border border-zinc-800 bg-zinc-950 p-3 transition-colors hover:border-zinc-700">
+                                        <Surface key={v.name} className="rounded border border-zinc-800 bg-zinc-950 p-3 transition-colors hover:border-zinc-700">
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="min-w-0">
                                                     <div className="truncate font-medium">
@@ -1018,7 +1026,7 @@ export default function Page() {
                                                             <span>{secondsToHuman(v.duration)}</span>
                                                         </div>
                                                     </div>
-                                                    <button
+                                                    <NativeButton
                                                         type="button"
                                                         disabled={hasUpdatingToast}
                                                         onClick={() => openPackageEditor(v)}
@@ -1026,10 +1034,10 @@ export default function Page() {
                                                         title="Edit"
                                                     >
                                                         <FaPen className="h-4 w-4 text-zinc-300" />
-                                                    </button>
+                                                    </NativeButton>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Surface>
                                     ))}
                             </div>
                         )}
@@ -1062,7 +1070,7 @@ export default function Page() {
                                         />
                                     </>
                                 )}
-                                <button
+                                <NativeButton
                                     onClick={() => openNewModal("CODE")}
                                     disabled={hasUpdatingToast || codes.length === 0 || loadingCodes}
                                     className={clsx(
@@ -1071,8 +1079,8 @@ export default function Page() {
                                     )}
                                 >
                                     <span className="inline-flex items-center gap-1.5"><LuKeyRound /> New code</span>
-                                </button>
-                                <button
+                                </NativeButton>
+                                <NativeButton data-active={(loadingCodes || hasUpdatingToast)}
                                     onClick={fetchCodes}
                                     disabled={loadingCodes || hasUpdatingToast}
                                     className={clsx(
@@ -1087,7 +1095,7 @@ export default function Page() {
                       <LoadingDot /> Loading
                     </span>
                                     ) : codes.length ? "Reload" : "Load"}
-                                </button>
+                                </NativeButton>
                             </div>
                         }
                     >
@@ -1100,7 +1108,7 @@ export default function Page() {
                                 ].map((filter) => (
                                     <label key={filter.label} className="flex min-w-0 flex-col gap-1 text-xs text-zinc-400">
                                         <span>{filter.label}</span>
-                                        <select
+                                        <SelectControl
                                             value={filter.value}
                                             onChange={(event) => filter.change(event.target.value)}
                                             className="max-w-full rounded border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-200 outline-none focus:border-zinc-500"
@@ -1108,17 +1116,17 @@ export default function Page() {
                                             {filter.options.map(([value, label]) => (
                                                 <option key={value} value={value}>{label}</option>
                                             ))}
-                                        </select>
+                                        </SelectControl>
                                     </label>
                                 ))}
                                 {hasCodeFilters && (
-                                    <button
+                                    <NativeButton
                                         type="button"
                                         onClick={resetCodeFilters}
                                         className="rounded px-2 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white"
                                     >
                                         Clear filters
-                                    </button>
+                                    </NativeButton>
                                 )}
                             </div>
                         )}
@@ -1151,7 +1159,7 @@ export default function Page() {
                                         {filteredCodes.map((c) => (
                                             <tr key={c.uniqueId || c.code} className="border-b border-zinc-800 transition-colors hover:bg-zinc-800/40">
                                                 <td className="break-all px-3 py-2 font-mono">
-                                                    <button
+                                                    <NativeButton
                                                         type="button"
                                                         onClick={() => copyToClipboard(c.code)}
                                                         title="Copy code"
@@ -1159,7 +1167,7 @@ export default function Page() {
                                                     >
                                                         <span>{c.code}</span>
                                                         <IoMdClipboard className="shrink-0 text-zinc-500" />
-                                                    </button>
+                                                    </NativeButton>
                                                 </td>
                                                 <td className="px-3 py-2">
                             <span
@@ -1188,25 +1196,25 @@ export default function Page() {
                                                 <td className="max-w-[220px] truncate px-3 py-2">{c.usedAt || "N/A"}</td>
                                                 <td className="px-3 py-2">
                                                     {c.email && c.email !== "N/A" ? (
-                                                        <button
+                                                        <NativeButton
                                                             className="rounded p-1 hover:bg-zinc-800"
                                                             title={`${c.email} (click to copy)`}
                                                             onClick={() => copyToClipboard(c.email!)}
                                                         >
                                                             <IoMail className="h-4 w-4 text-zinc-300" />
-                                                        </button>
+                                                        </NativeButton>
                                                     ) : (
                                                         <span className="text-zinc-500">—</span>
                                                     )}
                                                 </td>
                                                 <td className="px-3 py-2">
-                                                    <button
+                                                    <NativeDeleteButton
                                                         className="rounded p-1 hover:bg-red-500/10"
                                                         onClick={() => deleteResource("CODE", c.code)}
                                                         title="Delete code"
                                                     >
-                                                        <FaTrashCan className="text-red-500" />
-                                                    </button>
+
+                                                    </NativeDeleteButton>
                                                 </td>
                                             </tr>
                                         ))}
@@ -1218,7 +1226,7 @@ export default function Page() {
                                 <div className="md:hidden">
                                     <div className="max-h-[520px] space-y-2 overflow-auto">
                                         {filteredCodes.map((c) => (
-                                            <div
+                                            <Surface
                                                 key={c.uniqueId || c.code}
                                                 className="rounded border border-zinc-800 bg-zinc-950 p-3"
                                             >
@@ -1266,13 +1274,13 @@ export default function Page() {
                                 <span className="truncate" title={c.email}>
                                   {c.email}
                                 </span>
-                                                                <button
+                                                                <NativeButton
                                                                     className="rounded p-1 hover:bg-zinc-800"
                                                                     title="Copy email"
                                                                     onClick={() => copyToClipboard(c.email!)}
                                                                 >
                                                                     <IoMdClipboard className="h-3 w-3 text-zinc-400" />
-                                                                </button>
+                                                                </NativeButton>
                                                             </>
                                                         ) : (
                                                             <span className="text-zinc-500">—</span>
@@ -1280,27 +1288,27 @@ export default function Page() {
                                                     </div>
                                                 </div>
                                                 <div className="mt-2 flex justify-end">
-                                                    <button
+                                                    <NativeDeleteButton
                                                         className="rounded p-1 hover:bg-red-500/10"
                                                         onClick={() => deleteResource("CODE", c.code)}
                                                         title="Delete code"
                                                     >
-                                                        <FaTrashCan className="text-red-500" />
-                                                    </button>
+
+                                                    </NativeDeleteButton>
                                                 </div>
-                                            </div>
+                                            </Surface>
                                         ))}
                                     </div>
                                 </div>
 
                                 {filteredCodes.length < matchingCodes.length && (
                                     <div className="mt-3 flex justify-center">
-                                        <button
+                                        <NativeButton
                                             onClick={() => setCodesPage((p) => p + 1)}
                                             className="rounded border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-700"
                                         >
                                             Load more
-                                        </button>
+                                        </NativeButton>
                                     </div>
                                 )}
                             </>
@@ -1419,7 +1427,7 @@ export default function Page() {
                         </div>
 
                         {/* Preview for new package */}
-                        <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
+                        <Surface className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
                             <div className="mb-1 text-zinc-500">Preview</div>
                             <div className="flex items-center justify-between gap-3">
                                 <div className="min-w-0">
@@ -1439,7 +1447,7 @@ export default function Page() {
                                     <div>Duration: {newPkgDurationExpr || "-"}</div>
                                 </div>
                             </div>
-                        </div>
+                        </Surface>
                     </div>
                 )}
 
@@ -1457,7 +1465,7 @@ export default function Page() {
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Package</label>
-                                <select
+                                <SelectControl
                                     value={newActivePackage}
                                     onChange={(e) => setNewActivePackage(e.target.value)}
                                     className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
@@ -1471,7 +1479,7 @@ export default function Page() {
                                                 {v.name}
                                             </option>
                                         ))}
-                                </select>
+                                </SelectControl>
                             </div>
                             <div>
                                 <label className="mb-1 block text-xs text-zinc-400">Duration (optional, e.g. 30d or 20m10s)</label>
@@ -1502,7 +1510,7 @@ export default function Page() {
                                 <label className="mb-1 block text-xs text-zinc-400">Type</label>
                                 <div className="flex items-center gap-3">
                                     <label className="flex items-center gap-1 text-sm">
-                                        <input
+                                        <SelectionInput
                                             type="radio"
                                             className="accent-indigo-500"
                                             checked={newCodeType === "VIP"}
@@ -1511,7 +1519,7 @@ export default function Page() {
                                         VIP
                                     </label>
                                     <label className="flex items-center gap-1 text-sm">
-                                        <input
+                                        <SelectionInput
                                             type="radio"
                                             className="accent-indigo-500"
                                             checked={newCodeType === "KIT"}
@@ -1525,7 +1533,7 @@ export default function Page() {
                             <>
                                 <div>
                                     <label className="mb-1 block text-xs text-zinc-400">{newCodeType === "VIP" ? "VIP Package" : "Kit"}</label>
-                                    <select
+                                    <SelectControl
                                         value={newCodeVip}
                                         onChange={(e) => setNewCodeVip(e.target.value)}
                                         className="w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-zinc-500"
@@ -1535,7 +1543,7 @@ export default function Page() {
                                             .slice()
                                             .sort((a, b) => a.name.localeCompare(b.name))
                                             .map((entry) => <option key={entry.name} value={entry.name}>{entry.name}</option>)}
-                                    </select>
+                                    </SelectControl>
                                 </div>
                                 {newCodeType === "VIP" && (
                                     <div>
@@ -1572,10 +1580,10 @@ export default function Page() {
                 <div className="space-y-4">
                     <p className="text-sm text-zinc-400">Add or remove time from this queued VIP. Examples: <code>+7d</code>, <code>-30m</code>.</p>
                     <div className="flex flex-wrap gap-2">
-                        {["-7d", "-1d", "+1d", "+7d"].map((value) => <button key={value} onClick={() => setQueuedEditExpr(value)} className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs hover:bg-zinc-700">{value}</button>)}
+                        {["-7d", "-1d", "+1d", "+7d"].map((value) => <NativeButton key={value} onClick={() => setQueuedEditExpr(value)} className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs hover:bg-zinc-700">{value}</NativeButton>)}
                     </div>
                     <MainStringInput value={queuedEditExpr} onChange={setQueuedEditExpr} placeholder="e.g. +2h or -30m" className={clsx("w-full bg-zinc-900", queuedExprValid || !queuedEditExpr ? "border-zinc-700" : "border-red-600")} inputClassName="px-3 py-2 text-sm" />
-                    {editingQueued && <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-400">Current duration: {secondsToHuman(editingQueued.duration)}</div>}
+                    {editingQueued && <Surface className="rounded border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-400">Current duration: {secondsToHuman(editingQueued.duration)}</Surface>}
                 </div>
             </SlideOver>
 
@@ -1606,13 +1614,13 @@ export default function Page() {
 
                     <div className="flex flex-wrap gap-2">
                         {["-6h", "-2h", "-30m", "+30m", "+2h", "+6h"].map((x) => (
-                            <button
+                            <NativeButton
                                 key={x}
                                 onClick={() => setActiveEditExpr(x)}
                                 className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-700"
                             >
                                 {x}
-                            </button>
+                            </NativeButton>
                         ))}
                     </div>
 
@@ -1632,7 +1640,7 @@ export default function Page() {
                     </div>
 
                     {editingActive && (
-                        <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
+                        <Surface className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
                             <div className="mb-1 text-zinc-500">Current</div>
                             <div className="flex flex-wrap gap-4">
                                 <div>
@@ -1645,7 +1653,7 @@ export default function Page() {
                                     <span className="text-zinc-500">Duration:</span> {secondsToHuman(editingActive.duration)}
                                 </div>
                             </div>
-                        </div>
+                        </Surface>
                     )}
                 </div>
             </SlideOver>
@@ -1727,7 +1735,7 @@ export default function Page() {
                     </div>
 
                     {editingPackage && (
-                        <div className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
+                        <Surface className="rounded border border-zinc-800 bg-zinc-950 p-3 text-xs text-zinc-400">
                             <div className="mb-1 text-zinc-500">Preview</div>
                             <div className="flex items-center justify-between gap-3">
                                 <div className="min-w-0">
@@ -1746,7 +1754,7 @@ export default function Page() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </Surface>
                     )}
                 </div>
             </SlideOver>

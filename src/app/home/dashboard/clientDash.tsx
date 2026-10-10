@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import { useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
@@ -41,7 +43,7 @@ export default function DashboardLauncherClient() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {Array.from({ length: 9 }).map((_, idx) => (
-                            <div
+                            <Surface
                                 key={idx}
                                 className="box-primary p-5 rounded-lg border border-white/5 bg-zinc-900/10 space-y-4"
                             >
@@ -50,7 +52,7 @@ export default function DashboardLauncherClient() {
                                     <div className="h-5 w-1/3 bg-zinc-700 rounded" />
                                     <div className="h-4 w-2/3 bg-zinc-800 rounded" />
                                 </div>
-                            </div>
+                            </Surface>
                         ))}
                     </div>
                 </div>

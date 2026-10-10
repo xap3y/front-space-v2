@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -90,14 +99,14 @@ function ActionButton({
             : "border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200";
 
     return (
-        <button
+        <NativeButton
             disabled={disabled}
             onClick={onClick}
             title={title}
             className={`px-3 py-2 rounded-lg text-sm border-2 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
-        </button>
+        </NativeButton>
     );
 }
 
@@ -179,15 +188,15 @@ function ExpirationModal({ email, currentExpiry, apiKey, onClose, onSaved }: Exp
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
             onClick={onClose}
         >
-            <div
+            <Surface
                 className="w-full max-w-sm bg-primary1 border-2 border-zinc-800 rounded-xl shadow-2xl p-5 space-y-4"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between">
                     <h3 className="text-base font-semibold text-white">Edit Expiration</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+                    <NativeButton onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
                         <FaTimes className="h-3.5 w-3.5" />
-                    </button>
+                    </NativeButton>
                 </div>
 
                 <p className="text-xs text-gray-400 font-mono break-all">{email}</p>
@@ -206,21 +215,21 @@ function ExpirationModal({ email, currentExpiry, apiKey, onClose, onSaved }: Exp
                 {err && <p className="text-xs text-red-400">{err}</p>}
 
                 <div className="flex gap-2 justify-end pt-1">
-                    <button
+                    <NativeButton
                         onClick={onClose}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 text-xs text-gray-300 transition-all duration-200"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </NativeButton>
+                    <NativeButton
                         onClick={handleSave}
                         disabled={saving}
                         className="px-3 py-1.5 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 bg-primary1 text-xs text-emerald-300 disabled:opacity-50 transition-all duration-200"
                     >
                         {saving ? "Saving…" : "Save"}
-                    </button>
+                    </NativeButton>
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }
@@ -464,7 +473,7 @@ export default function AdminEmailsClient({
                 ) : null}
 
                 {/* Compact Filters Panel */}
-                <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+                <Surface className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
                     <MainStringInput
                         type="text"
                         placeholder="Search email / id / status / creator..."
@@ -474,7 +483,7 @@ export default function AdminEmailsClient({
                         inputClassName="px-2.5 py-1.5 text-xs"
                     />
 
-                    <select
+                    <SelectControl
                         className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         value={statusFilter}
                         onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
@@ -484,9 +493,9 @@ export default function AdminEmailsClient({
                         {statusOptions.map((s) => (
                             <option key={s} value={s}>{s}</option>
                         ))}
-                    </select>
+                    </SelectControl>
 
-                    <select
+                    <SelectControl
                         className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         value={createdByFilter}
                         onChange={(e) => { setCreatedByFilter(e.target.value); setPage(1); }}
@@ -496,9 +505,9 @@ export default function AdminEmailsClient({
                         {createdByOptions.map((u) => (
                             <option key={u} value={u}>{u}</option>
                         ))}
-                    </select>
+                    </SelectControl>
 
-                    <select
+                    <SelectControl
                         className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                         value={sort}
                         onChange={(e) => setSort(e.target.value as SortMode)}
@@ -512,35 +521,35 @@ export default function AdminEmailsClient({
                         <option value="email_desc">Email: Z → A</option>
                         <option value="id_desc">ID: high → low</option>
                         <option value="id_asc">ID: low → high</option>
-                    </select>
+                    </SelectControl>
 
                     <div className="flex gap-1.5 ml-auto">
-                        <button
+                        <NativeButton
                             onClick={() => { setSearch(""); setStatusFilter(""); setCreatedByFilter(""); setSort("created_desc"); setPage(1); }}
                             className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                         >
                             Reset
-                        </button>
-                        <button
+                        </NativeButton>
+                        <NativeButton
                             onClick={() => router.refresh()}
                             className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                         >
                             Refresh
-                        </button>
+                        </NativeButton>
                     </div>
-                </div>
+                </Surface>
 
                 {/* List Container */}
-                <div className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-2" : "p-3 md:p-4"}`}>
+                <ResourceList className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-2" : "p-3 md:p-4"}`}>
                     <div className={`max-h-[60vh] overflow-y-auto pr-2 ${layoutMode === "compact" ? "space-y-1.5" : "space-y-3"}`}>
                         {pageEmails.map((e) => (
-                            <div key={e.id} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
+                            <Surface key={e.id} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                     <div className="flex items-center gap-2 min-w-0">
                                         <div className="min-w-0">
                                             <div className="text-sm sm:text-base text-white font-semibold break-all flex items-center gap-2">
                                                 <span className="truncate">{e.email}</span>
-                                                <button
+                                                <NativeButton
                                                     onClick={async () => {
                                                         try {
                                                             await navigator.clipboard.writeText(e.email);
@@ -555,7 +564,7 @@ export default function AdminEmailsClient({
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 text-gray-300">
                                                         <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v12h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
                                                     </svg>
-                                                </button>
+                                                </NativeButton>
                                                 <span className="text-gray-400 text-xs sm:text-sm"># {e.id}</span>
                                             </div>
                                             <div className={`text-xs text-gray-400 flex flex-wrap items-center gap-2 ${layoutMode === "compact" ? "mt-0.5" : "mt-1.5"}`}>
@@ -643,7 +652,7 @@ export default function AdminEmailsClient({
                                         Created by <UserMini user={e.createdBy} />
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))}
 
                         {pageEmails.length === 0 ? (
@@ -652,47 +661,18 @@ export default function AdminEmailsClient({
                     </div>
 
                     {/* Pagination Footer */}
-                    {totalPages > 1 && (
-                        <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                            <div className="flex items-center gap-4">
-                                <div className="text-xs text-gray-400">
-                                    Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                    <select
-                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                        value={pageSize}
-                                        onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                                    >
-                                        <option value={10}>10</option>
-                                        <option value={25}>25</option>
-                                        <option value={50}>50</option>
-                                        <option value={100}>100</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                    disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                                >
-                                    <FaChevronLeft className="h-3 w-3" />
-                                    <span>Prev</span>
-                                </button>
-                                <button
-                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                    disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                                >
-                                    <span>Next</span>
-                                    <FaChevronRight className="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPage}
+                            pageSize={pageSize}
+                            pageSizes={[10, 25, 50, 100]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPage(1);
+                            }}
+                        />
+                </ResourceList>
             </div>
 
             {/* ── Inbox Stream Modal ── */}
@@ -701,16 +681,16 @@ export default function AdminEmailsClient({
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={closeStream}
                 >
-                    <div
+                    <Surface
                         className="w-full max-w-5xl bg-primary1 p-5 relative border-2 border-zinc-800 rounded-xl shadow-2xl cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
+                        <NativeButton
                             onClick={closeStream}
                             className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
                         >
                             <FaTimes className="h-4 w-4" />
-                        </button>
+                        </NativeButton>
                         <div className="flex items-start justify-between gap-3 pr-8">
                             <div className="min-w-0">
                                 <div className="text-white font-semibold break-all text-lg">{streamEmail.email}</div>
@@ -719,22 +699,22 @@ export default function AdminEmailsClient({
                                 </div>
                             </div>
                             <div className="flex gap-2 shrink-0 flex-wrap">
-                                <button
+                                <NativeButton
                                     onClick={() => setWsForceRefreshId((v) => v + 1)}
                                     className="px-3 py-1.5 rounded-lg text-xs border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 text-white transition-all duration-200"
                                     disabled={loadingUser || !user?.apiKey}
                                 >
                                     Reconnect
-                                </button>
-                                <button
+                                </NativeButton>
+                                <NativeDeleteButton
                                     onClick={() => clearInbox(streamEmail)}
                                     className="px-3 py-1.5 rounded-lg text-xs border-2 border-red-500/30 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-300 transition-all duration-200 flex items-center gap-1.5"
                                     disabled={loadingUser || !user?.apiKey}
                                     title="Delete all inbox messages"
                                 >
-                                    <MdDeleteSweep className="h-4 w-4" />
+
                                     Clear Inbox
-                                </button>
+                                </NativeDeleteButton>
                             </div>
                         </div>
 
@@ -757,7 +737,7 @@ export default function AdminEmailsClient({
                                 }
                             />
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             ) : null}
 

@@ -1,4 +1,8 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { notFound, useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -283,7 +287,7 @@ export default function Page() {
                         <div className="h-10 w-44 bg-zinc-700 rounded-md" />
                     </div>
 
-                    <div className="box-primary shadow-lg overflow-hidden border border-white/10 rounded-xl">
+                    <Surface className="box-primary shadow-lg overflow-hidden border border-white/10 rounded-xl">
                         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-start lg:items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 bg-zinc-900/60">
                             <div className="h-5 w-24 bg-zinc-800 rounded" />
                             <div className="flex flex-wrap items-center gap-3">
@@ -302,7 +306,7 @@ export default function Page() {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             </div>
         );
@@ -394,7 +398,7 @@ export default function Page() {
             >
                 <div className="w-full max-w-6xl flex flex-col gap-6">
                     {/* Header */}
-                    <div className="bg-dark-grey3/70 backdrop-blur box-primary p-5 shadow-lg rounded-2xl">
+                    <Surface className="bg-dark-grey3/70 backdrop-blur box-primary p-5 shadow-lg rounded-2xl">
                         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4" onMouseMove={handleMouseMove}>
                             <div className="flex flex-row items-center gap-3 min-w-0">
                                 <h1 className="text-2xl sm:text-3xl font-semibold leading-tight break-words break-all">
@@ -426,7 +430,7 @@ export default function Page() {
               </span>
                             <span className="flex items-center gap-2 px-2.5 py-1 rounded-full box-primary break-all">
                 <span className="break-all">{shortUrl}</span>
-                <button
+                <NativeButton
                     onClick={async () => {
                         try {
                             await navigator.clipboard.writeText(shortUrl);
@@ -438,13 +442,13 @@ export default function Page() {
                     className="px-0.5 text-[15px]"
                 >
                   <FaCopy />
-                </button>
+                </NativeButton>
               </span>
                         </div>
-                    </div>
+                    </Surface>
 
                     {/* Code / snippet */}
-                    <div className="box-primary shadow-lg overflow-hidden">
+                    <Surface className="box-primary shadow-lg overflow-hidden">
                         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 items-start lg:items-center justify-between px-4 sm:px-6 py-3 border-b border-white/5 bg-dark-grey3/60">
                             {/* Left label */}
                             <div className="flex items-center gap-3 text-sm text-white/70">
@@ -465,7 +469,7 @@ export default function Page() {
                             >
                                 {/* Theme */}
                                 <div className="relative">
-                                    <button
+                                    <NativeButton
                                         onClick={() => setThemeOpen((v) => !v)}
                                         className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs box-primary transition"
                                     >
@@ -473,11 +477,11 @@ export default function Page() {
                                         <span className={`transition-transform ${themeOpen ? "rotate-180" : ""}`}>
                                           <FaArrowDown />
                                         </span>
-                                    </button>
+                                    </NativeButton>
                                     {themeOpen && (
-                                        <div className="absolute right-0 mt-2 w-32 rounded-xl bg-dark-grey3/90 box-primary shadow-xl overflow-hidden z-10">
+                                        <Surface className="absolute right-0 mt-2 w-32 rounded-xl bg-dark-grey3/90 box-primary shadow-xl overflow-hidden z-10">
                                             {themeOptions.map((z, idx) => (
-                                                <button
+                                                <NativeButton
                                                     key={z}
                                                     onClick={() => {
                                                         setTheme(z);
@@ -488,15 +492,15 @@ export default function Page() {
                                                     } ${z === theme ? "bg-white/10 text-white" : "text-white/80"}`}
                                                 >
                                                     {z}
-                                                </button>
+                                                </NativeButton>
                                             ))}
-                                        </div>
+                                        </Surface>
                                     )}
                                 </div>
 
                                 {/* Zoom */}
                                 <div className="relative">
-                                    <button
+                                    <NativeButton
                                         onClick={() => setZoomOpen((v) => !v)}
                                         className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs box-primary transition"
                                     >
@@ -504,11 +508,11 @@ export default function Page() {
                                         <span className={`transition-transform ${zoomOpen ? "rotate-180" : ""}`}>
                                           <FaArrowDown />
                                         </span>
-                                    </button>
+                                    </NativeButton>
                                     {zoomOpen && (
-                                        <div className="absolute right-0 mt-2 w-32 rounded-xl bg-dark-grey3/90 box-primary shadow-xl overflow-hidden z-10">
+                                        <Surface className="absolute right-0 mt-2 w-32 rounded-xl bg-dark-grey3/90 box-primary shadow-xl overflow-hidden z-10">
                                             {zoomOptions.map((z, idx) => (
-                                                <button
+                                                <NativeButton
                                                     key={z}
                                                     onClick={() => {
                                                         setZoom(z);
@@ -519,14 +523,14 @@ export default function Page() {
                                                     } ${z === zoom ? "bg-white/10 text-white" : "text-white/80"}`}
                                                 >
                                                     {z}%
-                                                </button>
+                                                </NativeButton>
                                             ))}
-                                        </div>
+                                        </Surface>
                                     )}
                                 </div>
 
                                 {/* Copy all */}
-                                <button
+                                <NativeButton
                                     onClick={() => {
                                         navigator.clipboard.writeText(safeContent);
                                         infoToast("Copied to clipboard!");
@@ -534,31 +538,31 @@ export default function Page() {
                                     className="rounded-lg px-3 py-1.5 text-xs box-primary"
                                 >
                                     Copy
-                                </button>
+                                </NativeButton>
 
                                 {/* Wrap toggle */}
-                                <button
+                                <NativeButton
                                     onClick={() => setWrap((w) => !w)}
                                     className="rounded-lg px-3 py-1.5 text-xs box-primary"
                                 >
                                     Wrap: {wrap ? "On" : "Off"}
-                                </button>
+                                </NativeButton>
 
                                 {/* Selection actions (shown only when a range is selected) */}
                                 {showSelectionActions && (
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <button
+                                        <NativeButton
                                             onClick={copySelectedContent}
                                             className="rounded-lg px-3 py-1.5 text-xs box-primary"
                                         >
                                             Copy lines
-                                        </button>
-                                        <button
+                                        </NativeButton>
+                                        <NativeButton
                                             onClick={copyPermalink}
                                             className="rounded-lg px-3 py-1.5 text-xs box-primary"
                                         >
                                             Copy link
-                                        </button>
+                                        </NativeButton>
                                     </div>
                                 )}
                             </div>
@@ -593,13 +597,13 @@ export default function Page() {
                                                     id={`L${lineNumber}`}
                                                     className={`code-line ${isSelected(lineNumber) ? "line-selected" : ""}`}
                                                 >
-                                                    <button
+                                                    <NativeButton
                                                         className="line-num"
                                                         onClick={(e) => handleLineClick(lineNumber, e)}
                                                         aria-label={`Line ${lineNumber}`}
                                                     >
                                                         {lineNumber}
-                                                    </button>
+                                                    </NativeButton>
                                                     <span className="line-content">{line || " "}</span>
                                                 </li>
                                             );
@@ -618,13 +622,13 @@ export default function Page() {
                                                     id={`L${lineNumber}`}
                                                     className={`code-line ${isSelected(lineNumber) ? "line-selected" : ""}`}
                                                 >
-                                                    <button
+                                                    <NativeButton
                                                         className="line-num"
                                                         onClick={(e) => handleLineClick(lineNumber, e)}
                                                         aria-label={`Line ${lineNumber}`}
                                                     >
                                                         {lineNumber}
-                                                    </button>
+                                                    </NativeButton>
                                                     <span
                                                         className="line-content"
                                                         dangerouslySetInnerHTML={{ __html: html || "&nbsp;" }}
@@ -636,18 +640,18 @@ export default function Page() {
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             </div>
 
-            <div
+            <Surface
                 className={`pointer-events-none transition-all duration-200 ease-out transform ${
                     showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
                 } absolute box-primary p-4 z-50 flex flex-row gap-4`}
                 style={{ top: position.y + 10, left: position.x + 20 }}
             >
                 <UserPopupCard user={paste.uploader as UserObj} lang={lang} />
-            </div>
+            </Surface>
 
             <style jsx global>{`
                 .nice-scrollbar {

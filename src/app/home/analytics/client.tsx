@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import MainStringInput from "@/components/MainStringInput";
+
 
 import HoverDiv from "@/components/HoverDiv";
 
@@ -145,7 +149,7 @@ function breakdownOption(data: AnalyticsCategory[], centerLabel: string, colorsB
 
 function MetricCard({label, value, hint, icon}: {label: string; value: string; hint: string; icon: React.ReactNode}) {
     return (
-        <div className="box-primary min-w-0 p-3.5 md:p-4">
+        <Surface className="box-primary min-w-0 p-3.5 md:p-4">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-gray-500">{label}</p>
@@ -156,7 +160,7 @@ function MetricCard({label, value, hint, icon}: {label: string; value: string; h
                     {icon}
                 </span>
             </div>
-        </div>
+        </Surface>
     );
 }
 
@@ -350,7 +354,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                     <p className="text-xs text-gray-500">Updated {updatedAt.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}</p>
                 </header>
 
-                <div className="box-primary p-3 md:p-4">
+                <Surface className="box-primary p-3 md:p-4">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
                         <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1 xl:pb-0">
                             {presets.map(item => (
@@ -365,13 +369,13 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                             <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1.5 text-xs text-gray-400">
                                 <FaCalendarDays className="shrink-0" />
                                 <span>From</span>
-                                <input type="date" value={from} max={to} onChange={event => {setFrom(event.target.value); setPreset("custom");}}
+                                <MainStringInput type="date" value={from} max={to} onChange={(_value, event) => {setFrom(event.target.value); setPreset("custom");}}
                                     className="min-w-0 flex-1 bg-transparent text-gray-200 outline-none [color-scheme:dark]" />
                             </label>
                             <span className="hidden text-gray-600 sm:block">→</span>
                             <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-2.5 py-1.5 text-xs text-gray-400">
                                 <span>To</span>
-                                <input type="date" value={to} min={from} onChange={event => {setTo(event.target.value); setPreset("custom");}}
+                                <MainStringInput type="date" value={to} min={from} onChange={(_value, event) => {setTo(event.target.value); setPreset("custom");}}
                                     className="min-w-0 flex-1 bg-transparent text-gray-200 outline-none [color-scheme:dark]" />
                             </label>
                             <HoverDiv type="INFO" onClick={() => void load()} disabled={loading}
@@ -381,7 +385,7 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                         </div>
                     </div>
                     {error ? <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/[0.07] px-3 py-2 text-xs text-red-300">{error}</p> : null}
-                </div>
+                </Surface>
 
                 <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 xl:grid-cols-7">
                     <MetricCard label="Images" value={String(data?.summary.images ?? 0)} hint="uploaded in range" icon={<FaImages />} />
@@ -393,35 +397,35 @@ export default function AnalyticsClient({apiKey, accountCreatedAt, initialData, 
                     <MetricCard label="URL visits" value={(data?.summary.urlVisits ?? 0).toLocaleString()} hint="across links in range" icon={<FaEye />} />
                 </div>
 
-                <div className="box-primary overflow-hidden p-3 md:p-4">
+                <Surface className="box-primary overflow-hidden p-3 md:p-4">
                     <div className="flex flex-col gap-1 px-1 sm:flex-row sm:items-end sm:justify-between">
                         <div><h2 className="text-base font-semibold text-white">Daily activity</h2><p className="text-xs text-gray-500">Scroll or pinch to zoom · drag the navigator to focus a period</p></div>
                         <div className="flex gap-3 text-[11px] text-gray-500"><span>{activityTotal} events</span><span>{activeDays} active days</span><span>{busiest.amount ? `Peak ${busiest.amount} · ${shortDate(busiest.date)}` : "No peak yet"}</span></div>
                     </div>
                     <AnalyticsChart option={activityOption} height={390} />
-                </div>
+                </Surface>
 
-                <div className="box-primary overflow-hidden p-3 md:p-4">
+                <Surface className="box-primary overflow-hidden p-3 md:p-4">
                     <div className="px-1"><h2 className="text-base font-semibold text-white">Storage used</h2><p className="text-xs text-gray-500">Cumulative retained images and files with daily additions</p></div>
                     <AnalyticsChart option={storageOption} height={340} />
-                </div>
+                </Surface>
 
                 <div className="grid gap-4 lg:grid-cols-5">
-                    <div className="box-primary p-3 md:p-4 lg:col-span-3">
+                    <Surface className="box-primary p-3 md:p-4 lg:col-span-3">
                         <div className="px-1"><h2 className="text-base font-semibold text-white">Uploaded file types</h2><p className="text-xs text-gray-500">Format mix for the selected period</p></div>
                         <AnalyticsChart option={fileTypeOption} height={330} />
-                    </div>
-                    <div className="box-primary p-3 md:p-4 lg:col-span-2">
+                    </Surface>
+                    <Surface className="box-primary p-3 md:p-4 lg:col-span-2">
                         <div className="px-1"><h2 className="text-base font-semibold text-white">Activity by weekday</h2><p className="text-xs text-gray-500">When you create the most</p></div>
                         <AnalyticsChart option={weekdayOption} height={330} />
-                    </div>
+                    </Surface>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Image visibility</h2><AnalyticsChart option={breakdownOption(data?.visibility ?? [], "images")} height={260} /></div>
-                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Storage location</h2><AnalyticsChart option={breakdownOption(data?.storageLocations ?? [], "uploads")} height={260} /></div>
-                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Paste languages</h2><AnalyticsChart option={breakdownOption(data?.pasteLanguages ?? [], "pastes")} height={260} /></div>
-                    <div className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Temp-mail status</h2><AnalyticsChart option={breakdownOption(data?.mailStatuses ?? [], "addresses", {OPEN: "#22c55e", SUSPENDED: "#d97706", DELETED: "#ef4444", DELETEED: "#ef4444"})} height={260} /></div>
+                    <Surface className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Image visibility</h2><AnalyticsChart option={breakdownOption(data?.visibility ?? [], "images")} height={260} /></Surface>
+                    <Surface className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Storage location</h2><AnalyticsChart option={breakdownOption(data?.storageLocations ?? [], "uploads")} height={260} /></Surface>
+                    <Surface className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Paste languages</h2><AnalyticsChart option={breakdownOption(data?.pasteLanguages ?? [], "pastes")} height={260} /></Surface>
+                    <Surface className="box-primary p-3"><h2 className="px-1 text-sm font-semibold">Temp-mail status</h2><AnalyticsChart option={breakdownOption(data?.mailStatuses ?? [], "addresses", {OPEN: "#22c55e", SUSPENDED: "#d97706", DELETED: "#ef4444", DELETEED: "#ef4444"})} height={260} /></Surface>
                 </div>
             </div>
         </section>

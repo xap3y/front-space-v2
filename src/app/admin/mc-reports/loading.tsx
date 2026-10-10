@@ -1,8 +1,10 @@
+
+import Surface from "@/components/ui/Surface";
 export default function McReportsLoading() {
     return (
         <div className="flex flex-col gap-4 animate-pulse">
             {/* Header skeleton */}
-            <div className="box-primary p-4">
+            <Surface className="box-primary p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="space-y-2">
                         <div className="h-7 w-64 bg-white/10 rounded" />
@@ -10,10 +12,10 @@ export default function McReportsLoading() {
                     </div>
                     <div className="h-9 w-24 bg-white/5 rounded-md" />
                 </div>
-            </div>
+            </Surface>
 
             {/* List Skeleton */}
-            <div className="box-primary p-4 space-y-4">
+            <Surface className="box-primary p-4 space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                     <div className="flex items-center gap-4">
                         <div className="h-5 w-24 bg-white/10 rounded" />
@@ -30,7 +32,7 @@ export default function McReportsLoading() {
                 {/* Card list skeleton */}
                 <div className="mt-4 grid gap-3">
                     {Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="rounded-xl box-primary p-3 shadow-sm shadow-black/30 flex items-center gap-3">
+                        <Surface key={i} className="rounded-xl box-primary p-3 shadow-sm shadow-black/30 flex items-center gap-3">
                             <div className="flex-1 min-w-0 space-y-2">
                                 <div className="flex items-center gap-2">
                                     <div className="h-4.5 w-36 bg-white/10 rounded" />
@@ -43,10 +45,10 @@ export default function McReportsLoading() {
                                 </div>
                             </div>
                             <div className="h-5 w-5 bg-white/5 rounded-full ml-auto" />
-                        </div>
+                        </Surface>
                     ))}
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }

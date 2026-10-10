@@ -1,4 +1,6 @@
 "use client";
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import {useEffect, useState} from "react";
 import {FaEye, FaFileArrowDown, FaFloppyDisk, FaKey, FaPlay} from "react-icons/fa6";
@@ -214,7 +216,7 @@ export default function MuniPdfClient() {
                         </label>
 
                         <label className="flex cursor-pointer items-center gap-3 text-sm text-zinc-300">
-                            <input
+                            <SelectionInput
                                 type="checkbox"
                                 checked={saveApiKey}
                                 onChange={event => updateSaveApiKey(event.target.checked)}

@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import React, {useEffect, useState} from "react";
 import {useDropzone} from "react-dropzone";
@@ -379,7 +383,7 @@ export default function ImageUploader() {
             )}
             {!uploadedImage && (
                 <form onSubmit={handleSubmit} className={`flex items-center justify-center bg-opacity-50 select-none md:px-0 px-1`}>
-                    <div id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out md:p-6 p-2 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]`}>
+                    <Surface id={"test"} className={`${showAdvanced ? "xl:mt-10 mt-2" : "xl:mt-52 mt-32"} transition-all duration-500 ease-in-out md:p-6 p-2 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]`}>
                         <div className="space-y-6">
                             <h1 className="text-2xl font-bold text-center">
                                 {"Upload a Image"}
@@ -400,16 +404,16 @@ export default function ImageUploader() {
                                 </div>
                             )}
                             {file && (
-                                <div className="overflow-hidden rounded-xl border-2 border-lime-700/80 bg-black/20">
+                                <Surface className="overflow-hidden rounded-xl border-2 border-lime-700/80 bg-black/20">
                                     {filePreviewUrl && file.type.startsWith("image/") && <div style={transparencyGridStyle} className={`flex min-h-24 max-h-48 w-full items-center justify-center overflow-hidden border-b border-white/10 p-3 ${showTransparencyGrid ? "" : "bg-[radial-gradient(circle_at_center,rgba(255,255,255,.055),transparent_70%)]"}`}>
                                         <img src={filePreviewUrl} alt={`Preview of ${file.name}`} className="block h-auto max-h-40 w-auto max-w-full rounded-lg object-contain shadow-lg" />
                                     </div>}
                                     <div className="flex min-w-0 items-center justify-between gap-3 p-2.5">
                                         <div className="min-w-0"><span className="block truncate text-sm text-zinc-200" title={file.name}>{cleanText(file.name)}</span><span className="mt-0.5 block text-[10px] uppercase tracking-wider text-zinc-500">{file.type.startsWith("video/") ? "Video" : "Image"} · {file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`}</span></div>
-                                        <button type="button" aria-label="Remove selected file" className="ml-2 shrink-0 rounded-lg p-1.5 transition hover:bg-red-500/10" onClick={handleRemoveFile}> <MdOutlineDelete className="h-6 w-6 text-red-500" /> </button>
+                                        <NativeButton type="button" aria-label="Remove selected file" className="ml-2 shrink-0 rounded-lg p-1.5 transition hover:bg-red-500/10" onClick={handleRemoveFile}> <MdOutlineDelete className="h-6 w-6 text-red-500" /> </NativeButton>
                                     </div>
                                     {supportsTransparency && <div className="flex items-center justify-between border-t border-white/10 px-2.5 py-2"><span className="text-[11px] text-zinc-400">Transparency grid</span><HoverDiv type={showTransparencyGrid ? "SAVE" : "INFO"} role="switch" aria-checked={showTransparencyGrid} aria-label="Toggle transparency grid" onClick={() => setShowTransparencyGrid(value => !value)} style={{justifyContent: showTransparencyGrid ? "flex-end" : "flex-start"}} className="h-6 w-11 shrink-0 rounded-full p-[3px]"><span className={`block h-4 w-4 shrink-0 rounded-full transition-colors ${showTransparencyGrid ? "bg-emerald-300" : "bg-zinc-500"}`}/></HoverDiv></div>}
-                                </div>
+                                </Surface>
                             )}
 
                             {!user && (
@@ -433,7 +437,7 @@ export default function ImageUploader() {
 
                             <div className={"flex flex-col gap-2 items-start"}>
                                 <div className={"flex gap-3"}>
-                                    <button
+                                    <NativeButton
                                         type="button"
                                         onClick={() => {
                                             if (!uploading) setShowAdvanced(!showAdvanced)
@@ -448,7 +452,7 @@ export default function ImageUploader() {
                                             color={"white"}
                                             style={{ strokeWidth: 1.5 }}
                                         />
-                                    </button>
+                                    </NativeButton>
                                 </div>
                                 <div
                                     className={`transition-all duration-500 overflow-hidden w-full md:pl-2 pl-0 ${showAdvanced ? "max-h-[500px] mt-4" : "max-h-0"}`}
@@ -589,7 +593,7 @@ export default function ImageUploader() {
 
                                         <div className={"flex items-center gap-1"}>
                                             <div className="overflow-visible min-w-52 text-white">
-                                                <button
+                                                <NativeButton
                                                     type="button"
                                                     onClick={() => {
                                                         if (!uploading) toggle()
@@ -609,15 +613,15 @@ export default function ImageUploader() {
                                                     >
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                     </svg>
-                                                </button>
+                                                </NativeButton>
 
-                                                <div
+                                                <Surface
                                                     className={`absolute mt-1 min-w-52 box-primary z-50 overflow-hidden transform transition-all duration-500 ease-in-out origin-top ${
                                                         isOpen ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0"
                                                     }`}
                                                 >
                                                     {callServers.map(server => (
-                                                        <button
+                                                        <NativeButton
                                                             type="button"
                                                             key={server.url}
                                                             onClick={() => select(server)}
@@ -648,9 +652,9 @@ export default function ImageUploader() {
                                                                     }
                                                                 </div>
                                                             )}
-                                                        </button>
+                                                        </NativeButton>
                                                     ))}
-                                                </div>
+                                                </Surface>
                                             </div>
 
                                             <IoMdRefresh onClick={handlePingButtonClick} className={`w-[25px] h-[25px] cursor-pointer rounded-full ${isPingButtonClicked ? "rotate-180" : ""} ${isMobile ? "" : "hover:bg-white hover:bg-opacity-10"} duration-150`} />
@@ -661,16 +665,15 @@ export default function ImageUploader() {
                             </div>
 
                             {!uploading ? (
-                                <button type="submit" disabled={uploading} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
+                                <NativeButton variant="primary" type="submit" disabled={uploading} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
                                     {lang.pages.portable_image.button_text}
-                                </button>) : (
+                                </NativeButton>) : (
                                 <>
                                     {/*<div className={"flex items-center justify-center"}>
                                         <OrbitProgress color="#32cd32" variant={"dotted"} size={"small"} text="" textColor=""/>
                                     </div>*/}
                                 </>
                             )}
-
 
 
                             {uploading && (
@@ -693,14 +696,14 @@ export default function ImageUploader() {
                                         </div>
                                     </div>
                                     { uploadProgress < 100 && (
-                                        <button onClick={cancelUpload} type="submit" disabled={!uploading} className="w-full duration-200 bg-red-600 hover:bg-red-700 border-red-800 border-2 text-white p-2 rounded">
+                                        <NativeButton onClick={cancelUpload} type="submit" disabled={!uploading} className="w-full duration-200 bg-red-600 hover:bg-red-700 border-red-800 border-2 text-white p-2 rounded">
                                             {lang.global.cancel || "Cancel"}
-                                        </button>
+                                        </NativeButton>
                                     )}
                                 </>
                             )}
                         </div>
-                    </div>
+                    </Surface>
                 </form>
             )}
 

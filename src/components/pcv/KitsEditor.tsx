@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import { useEffect, useMemo, useState } from "react";
 import { pcvAxios as axios, pcvFetch as fetch } from "@/lib/pcvDevice";
@@ -196,10 +198,10 @@ export function KitsEditor({ kits, apiBase, uid, onReload }: {
                         {!draft.content.length && <div className="rounded border border-dashed border-zinc-800 p-8 text-center text-xs text-zinc-500 xl:col-span-2">This kit has no items yet.</div>}
                     </div>
 
-                    <div className="sticky bottom-2 flex flex-wrap justify-end gap-2 rounded border border-zinc-800 bg-zinc-950/95 p-2 backdrop-blur">
+                    <Surface className="sticky bottom-2 flex flex-wrap justify-end gap-2 rounded border border-zinc-800 bg-zinc-950/95 p-2 backdrop-blur">
                         <DeleteButton onClick={removeKit} disabled={saving} className="px-3 py-1.5 text-xs">Delete kit</DeleteButton>
                         <SaveButton onClick={save} disabled={saving} className="px-3 py-1.5 text-xs">{saving ? "Saving…" : "Save kit"}</SaveButton>
-                    </div>
+                    </Surface>
                 </section>
             )}
         </div>

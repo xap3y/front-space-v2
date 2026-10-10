@@ -1,5 +1,7 @@
 "use client";
 
+import Pagination from "@/components/ui/Pagination";
+
 import {useEffect, useState} from "react";
 import {FaEye, FaKey} from "react-icons/fa6";
 import MainStringInput from "@/components/MainStringInput";
@@ -126,11 +128,12 @@ export default function FilePackManagement({packId, apiKey, protectedPack, admin
                             {log.userAgent && <span className="break-all text-zinc-400">UA: {log.userAgent}</span>}
                         </div>
                     ))}
-                    <div className="flex items-center gap-2">
-                        <HoverDiv type="INFO" className="px-2 py-1" disabled={loading || page === 0} onClick={() => setPage(page - 1)}>Previous</HoverDiv>
-                        <span>{page + 1} / {pages}</span>
-                        <HoverDiv type="INFO" className="px-2 py-1" disabled={loading || page + 1 >= pages} onClick={() => setPage(page + 1)}>Next</HoverDiv>
-                    </div>
+                    <Pagination
+                        page={page + 1}
+                        pages={pages}
+                        disabled={loading}
+                        onChange={(nextPage) => setPage(nextPage - 1)}
+                    />
                 </div>
             )}
         </div>

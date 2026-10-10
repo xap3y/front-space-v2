@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -243,7 +252,7 @@ export default function InvitesClient({
     return (
         <div className="flex flex-col gap-3">
             {/* Header + filter */}
-            <div className="box-primary p-3 sm:p-4">
+            <Surface className="box-primary p-3 sm:p-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 className="text-xl font-semibold">Invites</h1>
@@ -255,8 +264,8 @@ export default function InvitesClient({
                     <div className="flex items-center gap-2">
                         <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
                         <div className="text-xs text-gray-400">Show</div>
-                        <div className="inline-flex rounded-lg border-2 border-zinc-800 overflow-hidden bg-primary1">
-                            <button
+                        <Surface className="inline-flex rounded-lg border-2 border-zinc-800 overflow-hidden bg-primary1">
+                            <NativeButton data-active={filter === "all"}
                                 className={`px-3 py-1.5 text-sm transition-all duration-200 ${
                                     filter === "all"
                                         ? "bg-zinc-800 text-white font-semibold"
@@ -265,8 +274,8 @@ export default function InvitesClient({
                                 onClick={() => applyFilter("all")}
                             >
                                 All
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton data-active={filter === "unused"}
                                 className={`px-3 py-1.5 text-sm transition-all duration-200 ${
                                     filter === "unused"
                                         ? "bg-zinc-800 text-white font-semibold"
@@ -275,8 +284,8 @@ export default function InvitesClient({
                                 onClick={() => applyFilter("unused")}
                             >
                                 Unused
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton data-active={filter === "used"}
                                 className={`px-3 py-1.5 text-sm transition-all duration-200 ${
                                     filter === "used"
                                         ? "bg-zinc-800 text-white font-semibold"
@@ -285,14 +294,14 @@ export default function InvitesClient({
                                 onClick={() => applyFilter("used")}
                             >
                                 Used
-                            </button>
-                        </div>
+                            </NativeButton>
+                        </Surface>
                     </div>
                 </div>
 
                 {/* Create */}
                 <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
-                    <div className="box-primary p-3 lg:col-span-2">
+                    <Surface className="box-primary p-3 lg:col-span-2">
                         <div className="font-semibold">Create invites</div>
                         <div className="text-xs text-gray-400 mt-1">
                             Generate new invite codes. (Count required, prefix optional.)
@@ -332,66 +341,37 @@ export default function InvitesClient({
                         </div>
 
                         <div className="mt-2 flex items-center gap-2">
-                            <button
+                            <NativeButton
                                 onClick={onCreate}
                                 disabled={creating}
                                 className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:border-zinc-700 hover:in-shadow disabled:opacity-50"
                             >
                                 {creating ? "Creating..." : "Create"}
-                            </button>
+                            </NativeButton>
 
-                            <button
+                            <NativeButton
                                 onClick={() => router.refresh()}
                                 className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm text-gray-200 transition-all duration-200 hover:border-zinc-700 hover:in-shadow"
                             >
                                 Refresh
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
 
-                    <div className="box-primary p-3">
-                        <div className="font-semibold">Pagination</div>
-                        <div className="text-xs text-gray-400 mt-1">
-                            Total: <span className="text-white">{total}</span>
-                        </div>
-
-                        <div className="mt-2">
-                            <label className="text-xs text-gray-400">Page size</label>
-                            <select
-                                className="in-primary mt-1 w-full rounded-lg border-2 border-zinc-800 bg-primary1 text-xs"
-                                value={pageSize}
-                                onChange={(e) => setPageSize(Number(e.target.value))}
-                            >
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                                <option value={100}>100</option>
-                            </select>
-                        </div>
-
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                            <button
-                                className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm text-gray-200 transition-all duration-200 hover:border-zinc-700 hover:in-shadow disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                            >
-                                Prev
-                            </button>
-
-                            <div className="text-sm text-gray-300">
-                                Page <span className="text-white">{page}</span> /{" "}
-                                <span className="text-white">{totalPages}</span>
-                            </div>
-
-                            <button
-                                className="rounded-lg border-2 border-zinc-800 bg-primary1 px-3 py-1.5 text-sm text-gray-200 transition-all duration-200 hover:border-zinc-700 hover:in-shadow disabled:opacity-50"
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                    <Surface className="p-3">
+                        <p className="text-xs text-zinc-500">Total: {total}</p>
+                        <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPage}
+                            pageSize={pageSize}
+                            pageSizes={[10, 25, 50, 100]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPage(1);
+                            }}
+                        />
+                    </Surface>
                 </div>
 
                 {error ? (
@@ -399,10 +379,10 @@ export default function InvitesClient({
                         {error}
                     </div>
                 ) : null}
-            </div>
+            </Surface>
 
             {/* Compact Filters Panel */}
-            <div className="box-primary mt-1 flex flex-wrap items-center gap-2 p-2.5 text-xs">
+            <Surface className="box-primary mt-1 flex flex-wrap items-center gap-2 p-2.5 text-xs">
                 <MainStringInput
                     type="text"
                     placeholder="Search code / user..."
@@ -412,7 +392,7 @@ export default function InvitesClient({
                     inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
-                <select
+                <SelectControl
                     className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={createdBy}
                     onChange={(e) => { setCreatedBy(e.target.value); setPage(1); }}
@@ -422,9 +402,9 @@ export default function InvitesClient({
                     {createdByOptions.map((u) => (
                         <option key={u} value={u}>{u}</option>
                     ))}
-                </select>
+                </SelectControl>
 
-                <select
+                <SelectControl
                     className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
@@ -434,25 +414,25 @@ export default function InvitesClient({
                     <option value="created_asc">Created: oldest</option>
                     <option value="used_desc">Used at: newest</option>
                     <option value="used_asc">Used at: oldest</option>
-                </select>
+                </SelectControl>
                 <div className="flex gap-1.5 ml-auto">
-                    <button
+                    <NativeButton
                         onClick={() => { setSearch(""); setCreatedBy(""); setSort("created_desc"); setPage(1); }}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
-                    </button>
-                    <button
+                    </NativeButton>
+                    <NativeButton
                         onClick={() => router.refresh()}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
-                    </button>
+                    </NativeButton>
                 </div>
-            </div>
+            </Surface>
 
             {/* List */}
-            <div className={`mt-1 flex flex-col box-primary ${layoutMode === "compact" ? "gap-1 p-2" : "gap-2 p-3"}`}>
+            <ResourceList className={`mt-1 flex flex-col box-primary ${layoutMode === "compact" ? "gap-1 p-2" : "gap-2 p-3"}`}>
 
                 {/* Desktop table */}
                 <div className="hidden overflow-x-auto lg:block">
@@ -510,7 +490,7 @@ export default function InvitesClient({
                 {/* Mobile cards */}
                 <div className={`lg:hidden grid ${layoutMode === "compact" ? "mt-1 gap-1.5" : "mt-3 gap-3"}`}>
                     {pageInvites.map((inv) => (
-                        <div key={inv.code} className={`box-primary ${layoutMode === "compact" ? "p-2" : "p-4"}`}>
+                        <Surface key={inv.code} className={`box-primary ${layoutMode === "compact" ? "p-2" : "p-4"}`}>
                             <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                     <div className="text-xs text-gray-400">Code</div>
@@ -546,7 +526,7 @@ export default function InvitesClient({
                                 <UserBadge label="Creator" user={(inv as any).createdBy ?? null} />
                                 <UserBadge label="Used by" user={(inv as any).usedBy ?? null} />
                             </div>
-                        </div>
+                        </Surface>
                     ))}
 
                     {pageInvites.length === 0 ? (
@@ -555,50 +535,18 @@ export default function InvitesClient({
                 </div>
 
                 {/* Pagination Footer */}
-                {totalPages > 1 && (
-                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                        <div className="flex items-center gap-4">
-                            <div className="text-xs text-gray-400">
-                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                <select
-                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                    value={pageSize}
-                                    onChange={(e) => {
-                                        setPageSize(Number(e.target.value));
-                                        setPage(1);
-                                    }}
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                            >
-                                <FaChevronLeft className="h-3 w-3" />
-                                <span>Prev</span>
-                            </button>
-                            <button
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                            >
-                                <span>Next</span>
-                                <FaChevronRight className="h-3 w-3" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPage}
+                            pageSize={pageSize}
+                            pageSizes={[10, 25, 50, 100]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPage(1);
+                            }}
+                        />
+            </ResourceList>
         </div>
     );
 }

@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import HoverDiv from "@/components/HoverDiv";
 
@@ -73,7 +75,7 @@ export default function HomeSettingsEmbed() {
     if (loadingUser || !user) {
         return (
             <section className="flex-1 min-w-0 pt-0 px-1 md:px-12">
-                <div className="w-full md:space-y-8 space-y-4 md:mt-10 mt-2 p-5 box-primary animate-pulse">
+                <Surface className="w-full md:space-y-8 space-y-4 md:mt-10 mt-2 p-5 box-primary animate-pulse">
                     {/* Header */}
                     <div className="flex items-center md:justify-between justify-center pb-2">
                         <div className="h-8 w-24 bg-white/5 rounded" />
@@ -81,7 +83,7 @@ export default function HomeSettingsEmbed() {
 
                     {/* Tab bar */}
                     <div className="relative -m-5 px-2 mx-1">
-                        <div className="p-2 box-primary">
+                        <Surface className="p-2 box-primary">
                             <div className="flex gap-2 overflow-x-auto flex-nowrap md:flex-wrap">
                                 {TABS.map((tab) => (
                                     <div key={tab.key} className="flex-shrink-0 md:flex-1 min-w-[110px] md:min-w-[140px]">
@@ -89,7 +91,7 @@ export default function HomeSettingsEmbed() {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </Surface>
                     </div>
 
                     {/* Tab content area */}
@@ -98,14 +100,14 @@ export default function HomeSettingsEmbed() {
                         <div className="h-24 w-full bg-white/5 rounded-xl" />
                         <div className="h-10 w-32 bg-white/10 rounded-xl" />
                     </div>
-                </div>
+                </Surface>
             </section>
         );
     }
 
     return (
         <section className="flex-1 min-w-0 pt-0 px-1 md:px-12">
-            <div className="w-full md:space-y-8 space-y-4 md:mt-10 mt-2 p-5 box-primary">
+            <Surface className="w-full md:space-y-8 space-y-4 md:mt-10 mt-2 p-5 box-primary">
                 {/* Header */}
                 <div className="flex items-center md:justify-between justify-center pb-2">
                     <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
@@ -113,7 +115,7 @@ export default function HomeSettingsEmbed() {
 
                 {/* Tab bar */}
                 <nav className="relative -m-5 px-2 mx-1">
-                    <div className="p-2 box-primary">
+                    <Surface className="p-2 box-primary">
                         <ul className="flex gap-2 overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap" role="tablist">
                             {TABS.map((tab) => {
                                 const isActive = activeTab === tab.key;
@@ -145,7 +147,7 @@ export default function HomeSettingsEmbed() {
                                 );
                             })}
                         </ul>
-                    </div>
+                    </Surface>
                 </nav>
 
                 {/* Tab content */}
@@ -157,7 +159,7 @@ export default function HomeSettingsEmbed() {
                 >
                     {tabContent}
                 </div>
-            </div>
+            </Surface>
 
             <style jsx global>{`
                 .animate-fade-in {

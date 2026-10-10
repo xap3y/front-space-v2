@@ -1,4 +1,9 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
@@ -135,7 +140,7 @@ export default function RegisterPage() {
             <main className="flex lg:mt-0 mt-20 overflow-y-hidden items-center justify-center sm:min-h-screen">
 
                 <div className="max-w-lg w-full mx-3">
-                    <div
+                    <Surface
                         className="box-primary shadow-xl overflow-hidden"
                     >
                         <div className="p-3 lg:p-8">
@@ -241,7 +246,7 @@ export default function RegisterPage() {
                                         htmlFor="agree"
                                         className="flex items-center gap-3 cursor-pointer"
                                     >
-                                        <input
+                                        <SelectionInput
                                             id="agree"
                                             name="agree"
                                             type="checkbox"
@@ -306,18 +311,18 @@ export default function RegisterPage() {
                                 </div>
 
                                 <div>
-                                    <button
+                                    <NativeButton
                                         className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-white text-black font-semibold text-sm transition-all duration-200 hover:bg-gray-100 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                                         type="submit"
                                         disabled={!isValidEmail(email) || password.length < 5 || !confirmPass || !agreed || !inviteCode}
                                     >
                                         {lang.pages.register.button_text}
                                         <FaArrowRight size={14} />
-                                    </button>
+                                    </NativeButton>
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             </main>
         </>

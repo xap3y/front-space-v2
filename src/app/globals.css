@@ -4,7 +4,8 @@
 
 @layer components {
     .box-primary {
-        @apply bg-primary1 border-4 border-primary0 rounded-lg;
+        @apply border border-zinc-800 rounded-md;
+        background: #0a0a0a;
     }
 
     .in-primary {

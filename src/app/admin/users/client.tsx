@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -92,14 +101,14 @@ function ActionButton({
                 ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-800/20 text-red-500"
                 : "border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200";
     return (
-        <button
+        <NativeButton
             title={title}
             disabled={disabled}
             onClick={onClick}
             className={`px-3 py-2 rounded-lg text-sm border-2 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
-        </button>
+        </NativeButton>
     );
 }
 
@@ -342,7 +351,7 @@ export default function UsersClient({
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="box-primary p-4">
+            <Surface className="box-primary p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
                         <h1 className="text-xl font-semibold">Users</h1>
@@ -356,18 +365,18 @@ export default function UsersClient({
 
                     <div className="flex gap-2">
                         <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
-                        <button
+                        <NativeButton
                             onClick={() => setIsCreateModalOpen(true)}
                             className="px-4 py-2 rounded-lg text-sm border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-emerald-300 font-medium transition-all duration-200"
                         >
                             New User
-                        </button>
-                        <button
+                        </NativeButton>
+                        <NativeButton
                             onClick={() => router.refresh()}
                             className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 font-medium transition-all duration-200"
                         >
                             Refresh
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
 
@@ -376,10 +385,10 @@ export default function UsersClient({
                         {error}
                     </div>
                 ) : null}
-            </div>
+            </Surface>
 
             {/* Compact Filters Panel */}
-            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+            <Surface className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
                 <MainStringInput
                     type="text"
                     placeholder="Search username / uid / invitor..."
@@ -389,7 +398,7 @@ export default function UsersClient({
                     inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
-                <select
+                <SelectControl
                     className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={roleFilter}
                     onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
@@ -399,9 +408,9 @@ export default function UsersClient({
                     {roleOptions.map((r) => (
                         <option key={r} value={r}>{r}</option>
                     ))}
-                </select>
+                </SelectControl>
 
-                <select
+                <SelectControl
                     className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
@@ -413,36 +422,37 @@ export default function UsersClient({
                     <option value="username_desc">Username: Z → A</option>
                     <option value="uid_desc">UID: high → low</option>
                     <option value="uid_asc">UID: low → high</option>
-                </select>
+                </SelectControl>
 
                 <div className="flex gap-1.5 ml-auto">
-                    <button
+                    <NativeButton
                         onClick={() => { setSearch(""); setRoleFilter(""); setSort("created_desc"); setPage(1); }}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
-                    </button>
-                    <button
+                    </NativeButton>
+                    <NativeButton
                         onClick={() => router.refresh()}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
-                    </button>
+                    </NativeButton>
                 </div>
-            </div>
+            </Surface>
 
             {/* List */}
-            <div className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-2" : "p-3 md:p-4"}`}>
+            <ResourceList className={`flex flex-col box-primary mt-4 ${layoutMode === "compact" ? "p-2" : "p-3 md:p-4"}`}>
                 <div className={`grid ${layoutMode === "compact" ? "gap-1.5" : "mt-2 gap-3"}`}>
                     {pageUsers.map((u) => {
                         const isOpen = openUid === u.uid;
                         const emailShown = emailReveal[u.uid] ?? false;
                         return (
-                            <div
+                            <Surface
                                 key={u.uid}
                                 className={`rounded-xl box-primary shadow-sm shadow-black/30 ${layoutMode === "compact" ? "p-2" : "p-3"}`}
                             >
-                                <button
+                                <NativeButton
+                                    layout="row"
                                     className="w-full text-left"
                                     onClick={() => {
                                         const next = isOpen ? null : u.uid;
@@ -491,7 +501,7 @@ export default function UsersClient({
                                             <IoIosArrowDown />
                                         </div>
                                     </div>
-                                </button>
+                                </NativeButton>
 
                                 <div
                                     className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
@@ -504,7 +514,7 @@ export default function UsersClient({
                                             isOpen ? "opacity-100" : "opacity-0 pointer-events-none select-none"
                                         }`}
                                     >
-                                        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                                        <Surface className="rounded-lg border border-white/10 bg-black/20 p-3">
                                             <div className="text-xs text-gray-400">Total uploads</div>
                                             <div className="text-lg font-semibold mt-1">
                                                 {u.stats?.totalUploads ?? "—"}
@@ -521,9 +531,9 @@ export default function UsersClient({
                                             <div className="text-sm text-gray-100">
                                                 {u.stats?.urlsShortened ?? "—"}
                                             </div>
-                                        </div>
+                                        </Surface>
 
-                                        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                                        <Surface className="rounded-lg border border-white/10 bg-black/20 p-3">
                                             <div className="text-xs text-gray-400">Invited by</div>
                                             <div className="mt-2">
                                                 {u.invitor ? (
@@ -547,9 +557,9 @@ export default function UsersClient({
                                             <div className="text-sm text-gray-100 break-words">
                                                 {u.email ?? "—"}
                                             </div>
-                                        </div>
+                                        </Surface>
 
-                                        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                                        <Surface className="rounded-lg border border-white/10 bg-black/20 p-3">
                                             <div className="text-xs text-gray-400">Actions</div>
                                             <div className="mt-2 flex flex-wrap gap-2">
                                                 {u.role == "BANNED" ? (
@@ -618,10 +628,10 @@ export default function UsersClient({
                                                     <FaArrowRight />
                                                 </ActionButton>
                                             </div>
-                                        </div>
+                                        </Surface>
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         );
                     })}
 
@@ -631,57 +641,25 @@ export default function UsersClient({
                 </div>
 
                 {/* Pagination Footer */}
-                {totalPages > 1 && (
-                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                        <div className="flex items-center gap-4">
-                            <div className="text-xs text-gray-400">
-                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                <select
-                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                    value={pageSize}
-                                    onChange={(e) => {
-                                        setPageSize(Number(e.target.value));
-                                        setPage(1);
-                                    }}
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                            >
-                                <FaChevronLeft className="h-3 w-3" />
-                                <span>Prev</span>
-                            </button>
-                            <button
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                            >
-                                <span>Next</span>
-                                <FaChevronRight className="h-3 w-3" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPage}
+                            pageSize={pageSize}
+                            pageSizes={[10, 25, 50, 100]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPage(1);
+                            }}
+                        />
+            </ResourceList>
 
             {modal.type ? (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm cursor-pointer"
                     onClick={closeModal}
                 >
-                    <div
+                    <Surface
                         className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl p-5 shadow-2xl cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -701,13 +679,13 @@ export default function UsersClient({
                                                 ? "Change password"
                                                 : "Change role"}
                             </h2>
-                            <button
+                            <NativeButton
                                 className="text-gray-400 hover:text-white transition-colors"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
                                 ✕
-                            </button>
+                            </NativeButton>
                         </div>
 
                         <div className="mt-4">
@@ -716,7 +694,7 @@ export default function UsersClient({
                                     {modal.type === "delete" ? <>Permanently delete <strong>{modal.value}</strong>? This action cannot be undone.</> : <>Generate a new API key for <strong>{modal.value}</strong>? Their current key will stop working immediately.</>}
                                 </div>
                             ) : modal.type === "role" ? (
-                                <select
+                                <SelectControl
                                     className="rounded-lg border-2 border-zinc-800 bg-primary1 p-2 text-sm text-white w-full focus:outline-none"
                                     value={modal.value}
                                     onChange={(e) => setModal((m) => ({ ...m, value: e.target.value }))}
@@ -727,7 +705,7 @@ export default function UsersClient({
                                             {r}
                                         </option>
                                     ))}
-                                </select>
+                                </SelectControl>
                             ) : (
                                 <MainStringInput
                                     className="p-2 border-2 border-zinc-800 rounded-lg bg-primary1 text-sm text-white w-full focus:outline-none"
@@ -749,22 +727,22 @@ export default function UsersClient({
                         </div>
 
                         <div className="mt-4 flex justify-end gap-2">
-                            <button
+                            <NativeButton
                                 className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-300 transition-all duration-200"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-white font-medium transition-all duration-200 disabled:opacity-50"
                                 onClick={submitModal}
                                 disabled={modal.loading || !modal.value.trim()}
                             >
                                 {modal.loading ? "Working..." : modal.type === "delete" ? "Delete user" : modal.type === "apiKey" ? "Rotate key" : "Save"}
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             ) : null}
 
@@ -774,7 +752,7 @@ export default function UsersClient({
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={() => { if (!creatingUser) { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); } }}
                 >
-                    <div
+                    <Surface
                         className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -784,13 +762,13 @@ export default function UsersClient({
                                 <h2 className="text-base font-semibold text-white">Create User</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Add a new account to the system</p>
                             </div>
-                            <button
+                            <NativeButton
                                 onClick={() => { if (!creatingUser) { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); } }}
                                 className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors text-sm"
                                 disabled={creatingUser}
                             >
                                 ✕
-                            </button>
+                            </NativeButton>
                         </div>
 
                         <form onSubmit={handleCreateUserSubmit} className="p-5 space-y-4">
@@ -868,7 +846,7 @@ export default function UsersClient({
                                         </div>
                                     </div>
                                 </div>
-                                <button
+                                <NativeButton data-active={createVerified}
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); if (!creatingUser) setCreateVerified(!createVerified); }}
                                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
@@ -877,28 +855,28 @@ export default function UsersClient({
                                     disabled={creatingUser}
                                 >
                                     <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${createVerified ? "translate-x-4" : "translate-x-0"}`} />
-                                </button>
+                                </NativeButton>
                             </div>
 
                             <div className="flex justify-end gap-2 pt-1">
-                                <button
+                                <NativeButton
                                     type="button"
                                     onClick={() => { setIsCreateModalOpen(false); setCreateUsername(""); setCreateEmail(""); setCreatePassword(""); setCreateVerified(true); }}
                                     className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={creatingUser}
                                 >
                                     Cancel
-                                </button>
-                                <button
+                                </NativeButton>
+                                <NativeButton variant="save"
                                     type="submit"
                                     className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={creatingUser || !createUsername.trim() || !createEmail.trim() || !createPassword.trim()}
                                 >
                                     {creatingUser ? "Creating…" : "Create User"}
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
-                    </div>
+                    </Surface>
                 </div>
             )}
         </div>

@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { useCallback, useEffect, useState } from "react";
 import { usePage } from "@/context/PageContext";
@@ -413,24 +422,24 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                     </div>
                     <div className="flex gap-2">
                         <LayoutModeSwitch value={layoutMode} onChange={setLayoutMode}/>
-                        <button
+                        <NativeButton
                             onClick={() => setIsUploadModalOpen(true)}
                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 transition-all duration-200 text-xs font-semibold text-emerald-300"
                         >
                             New Image
-                        </button>
-                        <button
+                        </NativeButton>
+                        <NativeButton
                             onClick={() => fetchImages()}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
                         >
                             Refresh
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
 
                 {/* Filters Header Bar */}
-                <div className="box-primary p-3 flex flex-col gap-3">
+                <Surface className="box-primary p-3 flex flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                         {/* Unique ID search */}
                         <MainStringInput
@@ -444,18 +453,18 @@ export default function ImagesClient({ users }: ImagesClientProps) {
 
                         {/* User Filter Dropdown */}
                         <div className="relative">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Users ({includedUsers.length + excludedUsers.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
+                            </NativeButton>
                             {userDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setUserDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
+                                    <Surface className="absolute left-0 mt-1 w-56 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 max-h-60 overflow-y-auto p-1 divide-y divide-white/5">
                                         {users.length === 0 ? (
                                             <div className="p-2 text-xs text-gray-500 text-center">No users available</div>
                                         ) : (
@@ -466,87 +475,87 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                     <div key={u.uid} className="flex items-center justify-between px-2.5 py-1.5 hover:bg-white/5 text-xs gap-2">
                                                         <span className="text-gray-300 truncate">{u.username}</span>
                                                         <div className="flex gap-1 shrink-0">
-                                                            <button
+                                                            <NativeButton data-active={isInc}
                                                                 type="button"
                                                                 onClick={() => handleAddUserFilter(u, "include")}
                                                                 className={`w-5 h-5 flex items-center justify-center rounded text-[10px] font-bold transition-colors ${isInc ? "bg-emerald-600 text-white" : "bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/35"}`}
                                                                 title="Include User"
                                                             >
                                                                 +
-                                                            </button>
-                                                            <button
+                                                            </NativeButton>
+                                                            <NativeButton data-active={isExc}
                                                                 type="button"
                                                                 onClick={() => handleAddUserFilter(u, "exclude")}
                                                                 className={`w-5 h-5 flex items-center justify-center rounded text-[10px] font-bold transition-colors ${isExc ? "bg-rose-600 text-white" : "bg-rose-600/20 text-rose-300 hover:bg-rose-600/35"}`}
                                                                 title="Exclude User"
                                                             >
                                                                 -
-                                                            </button>
+                                                            </NativeButton>
                                                         </div>
                                                     </div>
                                                 );
                                             })
                                         )}
-                                    </div>
+                                    </Surface>
                                 </>
                             )}
                         </div>
 
                         {/* Time Filter Dropdown */}
                         <div className="relative">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Time: {timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
+                            </NativeButton>
                             {timeDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setTimeDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-72 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-3 space-y-3">
+                                    <Surface className="absolute left-0 mt-1 w-72 rounded-lg border border-white/10 bg-primary1 shadow-xl z-40 p-3 space-y-3">
                                         <div className="flex gap-1 border-b border-white/5 pb-2">
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("range")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "range" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 Range
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("exact")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "exact" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 Exact Date
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("time-day")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "time-day" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 One Day
-                                            </button>
+                                            </NativeButton>
                                         </div>
 
                                         {timeFilterMode === "range" && (
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Date</span>
-                                                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={fromDate} onChange={(_value, e) => setFromDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Time</span>
-                                                    <input type="time" value={fromTime} onChange={e => setFromTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={fromTime} onChange={(_value, e) => setFromTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Date</span>
-                                                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={toDate} onChange={(_value, e) => setToDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Time</span>
-                                                    <input type="time" value={toTime} onChange={e => setToTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={toTime} onChange={(_value, e) => setToTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
@@ -554,7 +563,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                         {timeFilterMode === "exact" && (
                                             <div className="text-[10px]">
                                                 <span className="text-gray-400 block mb-0.5">Date</span>
-                                                <input type="date" value={exactDate} onChange={e => setExactDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                <MainStringInput type="date" value={exactDate} onChange={(_value, e) => setExactDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                             </div>
                                         )}
 
@@ -562,21 +571,21 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div className="col-span-2">
                                                     <span className="text-gray-400 block mb-0.5">Date</span>
-                                                    <input type="date" value={dayDate} onChange={e => setDayDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={dayDate} onChange={(_value, e) => setDayDate(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">Start Time</span>
-                                                    <input type="time" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={dayStartTime} onChange={(_value, e) => setDayStartTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">End Time</span>
-                                                    <input type="time" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={dayEndTime} onChange={(_value, e) => setDayEndTime(e.target.value)} className="w-full rounded border border-white/10 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
 
                                         <div className="flex justify-end gap-1.5 pt-1.5 border-t border-white/5">
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => {
                                                     setFromDate(""); setFromTime(""); setToDate(""); setToTime("");
@@ -585,31 +594,31 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                 className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[10px] font-medium transition-colors"
                                             >
                                                 Clear
-                                            </button>
+                                            </NativeButton>
                                         </div>
-                                    </div>
+                                    </Surface>
                                 </>
                             )}
                         </div>
 
                         {/* Format selector */}
                         <div className="relative">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Format ({selectedFormats.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
+                            </NativeButton>
                             {formatDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setFormatDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-1">
+                                    <Surface className="absolute left-0 mt-1 w-36 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-1">
                                         {["png", "jpg", "webp", "gif", "mp4"].map(f => {
                                             const isSel = selectedFormats.includes(f);
                                             return (
-                                                <button
+                                                <NativeButton
                                                     key={f}
                                                     type="button"
                                                     onClick={() => toggleFormat(f)}
@@ -617,16 +626,16 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                 >
                                                     <span>{f.toUpperCase()}</span>
                                                     {isSel && <span className="text-[10px]">✓</span>}
-                                                </button>
+                                                </NativeButton>
                                             );
                                         })}
-                                    </div>
+                                    </Surface>
                                 </>
                             )}
                         </div>
 
                         {/* Storage Filter */}
-                        <select
+                        <SelectControl
                             value={storageFilter}
                             onChange={e => setStorageFilter(e.target.value)}
                             className="rounded-lg border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none transition-colors"
@@ -634,22 +643,22 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             <option value="">Storage...</option>
                             <option value="LOCAL">Local</option>
                             <option value="R2">Cloud (R2)</option>
-                        </select>
+                        </SelectControl>
 
                         {/* Search and Reset button */}
                         <div className="flex gap-1.5 ml-auto">
-                            <button
+                            <NativeButton
                                 onClick={resetFilters}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 onClick={() => { setPageIdx(1); fetchImages(1); }}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Search
-                            </button>
+                            </NativeButton>
                         </div>
                     </div>
 
@@ -659,30 +668,30 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             {includedUsers.map(u => (
                                 <span key={`inc-${u.uid}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                                     <span>+ {u.username}</span>
-                                    <button onClick={() => removeUserFilter(u.uid, "include")} className="hover:text-white">×</button>
+                                    <NativeButton onClick={() => removeUserFilter(u.uid, "include")} className="hover:text-white">×</NativeButton>
                                 </span>
                             ))}
                             {excludedUsers.map(u => (
                                 <span key={`exc-${u.uid}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
                                     <span>- {u.username}</span>
-                                    <button onClick={() => removeUserFilter(u.uid, "exclude")} className="hover:text-white">×</button>
+                                    <NativeButton onClick={() => removeUserFilter(u.uid, "exclude")} className="hover:text-white">×</NativeButton>
                                 </span>
                             ))}
                             {selectedFormats.map(f => (
                                  <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border-2 border-zinc-800 uppercase font-semibold">
                                     <span>{f}</span>
-                                    <button onClick={() => toggleFormat(f)} className="hover:text-white">×</button>
+                                    <NativeButton onClick={() => toggleFormat(f)} className="hover:text-white">×</NativeButton>
                                 </span>
                             ))}
                         </div>
                     )}
-                </div>
+                </Surface>
 
                 {/* List */}
-                <div className={`flex flex-col box-primary ${layoutMode === "compact" ? "gap-1.5 p-2" : "gap-3 p-3 md:p-4"}`}>
+                <ResourceList className={`flex flex-col box-primary ${layoutMode === "compact" ? "gap-1.5 p-2" : "gap-3 p-3 md:p-4"}`}>
                     {loading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className={`rounded-xl border-2 border-zinc-800 bg-primary1 animate-pulse ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
+                            <Surface key={i} className={`rounded-xl border-2 border-zinc-800 bg-primary1 animate-pulse ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                 <div className="flex flex-col gap-2">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                         <div className="min-w-0 flex flex-col gap-1 w-full">
@@ -691,7 +700,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         ))
                     ) : images.length === 0 ? (
                         <div className="px-2 py-6 text-center text-sm text-gray-400">
@@ -702,11 +711,11 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             const portalUrl = img.urlSet.portalUrl || img.urlSet.webUrl || img.urlSet.shortUrl || "";
                             const rawUrl = img.urlSet.rawUrl || "";
                             return (
-                                <div key={img.uniqueId} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
+                                <Surface key={img.uniqueId} className={`rounded-xl border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 ${layoutMode === "compact" ? "p-2" : "p-3"}`}>
                                     <div className="flex gap-3 items-center">
                                         {/* Thumbnail preview */}
                                         {rawUrl && (
-                                            <div 
+                                            <div
                                                 className={`${layoutMode === "compact" ? "h-9 w-9" : "h-12 w-12"} rounded bg-black/40 border-2 border-zinc-800 shrink-0 overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity`}
                                                 onClick={() => setEnlargedImage(img)}
                                                 title="Click to enlarge"
@@ -759,30 +768,30 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-2">
-                                                    <button
+                                                    <NativeButton
                                                         onClick={() => (portalUrl ? window.open(portalUrl, "_blank") : null)}
                                                         className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                         disabled={!portalUrl}
                                                         title="Open Link"
                                                     >
                                                         <FaExternalLinkAlt className="h-4 w-4" />
-                                                    </button>
-                                                    <button
+                                                    </NativeButton>
+                                                    <NativeButton
                                                         onClick={() => copy(portalUrl)}
                                                         className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200 disabled:opacity-50"
                                                         disabled={!portalUrl}
                                                         title="Copy Link"
                                                     >
                                                         <FaRegCopy className="h-4 w-4" />
-                                                    </button>
-                                                    <button
+                                                    </NativeButton>
+                                                    <NativeButton variant="warning"
                                                         onClick={() => migrateImageStorage(img)}
                                                         className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-yellow-500/40 hover:border-yellow-500 hover:in-shadow bg-yellow-600/10 text-yellow-300 transition-all duration-200 disabled:opacity-50"
                                                         title={`Migrate storage to ${(img.location || "LOCAL") === "LOCAL" ? "R2" : "LOCAL"}`}
                                                         disabled={migratingId === img.uniqueId}
                                                     >
                                                         <FaRotateRight className={`h-4 w-4 ${migratingId === img.uniqueId ? "animate-spin" : ""}`} />
-                                                    </button>
+                                                    </NativeButton>
                                                     {[
                                                         "png",
                                                         "jpg",
@@ -808,72 +817,41 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                                             Convert
                                                         </HoverDiv>
                                                     ) : null}
-                                                    <button
+                                                    <NativeDeleteButton
                                                         onClick={() => deleteImage(img)}
                                                         disabled={img.uploader?.uid !== user?.uid && !hasPermission(user, "DELETE_IMAGES")}
                                                         className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 text-red-300 transition-all duration-200"
                                                         title="Delete Image"
                                                     >
-                                                        <FaTrash className="h-4 w-4" />
-                                                    </button>
+
+                                                    </NativeDeleteButton>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Surface>
                             );
                         })
                     )}
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                            <div className="flex items-center gap-4">
-                                <div className="text-xs text-gray-400">
-                                    Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                    <select
-                                        className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                        value={pageSize}
-                                        onChange={(e) => {
-                                            setPageSize(Number(e.target.value));
-                                            setPageIdx(1);
-                                        }}
-                                    >
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setPageIdx((p) => Math.max(1, p - 1))}
-                                    disabled={page <= 1}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                                >
-                                    <FaChevronLeft className="h-3 w-3" />
-                                    <span>Prev</span>
-                                </button>
-                                <button
-                                    onClick={() => setPageIdx((p) => Math.min(totalPages, p + 1))}
-                                    disabled={page >= totalPages}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                                >
-                                    <span>Next</span>
-                                    <FaChevronRight className="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPageIdx}
+                            pageSize={pageSize}
+                            pageSizes={[10, 20, 50]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPageIdx(1);
+                            }}
+                        />
+                </ResourceList>
             </div>
 
             {/* Upload Modal */}
             {isUploadModalOpen && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                     onClick={() => {
                         if (!uploadingState) {
@@ -885,7 +863,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                         }
                     }}
                 >
-                    <div 
+                    <Surface
                         className="w-full max-w-lg bg-primary1 border-2 border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -895,7 +873,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 <h2 className="text-base font-semibold text-white">Upload Image</h2>
                                 <p className="text-[11px] text-gray-500 mt-0.5">Upload an image or video to the server</p>
                             </div>
-                            <button
+                            <NativeButton
                                 onClick={() => {
                                     if (!uploadingState) {
                                         setIsUploadModalOpen(false);
@@ -909,7 +887,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 disabled={uploadingState}
                             >
                                 <FaTimes className="h-3.5 w-3.5" />
-                            </button>
+                            </NativeButton>
                         </div>
 
                         <form onSubmit={handleUploadSubmit} className="p-5 space-y-4">
@@ -940,9 +918,9 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                         </div>
                                         <span className="text-sm font-medium text-emerald-300">{uploadFile.name}</span>
                                         <span className="text-xs text-gray-500">{(uploadFile.size / 1024 / 1024).toFixed(2)} MB · {uploadFile.type || "unknown type"}</span>
-                                        <button type="button" onClick={(e) => { e.stopPropagation(); setUploadFile(null); }} className="text-xs text-red-400 hover:text-red-300 mt-1 transition-colors">
+                                        <NativeButton type="button" onClick={(e) => { e.stopPropagation(); setUploadFile(null); }} className="text-xs text-red-400 hover:text-red-300 mt-1 transition-colors">
                                             Remove file
-                                        </button>
+                                        </NativeButton>
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center gap-2 text-center">
@@ -1019,24 +997,24 @@ export default function ImagesClient({ users }: ImagesClientProps) {
 
                             {/* Footer Actions */}
                             <div className="flex justify-end gap-2 pt-1">
-                                <button
+                                <NativeButton
                                     type="button"
                                     onClick={() => { setIsUploadModalOpen(false); setUploadFile(null); setUploadDesc(""); setUploadPass(""); setUploadCustomUid(""); }}
                                     className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary text-gray-400 hover:text-white transition-all duration-200"
                                     disabled={uploadingState}
                                 >
                                     Cancel
-                                </button>
-                                <button
+                                </NativeButton>
+                                <NativeButton variant="save"
                                     type="submit"
                                     className="px-4 py-2 rounded-lg text-sm bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-500/40 disabled:bg-emerald-900 disabled:text-emerald-700 text-white font-medium transition-all duration-200"
                                     disabled={uploadingState || !uploadFile}
                                 >
                                     {uploadingState ? "Uploading…" : "Upload"}
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
-                    </div>
+                    </Surface>
                 </div>
             )}
 
@@ -1045,7 +1023,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                     className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
                     onClick={() => !converting && setConvertImage(null)}
                 >
-                    <div
+                    <Surface
                         className="box-primary w-full max-w-md p-5"
                         onClick={event => event.stopPropagation()}
                     >
@@ -1070,7 +1048,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                             <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[.12em] text-gray-500">
                                 Target format
                             </span>
-                            <select
+                            <SelectControl
                                 value={convertFormat}
                                 onChange={event => setConvertFormat(event.target.value)}
                                 disabled={converting}
@@ -1081,7 +1059,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                     .map(format => (
                                         <option key={format} value={format}>{format.toUpperCase()}</option>
                                     ))}
-                            </select>
+                            </SelectControl>
                         </label>
 
                         <p className="mt-3 text-xs leading-5 text-gray-500">
@@ -1107,17 +1085,17 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 {converting ? "Converting…" : `Convert to ${convertFormat.toUpperCase()}`}
                             </HoverDiv>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
 
             {/* Enlarge Image Modal (Lightbox) */}
             {enlargedImage && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-pointer"
                     onClick={() => setEnlargedImage(null)}
                 >
-                    <div 
+                    <Surface
                         className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center cursor-default bg-primary1 border-2 border-zinc-800 rounded-2xl p-4 shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -1132,13 +1110,13 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button
+                                <NativeButton
                                     onClick={() => copy(enlargedImage.urlSet.portalUrl || enlargedImage.urlSet.webUrl || enlargedImage.urlSet.shortUrl || '')}
                                     className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
                                     title="Copy direct link"
                                 >
                                     <FaRegCopy className="h-4 w-4" />
-                                </button>
+                                </NativeButton>
                                 <a
                                     href={(enlargedImage.urlSet.rawUrl || '') + "?download=true"}
                                     className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 hover:text-white transition-all duration-200 text-xs"
@@ -1146,13 +1124,13 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 >
                                     <FaExternalLinkAlt className="h-4 w-4" />
                                 </a>
-                                <button
+                                <NativeButton
                                     onClick={() => setEnlargedImage(null)}
                                     className="p-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-400 hover:text-white transition-all duration-200 text-xs"
                                     title="Close"
                                 >
                                     <FaTimes className="h-4 w-4" />
-                                </button>
+                                </NativeButton>
                             </div>
                         </div>
 
@@ -1173,7 +1151,7 @@ export default function ImagesClient({ users }: ImagesClientProps) {
                                 />
                             )}
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
         </section>

@@ -1,3 +1,5 @@
+
+import { NativeButton } from "@/components/ui/NativeButton";
 import {FaExternalLinkAlt} from "react-icons/fa";
 import {Album, ImageItem} from "@/types/album";
 import {isVideoFile} from "@/lib/core";
@@ -125,14 +127,14 @@ export function AlbumGrid({album}: AlbumGridProps) {
                                     </video>
                                 ) : (
                                     <div className="w-full min-h-[120px] min-w-[300px] h-full flex items-center justify-center bg-black rounded relative">
-                                        <button
+                                        <NativeButton
                                             className="absolute inset-0 flex items-center justify-center"
                                             onClick={() => handleActivateVideo(idx)}
                                         >
                                         <span className="bg-black bg-opacity-60 rounded-full p-4">
                                           <FaPlay className="text-white text-3xl" />
                                         </span>
-                                                            </button>
+                                                            </NativeButton>
                                                         </div>
                                                     )
                             ) : (
@@ -145,27 +147,27 @@ export function AlbumGrid({album}: AlbumGridProps) {
                         </div>
 
                         <div className="flex flex-row gap-4 w-full lg:h-11 h-9">
-                            <button
+                            <NativeButton variant="primary"
                                 className="w-full justify-center flex items-center gap-2 bg-blue-600 text-white px-2 rounded"
                                 onClick={() => window.open(image.urlSet.portalUrl, "_blank")}
                             >
                                 <FaExternalLinkAlt />
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton variant="save"
                                 className="w-full justify-center  flex items-center gap-2 bg-green-600 text-white px-2 rounded"
                                 onClick={() => downloadImage(image)}
                             >
                                 <FaDownload />
-                            </button>
+                            </NativeButton>
 
                             <div className="w-full relative inline-block text-left">
-                                <button
+                                <NativeButton
                                     className="w-full justify-center flex items-center gap-2 bg-telegram text-white px-2 rounded"
                                     onClick={() => toggleDropdown(idx)}
                                 >
                                     <FaArrowDown className={`${(openedDropdown == idx) ? "rotate-180" : ""} duration-200`} />
                                     {lang.pages.image_viewer.copy_button_text}
-                                </button>
+                                </NativeButton>
 
                                 <div
                                     className={`absolute right-0 mt-1 min-w-52 bg-zinc-900 rounded border border-zinc-700 shadow-lg z-50 overflow-hidden transform transition-all duration-300 ease-in-out origin-top ${
@@ -173,7 +175,7 @@ export function AlbumGrid({album}: AlbumGridProps) {
                                     }`}
                                 >
 
-                                    <button
+                                    <NativeButton
                                         key={"short"}
                                         onClick={() => {
                                             closeAllDropdowns()
@@ -182,11 +184,11 @@ export function AlbumGrid({album}: AlbumGridProps) {
                                         className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                     >
                                         Short URL
-                                    </button>
+                                    </NativeButton>
 
                                     <hr className="border-zinc-700" />
 
-                                    <button
+                                    <NativeButton
                                         key={"portal"}
                                         onClick={() => {
                                             closeAllDropdowns()
@@ -195,11 +197,11 @@ export function AlbumGrid({album}: AlbumGridProps) {
                                         className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                     >
                                         Portal URL
-                                    </button>
+                                    </NativeButton>
 
                                     <hr className="border-zinc-700" />
 
-                                    <button
+                                    <NativeButton
                                         key={"raw"}
                                         onClick={() => {
                                             closeAllDropdowns()
@@ -208,7 +210,7 @@ export function AlbumGrid({album}: AlbumGridProps) {
                                         className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-700 text-white"
                                     >
                                         Raw URL
-                                    </button>
+                                    </NativeButton>
                                 </div>
                             </div>
                         </div>

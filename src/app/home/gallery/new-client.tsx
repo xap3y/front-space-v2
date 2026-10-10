@@ -1,4 +1,12 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+import MainStringInput from "@/components/MainStringInput";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useUser } from '@/hooks/useUser';
@@ -20,7 +28,7 @@ function TimeDropdownShell({label, children}: {label: string; children: ReactNod
     const [open, setOpen] = useState(false);
 
     return <div className="relative">
-        <button
+        <NativeButton
             type="button"
             aria-haspopup="dialog"
             aria-expanded={open}
@@ -29,12 +37,12 @@ function TimeDropdownShell({label, children}: {label: string; children: ReactNod
         >
             <span>{label}</span>
             <span className={`text-[10px] text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}>▼</span>
-        </button>
+        </NativeButton>
         {open && <>
             <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-            <div className="absolute left-0 z-40 mt-1 w-72 space-y-3 rounded-lg border-2 border-zinc-800 bg-primary1 p-3 shadow-xl">
+            <Surface className="absolute left-0 z-40 mt-1 w-72 space-y-3 rounded-lg border-2 border-zinc-800 bg-primary1 p-3 shadow-xl">
                 {children}
-            </div>
+            </Surface>
         </>}
     </div>;
 }
@@ -290,7 +298,7 @@ export default function GalleryPage() {
     };
 
     const SkeletonCard = ({ animate = true }: { animate?: boolean }) => (
-        <div className={`rounded-xl border-2 border-zinc-800 bg-primary1 h-full w-full ${animate ? 'animate-pulse' : ''}`}>
+        <Surface className={`rounded-xl border-2 border-zinc-800 bg-primary1 h-full w-full ${animate ? 'animate-pulse' : ''}`}>
             <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl bg-black">
                 <div className="absolute right-1 top-1 flex items-center gap-1 z-10">
                     <div className="h-[19px] w-[26px] bg-black/60 rounded border border-white/10" />
@@ -313,10 +321,10 @@ export default function GalleryPage() {
                     <div className="h-[26px] w-[31px] rounded-md bg-red-600/10 border-2 border-red-500/30" />
                 </div>
             </div>
-        </div>
+        </Surface>
     );
 
-    const gridClasses = "w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3 md:gap-4";
+    const gridClasses = "w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-3";
 
     return (
         <section className="flex-1 min-w-0 pt-0 px-3 md:px-6 bg-primaryDottedSize bg-primaryDotted relative">
@@ -332,17 +340,17 @@ export default function GalleryPage() {
 
                     <div className="flex gap-2">
                         <a href="/a/image">
-                            <button
+                            <NativeButton
                                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                                 aria-label="New upload"
                                 title="New"
                             >
                                 <FaPlus className="h-4 w-4" />
                                 <span className="hidden sm:inline">New</span>
-                            </button>
+                            </NativeButton>
                         </a>
 
-                        <button
+                        <NativeButton
                             onClick={() => {
                                 setLoading(true);
                                 fetchImages(currentPage);
@@ -354,31 +362,31 @@ export default function GalleryPage() {
                         >
                             <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                             <span className="hidden sm:inline">{loading ? 'Refreshing...' : 'Refresh'}</span>
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
 
                 {/* Compact Filters Panel */}
                 <div className="flex flex-col gap-1.5">
-                    <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
+                    <Surface className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs">
                         {/* Format selector */}
                         <div className="relative">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => setFormatDropdownOpen(!formatDropdownOpen)}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 flex items-center gap-1.5 focus:outline-none transition-all duration-200"
                             >
                                 <span>Format ({selectedFormats.length})</span>
                                 <span className="text-[10px] text-gray-400">▼</span>
-                            </button>
+                            </NativeButton>
                             {formatDropdownOpen && (
                                 <>
                                     <div className="fixed inset-0 z-30" onClick={() => setFormatDropdownOpen(false)} />
-                                    <div className="absolute left-0 mt-1 w-36 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-1">
+                                    <Surface className="absolute left-0 mt-1 w-36 rounded-lg border-2 border-zinc-800 bg-primary1 shadow-xl z-40 p-1">
                                         {["png", "jpg", "webp", "gif", "mp4"].map(f => {
                                             const isSel = selectedFormats.includes(f);
                                             return (
-                                                <button
+                                                <NativeButton
                                                     key={f}
                                                     type="button"
                                                     onClick={() => toggleFormat(f)}
@@ -386,10 +394,10 @@ export default function GalleryPage() {
                                                 >
                                                     <span>{f.toUpperCase()}</span>
                                                     {isSel && <span className="text-[10px]">✓</span>}
-                                                </button>
+                                                </NativeButton>
                                             );
                                         })}
-                                    </div>
+                                    </Surface>
                                 </>
                             )}
                         </div>
@@ -397,46 +405,46 @@ export default function GalleryPage() {
                         {/* Time Filter Dropdown */}
                         <TimeDropdownShell label={`Time: ${timeFilterMode === "range" ? "Range" : timeFilterMode === "exact" ? "Exact" : "One Day"}`}>
                                         <div className="flex gap-1 border-b border-white/5 pb-2">
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("range")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "range" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 Range
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("exact")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "exact" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 Exact Date
-                                            </button>
-                                            <button
+                                            </NativeButton>
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setTimeFilterMode("time-day")}
                                                 className={`flex-1 text-center py-1 rounded text-[10px] font-medium transition-colors ${timeFilterMode === "time-day" ? "bg-primary_light/20 text-white" : "text-gray-400"}`}
                                             >
                                                 One Day
-                                            </button>
+                                            </NativeButton>
                                         </div>
 
                                         {timeFilterMode === "range" && (
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Date</span>
-                                                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={fromDate} onChange={(_value, e) => setFromDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">From Time</span>
-                                                    <input type="time" value={fromTime} onChange={e => setFromTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={fromTime} onChange={(_value, e) => setFromTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Date</span>
-                                                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={toDate} onChange={(_value, e) => setToDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">To Time</span>
-                                                    <input type="time" value={toTime} onChange={e => setToTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={toTime} onChange={(_value, e) => setToTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
@@ -444,7 +452,7 @@ export default function GalleryPage() {
                                         {timeFilterMode === "exact" && (
                                             <div className="text-[10px]">
                                                 <span className="text-gray-400 block mb-0.5">Date</span>
-                                                <input type="date" value={exactDate} onChange={e => setExactDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                <MainStringInput type="date" value={exactDate} onChange={(_value, e) => setExactDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                             </div>
                                         )}
 
@@ -452,21 +460,21 @@ export default function GalleryPage() {
                                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                                                 <div className="col-span-2">
                                                     <span className="text-gray-400 block mb-0.5">Date</span>
-                                                    <input type="date" value={dayDate} onChange={e => setDayDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="date" value={dayDate} onChange={(_value, e) => setDayDate(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">Start Time</span>
-                                                    <input type="time" value={dayStartTime} onChange={e => setDayStartTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={dayStartTime} onChange={(_value, e) => setDayStartTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-400 block mb-0.5">End Time</span>
-                                                    <input type="time" value={dayEndTime} onChange={e => setDayEndTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
+                                                    <MainStringInput type="time" value={dayEndTime} onChange={(_value, e) => setDayEndTime(e.target.value)} className="w-full rounded border-2 border-zinc-800 bg-primary px-2 py-1 text-white focus:outline-none text-[10px]" />
                                                 </div>
                                             </div>
                                         )}
 
                                         <div className="flex justify-end gap-1.5 pt-1.5 border-t border-white/5">
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => {
                                                     setFromDate(""); setFromTime(""); setToDate(""); setToTime("");
@@ -475,20 +483,20 @@ export default function GalleryPage() {
                                                 className="px-2 py-1 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-[10px] font-medium text-gray-300 transition-all duration-200"
                                             >
                                                 Clear
-                                            </button>
+                                            </NativeButton>
                                         </div>
                         </TimeDropdownShell>
 
                         {/* Reset button */}
                         <div className="flex gap-1.5 ml-auto">
-                            <button
+                            <NativeButton
                                 onClick={resetFilters}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                             >
                                 Reset Filters
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
 
                     {/* Filter Badges */}
                     {selectedFormats.length > 0 && (
@@ -496,7 +504,7 @@ export default function GalleryPage() {
                             {selectedFormats.map(f => (
                                 <span key={`fmt-${f}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/10 text-white border-2 border-zinc-800 uppercase font-semibold">
                                     <span>{f}</span>
-                                    <button onClick={() => toggleFormat(f)} className="hover:text-white">×</button>
+                                    <NativeButton onClick={() => toggleFormat(f)} className="hover:text-white">×</NativeButton>
                                 </span>
                             ))}
                         </div>
@@ -504,7 +512,7 @@ export default function GalleryPage() {
                 </div>
 
                 {/* Grid card area */}
-                <div
+                <ResourceList
                     className="flex flex-col box-primary sm:p-3 p-2 md:p-4"
                     style={{ minHeight: "calc(3 * 220px + 56px + 2rem)" }}
                 >
@@ -550,51 +558,33 @@ export default function GalleryPage() {
                     </div>
 
                     {/* Pagination Footer */}
-                    {totalPages > 1 && (
-                        <div className="w-full border-t border-white/10 pt-4 mt-4 flex items-center justify-between text-sm text-gray-300">
-                            <div className="text-xs text-gray-400">
-                                Page <span className="text-white font-medium">{currentPage + 1}</span> of <span className="text-white font-medium">{totalPages}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={goToPrevPage}
-                                    disabled={currentPage <= 0}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                                >
-                                    <FaChevronLeft className="h-3 w-3" />
-                                    <span>Prev</span>
-                                </button>
-                                <button
-                                    onClick={goToNextPage}
-                                    disabled={currentPage >= totalPages - 1}
-                                    className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                                >
-                                    <span>Next</span>
-                                    <FaChevronRight className="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    <Pagination
+                            page={currentPage + 1}
+                            pages={totalPages}
+                            onPrevious={goToPrevPage}
+                            onNext={goToNextPage}
+                            disabled={loading}
+                        />
+                </ResourceList>
             </div>
 
             {/* Password Modal */}
             {passwordModalOpen && passwordModalImage && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm cursor-pointer"
                     onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
                 >
-                    <div 
+                    <Surface
                         className="box-primary w-full max-w-sm p-5 space-y-4 rounded-xl border-2 border-zinc-800 shadow-2xl relative cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
+                        <NativeButton
                             type="button"
                             onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
                             className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"
                         >
                             <FaTimes />
-                        </button>
+                        </NativeButton>
                         <div>
                             <h3 className="text-sm font-semibold text-white">Image Password Settings</h3>
                             <p className="text-xs text-gray-400 mt-1 truncate">For: {passwordModalImage.uniqueId}</p>
@@ -602,42 +592,42 @@ export default function GalleryPage() {
 
                         <div className="space-y-1">
                             <label className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Password</label>
-                            <input
+                            <MainStringInput
                                 type="password"
                                 placeholder="Enter password (leave empty to remove)"
                                 value={newPasswordVal}
-                                onChange={e => setNewPasswordVal(e.target.value)}
+                                onChange={(_value, e) => setNewPasswordVal(e.target.value)}
                                 className="w-full rounded-lg border-2 border-zinc-800 bg-primary px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-700"
                             />
                         </div>
 
                         <div className="flex gap-2 justify-end pt-2">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={() => { setPasswordModalOpen(false); setPasswordModalImage(null); }}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-300 transition-all duration-200"
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 type="button"
                                 onClick={handleSavePassword}
                                 className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-white transition-all duration-200"
                             >
                                 Save
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
 
             {/* Enlarge Image Modal (Lightbox) */}
             {enlargedImage && (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-pointer"
                     onClick={() => setEnlargedImage(null)}
                 >
-                    <div 
+                    <Surface
                         className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center cursor-default bg-primary1 border-2 border-zinc-800 rounded-2xl p-4 shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -699,7 +689,7 @@ export default function GalleryPage() {
                                 />
                             )}
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
         </section>
@@ -739,10 +729,10 @@ const MediaCard = memo(function MediaCard({
     const videoUrl = item.location === "R2" ? getR2VideoUrl("media", item.uniqueId) : rawUrl;
 
     return (
-        <div className="group rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-200 w-full h-full flex flex-col overflow-hidden">
+        <Surface className="group rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-200 w-full h-full flex flex-col overflow-hidden">
             {/* Preview */}
-            <div 
-                className="relative w-full aspect-[4/3] overflow-hidden bg-black/60 flex-shrink-0 cursor-pointer" 
+            <div
+                className="relative w-full aspect-[4/3] overflow-hidden bg-black/60 flex-shrink-0 cursor-pointer"
                 style={{ minHeight: 0 }}
                 onClick={() => onEnlarge(item)}
             >
@@ -851,7 +841,7 @@ const MediaCard = memo(function MediaCard({
                     />
                 </div>
             </div>
-        </div>
+        </Surface>
     );
 });
 

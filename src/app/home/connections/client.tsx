@@ -1,4 +1,9 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+import {NativeDeleteButton} from "@/components/ui/NativeButton";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -127,35 +132,35 @@ export default function ConnectionsClient() {
                         <p className="text-sm uppercase tracking-[0.2em] text-white/60">Connections</p>
                         <h1 className="text-3xl font-semibold leading-tight">Manage linked accounts</h1>
                     </div>
-                    <button
+                    <NativeButton
                         onClick={fetchConnections}
                         className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/10 transition"
                     >
                         <FaRotateRight className="h-4 w-4" />
                         Refresh
-                    </button>
+                    </NativeButton>
                 </div>
 
                 {error && (
-                    <div className="box-primary p-4 mb-4 text-red-400 border border-red-400/40">
+                    <Surface className="box-primary p-4 mb-4 text-red-400 border border-red-400/40">
                         {error}
-                    </div>
+                    </Surface>
                 )}
 
                 {loading ? (
                     <div className="grid gap-4 md:grid-cols-2">
                         {[0, 1].map((i) => (
-                            <div key={i} className="box-primary p-5 animate-pulse space-y-3">
+                            <Surface key={i} className="box-primary p-5 animate-pulse space-y-3">
                                 <div className="h-5 w-32 bg-white/10 rounded" />
                                 <div className="h-10 w-24 bg-white/10 rounded" />
                                 <div className="h-10 w-full bg-white/10 rounded" />
-                            </div>
+                            </Surface>
                         ))}
                     </div>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2">
                         {/* Telegram */}
-                        <div className="box-primary p-5 flex flex-col gap-4">
+                        <Surface className="box-primary p-5 flex flex-col gap-4">
                             <div className="flex items-center gap-3">
                                 <span className="rounded-full bg-sky-500/20 p-2 text-sky-300">
                                     <FaTelegramPlane className="h-5 w-5" />
@@ -185,34 +190,34 @@ export default function ConnectionsClient() {
                                         </p>
                                         <p className="text-sm text-white/60">ID: {telegram.telegram_id}</p>
                                     </div>
-                                    <button
+                                    <NativeDeleteButton
                                         onClick={revokeTelegram}
                                         disabled={isRevoking.telegram}
                                         className="inline-flex items-center gap-2 rounded-md border border-red-400/40 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-400/10 transition disabled:opacity-60"
                                     >
-                                        <FaRegTrashAlt className="h-4 w-4" />
+
                                         <span className={"hidden sm:block"}>{isRevoking.telegram ? "Revoking..." : "Revoke"}</span>
-                                    </button>
+                                    </NativeDeleteButton>
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-3">
                                     <p className="text-white/70 text-sm">
                                         You are not connected to Telegram yet. Start the bot to link your account.
                                     </p>
-                                    <button
+                                    <NativeButton variant="primary"
                                         onClick={connectTelegram}
                                         disabled={isConnectingTelegram}
                                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-500/80 px-4 py-3 text-sm font-semibold hover:bg-sky-500 transition disabled:opacity-60"
                                     >
                                         <FaLink className="h-4 w-4" />
                                         {isConnectingTelegram ? "Opening..." : "Connect via Telegram"}
-                                    </button>
+                                    </NativeButton>
                                 </div>
                             )}
-                        </div>
+                        </Surface>
 
                         {/* Discord */}
-                        <div className="box-primary p-5 flex flex-col gap-4">
+                        <Surface className="box-primary p-5 flex flex-col gap-4">
                             <div className="flex items-center gap-3">
                                 <span className="rounded-full bg-indigo-500/20 p-2 text-indigo-300">
                                     <FaDiscord className="h-5 w-5" />
@@ -242,14 +247,14 @@ export default function ConnectionsClient() {
                                         </p>
                                         <p className="text-sm text-white/60">ID: {discord.discordId}</p>
                                     </div>
-                                    <button
+                                    <NativeDeleteButton
                                         onClick={revokeDiscord}
                                         disabled={isRevoking.discord}
                                         className="inline-flex items-center gap-2 rounded-md border border-red-400/40 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-400/10 transition disabled:opacity-60"
                                     >
-                                        <FaRegTrashAlt className="h-4 w-4" />
+
                                         <span className={"hidden sm:block"}>{isRevoking.discord ? "Revoking..." : "Revoke"}</span>
-                                    </button>
+                                    </NativeDeleteButton>
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-3">
@@ -265,7 +270,7 @@ export default function ConnectionsClient() {
                                     </Link>
                                 </div>
                             )}
-                        </div>
+                        </Surface>
                     </div>
                 )}
             </div>

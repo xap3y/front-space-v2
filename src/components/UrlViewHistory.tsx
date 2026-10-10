@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+
+import Pagination from "@/components/ui/Pagination";
 
 import {useEffect, useState} from "react";
 import {FaChevronLeft, FaChevronRight, FaEye} from "react-icons/fa6";
@@ -81,7 +85,7 @@ export default function UrlViewHistory({urlId, admin = false, defaultOpen = fals
                 </HoverDiv>
             )}
             {open && (
-                <div className="rounded-md border border-zinc-800 bg-black/20 p-2">
+                <Surface className="rounded-md border border-zinc-800 bg-black/20 p-2">
                     {error ? (
                         <p role="alert" className="py-2 text-red-400">{error}</p>
                     ) : loading ? (
@@ -116,28 +120,14 @@ export default function UrlViewHistory({urlId, admin = false, defaultOpen = fals
                             ))}
                         </div>
                     )}
-                    <div className="mt-2 flex items-center justify-between border-t border-zinc-800 pt-2 text-[10px] text-zinc-500">
-                        <span>{total} visits · {page + 1} / {pages}</span>
-                        <div className="flex gap-1">
-                            <HoverDiv
-                                type="INFO"
-                                icon={<FaChevronLeft />}
-                                disabled={loading || page === 0}
-                                onClick={() => setPage(value => value - 1)}
-                                aria-label="Previous visits"
-                                className="h-6 w-6"
-                            />
-                            <HoverDiv
-                                type="INFO"
-                                icon={<FaChevronRight />}
-                                disabled={loading || page + 1 >= pages}
-                                onClick={() => setPage(value => value + 1)}
-                                aria-label="Next visits"
-                                className="h-6 w-6"
-                            />
-                        </div>
-                    </div>
-                </div>
+                    <p className="mt-2 text-[10px] text-zinc-500">{total} visits</p>
+                    <Pagination
+                        page={page + 1}
+                        pages={pages}
+                        disabled={loading}
+                        onChange={(nextPage) => setPage(nextPage - 1)}
+                    />
+                </Surface>
             )}
         </div>
     );

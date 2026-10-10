@@ -1,4 +1,8 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import {useState} from "react";
 import {useRouter} from 'next/navigation'
@@ -52,7 +56,7 @@ export default function ImageFinder() {
             {!loading && (
                 <main className="flex overflow-y-hidden mt-40 lg:mt-0 lg:items-center justify-center lg:min-h-screen">
                     <div className="overflow-y-hidden max-w-lg w-full mx-3">
-                        <div
+                        <Surface
                             className="box-primary shadow-xl overflow-hidden"
                         >
                             <div className="p-4">
@@ -73,18 +77,18 @@ export default function ImageFinder() {
                                     />
                                 </div>
                                 <div className="mb-2 flex flex-col items-center gap-4">
-                                    <button
+                                    <NativeButton
                                         type="submit"
                                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-telegram hover:bg-telegram-brightest hover:text-primary focus:outline-none transition-all duration-200 transform"
                                         onClick={findImage}
                                     >
                                         {lang.pages.image_finder.button_text}
-                                    </button>
+                                    </NativeButton>
 
                                     <a href={"/a/image"} className={"text-telegram opacity-70 cursor-pointer font-medium hover:underline text-sm"}>Portable image uploader</a>
                                 </div>
                             </form>
-                        </div>
+                        </Surface>
                     </div>
                 </main>
             )}

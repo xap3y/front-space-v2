@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -125,7 +129,7 @@ export default function UrlShortener() {
     return (
         <>
             <main className="w-full flex flex-col justify-center items-center">
-                <div className="mt-28 xl:mt-40 transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]">
+                <Surface className="mt-28 xl:mt-40 transition-all duration-500 ease-in-out p-6 box-primary shadow-lg w-full max-w-md xl:min-w-[550px]">
                     <h1 className="text-2xl font-bold text-center mb-8">URL Shortener</h1>
 
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -184,7 +188,7 @@ export default function UrlShortener() {
                         )}
 
                         {/* Submit button */}
-                        <button
+                        <NativeButton variant="primary"
                             className="group/button relative inline-flex items-center justify-center overflow-hidden rounded-md bg-blue-500 px-6 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:bg-blue-600 border-2 border-blue-600 disabled:opacity-60"
                             disabled={loading || !!shortUrl}
                             type="submit"
@@ -193,12 +197,12 @@ export default function UrlShortener() {
                             <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
                                 <div className="relative h-full w-10 bg-white/20"></div>
                             </div>
-                        </button>
+                        </NativeButton>
                     </form>
-                </div>
+                </Surface>
 
                 {(!loading && shortUrl && shortUrlDto) && (
-                    <div className="mt-4 box-primary border-2 rounded-xl border-blue-500 p-4 flex flex-col items-center">
+                    <Surface className="mt-4 box-primary border-2 rounded-xl border-blue-500 p-4 flex flex-col items-center">
                         <h1 className="mb-4 text-xl font-extrabold">Shortened URL</h1>
 
                         <div className={"flex flex-col gap-2 p-1"}>
@@ -245,7 +249,7 @@ export default function UrlShortener() {
                             <span className="text-lg">Create Another</span>
                         </HoverDiv>
 
-                    </div>
+                    </Surface>
                 )}
             </main>
         </>

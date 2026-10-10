@@ -1,4 +1,6 @@
 "use client";
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import React, { useEffect, useState } from "react";
 import MainStringInput from "@/components/MainStringInput";
@@ -146,9 +148,9 @@ export default function BlackJackMultiplayer() {
                         />
                     </div>
 
-                    <button onClick={handleCreateLobby} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors">
+                    <NativeButton variant="save" onClick={handleCreateLobby} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors">
                         Create New Lobby
-                    </button>
+                    </NativeButton>
 
                     <div className="relative flex py-2 items-center">
                         <div className="flex-grow border-t border-neutral-800"></div>
@@ -166,9 +168,9 @@ export default function BlackJackMultiplayer() {
                             value={code}
                             onChange={setCode}
                         />
-                        <button onClick={handleJoinLobby} className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white font-bold px-6 rounded-lg transition-colors">
+                        <NativeButton onClick={handleJoinLobby} className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-white font-bold px-6 rounded-lg transition-colors">
                             Join
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
             </div>
@@ -187,13 +189,13 @@ export default function BlackJackMultiplayer() {
                         <div className="bg-neutral-950 border border-neutral-700 px-8 py-4 rounded-xl text-4xl font-mono text-emerald-400 font-black tracking-widest">
                             {code}
                         </div>
-                        <button
+                        <NativeButton
                             onClick={copyCode}
                             className="bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 p-4 rounded-xl transition-colors flex items-center justify-center"
                             title="Copy Code"
                         >
                             {copied ? "✓" : "📋"}
-                        </button>
+                        </NativeButton>
                     </div>
 
                     <div className="bg-neutral-950 rounded-xl p-4 border border-neutral-800 mb-8">
@@ -209,12 +211,12 @@ export default function BlackJackMultiplayer() {
                     </div>
 
                     {gameState?.isHost ? (
-                        <button
+                        <NativeButton variant="save"
                             onClick={() => sendAction("START_GAME")}
                             className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-lg font-bold py-4 rounded-xl transition-colors shadow-lg shadow-emerald-500/20"
                         >
                             Start Game
-                        </button>
+                        </NativeButton>
                     ) : (
                         <div className="text-center text-neutral-500 text-sm animate-pulse">
                             Waiting for host to start the game...
@@ -285,11 +287,11 @@ export default function BlackJackMultiplayer() {
                     <div className="bg-neutral-950/80 p-4 border-t border-neutral-800">
                         <div className="text-sm text-center mb-3 text-emerald-400 font-mono tracking-widest uppercase">{gameState.message}</div>
                         <div className="flex gap-2 justify-center">
-                            <button onClick={() => sendAction("HIT")} disabled={!isActive} className="px-6 py-2 bg-emerald-600 rounded font-bold disabled:opacity-50">Hit</button>
-                            <button onClick={() => sendAction("STAND")} disabled={!isActive} className="px-6 py-2 bg-blue-600 rounded font-bold disabled:opacity-50">Stand</button>
-                            <button onClick={() => sendAction("DOUBLE")} disabled={!isActive} className="px-6 py-2 bg-amber-600 rounded font-bold text-black disabled:opacity-50">Double</button>
+                            <NativeButton variant="save" onClick={() => sendAction("HIT")} disabled={!isActive} className="px-6 py-2 bg-emerald-600 rounded font-bold disabled:opacity-50">Hit</NativeButton>
+                            <NativeButton variant="primary" onClick={() => sendAction("STAND")} disabled={!isActive} className="px-6 py-2 bg-blue-600 rounded font-bold disabled:opacity-50">Stand</NativeButton>
+                            <NativeButton variant="warning" onClick={() => sendAction("DOUBLE")} disabled={!isActive} className="px-6 py-2 bg-amber-600 rounded font-bold text-black disabled:opacity-50">Double</NativeButton>
                             {gameState.phase === "roundEnd" && (
-                                <button onClick={() => sendAction("READY")} className="px-6 py-2 bg-purple-600 rounded font-bold ml-4">Next Round</button>
+                                <NativeButton onClick={() => sendAction("READY")} className="px-6 py-2 bg-purple-600 rounded font-bold ml-4">Next Round</NativeButton>
                             )}
                         </div>
                     </div>
@@ -303,19 +305,19 @@ export default function BlackJackMultiplayer() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-4">
-                        <button onClick={() => setLocalBet(Math.max(10, localBet - 10))} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">- $10</button>
-                        <button onClick={() => setLocalBet(localBet + 10)} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">+ $10</button>
-                        <button onClick={() => setLocalBet(Math.max(10, localBet - 50))} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">- $50</button>
-                        <button onClick={() => setLocalBet(localBet + 50)} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">+ $50</button>
+                        <NativeButton onClick={() => setLocalBet(Math.max(10, localBet - 10))} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">- $10</NativeButton>
+                        <NativeButton onClick={() => setLocalBet(localBet + 10)} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">+ $10</NativeButton>
+                        <NativeButton onClick={() => setLocalBet(Math.max(10, localBet - 50))} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">- $50</NativeButton>
+                        <NativeButton onClick={() => setLocalBet(localBet + 50)} disabled={gameState.phase !== "betting"} className="bg-neutral-800 py-2 rounded text-sm disabled:opacity-50">+ $50</NativeButton>
                     </div>
 
-                    <button
+                    <NativeButton variant="warning"
                         onClick={() => sendAction("BET", { amount: localBet })}
                         disabled={gameState.phase !== "betting"}
                         className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-neutral-800 disabled:text-neutral-500 text-black py-4 rounded-xl font-bold text-lg transition-colors shadow-lg"
                     >
                         SUBMIT BET
-                    </button>
+                    </NativeButton>
                 </div>
             </div>
         </div>

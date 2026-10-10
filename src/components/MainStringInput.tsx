@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, forwardRef } from "react";
+import styles from "./ui/ui.module.css";
 
 type InputTypes = "text" | "email" | "password" | "search" | "url" | "tel" | "datetime-local" | "number" | "date" | "time";
 
@@ -109,16 +110,18 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
                     isFocused ? "in-shadow border-zinc-500" : "hover:border-zinc-700 border-primary0",
                     // disabled visuals
                     disabled && "opacity-50 cursor-not-allowed",
-                    className
+                    className,
+                    styles.textInput
                 )}
             >
                 {multiline ? <textarea
+                    {...(rest as unknown as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
                     ref={ref as React.Ref<HTMLTextAreaElement>}
                     placeholder={placeholder}
                     disabled={disabled}
                     required={required}
                     rows={rows}
-                    value={value}
+                    {...(isControlled ? {value} : {defaultValue})}
                     onChange={event => onChange?.(event.target.value, event as unknown as React.ChangeEvent<HTMLInputElement>)}
                     onFocus={event => { setIsFocused(true); onFocus?.(event as unknown as React.FocusEvent<HTMLInputElement>); }}
                     onBlur={event => { setIsFocused(false); onBlur?.(event as unknown as React.FocusEvent<HTMLInputElement>); }}

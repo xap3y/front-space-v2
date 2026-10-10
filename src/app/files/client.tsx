@@ -1,4 +1,9 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import { useEffect, useState, useRef } from "react";
 import { useUser } from "@/hooks/useUser";
@@ -643,7 +648,7 @@ export function FilesPageClient() {
     if (!uploading && allCompleted && uploadedFiles.length > 0) {
         return (
             <div className="flex min-h-screen items-center justify-center px-4 py-8">
-                <div className="box-primary w-full max-w-xl overflow-hidden shadow-2xl">
+                <Surface className="box-primary w-full max-w-xl overflow-hidden shadow-2xl">
                     <div className="space-y-5 p-5 sm:p-6">
                         <div className="flex items-start gap-3 border-b border-zinc-800 pb-5">
                             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded bg-emerald-500/15">
@@ -742,12 +747,12 @@ export function FilesPageClient() {
                             Upload More
                         </HoverDiv>
                     </div>
-                </div>
+                </Surface>
 
                 {/* Registration Error Modal */}
                 {registrationError && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                        <div
+                        <Surface
                             ref={errorModalRef}
                             className="box-primary shadow-2xl w-full max-w-sm rounded-lg"
                         >
@@ -774,15 +779,15 @@ export function FilesPageClient() {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button
+                                    <NativeButton variant="primary"
                                         onClick={() => setRegistrationError(null)}
                                         className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition"
                                     >
                                         OK
-                                    </button>
+                                    </NativeButton>
                                 </div>
                             </div>
-                        </div>
+                        </Surface>
                     </div>
                 )}
             </div>
@@ -792,7 +797,7 @@ export function FilesPageClient() {
     return (
         <>
             <div className="flex items-center justify-center min-h-screen px-4 py-8">
-                <div className="box-primary shadow-2xl w-full max-w-md">
+                <Surface className="box-primary shadow-2xl w-full max-w-md">
                     <div className="space-y-4 p-6">
                         <h1 className="text-2xl md:text-3xl font-bold text-center text-white">
                             {appendPackId ? "Add files to pack" : "File Uploader"}
@@ -878,7 +883,7 @@ export function FilesPageClient() {
                                 </div>
 
                                 {uploadItems.map((item) => (
-                                    <div
+                                    <Surface
                                         key={item.id}
                                         className={`${
                                             isMultiple
@@ -917,46 +922,46 @@ export function FilesPageClient() {
 
                                             {!uploading && item.status === "pending" && (
                                                 <div className="flex gap-1">
-                                                    <button
+                                                    <NativeButton variant="primary"
                                                         onClick={() => handleEditFile(item.id)}
                                                         className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
                                                     >
                                                         <FaPen className="w-3 h-3 text-blue-400" />
-                                                    </button>
-                                                    <button
+                                                    </NativeButton>
+                                                    <NativeButton
                                                         onClick={() => handleRemoveFile(item.id)}
                                                         className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition"
                                                     >
                                                         <MdOutlineDelete className="w-4 h-4 text-red-500" />
-                                                    </button>
+                                                    </NativeButton>
                                                 </div>
                                             )}
 
                                             {uploading && item.status === "uploading" && (
-                                                <button
+                                                <NativeButton
                                                     onClick={() => handleCancelItemUpload(item.id)}
                                                     className="p-1 hover:bg-red-500 hover:bg-opacity-20 rounded transition"
                                                 >
                                                     <FaTimes className="w-4 h-4 text-red-500" />
-                                                </button>
+                                                </NativeButton>
                                             )}
 
                                             {uploading && item.status === "pending" && (
-                                                <button
+                                                <NativeButton
                                                     onClick={() => handleCancelQueuedItem(item.id)}
                                                     className="p-1 hover:bg-orange-500 hover:bg-opacity-20 rounded transition"
                                                 >
                                                     <FaTimes className="w-4 h-4 text-orange-400" />
-                                                </button>
+                                                </NativeButton>
                                             )}
 
                                             {item.status === "completed" && item.uploadedUrl && (
-                                                <button
+                                                <NativeButton variant="primary"
                                                     onClick={() => copyToClipboard(item.uploadedUrl!)}
                                                     className="p-1 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
                                                 >
                                                     <FaCopy className="w-4 h-4 text-blue-400" />
-                                                </button>
+                                                </NativeButton>
                                             )}
                                         </div>
 
@@ -982,7 +987,7 @@ export function FilesPageClient() {
                                         {item.status === "error" && (
                                             <p className="text-red-400 text-xs mt-1">{item.error}</p>
                                         )}
-                                    </div>
+                                    </Surface>
                                 ))}
 
                                 {canAddMore && !uploading && (
@@ -995,13 +1000,13 @@ export function FilesPageClient() {
                                         }`}
                                     >
                                         <input {...getAddMoreInputProps()} />
-                                        <button
+                                        <NativeButton
                                             onClick={handleAddMore}
                                             className="w-full text-gray-400 hover:text-gray-300 transition flex items-center justify-center gap-2 text-sm"
                                         >
                                             <FaPlus size={14} />
                                             Add More Files ({existingPackUsage.files + activeItems.length}/{filePackLimits.maxFiles ?? "∞"})
-                                        </button>
+                                        </NativeButton>
                                     </div>
                                 )}
                             </div>
@@ -1024,7 +1029,7 @@ export function FilesPageClient() {
                                         </div>
 
                                         {/* Toggle Switch */}
-                                        <button
+                                        <NativeButton data-active={isPasswordProtected}
                                             onClick={() => {
                                                 setIsPasswordProtected(!isPasswordProtected);
                                                 if (isPasswordProtected) {
@@ -1045,7 +1050,7 @@ export function FilesPageClient() {
                                                         : "translate-x-1"
                                                 }`}
                                             />
-                                        </button>
+                                        </NativeButton>
                                     </div>
 
                                     {/* Password Input - Animated */}
@@ -1070,7 +1075,7 @@ export function FilesPageClient() {
                                                 }}
                                                 className={`xl:text-base text-xs w-full pr-10 ${isPassFocused && !showPassword ? "text-dots" : ""}`}
                                             />
-                                            <button
+                                            <NativeButton
                                                 type="button"
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-700 hover:bg-opacity-30 rounded transition"
@@ -1081,7 +1086,7 @@ export function FilesPageClient() {
                                                 ) : (
                                                     <FaEye className="w-3.5 h-3.5 text-gray-400" />
                                                 )}
-                                            </button>
+                                            </NativeButton>
                                         </div>
                                     </div>
                                 </div>
@@ -1102,7 +1107,7 @@ export function FilesPageClient() {
                                                 : "bg-gray-700"
                                         } ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                                     >
-                                        <input
+                                        <SelectionInput
                                             type="checkbox"
                                             role="switch"
                                             aria-label="Upload anonymously"
@@ -1121,7 +1126,7 @@ export function FilesPageClient() {
                                     </label>
                                 </div></>}
 
-                                <button
+                                <NativeButton variant="primary"
                                     onClick={handleUpload}
                                     disabled={uploading}
                                     className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:opacity-50 text-white font-semibold rounded transition flex items-center justify-center gap-2"
@@ -1137,30 +1142,30 @@ export function FilesPageClient() {
                                             {appendPackId ? "Add" : "Upload"} {activeItems.length > 1 ? `${activeItems.length} Files` : "File"}
                                         </>
                                     )}
-                                </button>
+                                </NativeButton>
 
                                 {!uploading && (
-                                    <button
+                                    <NativeDeleteButton
                                         onClick={() => {
                                             setUploadItems([]);
                                             setFileName("");
                                         }}
                                         className="w-full py-3 bg-zinc-900 hover:bg-zinc-900/60 text-gray-200 font-semibold rounded transition flex items-center justify-center gap-2"
                                     >
-                                        <FaTrash className="w-4 h-4" />
+
                                         Clear
-                                    </button>
+                                    </NativeDeleteButton>
                                 )}
                             </>
                         )}
                     </div>
-                </div>
+                </Surface>
             </div>
 
             {/* Edit Modal */}
             {editingId && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div
+                    <Surface
                         ref={modalRef}
                         className="box-primary shadow-2xl w-full max-w-sm rounded-lg"
                     >
@@ -1179,13 +1184,13 @@ export function FilesPageClient() {
                             </div>
 
                             <div className="flex gap-3">
-                                <button
+                                <NativeButton variant="primary"
                                     onClick={handleSaveEdit}
                                     className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded transition"
                                 >
                                     Save
-                                </button>
-                                <button
+                                </NativeButton>
+                                <NativeButton
                                     onClick={() => {
                                         setEditingId(null);
                                         setEditingName("");
@@ -1193,10 +1198,10 @@ export function FilesPageClient() {
                                     className="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold rounded transition"
                                 >
                                     Cancel
-                                </button>
+                                </NativeButton>
                             </div>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             )}
 

@@ -1,4 +1,6 @@
 "use client";
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css'
@@ -27,12 +29,12 @@ export function DatePickerComp({onDateChangeAction}: Props) {
     return (
         <>
             <div className="relative inline-block">
-                <button
+                <NativeButton
                     className="lg:text-xl text-lg p-2 border-2 border-gray-400 rounded-lg flex items-center gap-2 font-bold"
                     onClick={() => setShowPicker(!showPicker)}
                 >
                     <FaCalendarAlt /> Date
-                </button>
+                </NativeButton>
 
                 {showPicker && (
                     <div className="absolute top-full left-0 mt-2 bg-secondary border border-gray-300 rounded-lg p-4 shadow-lg z-50">
@@ -45,12 +47,12 @@ export function DatePickerComp({onDateChangeAction}: Props) {
                                 <span className="font-bold ">To:</span>
                                 <DatePicker className={"text-black"} selected={toDate} onChange={(date: Date | null) => date && setToDate(date)} />
                             </div>
-                            <button
+                            <NativeButton variant="primary"
                                 className="mt-2 bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
                                 onClick={handleApply}
                             >
                                 Apply
-                            </button>
+                            </NativeButton>
                         </div>
                     </div>
                 )}

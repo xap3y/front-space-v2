@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import {useCallback, useEffect, useState} from "react";
 import MediaInput from "@/components/tools/MediaInput";
@@ -236,7 +238,7 @@ export default function ImageConverterClient() {
                 />
                 {!file && <HoverDiv type="INFO" icon={<FaImages/>} onClick={openUploads} className="w-full py-2.5 text-xs font-semibold">Select from uploads</HoverDiv>}
 
-                {file && <div className="box-primary grid overflow-hidden rounded-xl sm:grid-cols-[minmax(0,1fr)_auto]">
+                {file && <Surface className="box-primary grid overflow-hidden rounded-xl sm:grid-cols-[minmax(0,1fr)_auto]">
                     <div className="flex min-h-44 items-center justify-center border-b border-zinc-800 bg-black/30 p-3 sm:border-b-0 sm:border-r">
                         {inputPreviewUrl && !previewFailed
                             ? <img src={inputPreviewUrl} alt={`Preview of ${file.name}`} onError={() => setPreviewFailed(true)} className="max-h-64 max-w-full rounded-lg object-contain"/>
@@ -247,7 +249,7 @@ export default function ImageConverterClient() {
                         <div className="flex items-center gap-2 font-mono"><span className="uppercase text-zinc-400">{extensionOf(file.name)}</span><FaArrowRight className="text-zinc-600"/><span className="uppercase text-emerald-300">{format}</span></div>
                         <p className="text-[10px] text-zinc-600">{formatBytes(file.size)}</p>
                     </div>
-                </div>}
+                </Surface>}
 
                 <ToolResult processing={processing} progress={progress} resultUrl={resultUrl} resultFilename={resultFilename} resultSize={resultSize} error={error} onClose={clearResult} onUpload={GALLERY_OUTPUTS.has(format) ? saveToSpace : undefined} uploading={uploading} uploadProgress={uploadProgress} uploadedUrl={uploadedUrl}/>
             </div>
@@ -280,9 +282,9 @@ export default function ImageConverterClient() {
                     </div>}
                     {filenameMode === "preserve" && file && <p className="mt-2 truncate font-mono text-[10px] text-zinc-500">{baseNameOf(file.name)}.{format}</p>}
                 </div>
-                <div className="rounded-lg border border-zinc-800 bg-black/20 p-3 text-[10px] leading-5 text-zinc-500">
+                <Surface className="rounded-lg border border-zinc-800 bg-black/20 p-3 text-[10px] leading-5 text-zinc-500">
                     PNG, JPG, JPEG, WebP, TIFF, GIF, BMP, AVIF, ICO, PSD, SVG, HEIC, HEIF, JXL, APNG, EPS and PDF are accepted.
-                </div>
+                </Surface>
                 <HoverDiv type="SAVE" icon={processing ? <FaRotate className="animate-spin"/> : <FaCheck/>} onClick={convert} disabled={!file || processing || !customNameValid} className="w-full py-3 text-sm font-semibold">
                     {processing ? "Converting…" : `Convert to ${format.toUpperCase()}`}
                 </HoverDiv>

@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import {useApiStatusStore} from "@/lib/stores/apiStatusStore";
 import {useEffect, useState} from "react";
@@ -149,7 +153,7 @@ export default function TranscriptsLoginPage() {
             {/*<ErrorBanner message="API is down!" />*/}
 
             <div className="max-w-lg w-full mx-3">
-                <div
+                <Surface
                     className="box-primary shadow-xl overflow-hidden"
                 >
                     <div className="p-3 lg:p-8">
@@ -262,13 +266,13 @@ export default function TranscriptsLoginPage() {
                             </div>
 
                             <div>
-                                <button
+                                <NativeButton
                                     className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white transform duration-300 transition-all hover:to-blue-600 bg-telegram2 hover:bg-telegram-brighter focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                     type="submit"
                                     disabled={!username || !password || !caToken || turnstileLoading || loading || !isNameValid || !isPassValid}
                                 >
                                     {lang.pages.login.button_text}
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
                     </div>
@@ -280,7 +284,7 @@ export default function TranscriptsLoginPage() {
                             {lang.pages.login.forgot_password}
                         </button>
                     </div>*/}
-                </div>
+                </Surface>
             </div>
         </main>
     )

@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useState } from "react";
 import { setCookie } from "cookies-next/client";
@@ -272,8 +276,8 @@ export default function LoginPage() {
                         <h2 className="mt-4 text-center text-xl font-semibold">Two-factor authentication</h2>
                         <p className="mt-1 text-center text-sm text-zinc-500">Enter the 6-digit code from your authenticator app or one of your backup codes.</p>
                         <MainStringInput autoFocus value={twoFactorCode} onChange={(value) => setTwoFactorCode(value.toUpperCase().replace(/\s/g, "").slice(0, 11))} placeholder="000000 or backup code" autoComplete="one-time-code" className="mt-5 w-full rounded-lg border-zinc-700 bg-black/30" inputClassName="px-4 py-3 text-center font-mono text-lg tracking-wider" />
-                        <button type="submit" disabled={!twoFactorCode.trim() || verifyingTwoFactor} className="mt-3 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold hover:bg-blue-500 disabled:opacity-40">{verifyingTwoFactor ? "Verifying…" : "Verify and log in"}</button>
-                        <button type="button" onClick={() => {setTwoFactorChallenge(""); setTwoFactorCode(""); setCaToken(""); try { turnstile.reset(); } catch {}}} className="mt-3 w-full py-2 text-xs text-zinc-500 hover:text-zinc-300">Back to login</button>
+                        <NativeButton variant="primary" type="submit" disabled={!twoFactorCode.trim() || verifyingTwoFactor} className="mt-3 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold hover:bg-blue-500 disabled:opacity-40">{verifyingTwoFactor ? "Verifying…" : "Verify and log in"}</NativeButton>
+                        <NativeButton type="button" onClick={() => {setTwoFactorChallenge(""); setTwoFactorCode(""); setCaToken(""); try { turnstile.reset(); } catch {}}} className="mt-3 w-full py-2 text-xs text-zinc-500 hover:text-zinc-300">Back to login</NativeButton>
                     </form>
                 </div>
             )}
@@ -281,7 +285,7 @@ export default function LoginPage() {
             {/*<ErrorBanner message="API is down!" />*/}
 
             <div className="max-w-lg w-full mx-3">
-                <div
+                <Surface
                     className="box-primary shadow-xl overflow-hidden"
                 >
                     <div className="p-3 lg:p-8">
@@ -292,7 +296,7 @@ export default function LoginPage() {
 
                         {/*Discord login*/}
                         <div className={"w-full flex flex-col items-center justify-center mb-3 mt-4 space-y-2"}>
-                            <button
+                            <NativeButton
                                 className="w-64 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#5865F2]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                                 onClick={() => {
                                     const loginUrl = process.env.NEXT_PUBLIC_DISCORD_LOGIN_URL
@@ -305,7 +309,7 @@ export default function LoginPage() {
                             >
                                 <FaDiscord size={18} />
                                 Continue with Discord
-                            </button>
+                            </NativeButton>
 
                             {/*<button
                                 className="w-64 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#0088cc] hover:bg-[#006a9e] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#0088cc]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
@@ -428,14 +432,14 @@ export default function LoginPage() {
                             </div>
 
                             <div>
-                                <button
+                                <NativeButton
                                     className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-white text-black font-semibold text-sm transition-all duration-200 hover:bg-gray-100 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                                     type="submit"
                                     disabled={!email || (!password || password.length < 5) || !caToken || turnstileLoading || loading || !isValidEmail(email)}
                                 >
                                     {lang.pages.login.button_text}
                                     <FaArrowRight size={14} />
-                                </button>
+                                </NativeButton>
                             </div>
                         </form>
                     </div>
@@ -447,7 +451,7 @@ export default function LoginPage() {
                             {lang.pages.login.forgot_password}
                         </button>
                     </div>*/}
-                </div>
+                </Surface>
             </div>
         </main>
     )

@@ -1,4 +1,11 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
+
+
+import Pagination from "@/components/ui/Pagination";
+import ResourceList from "@/components/ui/ResourceList";
 
 import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@/hooks/useUser';
@@ -139,7 +146,7 @@ export default function UrlsPage() {
                     </div>
 
                     {/* Card */}
-                    <div className="box-primary overflow-hidden">
+                    <Surface className="box-primary overflow-hidden">
                         <ul className="divide-y divide-white/10">
                             {Array.from({ length: 12 }).map((_, i) => (
                                 <li key={i} className="px-2 py-1.5 group">
@@ -158,7 +165,7 @@ export default function UrlsPage() {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </Surface>
                 </div>
             </section>
         );
@@ -175,16 +182,16 @@ export default function UrlsPage() {
                     </div>
                     <div className="flex gap-2">
                         <a href="/a/url">
-                            <button
+                            <NativeButton
                                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                                 disabled={loading}
                                 title="New URL"
                             >
                                 <FaPlus className="h-4 w-4" />
                                 <span className="hidden sm:inline">New</span>
-                            </button>
+                            </NativeButton>
                         </a>
-                        <button
+                        <NativeButton
                             onClick={fetchUrls}
                             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-sm font-medium text-gray-200"
                             disabled={loading}
@@ -192,12 +199,12 @@ export default function UrlsPage() {
                         >
                             <FaRotateRight className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                             <span className="hidden sm:inline">Refresh</span>
-                        </button>
+                        </NativeButton>
                     </div>
                 </div>
 
                 {/* Card */}
-                <div className="box-primary overflow-hidden">
+                <ResourceList className="overflow-hidden">
                     {/* Ghost Loading */}
                     {loading && (
                         <ul className="divide-y divide-white/10">
@@ -249,34 +256,14 @@ export default function UrlsPage() {
                             </ul>
 
                             {/* Pagination Footer */}
-                            {totalPages > 1 && (
-                                <div className="flex items-center justify-between px-3 py-3 border-t border-white/10 text-sm text-gray-300">
-                                    <div className="text-xs text-gray-400">
-                                        Page <span className="text-white font-medium">{currentPage}</span> of <span className="text-white font-medium">{totalPages}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                            disabled={currentPage <= 1}
-                                            className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                                        >
-                                            <FaChevronLeft className="h-3 w-3" />
-                                            <span>Prev</span>
-                                        </button>
-                                        <button
-                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                            disabled={currentPage >= totalPages}
-                                            className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs text-gray-200 flex items-center gap-1.5"
-                                        >
-                                            <span>Next</span>
-                                            <FaChevronRight className="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                            <Pagination
+                            page={currentPage}
+                            pages={totalPages}
+                            onChange={setCurrentPage}
+                        />
                         </>
                     )}
-                </div>
+                </ResourceList>
             </div>
         </section>
     );
@@ -325,20 +312,20 @@ function UrlRow({
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
-                    <button
+                    <NativeButton
                         onClick={onCopy}
                         className="p-1.5 rounded-md border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 transition-all duration-200 text-gray-200"
                         title="Copy"
                     >
                         <FaRegCopy className="h-3 w-3" />
-                    </button>
-                    <button
+                    </NativeButton>
+                    <NativeDeleteButton
                         onClick={onDelete}
                         className="p-1.5 rounded-md border-2 border-red-500/40 bg-red-600/10 hover:bg-red-600/20 text-red-400 transition-all duration-200"
                         title="Delete"
                     >
-                        <FaTrash className="h-3 w-3" />
-                    </button>
+
+                    </NativeDeleteButton>
                 </div>
             </div>
 

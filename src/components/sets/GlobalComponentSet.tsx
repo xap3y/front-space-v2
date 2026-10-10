@@ -1,3 +1,5 @@
+
+import { SelectionInput } from "@/components/ui/SelectionInput";
 export function AnimatedCheckbox({ checked, onChange, label, id }: {
     checked: boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -7,7 +9,7 @@ export function AnimatedCheckbox({ checked, onChange, label, id }: {
     return (
         <label htmlFor={id} className="flex items-center gap-2 cursor-pointer select-none group outline-none">
             <span className="relative">
-                <input
+                <SelectionInput
                     id={id}
                     type="checkbox"
                     checked={checked}

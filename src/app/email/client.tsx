@@ -1,4 +1,8 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 // History is kept in sync via both direct refreshHistory() calls and
 // the window 'storage' event (cross-tab & same-tab after patching localStorage).
@@ -200,7 +204,7 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
 
     // ── render ─────────────────────────────────────────────────────────────────
     return (
-        <div
+        <Surface
             className="w-full xl:h-auto bg-card box-primary shadow-xl flex flex-col gap-6"
             style={{ maxWidth: MAX_WIDTH }}
         >
@@ -245,14 +249,14 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
                                     >
                                         {tempMail.email}
                                     </span>
-                                    <button
+                                    <NativeButton
                                         onClick={handleCopy}
                                         disabled={isRefreshing || isDeleting}
                                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                                         title="Copy email address"
                                     >
                                         <MdContentCopy className="w-3.5 h-3.5" />
-                                    </button>
+                                    </NativeButton>
                                 </div>
 
                                 {/* Expiry row */}
@@ -284,7 +288,7 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
 
                             {/* Action buttons */}
                             <div className="flex gap-2 flex-wrap xl:justify-end">
-                                <button
+                                <NativeButton
                                     onClick={handleRefresh}
                                     disabled={isRefreshing || isDeleting || isExpired}
                                     title={isExpired ? "Email is expired, create new one!" : "Reconnect to receive new emails"}
@@ -294,20 +298,20 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
                                 >
                                     <MdRefresh className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
                                     Reconnect
-                                </button>
+                                </NativeButton>
 
                                 {/* New address: logged-in users use handleReset; guests call parent to show Turnstile again */}
                                 {!isPublic ? (
-                                    <button
+                                    <NativeButton
                                         disabled={isRefreshing || isDeleting}
                                         onClick={handleReset}
                                         className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium transition-all duration-200 text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <MdAdd className={`w-4 h-4 ${isDeleting ? "animate-spin" : ""}`} />
                                         New Address
-                                    </button>
+                                    </NativeButton>
                                 ) : onRequestNewSession && (
-                                    <button
+                                    <NativeButton
                                         onClick={() => {
                                             // Archive current mail to history before going back to creation form
                                             if (tempMail) archiveToHistory(tempMail);
@@ -317,7 +321,7 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
                                     >
                                         <MdAdd className="w-4 h-4" />
                                         New Address
-                                    </button>
+                                    </NativeButton>
                                 )}
                             </div>
                         </div>
@@ -328,7 +332,7 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
                 {!tempMail && !isPublic && (
                     <div className="mt-4 space-y-4">
                         {error && <p className="text-xs text-red-400">{error}</p>}
-                        <button
+                        <NativeButton
                             onClick={handleCreate}
                             disabled={!apiKey || creating}
                             className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-emerald-600/40 hover:border-emerald-500 hover:in-shadow bg-primary1 text-sm font-semibold text-emerald-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -341,7 +345,7 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
                             ) : (
                                 "Create Temp Email"
                             )}
-                        </button>
+                        </NativeButton>
                     </div>
                 )}
             </div>
@@ -357,6 +361,6 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
                     refetchCallback={handleRefresh}
                 />
             )}
-        </div>
+        </Surface>
     );
 }

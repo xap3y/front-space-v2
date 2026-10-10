@@ -1,4 +1,13 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
+
+import ResourceList from "@/components/ui/ResourceList";
+import Pagination from "@/components/ui/Pagination";
 
 import { MinecraftServerReports } from "@/types/core";
 import { useRouter } from "next/navigation";
@@ -50,14 +59,14 @@ function ActionButton({
                 ? "border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-800/20 text-red-500"
                 : "border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200";
     return (
-        <button
+        <NativeButton
             title={title}
             disabled={disabled}
             onClick={onClick}
             className={`px-3 py-2 rounded-lg text-sm border-2 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 ${styles}`}
         >
             {children}
-        </button>
+        </NativeButton>
     );
 }
 
@@ -244,7 +253,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
     return (
         <div className="flex flex-col gap-4">
             {/* Header */}
-            <div className="box-primary p-4">
+            <Surface className="box-primary p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
                         <h1 className="text-xl font-semibold">Minecraft Server Reports</h1>
@@ -252,12 +261,12 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                             Total reports: <span className="text-white">{initialData.length}</span>
                         </p>
                     </div>
-                    <button
+                    <NativeButton
                         onClick={() => router.refresh()}
                         className="px-4 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-200 transition-all duration-200 font-medium"
                     >
                         Refresh
-                    </button>
+                    </NativeButton>
                 </div>
 
                 {error ? (
@@ -265,10 +274,10 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                         {error}
                     </div>
                 ) : null}
-            </div>
+            </Surface>
 
             {/* Compact Filters Panel */}
-            <div className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
+            <Surface className="box-primary p-3 flex flex-wrap items-center gap-3 text-xs mt-4">
                 <MainStringInput
                     type="text"
                     placeholder="Search server name / IP / email..."
@@ -278,7 +287,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                     inputClassName="px-2.5 py-1.5 text-xs"
                 />
 
-                <select
+                <SelectControl
                     className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={pausedFilter}
                     onChange={(e) => { setPausedFilter(e.target.value); setPage(1); }}
@@ -287,9 +296,9 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                     <option value="">All status</option>
                     <option value="active">Active</option>
                     <option value="paused">Paused</option>
-                </select>
+                </SelectControl>
 
-                <select
+                <SelectControl
                     className="rounded border-2 border-zinc-800 bg-primary1 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-zinc-700"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortMode)}
@@ -299,26 +308,26 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                     <option value="created_asc">Created: oldest</option>
                     <option value="name_asc">Name: A → Z</option>
                     <option value="name_desc">Name: Z → A</option>
-                </select>
+                </SelectControl>
 
                 <div className="flex gap-1.5 ml-auto">
-                    <button
+                    <NativeButton
                         onClick={() => { setSearch(""); setPausedFilter(""); setSort("created_desc"); setPage(1); }}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Reset
-                    </button>
-                    <button
+                    </NativeButton>
+                    <NativeButton
                         onClick={() => router.refresh()}
                         className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-xs font-medium text-gray-200 transition-all duration-200"
                     >
                         Refresh
-                    </button>
+                    </NativeButton>
                 </div>
-            </div>
+            </Surface>
 
             {/* List */}
-            <div className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
+            <ResourceList className="flex flex-col box-primary p-3 md:p-4 gap-3 mt-4">
                 <div className="mt-2 grid gap-3">
                     {pageServers.map((server) => {
                         const isOpen = openServer === server.serverName;
@@ -328,11 +337,12 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                         const isLoading = loadingServers[server.serverName] ?? false;
 
                         return (
-                            <div
+                            <Surface
                                 key={server.serverName}
                                 className="rounded-xl box-primary p-3 shadow-sm shadow-black/30"
                             >
-                                <button
+                                <NativeButton
+                                    layout="row"
                                     className="w-full text-left"
                                     onClick={() => {
                                         const next = isOpen ? null : server.serverName;
@@ -371,7 +381,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                             <IoIosArrowDown />
                                         </div>
                                     </div>
-                                </button>
+                                </NativeButton>
 
                                 {/* Expanded Details */}
                                 <div
@@ -386,7 +396,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                         }`}
                                     >
                                         {/* Details Section */}
-                                        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                                        <Surface className="rounded-lg border border-white/10 bg-black/20 p-3">
                                             <div className="text-xs text-gray-400">Server Information</div>
 
                                             <div className="mt-3 space-y-3">
@@ -397,13 +407,13 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                             {server.serverIp ?? "—"}
                                                         </div>
                                                         {server.serverIp && (
-                                                            <button
+                                                            <NativeButton
                                                                 onClick={() => copyToClipboard(server.serverIp!)}
                                                                 className="text-gray-400 hover:text-white transition flex-shrink-0"
                                                                 title="Copy"
                                                             >
                                                                 <FaRegCopy size={12} />
-                                                            </button>
+                                                            </NativeButton>
                                                         )}
                                                     </div>
                                                 </div>
@@ -415,13 +425,13 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                             {server.ownerIp ?? "—"}
                                                         </div>
                                                         {server.ownerIp && (
-                                                            <button
+                                                            <NativeButton
                                                                 onClick={() => copyToClipboard(server.ownerIp!)}
                                                                 className="text-gray-400 hover:text-white transition flex-shrink-0"
                                                                 title="Copy"
                                                             >
                                                                 <FaRegCopy size={12} />
-                                                            </button>
+                                                            </NativeButton>
                                                         )}
                                                     </div>
                                                 </div>
@@ -433,13 +443,13 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                             {server.ownerEmail ?? "—"}
                                                         </div>
                                                         {server.ownerEmail && (
-                                                            <button
+                                                            <NativeButton
                                                                 onClick={() => copyToClipboard(server.ownerEmail!)}
                                                                 className="text-gray-400 hover:text-white transition flex-shrink-0"
                                                                 title="Copy"
                                                             >
                                                                 <FaRegCopy size={12} />
-                                                            </button>
+                                                            </NativeButton>
                                                         )}
                                                     </div>
                                                 </div>
@@ -458,10 +468,10 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Surface>
 
                                         {/* Sensitive Data Section */}
-                                        <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                                        <Surface className="rounded-lg border border-white/10 bg-black/20 p-3">
                                             <div className="text-xs text-gray-400">Credentials</div>
 
                                             <div className="mt-3 space-y-3">
@@ -477,7 +487,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                         >
                                                             {passwordShown ? server.password : maskSensitive(server.password)}
                                                         </div>
-                                                        <button
+                                                        <NativeButton
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 setRevealPassword((prev) => ({
@@ -489,15 +499,15 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                             aria-label={passwordShown ? "Hide password" : "Show password"}
                                                         >
                                                             {passwordShown ? <FaEyeSlash size={12} /> : <FaEye size={12} />}
-                                                        </button>
+                                                        </NativeButton>
                                                         {passwordShown && (
-                                                            <button
+                                                            <NativeButton
                                                                 onClick={() => copyToClipboard(server.password)}
                                                                 className="text-gray-400 hover:text-white transition flex-shrink-0"
                                                                 title="Copy"
                                                             >
                                                                 <FaRegCopy size={12} />
-                                                            </button>
+                                                            </NativeButton>
                                                         )}
                                                     </div>
                                                 </div>
@@ -514,7 +524,7 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                         >
                                                             {apiKeyShown ? server.apiKey : maskSensitive(server.apiKey)}
                                                         </div>
-                                                        <button
+                                                        <NativeButton
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 setRevealApiKey((prev) => ({
@@ -526,23 +536,23 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                             aria-label={apiKeyShown ? "Hide API key" : "Show API key"}
                                                         >
                                                             {apiKeyShown ? <FaEyeSlash size={12} /> : <FaEye size={12} />}
-                                                        </button>
+                                                        </NativeButton>
                                                         {apiKeyShown && (
-                                                            <button
+                                                            <NativeButton
                                                                 onClick={() => copyToClipboard(server.apiKey)}
                                                                 className="text-gray-400 hover:text-white transition flex-shrink-0"
                                                                 title="Copy"
                                                             >
                                                                 <FaRegCopy size={12} />
-                                                            </button>
+                                                            </NativeButton>
                                                         )}
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Surface>
 
                                         {/* Actions Section */}
-                                        <div className="rounded-lg border border-white/10 bg-black/20 p-3 lg:col-span-2">
+                                        <Surface className="rounded-lg border border-white/10 bg-black/20 p-3 lg:col-span-2">
                                             <div className="text-xs text-gray-400 mb-2">Actions</div>
                                             <div className="flex flex-wrap gap-2">
                                                 <ActionButton
@@ -597,10 +607,10 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                                     {isLoading ? "Deleting..." : "Delete"}
                                                 </ActionButton>
                                             </div>
-                                        </div>
+                                        </Surface>
                                     </div>
                                 </div>
-                            </div>
+                            </Surface>
                         );
                     })}
 
@@ -610,58 +620,26 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                 </div>
 
                 {/* Pagination Footer */}
-                {totalPages > 1 && (
-                    <div className="w-full border-t border-white/10 pt-4 mt-2 flex items-center justify-between text-sm text-gray-300">
-                        <div className="flex items-center gap-4">
-                            <div className="text-xs text-gray-400">
-                                Page <span className="text-white font-medium">{page}</span> of <span className="text-white font-medium">{totalPages}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-gray-500 uppercase font-semibold">Page size</span>
-                                <select
-                                    className="rounded border-2 border-zinc-800 bg-primary1 px-2 py-0.5 text-xs focus:outline-none text-gray-300"
-                                    value={pageSize}
-                                    onChange={(e) => {
-                                        setPageSize(Number(e.target.value));
-                                        setPage(1);
-                                    }}
-                                >
-                                    <option value={10}>10</option>
-                                    <option value={25}>25</option>
-                                    <option value={50}>50</option>
-                                    <option value={100}>100</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={page <= 1}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                            >
-                                <FaChevronLeft className="h-3 w-3" />
-                                <span>Prev</span>
-                            </button>
-                            <button
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={page >= totalPages}
-                                className="px-3 py-1.5 rounded-lg border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 disabled:opacity-40 disabled:hover:shadow-none transition-all duration-200 text-xs flex items-center gap-1.5 text-gray-200"
-                            >
-                                <span>Next</span>
-                                <FaChevronRight className="h-3 w-3" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                <Pagination
+                            page={page}
+                            pages={totalPages}
+                            onChange={setPage}
+                            pageSize={pageSize}
+                            pageSizes={[10, 25, 50, 100]}
+                            onPageSizeChange={(size) => {
+                                setPageSize(size);
+                                setPage(1);
+                            }}
+                        />
+            </ResourceList>
 
             {/* Modal */}
             {modal.type && modal.serverName !== null ? (
-                <div 
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 cursor-pointer"
                     onClick={closeModal}
                 >
-                    <div 
+                    <Surface
                         className="w-full max-w-md bg-primary1 border-2 border-zinc-800 rounded-2xl p-5 shadow-2xl cursor-default"
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -673,13 +651,13 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                                         ? "Update API key"
                                         : "Update owner email"}
                             </h2>
-                            <button
+                            <NativeButton
                                 className="text-gray-400 hover:text-white transition-colors"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
                                 ✕
-                            </button>
+                            </NativeButton>
                         </div>
 
                         <div className="mt-4">
@@ -699,22 +677,22 @@ export default function McReportsAdmin({ initialData, initialError = "" }: { ini
                         </div>
 
                         <div className="mt-4 flex justify-end gap-2">
-                            <button
+                            <NativeButton
                                 className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-gray-300 transition-all duration-200"
                                 onClick={closeModal}
                                 disabled={modal.loading}
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton
                                 className="px-3 py-2 rounded-lg text-sm border-2 border-zinc-800 hover:border-zinc-700 hover:in-shadow bg-primary1 text-white font-medium transition-all duration-200 disabled:opacity-50"
                                 onClick={submitModal}
                                 disabled={modal.loading || (modal.type !== "email" && !modal.value)}
                             >
                                 {modal.loading ? "Saving..." : "Save"}
-                            </button>
+                            </NativeButton>
                         </div>
-                    </div>
+                    </Surface>
                 </div>
             ) : null}
         </div>

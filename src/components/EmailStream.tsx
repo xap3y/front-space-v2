@@ -1,4 +1,8 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEmailWebSocket } from '@/hooks/useEmailWebSocket';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -179,7 +183,7 @@ function InboxList({
                        connectedAt,
                    }: InboxListProps) {
     return (
-        <div
+        <Surface
             className={`flex flex-col w-full xl:w-[280px] xl:flex-none box-primary xl:rounded-lg xl:border-x-4 xl:border-b-4 border-b-0 border-x-0 rounded-none ${
                 !isMdUp && mobileMode === 'detail' ? 'hidden' : ''
             } min-w-0`}
@@ -240,7 +244,7 @@ function InboxList({
                     })
                 )}
             </ul>
-        </div>
+        </Surface>
     );
 }
 
@@ -278,15 +282,15 @@ function MessageDetail({ message, sanitizeHtml, onClose }: MessageDetailProps) {
                                 {message.from}
                             </p>
                         </div>
-                    
-                        <button
+
+                        <NativeButton
                             onClick={() => copy(message.from, 'from')}
                             className="flex items-center gap-1 px-2 py-1 text-gray-500 hover:text-gray-300 hover:bg-white/10 rounded transition-colors flex-shrink-0"
                             title="Copy from address"
                         >
                             <MdContentCopy className="w-3 h-3" />
                             {copied === 'from' && <span className="text-xs max-h-3">Copied</span>}
-                        </button>
+                        </NativeButton>
                     </div>
                     {message.to && (
                         <p>
@@ -301,14 +305,14 @@ function MessageDetail({ message, sanitizeHtml, onClose }: MessageDetailProps) {
                 </div>
 
                 {/* CLOSE BUTTON */}
-                <button
+                <NativeButton
                     onClick={onClose}
                     className="absolute top-4 right-0 inline-flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-gray-200 hover:bg-white/10 transition-colors"
                     aria-label="Close message"
                     title="Close message"
                 >
                     <MdClose className="w-4 h-4" />
-                </button>
+                </NativeButton>
             </div>
 
             {/* MESSAGE CONTENT */}
@@ -347,7 +351,7 @@ function MessageViewer({
                            onBack,
                        }: MessageViewerProps) {
     return (
-        <div
+        <Surface
             className={`flex flex-col w-full box-primary ${
                 !isMdUp && mobileMode === 'list' ? 'hidden' : ''
             } min-w-0`}
@@ -355,14 +359,14 @@ function MessageViewer({
             {/* HEADER */}
             <div className="px-4 py-3 flex items-center gap-3 border-b border-white/10 bg-white/2.5">
                 {!isMdUp && (
-                    <button
+                    <NativeButton
                         onClick={onBack}
                         className="inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-colors"
                         aria-label="Back to inbox"
                     >
                         <FaArrowLeft className="w-3 h-3" />
                         Back
-                    </button>
+                    </NativeButton>
                 )}
                 <h2 className="font-semibold text-xs text-gray-300 select-none">
                     MESSAGE
@@ -391,7 +395,7 @@ function MessageViewer({
                     />
                 )}
             </div>
-        </div>
+        </Surface>
     );
 }
 

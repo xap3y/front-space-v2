@@ -1,8 +1,10 @@
+
+import Surface from "@/components/ui/Surface";
 export default function EmailsLoading() {
     return (
         <div className="flex flex-col gap-4 animate-pulse">
             {/* Header skeleton */}
-            <div className="box-primary p-4">
+            <Surface className="box-primary p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="space-y-2">
                         <div className="h-7 w-24 bg-white/10 rounded" />
@@ -10,10 +12,10 @@ export default function EmailsLoading() {
                     </div>
                     <div className="h-9 w-[154px] bg-white/5 rounded-md" />
                 </div>
-            </div>
+            </Surface>
 
             {/* List Skeleton */}
-            <div className="box-primary p-4 h-full space-y-4">
+            <Surface className="box-primary p-4 h-full space-y-4">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                     <div className="flex items-center gap-4">
                         <div className="h-5 w-24 bg-white/10 rounded" />
@@ -30,7 +32,7 @@ export default function EmailsLoading() {
                 {/* Email cards list skeleton */}
                 <div className="mt-2 max-h-[60vh] overflow-y-auto pr-2 space-y-1.5">
                     {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                        <Surface key={i} className="rounded-xl box-primary p-2 shadow-sm shadow-black/30 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                             <div className="space-y-2 min-w-0">
                                 <div className="flex items-center gap-2">
                                     <div className="h-5 w-48 bg-white/10 rounded" />
@@ -50,10 +52,10 @@ export default function EmailsLoading() {
                                     <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10" />
                                 </div>
                             </div>
-                        </div>
+                        </Surface>
                     ))}
                 </div>
-            </div>
+            </Surface>
         </div>
     );
 }

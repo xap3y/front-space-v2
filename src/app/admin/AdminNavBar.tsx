@@ -1,4 +1,9 @@
 "use client";
+import styles from "@/components/ui/ui.module.css";
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -96,19 +101,14 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
                                 if (variant === "mobile") setMobileOpen(false);
                             }}
                             aria-current={isActive ? "page" : undefined}
-                            className={`
+                            className={`${styles.navItem}
                 group relative w-full flex items-center gap-3 px-3 py-2.5
                 text-sm transition-colors duration-200 rounded-[10px]
                 ${isActive ? "bg-primary_light/25 text-white" : "text-gray-200 hover:bg-primary_light/15"}
               `}
                         >
               <span
-                  className={`
-                  pointer-events-none absolute left-0 top-1/2 -translate-y-1/2
-                  h-5 w-[3px] rounded-full bg-primary_light
-                  opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                  ${isActive ? "opacity-100" : ""}
-                `}
+className={styles.navIndicator}
               />
                             {item.icon ? <span className="shrink-0">{item.icon}</span> : null}
                             <span className="truncate">{item.title}</span>
@@ -122,7 +122,7 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
     const Navigation = ({ variant }: { variant: "desktop" | "mobile" }) => loading ? (
         <ul className="animate-pulse">
             {Array.from({ length: Math.max(items.length, 4) }).map((_, index) => (
-                <li key={index} className="flex items-center gap-3 px-3 py-2.5">
+                <li key={index} className={styles.navItem}>
                     <div className="h-5 w-5 shrink-0 rounded bg-white/5" />
                     <div className="h-3.5 w-24 rounded bg-white/5" />
                 </li>
@@ -135,13 +135,13 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
             {/* Mobile top bar */}
             <div className="xl:hidden sticky top-0 z-30 bg-primary1 border-b border-white/10">
                 <div className="h-14 px-3 flex items-center justify-between">
-                    <button
+                    <NativeButton
                         aria-label="Open menu"
                         className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-primary0 transition-colors"
                         onClick={() => setMobileOpen(true)}
                     >
                         <MdMenu className="h-6 w-6" />
-                    </button>
+                    </NativeButton>
                     <SidebarBrand compact />
                     <div className="w-9" />
                 </div>
@@ -170,7 +170,7 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
 
                 <div className="border-t border-white/10 p-3">
                     {loading ? <div className="h-10 w-full animate-pulse rounded-lg bg-white/5" /> : (
-                        <Link href="/home/dashboard" className="w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors">
+                        <Link href="/home/dashboard" className={[styles.navItem, "w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors"].join(" ")}>
                             <MdArrowBack className="h-5 w-5" />
                             Back to app
                         </Link>
@@ -195,7 +195,7 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
                     onClick={() => setMobileOpen(false)}
                 />
 
-                <div
+                <Surface
                     role="dialog"
                     aria-modal="true"
                     className={`
@@ -210,13 +210,13 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
                 >
                     <div className="h-14 px-3 flex items-center justify-between border-b border-white/10">
                         <SidebarBrand compact />
-                        <button
+                        <NativeButton
                             aria-label="Close admin menu"
                             className="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 transition-colors"
                             onClick={() => setMobileOpen(false)}
                         >
                             <MdClose className="h-6 w-6" />
-                        </button>
+                        </NativeButton>
                     </div>
 
                     <div className="flex-1 overflow-y-auto px-3 py-3">
@@ -228,13 +228,13 @@ export default function AdminNavBar({ items, brandTitle = "ADMIN", loading = fal
 
                     <div className="border-t border-white/10 p-3">
                         {loading ? <div className="h-11 w-full animate-pulse rounded-lg bg-white/5" /> : (
-                            <Link href="/home/dashboard" onClick={() => setMobileOpen(false)} className="w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors">
+                            <Link href="/home/dashboard" onClick={() => setMobileOpen(false)} className={[styles.navItem, "w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-gray-200 hover:bg-white/10 hover:text-white transition-colors"].join(" ")}>
                                 <MdArrowBack className="h-5 w-5" />
                                 Back to app
                             </Link>
                         )}
                     </div>
-                </div>
+                </Surface>
             </div>
         </>
     );

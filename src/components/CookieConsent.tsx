@@ -1,4 +1,6 @@
 'use client';
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import { useEffect, useState, useCallback } from 'react';
 
@@ -51,18 +53,18 @@ export default function CookieConsent() {
                         </div>
 
                         <div className="flex gap-2 mt-3 md:mt-0">
-                            <button
+                            <NativeButton
                                 onClick={decline}
                                 className="px-3 py-2 rounded-md text-sm border border-white/10 bg-primary hover:bg-[#1b212a] transition-colors"
                             >
                                 Pouze nezbytné
-                            </button>
-                            <button
+                            </NativeButton>
+                            <NativeButton variant="save"
                                 onClick={accept}
                                 className="px-3 py-2 rounded-md text-sm border border-green-950 bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
                             >
                                 Povolit Analytics
-                            </button>
+                            </NativeButton>
                         </div>
                     </div>
                 </div>

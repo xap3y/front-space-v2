@@ -1,7 +1,29 @@
 "use client";
 
 import React, {forwardRef} from "react";
-import {FaCircleExclamation, FaFloppyDisk, FaTrashCan} from "react-icons/fa6";
+import {FaCircleExclamation, FaFloppyDisk, FaSpinner, FaTrashCan} from "react-icons/fa6";
+import styles from "./ui/ui.module.css";
+
+export interface HoverButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: "primary" | "secondary" | "save" | "delete" | "warning" | "ghost";
+}
+
+/** Native alternative to HoverDiv for submit buttons and existing native handlers. */
+export const HoverButton = forwardRef<HTMLButtonElement, HoverButtonProps>(function HoverButton(
+    { variant = "secondary", className, children, ...props },
+    ref,
+) {
+    return (
+        <button
+            {...props}
+            ref={ref}
+            data-variant={variant}
+            className={[styles.action, styles.nativeButton, className].filter(Boolean).join(" ")}
+        >
+            {children}
+        </button>
+    );
+});
 
 export type HoverDivType = "DELETE" | "WARN" | "SAVE" | "INFO" | "DANGER";
 
@@ -58,13 +80,15 @@ const HoverDiv = forwardRef<HTMLDivElement, HoverDivProps>(
                 tabIndex={disabled ? -1 : (tabIndex ?? 0)}
                 aria-disabled={disabled || undefined}
                 className={cx(
-                    "inline-flex items-center justify-center gap-2 rounded border-2 outline-none transition-all duration-200 active:scale-[.98]",
+                    "inline-flex items-center justify-center gap-2 rounded border outline-none",
                     disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
                     scheme.base,
                     !disabled && scheme.interactive,
-                    !className && "p-3",
+                    !className && "h-8 px-3 text-xs",
                     inputClassName,
-                    className
+                    className,
+                    styles.action,
+                    Boolean(className?.includes("border-0")) && styles.borderless
                 )}
                 style={{...style, backgroundColor: bg ?? style?.backgroundColor, color: text ?? style?.color}}
                 onClick={(event) => {
@@ -85,8 +109,26 @@ const HoverDiv = forwardRef<HTMLDivElement, HoverDivProps>(
 
 HoverDiv.displayName = "HoverDiv";
 
-export const SaveButton = (props: Omit<HoverDivProps, "type">) => <HoverDiv type="SAVE" icon={<FaFloppyDisk/>} {...props}/>;
-export const DeleteButton = (props: Omit<HoverDivProps, "type">) => <HoverDiv type="DELETE" icon={<FaTrashCan/>} {...props}/>;
+export const SaveButton = (props: Omit<HoverDivProps, "type">) => (
+    <HoverDiv {...props} type="SAVE" icon={<FaFloppyDisk aria-hidden="true" />} />
+);
+
+export function DeleteButton({className, children, loading = false, ...props}: Omit<HoverDivProps, "type"> & {loading?: boolean}) {
+    const hasLabel = React.Children.toArray(children).some((child) => typeof child !== "string" || child.trim().length > 0);
+
+    return (
+        <HoverDiv
+            {...props}
+            type="DELETE"
+            disabled={props.disabled || loading}
+            aria-busy={loading || undefined}
+            className={cx(styles.button, !hasLabel && styles.iconAction, className)}
+            icon={loading ? <FaSpinner className="motion-safe:animate-spin" aria-hidden="true" /> : <FaTrashCan aria-hidden="true" />}
+        >
+            {children}
+        </HoverDiv>
+    );
+}
 export const WarnButton = (props: Omit<HoverDivProps, "type">) => <HoverDiv type="WARN" icon={<FaCircleExclamation/>} {...props}/>;
 export const DangerButton = (props: Omit<HoverDivProps, "type">) => <HoverDiv type="DANGER" icon={<FaCircleExclamation/>} {...props}/>;
 

@@ -1,4 +1,6 @@
 "use client";
+import MainStringInput from "@/components/MainStringInput";
+
 
 import React, { useCallback, useState, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";

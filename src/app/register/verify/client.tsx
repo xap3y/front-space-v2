@@ -1,4 +1,8 @@
 'use client';
+import Surface from "@/components/ui/Surface";
+
+import { NativeButton } from "@/components/ui/NativeButton";
+
 
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
@@ -474,7 +478,7 @@ export default function RegistrationVerifyPage() {
         const successful = linkVerification === "success";
         return (
             <main className="flex min-h-screen items-center justify-center px-4">
-                <div className="w-full max-w-md box-primary shadow-card p-8 text-center">
+                <Surface className="w-full max-w-md box-primary shadow-card p-8 text-center">
                     <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full border ${successful ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400" : linkVerification === "error" ? "border-red-500/40 bg-red-500/10 text-red-400" : "border-telegram/40 bg-telegram/10 text-telegram"}`}>
                         {linkVerification === "verifying" ? <FaSpinner className="animate-spin text-xl"/> : <FaEnvelope className="text-xl"/>}
                     </div>
@@ -487,7 +491,7 @@ export default function RegistrationVerifyPage() {
                             {successful ? "Continue to sign in" : "Enter a verification code instead"}
                         </HoverDiv>
                     )}
-                </div>
+                </Surface>
             </main>
         );
     }
@@ -509,7 +513,7 @@ export default function RegistrationVerifyPage() {
 
     return (
         <main className="flex min-h-screen items-center justify-center px-4" onPaste={handleMainPaste}>
-            <div className="w-full max-w-md backdrop-blur-sm box-primary shadow-card p-8">
+            <Surface className="w-full max-w-md backdrop-blur-sm box-primary shadow-card p-8">
                 {/* Method chooser */}
                 {method === "none" && (
                     <>
@@ -667,7 +671,7 @@ export default function RegistrationVerifyPage() {
 
                         <div className="mt-6">
                             {/* We already started the flow from the first screen. Provide a secondary button to re-open if needed */}
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={startTelegram}
                                 disabled={tgLoading}
@@ -693,7 +697,7 @@ export default function RegistrationVerifyPage() {
                                     ></path>
                                 </svg>
                                 {tgLoading ? "Opening Telegram..." : "Open Telegram again"}
-                            </button>
+                            </NativeButton>
 
                             <div className={"mt-6"}>
                                 <StatusBlock status={status} />
@@ -708,25 +712,25 @@ export default function RegistrationVerifyPage() {
                         </div>
 
                         <div className="mt-4 flex flex-col gap-3">
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={changeMethod}
                                 className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
                             >
                                 Change verification method
-                            </button>
+                            </NativeButton>
 
-                            <button
+                            <NativeButton
                                 type="button"
                                 onClick={cancel}
                                 className="h-10 rounded-md border border-transparent text-sm font-medium text-gray-400 hover:text-white hover:underline"
                             >
                                 Cancel
-                            </button>
+                            </NativeButton>
                         </div>
                     </>
                 )}
-            </div>
+            </Surface>
         </main>
     );
 }

@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import dynamic from 'next/dynamic'
 import { useState } from "react";
@@ -9,7 +11,7 @@ import {DiscordConnection} from "@/types/discord";
 
 const DateChartECharts = dynamic(() => import("@/components/DateChartECharts"), {
     ssr: false,
-    loading: () => <div className="box-primary p-4 text-sm text-gray-400">Loading chart…</div>,
+    loading: () => <Surface className="box-primary p-4 text-sm text-gray-400">Loading chart…</Surface>,
 });
 
 type Props = {
@@ -34,7 +36,7 @@ export default function StatsClient({ initialStats, initialFrom, initialTo, apiK
     };
 
     return (
-        <div className="box-primary p-5 md:p-6">
+        <Surface className="box-primary p-5 md:p-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                 <p className="text-2xl md:text-3xl font-bold">Stats</p>
                 <div className="flex items-center gap-3 sm:gap-5 py-2 px-3 sm:px-5 bg-black/40 rounded-full border border-white/10">
@@ -58,7 +60,7 @@ export default function StatsClient({ initialStats, initialFrom, initialTo, apiK
                     }}
                 />
             </div>
-        </div>
+        </Surface>
     );
 }
 

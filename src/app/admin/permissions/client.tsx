@@ -1,4 +1,10 @@
 "use client";
+import { SelectControl } from "@/components/ui/SelectControl";
+
+import Surface from "@/components/ui/Surface";
+
+import { SelectionInput } from "@/components/ui/SelectionInput";
+
 
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useSearchParams} from "next/navigation";
@@ -189,7 +195,7 @@ export default function PermissionsClient() {
                     Role defaults apply to the whole group. User overrides take priority. Only OWNER can edit permissions.
                 </p>
             </header>
-            <div className="box-primary space-y-3 p-4">
+            <Surface className="box-primary space-y-3 p-4">
                 <div className="flex gap-2">
                     <HoverDiv
                         type="INFO"
@@ -211,7 +217,7 @@ export default function PermissionsClient() {
                     </HoverDiv>
                 </div>
                 {mode === "role" ? (
-                    <select
+                    <SelectControl
                         aria-label="Role"
                         value={role}
                         disabled={busy || loading}
@@ -221,7 +227,7 @@ export default function PermissionsClient() {
                         {roles.map(item => (
                             <option key={item.role} value={item.role}>{item.role}</option>
                         ))}
-                    </select>
+                    </SelectControl>
                 ) : (
                     <div className="space-y-2">
                         <MainStringInput
@@ -263,7 +269,7 @@ export default function PermissionsClient() {
                         </p>
                     </div>
                 )}
-            </div>
+            </Surface>
             {error && (
                 <p role="alert" className="text-sm text-red-400">{error}</p>
             )}
@@ -275,16 +281,16 @@ export default function PermissionsClient() {
                 </p>
             )}
             {loading || busy && !ready ? (
-                <div className="box-primary animate-pulse divide-y divide-white/5 p-4">
+                <Surface className="box-primary animate-pulse divide-y divide-white/5 p-4">
                     {Array.from({length: PERMISSIONS.length}).map((_, index) => (
                         <div key={index} className="flex items-center justify-between py-3">
                             <div className="h-3 w-48 rounded bg-white/5" />
                             <div className="h-7 w-32 rounded bg-white/5" />
                         </div>
                     ))}
-                </div>
+                </Surface>
             ) : ready && (
-                <div className="box-primary divide-y divide-white/5 px-4">
+                <Surface className="box-primary divide-y divide-white/5 px-4">
                     {PERMISSIONS.map(permission => {
                         const inherited = userPolicy?.inherited.includes(permission.key) ?? false;
                         const master = values.ADMIN_ACCESS ?? userPolicy?.inherited.includes("ADMIN_ACCESS") ?? false;
@@ -299,7 +305,7 @@ export default function PermissionsClient() {
                                 <div className="flex items-center gap-4 text-[11px] text-zinc-500">
                                     {mode === "user" && (
                                         <label className="flex cursor-pointer items-center gap-1.5">
-                                            <input
+                                            <SelectionInput
                                                 type="checkbox"
                                                 checked={values[permission.key] === undefined}
                                                 disabled={busy || fixed}
@@ -309,7 +315,7 @@ export default function PermissionsClient() {
                                             Inherit
                                         </label>
                                     )}
-                                    <input
+                                    <SelectionInput
                                         id={`permission-${permission.key}`}
                                         type="checkbox"
                                         aria-label={permission.label}
@@ -322,7 +328,7 @@ export default function PermissionsClient() {
                             </div>
                         );
                     })}
-                </div>
+                </Surface>
             )}
             {ready && !fixed && (
                 <div className="flex flex-wrap items-center gap-2">

@@ -1,4 +1,6 @@
 "use client";
+import Surface from "@/components/ui/Surface";
+
 
 import HoverDiv from "@/components/HoverDiv";
 
@@ -75,12 +77,12 @@ export default function SocialsClient({ user }: { user: UserObj }) {
 
     return <section className="flex-1 min-w-0 px-3 py-6 md:px-6 md:py-8">
         <div className="mx-auto max-w-5xl space-y-4">
-            <div className="flex flex-col gap-4 box-primary p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <Surface className="flex flex-col gap-4 box-primary p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                 <div className="flex items-center gap-3"><Link href="/home/profile" aria-label="Back to profile" className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-black/20 text-zinc-400 transition hover:text-white"><PiArrowLeftBold /></Link><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-xl text-sky-400"><PiShareNetworkBold /></span><div><h1 className="font-semibold text-white">Social profiles</h1><p className="mt-0.5 text-xs text-zinc-500">Add links shown on your public profile.</p></div></div>
                 <div className="relative sm:w-56"><PiMagnifyingGlassBold className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-zinc-600" /><MainStringInput type="search" value={query} onChange={(value) => setQuery(toAsciiAlnumPassword(value))} placeholder="Find a platform" className="h-9 rounded-lg border-zinc-800 bg-black/20" inputClassName="h-full py-0 pl-9 pr-3 text-xs" /></div>
-            </div>
+            </Surface>
 
-            <div className="box-primary p-3 sm:p-4">
+            <Surface className="box-primary p-3 sm:p-4">
                 <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                     {shown.map((social) => <label key={social.key} className="group rounded-xl border border-zinc-800 bg-black/15 p-2.5 transition focus-within:border-zinc-600">
                         <span className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[.04] text-base text-zinc-300">{social.icon}</span>{social.label}</span>
@@ -88,7 +90,7 @@ export default function SocialsClient({ user }: { user: UserObj }) {
                     </label>)}
                     {shown.length === 0 && <div className="col-span-full py-10 text-center text-sm text-zinc-500">No matching platform</div>}
                 </div>
-            </div>
+            </Surface>
 
             <div className="flex flex-col gap-2.5 rounded-xl border border-zinc-800 bg-[#101014] p-3 sm:flex-row sm:items-center sm:justify-between"><p className={`text-xs ${dirty ? "text-amber-300" : "text-zinc-500"}`}>{dirty ? "Unsaved changes" : "Up to date"}</p><HoverDiv type="SAVE" icon={<PiCheckBold/>} onClick={save} disabled={!dirty || saving} className="h-9 rounded-lg px-4 text-xs font-semibold">{saving ? "Saving…" : "Save changes"}</HoverDiv></div>
         </div>
