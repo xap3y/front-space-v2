@@ -64,6 +64,8 @@ function Avatar({ src, username, compact = false }: { src: string | null | undef
 }
 
 const TYPE_OPTIONS: AuditLogType[] = [
+    "IP_MAPPER_CHANGE",
+    "PERMISSION_CHANGE",
     "TOOL_ACTION",
     "USER_LOGIN",
     "USER_LOGOUT",
@@ -107,6 +109,8 @@ const TYPE_OPTIONS: AuditLogType[] = [
 ];
 
 const TYPE_ICONS: Record<AuditLogType, JSX.Element> = {
+    IP_MAPPER_CHANGE: <FiShield className="text-sky-400" />,
+    PERMISSION_CHANGE: <FiShield className="text-violet-400" />,
     TOOL_ACTION: <FiSettings />,
     USER_LOGIN: <FiLogIn className={"text-green-400"} />,
     USER_LOGOUT: <FiLogOut className={"text-red-400"} />,

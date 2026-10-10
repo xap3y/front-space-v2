@@ -5,6 +5,8 @@ export const PERMISSIONS = [
     {key: "BYPASS_FILE_PACK_PASSWORD", label: "Bypass file pack passwords"},
     {key: "FILE_PACK_VIEW_IP", label: "Show pack viewer IP addresses in My Files"},
     {key: "FILE_PACK_VIEW_UA", label: "Show pack viewer user agents in My Files"},
+    {key: "URL_VIEW_IP", label: "Show URL visitor IP addresses in My URLs"},
+    {key: "URL_VIEW_UA", label: "Show URL visitor user agents in My URLs"},
     {key: "DELETE_IMAGES", label: "Delete other users' images"},
     {key: "DELETE_PASTES", label: "Delete other users' pastes"},
     {key: "DELETE_FILE_PACKS", label: "Delete other users' file packs"},

@@ -1,302 +1,262 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import {useEffect, useMemo, useState, useTransition} from "react";
+import {useRouter} from "next/navigation";
+import {FaRotateRight} from "react-icons/fa6";
 import MainStringInput from "@/components/MainStringInput";
+import HoverDiv from "@/components/HoverDiv";
+import type {SystemSnapshot} from "@/types/system";
 
-function formatBytes(bytes?: number) {
-    if (bytes === undefined || bytes === null || Number.isNaN(bytes)) return "—";
-    if (bytes < 0) return "—";
-    const units = ["B", "KB", "MB", "GB", "TB"];
-    let v = bytes;
-    let i = 0;
-    while (v >= 1024 && i < units.length - 1) {
-        v /= 1024;
-        i++;
-    }
-    return `${v.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
-}
-
-function formatPercent01(v?: number) {
-    if (v === undefined || v === null || Number.isNaN(v)) return "—";
-    return `${(v * 100).toFixed(2)}%`;
-}
-
-function formatNumber(v?: number, digits = 2) {
-    if (v === undefined || v === null || Number.isNaN(v)) return "—";
-    return Number(v).toFixed(digits);
-}
-
-function formatDateFromEpochSecondsOrMs(v?: number) {
-    if (v === undefined || v === null || Number.isNaN(v)) return "—";
-    // your sample is 1.768e9 which is seconds
-    const ms = v < 1e12 ? v * 1000 : v;
-    const d = new Date(ms);
-    if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleString();
-}
-
-function groupKey(k: string) {
-    if (k.startsWith("system.")) return "System";
-    if (k.startsWith("process.")) return "Process";
-    if (k.startsWith("jvm.")) return "JVM";
-    if (k.startsWith("disk.")) return "Disk";
-    if (k.startsWith("executor.")) return "Executor";
-    if (k.startsWith("hikaricp.")) return "HikariCP";
-    return "Other";
-}
-
-function titleize(k: string) {
-    return k
-        .replace(/^system\./, "")
-        .replace(/^process\./, "")
-        .replace(/^jvm\./, "")
-        .replace(/^disk\./, "")
-        .replace(/^executor\./, "")
-        .replace(/^hikaricp\./, "")
-        .replace(/^Uploads\./, "")
-        .replace(/\./g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-type Props = {
-    initialMetrics: Record<string, number>;
-    initialError?: string;
+type Row = {
+    key: string;
+    name: string;
+    value: string | number | boolean;
+    unit?: string | null;
+    tags?: string;
 };
 
-export default function SystemPageClient({ initialMetrics, initialError = "" }: Props) {
+function bytes(value: number): string {
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let unit = 0;
+    while (value >= 1024 && unit < units.length - 1) {
+        value /= 1024;
+        unit += 1;
+    }
+    return `${value.toFixed(unit ? 2 : 0)} ${units[unit]}`;
+}
+
+function formatted(row: Row): string {
+    const value = row.value;
+    if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+    }
+    if (typeof value !== "number") {
+        return String(value);
+    }
+    if (!Number.isFinite(value) || value < 0) {
+        return "Unavailable";
+    }
+    if (row.name.endsWith(".epoch") || row.name === "process.start.time") {
+        return new Date(value * 1000).toLocaleString();
+    }
+    const isCount = /\.(count|collections|loaded|unloaded|live|daemon|peak|started)$/.test(row.name);
+    if (!isCount && (row.unit === "bytes" || row.name.endsWith(".bytes"))) {
+        return bytes(value);
+    }
+    if (row.name.endsWith(".usage")) {
+        return `${(value * 100).toFixed(1)}%`;
+    }
+    if (!isCount && (row.unit === "seconds" || row.name.endsWith(".seconds") || row.name === "process.uptime")) {
+        if (value >= 3600) {
+            return `${Math.floor(value / 3600)}h ${Math.floor(value % 3600 / 60)}m`;
+        }
+        return `${value.toLocaleString(undefined, {maximumFractionDigits: 3})} s`;
+    }
+    return value.toLocaleString(undefined, {maximumFractionDigits: 3}) + (row.unit && !isCount ? ` ${row.unit}` : "");
+}
+
+function category(name: string): string {
+    if (name.startsWith("runtime.pool.")) {
+        return `Memory pool · ${name.split(".")[2].replaceAll("_", " ")}`;
+    }
+    if (name.includes(".threads.")) {
+        return "Threads";
+    }
+    if (name.startsWith("runtime.gc.") || name.startsWith("jvm.gc.")) {
+        return "Garbage collection";
+    }
+    if (name.startsWith("runtime.memory.") || name.startsWith("jvm.memory.") || name.startsWith("jvm.buffer.")) {
+        return "JVM memory & buffers";
+    }
+    if (name.startsWith("http.")) {
+        return "HTTP traffic & latency";
+    }
+    if (name.startsWith("hikaricp.") || name.startsWith("jdbc.")) {
+        return "Database & connection pools";
+    }
+    if (name.startsWith("executor.")) {
+        return "Executors & task queues";
+    }
+    if (name.startsWith("runtime.os.") || name.startsWith("system.") || name.startsWith("disk.")) {
+        return "Host & storage";
+    }
+    if (name.startsWith("runtime.process.") || name.startsWith("runtime.files.") || name.startsWith("process.")) {
+        return "Process & file handles";
+    }
+    if (name.includes(".classes.") || name.includes(".compiler.") || name.startsWith("jvm.classes.")) {
+        return "Classes & compilation";
+    }
+    if (name.startsWith("runtime.")) {
+        return "Java runtime";
+    }
+    return "Application";
+}
+
+function label(name: string): string {
+    return name.replace(/^runtime\.pool\.[^.]+\./, "")
+        .replace(/^(runtime|jvm|system|process)\./, "")
+        .replaceAll(".", " ")
+        .replaceAll("_", " ");
+}
+
+export default function SystemPageClient({initialMetrics, initialError = ""}: {
+    initialMetrics: SystemSnapshot;
+    initialError?: string;
+}) {
     const router = useRouter();
     const [search, setSearch] = useState("");
-    const [showRawKeys, setShowRawKeys] = useState(false);
+    const [raw, setRaw] = useState(false);
+    const [autoRefresh, setAutoRefresh] = useState(false);
+    const [refreshing, startTransition] = useTransition();
 
-    const metrics = initialMetrics ?? {};
-
-    // Common values
-    const systemCpuUsage = metrics["system.cpu.usage"];
-    const systemCpuCount = metrics["system.cpu.count"];
-    const processCpuUsage = metrics["process.cpu.usage"];
-
-    const jvmMemUsed = metrics["jvm.memory.used"];
-    const jvmMemCommitted = metrics["jvm.memory.committed"];
-    const jvmMemMax = metrics["jvm.memory.max"];
-
-    const diskTotal = metrics["disk.total"];
-    const diskFree = metrics["disk.free"];
-
-    const procOpenFiles = metrics["process.files.open"];
-    const procMaxFiles = metrics["process.files.max"];
-
-    const procStart = metrics["process.start.time"];
-    const procUptime = metrics["process.uptime"];
-
-    const filteredEntries = useMemo(() => {
-        const q = search.trim().toLowerCase();
-        const entries = Object.entries(metrics);
-
-        if (!q) return entries;
-
-        return entries.filter(([k, v]) => {
-            const key = k.toLowerCase();
-            const value = String(v).toLowerCase();
-            return key.includes(q) || value.includes(q);
-        });
-    }, [metrics, search]);
-
-    const grouped = useMemo(() => {
-        const map = new Map<string, Array<[string, number]>>();
-        for (const [k, v] of filteredEntries) {
-            const g = groupKey(k);
-            if (!map.has(g)) map.set(g, []);
-            map.get(g)!.push([k, v]);
+    useEffect(() => {
+        if (!autoRefresh) {
+            return;
         }
+        const timer = window.setInterval(() => startTransition(() => router.refresh()), 15000);
+        return () => window.clearInterval(timer);
+    }, [autoRefresh, router]);
 
-        // sort keys inside groups
-        for (const [g, arr] of map) {
-            arr.sort((a, b) => a[0].localeCompare(b[0]));
-            map.set(g, arr);
+    const rows = useMemo(() => {
+        const result: Row[] = Object.entries(initialMetrics.runtime ?? {}).map(([name, value]) => ({
+            key: name, name, value,
+        }));
+        for (const [index, series] of (initialMetrics.series ?? []).entries()) {
+            const tags = Object.entries(series.tags).map(([key, value]) => `${key}: ${value}`).join(" · ");
+            for (const [stat, value] of Object.entries(series.measurements)) {
+                result.push({
+                    key: `${index}:${series.name}:${stat}`,
+                    name: stat === "value" ? series.name : `${series.name}.${stat}`,
+                    value,
+                    unit: ["count", "active_tasks", "unknown"].includes(stat) ? undefined : series.unit,
+                    tags,
+                });
+            }
         }
+        // Accept older backend snapshots during a rolling deployment.
+        if (!result.length) {
+            for (const [name, value] of Object.entries(initialMetrics)) {
+                if (typeof value === "number") {
+                    result.push({key: name, name, value});
+                }
+            }
+        }
+        return result;
+    }, [initialMetrics]);
 
-        // order groups nicely
-        const order = ["System", "Process", "JVM", "Disk", "Executor", "HikariCP", "Other"];
-        return order
-            .filter((g) => map.has(g))
-            .map((g) => ({ group: g, items: map.get(g)! }));
-    }, [filteredEntries]);
+    const groups = useMemo(() => {
+        const query = search.trim().toLowerCase();
+        const grouped = new Map<string, Row[]>();
+        for (const row of rows) {
+            if (query && !`${row.name} ${row.tags ?? ""} ${row.value}`.toLowerCase().includes(query)) {
+                continue;
+            }
+            const group = category(row.name);
+            const items = grouped.get(group) ?? [];
+            items.push(row);
+            grouped.set(group, items);
+        }
+        return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b));
+    }, [rows, search]);
+
+    const metric = (key: string): number | undefined => {
+        const value = initialMetrics[key] ?? initialMetrics.runtime?.[key];
+        return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
+    };
+    const summaries = [
+        {name: "Host CPU", value: metric("system.cpu.usage") ?? metric("runtime.os.cpu.usage"), unit: "percent"},
+        {name: "Process CPU", value: metric("process.cpu.usage") ?? metric("runtime.process.cpu.usage"), unit: "percent"},
+        {name: "Heap used", value: metric("runtime.memory.heap.used.bytes"), unit: "bytes"},
+        {name: "Heap max", value: metric("runtime.memory.heap.max.bytes"), unit: "bytes"},
+        {name: "Disk free", value: metric("disk.free"), unit: "bytes"},
+        {name: "Live threads", value: metric("runtime.threads.live"), unit: "count"},
+        {name: "DB active / pending", text: `${metric("hikaricp.connections.active") ?? "—"} / ${metric("hikaricp.connections.pending") ?? "—"}`},
+        {name: "Uptime", value: metric("runtime.uptime.seconds"), unit: "seconds"},
+    ];
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="box-primary p-4">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                    <div>
-                        <h1 className="text-xl font-semibold">System</h1>
-                        <p className="text-sm text-gray-300 mt-1">
-                            Micrometer-style metrics snapshot (server-fetched). Use search to quickly find a metric.
+        <section className="space-y-3">
+            <header className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <h1 className="text-lg font-semibold">System</h1>
+                    <p className="text-[10px] text-zinc-500">
+                        {rows.length} measurements · {initialMetrics.series?.length ?? 0} metric series
+                        {initialMetrics.collectedAt && ` · Snapshot ${new Date(initialMetrics.collectedAt).toLocaleString()}`}
+                    </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-[11px] text-zinc-500">
+                    <label className="flex items-center gap-1.5">
+                        <input type="checkbox" checked={autoRefresh} onChange={event => setAutoRefresh(event.target.checked)} className="accent-sky-500" />
+                        Refresh every 15s
+                    </label>
+                    <label className="flex items-center gap-1.5">
+                        <input type="checkbox" checked={raw} onChange={event => setRaw(event.target.checked)} className="accent-sky-500" />
+                        Raw keys
+                    </label>
+                    <HoverDiv
+                        type="INFO"
+                        icon={<FaRotateRight className={refreshing ? "animate-spin" : ""} />}
+                        disabled={refreshing}
+                        onClick={() => startTransition(() => router.refresh())}
+                        className="px-2 py-1 text-[11px]"
+                    >
+                        Refresh
+                    </HoverDiv>
+                </div>
+            </header>
+            {initialError && <p role="alert" className="text-xs text-red-400">{initialError}</p>}
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 xl:grid-cols-8">
+                {summaries.map(summary => (
+                    <div key={summary.name} className="rounded-md border border-zinc-800 bg-black/20 px-2.5 py-2">
+                        <p className="text-[9px] uppercase tracking-wide text-zinc-600">{summary.name}</p>
+                        <p className="mt-1 truncate text-xs font-medium tabular-nums text-zinc-200">
+                            {summary.text ?? (summary.value === undefined ? "—"
+                                : summary.unit === "percent" ? `${(summary.value * 100).toFixed(1)}%`
+                                    : formatted({key: summary.name, name: summary.name, value: summary.value, unit: summary.unit === "count" ? undefined : summary.unit}))}
                         </p>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => router.refresh()}
-                            className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5"
-                        >
-                            Refresh
-                        </button>
-
-                        <label className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 cursor-pointer select-none">
-                            <input
-                                type="checkbox"
-                                className="mr-2 accent-white"
-                                checked={showRawKeys}
-                                onChange={(e) => setShowRawKeys(e.target.checked)}
-                            />
-                            Raw keys
-                        </label>
-                    </div>
-                </div>
-
-                {initialError ? (
-                    <div className="mt-3 text-sm text-red-300 border border-red-500/20 bg-red-600/10 rounded-lg p-3">
-                        {initialError}
-                    </div>
-                ) : null}
-
-                {/* Quick summary cards */}
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                    <div className="box-primary p-4">
-                        <div className="text-xs text-gray-400">System CPU</div>
-                        <div className="text-lg font-semibold mt-1">{formatPercent01(systemCpuUsage)}</div>
-                        <div className="text-xs text-gray-400 mt-1">Cores: {formatNumber(systemCpuCount, 0)}</div>
-                    </div>
-
-                    <div className="box-primary p-4">
-                        <div className="text-xs text-gray-400">Process CPU</div>
-                        <div className="text-lg font-semibold mt-1">{formatPercent01(processCpuUsage)}</div>
-                        <div className="text-xs text-gray-400 mt-1">Uptime: {formatNumber(procUptime, 1)}s</div>
-                    </div>
-
-                    <div className="box-primary p-4">
-                        <div className="text-xs text-gray-400">JVM Memory</div>
-                        <div className="text-lg font-semibold mt-1">{formatBytes(jvmMemUsed)}</div>
-                        <div className="text-xs text-gray-400 mt-1">
-                            Committed: {formatBytes(jvmMemCommitted)} · Max: {formatBytes(jvmMemMax)}
-                        </div>
-                    </div>
-
-                    <div className="box-primary p-4">
-                        <div className="text-xs text-gray-400">Disk</div>
-                        <div className="text-lg font-semibold mt-1">{formatBytes(diskFree)} free</div>
-                        <div className="text-xs text-gray-400 mt-1">Total: {formatBytes(diskTotal)}</div>
-                    </div>
-                </div>
-
-                {/* Search */}
-                <div className="mt-4 box-primary p-4">
-                    <div className="font-semibold">Search metrics</div>
-                    <div className="mt-3 flex gap-2">
-                        <MainStringInput
-                            className="w-full"
-                            type="text"
-                            placeholder="Search e.g. cpu, jvm.threads, hikaricp..."
-                            value={search}
-                            onChange={(e) => setSearch(e)}
-                        />
-                        <button
-                            className="px-3 py-2 rounded-lg text-sm border border-white/10 text-gray-200 hover:bg-white/5 disabled:opacity-50"
-                            onClick={() => setSearch("")}
-                            disabled={!search.trim()}
-                        >
-                            Clear
-                        </button>
-                    </div>
-
-                    <div className="mt-2 text-xs text-gray-400">
-                        Showing <span className="text-white">{filteredEntries.length}</span> metric(s).
-                    </div>
-                </div>
+                ))}
             </div>
-
-            {/* Metrics table */}
-            <div className="box-primary p-4">
-                <div className="font-semibold">All metrics</div>
-
-                <div className="mt-3 space-y-4">
-                    {grouped.map(({ group, items }) => (
-                        <div key={group} className="box-primary p-4">
-                            <div className="flex items-center justify-between">
-                                <div className="font-semibold">{group}</div>
-                                <div className="text-xs text-gray-400">{items.length} items</div>
-                            </div>
-
-                            <div className="mt-3 overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="text-xs text-gray-400">
-                                    <tr className="border-b border-white/10">
-                                        <th className="text-left py-2 pr-3">Metric</th>
-                                        <th className="text-left py-2 pr-3">Value</th>
-                                        <th className="text-left py-2 pr-3">Formatted</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                    {items.map(([k, v]) => {
-                                        const formatted =
-                                            k.includes("memory") || k.startsWith("disk.")
-                                                ? formatBytes(v)
-                                                : k.endsWith(".usage")
-                                                    ? formatPercent01(v)
-                                                    : k.endsWith("start.time")
-                                                        ? formatDateFromEpochSecondsOrMs(v)
-                                                        : formatNumber(v, 3);
-
-                                        return (
-                                            <tr key={k} className="align-top">
-                                                <td className="py-2 pr-3">
-                                                    <div className="text-white font-medium">
-                                                        {showRawKeys ? k : titleize(k)}
-                                                    </div>
-                                                    {showRawKeys ? null : (
-                                                        <div className="text-xs text-gray-500 mt-0.5">{k}</div>
-                                                    )}
-                                                </td>
-                                                <td className="py-2 pr-3 font-mono text-gray-200">{String(v)}</td>
-                                                <td className="py-2 pr-3 text-gray-200">{formatted}</td>
-                                            </tr>
-                                        );
-                                    })}
-                                    {items.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={3} className="py-6 text-center text-gray-400">
-                                                No metrics.
-                                            </td>
-                                        </tr>
-                                    ) : null}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    ))}
-
-                    {/* Extra: process file limits card if present */}
-                    {procOpenFiles !== undefined || procMaxFiles !== undefined ? (
-                        <div className="box-primary p-4">
-                            <div className="font-semibold">Files</div>
-                            <div className="mt-2 text-sm text-gray-300">
-                                Open: <span className="text-white">{formatNumber(procOpenFiles, 0)}</span> · Max:{" "}
-                                <span className="text-white">{formatNumber(procMaxFiles, 0)}</span>
-                            </div>
-                        </div>
-                    ) : null}
-
-                    {/* Extra: process start time */}
-                    {procStart !== undefined ? (
-                        <div className="box-primary p-4">
-                            <div className="font-semibold">Process</div>
-                            <div className="mt-2 text-sm text-gray-300">
-                                Started: <span className="text-white">{formatDateFromEpochSecondsOrMs(procStart)}</span>
-                            </div>
-                        </div>
-                    ) : null}
-                </div>
+            <div className="flex items-center gap-3">
+                <MainStringInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search metrics, pools, states or values…"
+                    aria-label="Search system metrics"
+                    className="w-full sm:max-w-md"
+                    inputClassName="px-2.5 py-1.5 text-xs"
+                />
+                <span className="text-[10px] text-zinc-600">
+                    {groups.reduce((total, [, items]) => total + items.length, 0)} / {rows.length}
+                </span>
             </div>
-        </div>
+            <div className="grid items-start gap-2 md:grid-cols-2 2xl:grid-cols-3">
+                {groups.map(([group, items]) => (
+                    <section key={group} className="min-w-0 overflow-hidden rounded-md border border-zinc-800 bg-primary1">
+                        <h2 className="flex justify-between gap-2 border-b border-zinc-800 bg-white/[.02] px-2.5 py-2 text-xs font-medium text-zinc-300">
+                            {group}<span className="text-[10px] text-zinc-600">{items.length}</span>
+                        </h2>
+                        <dl className="divide-y divide-white/[.035]">
+                            {items.map(row => (
+                                <div key={row.key} className="flex items-start justify-between gap-3 px-2.5 py-1.5 text-[10px]">
+                                    <dt className="min-w-0 flex-1 text-zinc-500" title={row.name}>
+                                        <span className="block break-words">{raw ? row.name : label(row.name)}</span>
+                                        {row.tags && <span className="block break-words text-[9px] text-zinc-700">{row.tags}</span>}
+                                    </dt>
+                                    <dd className="max-w-[48%] break-words text-right font-mono tabular-nums text-zinc-300" title={String(row.value)}>
+                                        {formatted(row)}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    </section>
+                ))}
+            </div>
+            {!groups.length && <p className="py-8 text-center text-xs text-zinc-600">No metrics match this search.</p>}
+            <p className="text-[10px] text-zinc-600">
+                Counters are totals since startup; timers show count, total time and max. Memory pools retain current, peak and post-GC values.
+                Unsupported measurements are omitted, not reported as zero. Environment variables, startup arguments and credentials are not included.
+            </p>
+        </section>
     );
 }

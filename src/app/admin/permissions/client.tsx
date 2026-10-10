@@ -67,8 +67,8 @@ export default function PermissionsClient() {
         Promise.all([request<RolePolicy[]>(), request<UserOption[]>("/user-options")])
             .then(([rolePolicies, options]) => {
                 if (active) {
-                    setRoles(rolePolicies);
-                    setUsers(options);
+                    setRoles(rolePolicies.filter(policy => policy.role !== "OWNER"));
+                    setUsers(options.filter(user => user.role !== "OWNER"));
                 }
             })
             .catch(error => {
@@ -90,6 +90,7 @@ export default function PermissionsClient() {
         const version = ++selectionVersion.current;
         setError("");
         setUserPolicy(null);
+        setBusy(false);
         setValues({});
         if (mode === "role") {
             const selected = roles.find(item => item.role === role);
@@ -108,6 +109,11 @@ export default function PermissionsClient() {
         request<UserPolicy>(`/users/${encodeURIComponent(uid)}`)
             .then(policy => {
                 if (version === selectionVersion.current) {
+                    if (policy.role === "OWNER") {
+                        setUid("");
+                        setError("OWNER always has all permissions and cannot be edited.");
+                        return;
+                    }
                     setUserPolicy(policy);
                     setValues(policy.overrides);
                 }
@@ -129,10 +135,13 @@ export default function PermissionsClient() {
 
     const filteredUsers = useMemo(() => {
         const query = search.trim().toLowerCase();
-        return users.filter(user => String(user.uid) === uid
-            || user.username.toLowerCase().includes(query)
-            || String(user.uid).includes(query));
-    }, [users, search, uid]);
+        return users.filter(user => user.username.toLowerCase().includes(query)
+            || String(user.uid).includes(query))
+            .sort((a, b) => Number(b.username.toLowerCase().startsWith(query))
+                - Number(a.username.toLowerCase().startsWith(query))
+                || a.username.localeCompare(b.username))
+            .slice(0, 20);
+    }, [users, search]);
 
     const selectedRole = mode === "role" ? role : userPolicy?.role;
     const fixed = selectedRole === "OWNER" || selectedRole === "BANNED" || selectedRole === "DELETED";
@@ -144,7 +153,7 @@ export default function PermissionsClient() {
             const path = mode === "role" ? `/roles/${role}` : `/users/${uid}`;
             await request(path, {method: "PUT", body: JSON.stringify({permissions: values})});
             if (mode === "role") {
-                setRoles(await request<RolePolicy[]>());
+                setRoles((await request<RolePolicy[]>()).filter(policy => policy.role !== "OWNER"));
             } else {
                 const policy = await request<UserPolicy>(`/users/${uid}`);
                 setUserPolicy(policy);
@@ -214,27 +223,44 @@ export default function PermissionsClient() {
                         ))}
                     </select>
                 ) : (
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="space-y-2">
                         <MainStringInput
                             value={search}
                             onChange={setSearch}
                             placeholder="Search username or user ID"
                             aria-label="Search users"
                         />
-                        <select
-                            aria-label="User"
-                            value={uid}
-                            disabled={busy || loading}
-                            onChange={event => setUid(event.target.value)}
-                            className="rounded border border-zinc-800 bg-primary1 p-2 text-xs"
-                        >
-                            <option value="">Select a user</option>
+                        {userPolicy && (
+                            <p className="text-xs text-sky-300">
+                                Editing {userPolicy.username} · #{userPolicy.uid} · {userPolicy.role}
+                            </p>
+                        )}
+                        <div aria-label="Select a user" className="grid max-h-56 gap-1 overflow-y-auto sm:grid-cols-2">
                             {filteredUsers.map(user => (
-                                <option key={user.uid} value={user.uid}>
-                                    {user.username} · {user.role} · #{user.uid}
-                                </option>
+                                <HoverDiv
+                                    key={user.uid}
+                                    type="INFO"
+                                    disabled={busy || loading}
+                                    aria-pressed={String(user.uid) === uid}
+                                    onClick={() => setUid(String(user.uid))}
+                                    className={`justify-start gap-2 px-2 py-1.5 text-left ${String(user.uid) === uid ? "border-sky-800 bg-sky-950/20" : ""}`}
+                                >
+                                    {user.avatar ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={user.avatar} alt="" className="h-6 w-6 rounded-full object-cover" />
+                                    ) : (
+                                        <span className="grid h-6 w-6 place-items-center rounded-full bg-white/5 text-[10px]">
+                                            {user.username.slice(0, 1).toUpperCase()}
+                                        </span>
+                                    )}
+                                    <span className="min-w-0 flex-1 truncate text-xs text-zinc-300">{user.username}</span>
+                                    <span className="text-[10px] text-zinc-600">#{user.uid} · {user.role}</span>
+                                </HoverDiv>
                             ))}
-                        </select>
+                        </div>
+                        <p className="text-[10px] text-zinc-600">
+                            {filteredUsers.length ? "Up to 20 matches. Type a name or ID to narrow the list." : "No matching users."}
+                        </p>
                     </div>
                 )}
             </div>
@@ -264,24 +290,35 @@ export default function PermissionsClient() {
                         const master = values.ADMIN_ACCESS ?? userPolicy?.inherited.includes("ADMIN_ACCESS") ?? false;
                         const isAdminSection = permission.key.startsWith("ADMIN_") && permission.key !== "ADMIN_ACCESS";
                         const effective = (values[permission.key] ?? inherited) && (!isAdminSection || master);
-                        const value = values[permission.key] === undefined ? "inherit" : values[permission.key] ? "allow" : "deny";
                         return (
                             <div key={permission.key} className={`flex flex-wrap items-center justify-between gap-2 py-2.5 ${permission.key === "ADMIN_ACCESS" ? "border-t border-zinc-700" : ""}`}>
                                 <label htmlFor={`permission-${permission.key}`} className="text-xs text-zinc-300">
                                     {permission.label}
                                     {mode === "user" && <span className={`ml-2 text-[10px] ${effective ? "text-emerald-500" : "text-zinc-600"}`}>{effective ? "Allowed" : "Denied"}</span>}
                                 </label>
-                                <select
-                                    id={`permission-${permission.key}`}
-                                    value={fixed ? selectedRole === "OWNER" ? "allow" : "deny" : value}
-                                    disabled={busy || fixed}
-                                    onChange={event => change(permission.key, event.target.value)}
-                                    className="w-40 rounded border border-zinc-800 bg-primary1 px-2 py-1.5 text-xs"
-                                >
-                                    {mode === "user" && <option value="inherit">Inherit ({inherited ? "allowed" : "denied"})</option>}
-                                    <option value="allow">Allow</option>
-                                    <option value="deny">Deny</option>
-                                </select>
+                                <div className="flex items-center gap-4 text-[11px] text-zinc-500">
+                                    {mode === "user" && (
+                                        <label className="flex cursor-pointer items-center gap-1.5">
+                                            <input
+                                                type="checkbox"
+                                                checked={values[permission.key] === undefined}
+                                                disabled={busy || fixed}
+                                                onChange={event => change(permission.key, event.target.checked ? "inherit" : inherited ? "allow" : "deny")}
+                                                className="h-3.5 w-3.5 accent-sky-500"
+                                            />
+                                            Inherit
+                                        </label>
+                                    )}
+                                    <input
+                                        id={`permission-${permission.key}`}
+                                        type="checkbox"
+                                        aria-label={permission.label}
+                                        checked={fixed ? selectedRole === "OWNER" : values[permission.key] ?? inherited}
+                                        disabled={busy || fixed}
+                                        onChange={event => change(permission.key, event.target.checked ? "allow" : "deny")}
+                                        className="h-4 w-4 accent-emerald-500 disabled:opacity-40"
+                                    />
+                                </div>
                             </div>
                         );
                     })}

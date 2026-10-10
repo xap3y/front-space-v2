@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePage } from "@/context/PageContext";
-import { getAdminUrls, getUserShortUrlLogs } from "@/lib/apiGetters";
-import { ShortUrlDto, ShortUrlLog } from "@/types/url";
+import { getAdminUrls } from "@/lib/apiGetters";
+import { ShortUrlDto } from "@/types/url";
 import { UserObj } from "@/types/user";
 import { errorToast, infoToast, okToast } from "@/lib/client";
 import { useUser } from "@/hooks/useUser";
 import { createShortUrl } from "@/lib/apiPoster";
 import MainStringInput from "@/components/MainStringInput";
+import UrlViewHistory from "@/components/UrlViewHistory";
+import {decodeUrlForDisplay} from "@/lib/urlDisplay";
 import {
     FaRotateRight,
     FaChevronLeft,
@@ -46,9 +48,6 @@ export default function UrlsClient({ users }: UrlsClientProps) {
     // Logs Modal states
     const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
     const [selectedUrl, setSelectedUrl] = useState<ShortUrlDto | null>(null);
-    const [urlLogs, setUrlLogs] = useState<ShortUrlLog[]>([]);
-    const [loadingLogs, setLoadingLogs] = useState(false);
-    const [logsSearch, setLogsSearch] = useState("");
 
     // Filters state
     const [uniqueId, setUniqueId] = useState("");
@@ -181,35 +180,10 @@ export default function UrlsClient({ users }: UrlsClientProps) {
         }
     };
 
-    const handleViewLogs = async (urlObj: ShortUrlDto) => {
+    const handleViewLogs = (urlObj: ShortUrlDto) => {
         setSelectedUrl(urlObj);
         setIsLogsModalOpen(true);
-        setLoadingLogs(true);
-        setUrlLogs([]);
-        setLogsSearch("");
-        try {
-            const data = await getUserShortUrlLogs(urlObj.uniqueId);
-            if (Array.isArray(data)) {
-                setUrlLogs(data);
-            } else {
-                setUrlLogs([]);
-            }
-        } catch (err: any) {
-            console.error("Failed to fetch logs:", err);
-            setUrlLogs([]);
-        } finally {
-            setLoadingLogs(false);
-        }
     };
-
-    const filteredLogs = urlLogs.filter(log => {
-        const query = logsSearch.toLowerCase();
-        return (
-            (log.ipAddress && log.ipAddress.toLowerCase().includes(query)) ||
-            (log.userAgent && log.userAgent.toLowerCase().includes(query)) ||
-            (log.time && log.time.toLowerCase().includes(query))
-        );
-    });
 
     useEffect(() => {
         setPage("urls");
@@ -231,7 +205,6 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                 if (isLogsModalOpen) {
                     setIsLogsModalOpen(false);
                     setSelectedUrl(null);
-                    setUrlLogs([]);
                 }
             }
         };
@@ -608,8 +581,8 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                             <div className="min-w-0 flex flex-col gap-1">
                                                 <div className="text-white font-semibold truncate flex gap-2 items-center">
                                                     <span>/{u.uniqueId}</span>
-                                                    <span className="text-xs text-gray-400 font-normal truncate max-w-[200px] md:max-w-md" title={u.originalUrl}>
-                                                        → {u.originalUrl}
+                                                    <span className="text-xs text-gray-400 font-normal truncate max-w-[200px] md:max-w-md" title={decodeUrlForDisplay(u.originalUrl)}>
+                                                        → {decodeUrlForDisplay(u.originalUrl)}
                                                     </span>
                                                 </div>
                                                 <div className="text-xs text-gray-400 flex flex-wrap gap-2 mt-1">
@@ -807,7 +780,6 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                     onClick={() => {
                         setIsLogsModalOpen(false);
                         setSelectedUrl(null);
-                        setUrlLogs([]);
                     }}
                 >
                     <div 
@@ -829,7 +801,6 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                                 onClick={() => {
                                     setIsLogsModalOpen(false);
                                     setSelectedUrl(null);
-                                    setUrlLogs([]);
                                 }}
                                 className="w-7 h-7 flex items-center justify-center rounded-md text-gray-500 hover:text-white hover:bg-white/10 transition-colors text-sm"
                             >
@@ -837,62 +808,8 @@ export default function UrlsClient({ users }: UrlsClientProps) {
                             </button>
                         </div>
 
-                        {/* Search / Filter Bar */}
-                        <div className="p-4 bg-primary3/40 border-b border-zinc-800">
-                            <MainStringInput
-                                type="text"
-                                placeholder="Filter logs by IP, User Agent or Date..."
-                                value={logsSearch}
-                                onChange={setLogsSearch}
-                                className="w-full rounded-lg border-zinc-800 bg-primary3"
-                                inputClassName="px-3 py-2.5 text-xs"
-                            />
-                        </div>
-
-                        {/* Logs List Area */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                            {loadingLogs ? (
-                                <div className="space-y-3">
-                                    {Array.from({ length: 3 }).map((_, i) => (
-                                        <div key={i} className="p-3 rounded-lg border border-white/5 bg-white/[0.01] animate-pulse space-y-2">
-                                            <div className="h-3 w-1/4 bg-white/10 rounded" />
-                                            <div className="h-3 w-3/4 bg-white/5 rounded" />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : filteredLogs.length === 0 ? (
-                                <div className="text-center py-12 text-sm text-gray-500">
-                                    {urlLogs.length === 0 ? "No redirect access logged yet." : "No logs match the filter."}
-                                </div>
-                            ) : (
-                                <div className="space-y-2.5">
-                                    {filteredLogs.map((log, index) => (
-                                        <div key={index} className="p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.02] transition-colors flex flex-col md:flex-row md:items-start justify-between gap-3 text-xs">
-                                            <div className="space-y-1 min-w-0 w-full">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="font-semibold text-emerald-400 bg-emerald-400/5 px-2 py-0.5 rounded-md border border-emerald-500/10">
-                                                        {log.ipAddress || "Unknown IP"}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-500">
-                                                        {log.time ? formatDate(log.time) : "Unknown Date"}
-                                                    </span>
-                                                </div>
-                                                <p className="text-gray-400 font-mono text-[10.5px] break-all leading-normal pt-1.5" title={log.userAgent}>
-                                                    {log.userAgent || "No User Agent"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Footer */}
-                        <div className="px-5 py-3 border-t border-zinc-800 bg-primary3/20 flex justify-between items-center text-[10px] text-gray-500">
-                            <span>Total logged redirects: <strong>{urlLogs.length}</strong></span>
-                            {filteredLogs.length !== urlLogs.length && (
-                                <span>Showing <strong>{filteredLogs.length}</strong> matches</span>
-                            )}
+                        <div className="flex-1 overflow-y-auto px-4 pb-4">
+                            <UrlViewHistory key={selectedUrl.uniqueId} urlId={selectedUrl.uniqueId} admin defaultOpen />
                         </div>
                     </div>
                 </div>

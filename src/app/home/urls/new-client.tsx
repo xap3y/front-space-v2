@@ -12,6 +12,8 @@ import {FaExternalLinkAlt} from "react-icons/fa";
 import {errorToast} from "@/lib/client";
 
 import {useRouter} from "next/navigation";
+import UrlViewHistory from "@/components/UrlViewHistory";
+import {decodeUrlForDisplay} from "@/lib/urlDisplay";
 
 type DefaultResponse = { error: boolean; message: string };
 
@@ -291,6 +293,7 @@ function UrlRow({
 }) {
     const shortUrl = url.urlSet?.shortUrl || '';
     const created = safeFormat(url.createdAt);
+    const displayUrl = decodeUrlForDisplay(url.originalUrl);
 
     return (
         <li className="px-3 py-2 group hover:bg-white/5 transition-colors">
@@ -316,8 +319,8 @@ function UrlRow({
                 </div>
 
                 {/* Original URL (hidden on small screens) */}
-                <div className="hidden lg:block truncate text-gray-500 text-xs flex-1 min-w-0" title={url.originalUrl}>
-                    → {url.originalUrl}
+                <div className="hidden lg:block truncate text-gray-500 text-xs flex-1 min-w-0" title={displayUrl}>
+                    → {displayUrl}
                 </div>
 
                 {/* Actions */}
@@ -340,9 +343,10 @@ function UrlRow({
             </div>
 
             {/* Original URL (shown on small screens) */}
-            <div className="md:hidden text-gray-500 text-xs truncate mt-1" title={url.originalUrl}>
-                {url.originalUrl}
+            <div className="md:hidden text-gray-500 text-xs truncate mt-1" title={displayUrl}>
+                {displayUrl}
             </div>
+            <UrlViewHistory urlId={url.uniqueId} />
         </li>
     );
 }

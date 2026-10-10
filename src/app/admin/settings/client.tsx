@@ -8,6 +8,7 @@ import MainStringInput from "@/components/MainStringInput";
 import {errorToast, okToast} from "@/lib/client";
 import {getApiUrl} from "@/lib/core";
 import {useUser} from "@/hooks/useUser";
+import IpMapperSettings from "@/components/IpMapperSettings";
 
 type BooleanSettingKey = "autoAvifConvert" | "imageUploadingEnabled" | "localStorageUploadsEnabled" |
     "r2StorageUploadsEnabled" | "pasteCreatingEnabled" | "tempMailEnabled" | "filePackEnabled" |
@@ -193,6 +194,7 @@ export default function SettingsClient() {
                     </> : <p className="text-sm text-gray-500">No preset is available.</p>}
                 </div>
             </div>
+            <IpMapperSettings />
         </section>
     );
 }

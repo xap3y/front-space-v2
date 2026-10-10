@@ -587,14 +587,16 @@ export default function UsersClient({
                                                             <FaIdCardClip />
                                                             Change role
                                                         </ActionButton>
-                                                        <HoverDiv
-                                                            type="INFO"
-                                                            icon={<FaShieldHalved />}
-                                                            className="px-3 py-2 text-sm rounded-lg"
-                                                            onClick={() => router.push(`/admin/permissions?user=${u.uid}`)}
-                                                        >
-                                                            Permissions
-                                                        </HoverDiv>
+                                                        {u.role !== "OWNER" && (
+                                                            <HoverDiv
+                                                                type="INFO"
+                                                                icon={<FaShieldHalved />}
+                                                                className="px-3 py-2 text-sm rounded-lg"
+                                                                onClick={() => router.push(`/admin/permissions?user=${u.uid}`)}
+                                                            >
+                                                                Permissions
+                                                            </HoverDiv>
+                                                        )}
                                                     </>
                                                 )}
                                                 <ActionButton onClick={() => openModal("apiKey", u.uid, u.username)}>

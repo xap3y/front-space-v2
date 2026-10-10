@@ -47,3 +47,13 @@ test("permissions management is OWNER only and route boundaries are exact", () =
     assert.equal(canAccessAdminPath(user, "/admin/images/example"), true);
     assert.equal(canAccessAdminPath(user, "/admin/unknown"), false);
 });
+
+test("URL history IP and UA grants are independent from one another and admin access", () => {
+    const user = {role: "USER", permissions: ["URL_VIEW_IP"]};
+    assert.equal(hasPermission(user, "URL_VIEW_IP"), true);
+    assert.equal(hasPermission(user, "URL_VIEW_UA"), false);
+    assert.equal(canAccessAdminPath(user, "/admin/urls"), false);
+    user.permissions = ["URL_VIEW_UA"];
+    assert.equal(hasPermission(user, "URL_VIEW_IP"), false);
+    assert.equal(hasPermission(user, "URL_VIEW_UA"), true);
+});
