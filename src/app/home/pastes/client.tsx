@@ -17,6 +17,7 @@ import {PasteDto} from "@/types/paste";
 import {errorToast, infoToast} from "@/lib/client";
 import {DefaultResponse} from "@/types/core";
 import {FaLock, FaPlus, FaRotateRight, FaTrash, FaChevronLeft, FaChevronRight} from "react-icons/fa6";
+import RotateLinkButton from "@/components/RotateLinkButton";
 import {FaExternalLinkAlt, FaRegCopy} from "react-icons/fa";
 import HoverDiv from "@/components/HoverDiv";
 
@@ -277,6 +278,18 @@ export default function HomePastesPage() {
                                                 >
                                                     <FaRegCopy className="h-4 w-4" />
                                                 </NativeButton>
+                                                <RotateLinkButton
+                                                    type="PASTE"
+                                                    user={user}
+                                                    resourceId={p.uniqueId}
+                                                    onRotated={({uniqueId, urlSet}) => {
+                                                        if (urlSet) {
+                                                            setPastes(current => current.map(item =>
+                                                                item.uniqueId === p.uniqueId ? {...item, uniqueId, urlSet} : item
+                                                            ));
+                                                        }
+                                                    }}
+                                                />
                                                 <NativeDeleteButton
                                                     onClick={() => deletePaste(p)}
                                                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs border-2 border-red-500/40 hover:border-red-500 hover:in-shadow bg-red-600/10 hover:bg-red-600/20 text-red-300 transition-all duration-200"

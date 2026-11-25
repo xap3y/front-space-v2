@@ -10,13 +10,14 @@ import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {MdLogout, MdMenu, MdClose, MdOutlineAdminPanelSettings} from 'react-icons/md';
 import {useUser} from "@/hooks/useUser";
-import {firstAdminPath} from "@/lib/permissions";
+import {firstAdminPath, hasPermission, type Permission} from "@/lib/permissions";
 
 type SidebarItem = {
     title: string;
     href: string;   // e.g. '/inbox'
     icon: React.ReactNode;
     page: string;   // internal page name for your usePage() context
+    permission?: Permission; // hide the item when the user lacks this permission
 };
 
 interface Props {
@@ -55,6 +56,10 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
     const setPage = (name: string) => {};
 
     const { user, loadingUser, error } = useUser();
+    const items = useMemo(
+        () => sidebar.filter(item => !item.permission || hasPermission(user, item.permission)),
+        [sidebar, user]
+    );
 
     const router = useRouter();
     const pathname = usePathname();
@@ -84,7 +89,7 @@ export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Prop
 
     const NavList = ({ onItemClick }: { onItemClick: (item: SidebarItem) => void }) => (
         <ul className="divide-y divide-white/5">
-            {sidebar.map((item) => {
+            {items.map((item) => {
                 const isActive = activePage ? item.page === activePage : false;
                 return (
                     <li key={item.page}>
@@ -161,7 +166,7 @@ className={styles.navIndicator}
                 <div className="flex-1 overflow-y-auto px-3 py-3">
                     {showSkeleton ? (
                         <ul className="divide-y divide-white/5 animate-pulse">
-                            {sidebar.map((item) => (
+                            {items.map((item) => (
                                 <li key={item.page} className={styles.navItem}>
                                     <div className="h-5 w-5 rounded bg-white/5 shrink-0" />
                                     <div className="h-3.5 rounded bg-white/5" style={{width: `${Math.min(116, Math.max(52, item.title.length * 7))}px`}} />
@@ -272,7 +277,7 @@ className={styles.navIndicator}
                     <div className="flex-1 overflow-y-auto px-3 py-3">
                         {showSkeleton ? (
                             <ul className="divide-y divide-white/5 animate-pulse">
-                                {sidebar.map((item) => (
+                                {items.map((item) => (
                                     <li key={item.page} className={styles.navItem}>
                                         <div className="h-5 w-5 rounded bg-white/5 shrink-0" />
                                         <div className="h-3.5 rounded bg-white/5" style={{width: `${Math.min(116, Math.max(52, item.title.length * 7))}px`}} />

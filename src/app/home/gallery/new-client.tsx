@@ -11,6 +11,9 @@ import ResourceList from "@/components/ui/ResourceList";
 import Pagination from "@/components/ui/Pagination";
 
 import { type ReactNode, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import RotateLinkButton from "@/components/RotateLinkButton";
+import type {UserObj} from "@/types/user";
+import type {UrlSet} from "@/types/core";
 import { useUser } from '@/hooks/useUser';
 import { FaExternalLinkAlt, FaRegTrashAlt, FaDownload, FaLock, FaCopy, FaInfoCircle, FaTimes } from 'react-icons/fa';
 import { FaPlus, FaRotateRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
@@ -18,7 +21,7 @@ import { copyToClipboard, deleteImageApi as apiDeleteImage, errorToast, okToast 
 import { getUserImages } from "@/lib/apiGetters";
 import { updateImagePassword } from "@/lib/apiPoster";
 import { ImageListResponse, UploadedImagePage } from "@/types/image";
-import { getR2VideoUrl, isVideoFile } from "@/lib/core";
+import { isVideoFile } from "@/lib/core";
 
 import { useRouter } from "next/navigation";
 import { useGalleryRows } from "@/hooks/useGalleryRow";
@@ -122,7 +125,7 @@ export default function GalleryPage() {
 
     // Construct query string helper
     const queryString = useMemo(() => {
-        const params = new URLSearchParams();
+        const params = new URLSearchParams({excludeProfilePictures: "true"});
         if (selectedFormats.length > 0) {
             params.append("formats", selectedFormats.join(","));
         }
@@ -240,6 +243,12 @@ export default function GalleryPage() {
             errorToast(err instanceof Error ? err.message : 'Delete failed');
         }
     }, [user?.apiKey]);
+
+    const handleRotated = useCallback((oldId: string, uniqueId: string, urls: UrlSet) => {
+        setItems(current => current.map(image => image.uniqueId === oldId ? {...image, uniqueId, urls} : image));
+        setEnlargedImage(current => current?.uniqueId === oldId ? {...current, uniqueId, urls} : current);
+        setPasswordModalImage(current => current?.uniqueId === oldId ? {...current, uniqueId, urls} : current);
+    }, []);
 
     const openPasswordModal = useCallback((image: UploadedImagePage) => {
         setPasswordModalImage(image);
@@ -546,7 +555,8 @@ export default function GalleryPage() {
                                             <div className="relative h-full w-full">
                                                 <MediaCard
                                                     item={img}
-                                                    apiKey={user?.apiKey}
+                                                    user={user}
+                                                    onRotated={handleRotated}
                                                     onDelete={handleDelete}
                                                     onPasswordChange={openPasswordModal}
                                                     onEnlarge={setEnlargedImage}
@@ -674,11 +684,9 @@ export default function GalleryPage() {
                         <div className="w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden bg-black/40 rounded-xl p-2">
                             {isVideoFile(enlargedImage.type || '') ? (
                                 <video
-                                    src={enlargedImage.location === "R2"
-                                        ? getR2VideoUrl("media", enlargedImage.uniqueId)
-                                        : enlargedImage.location === "LOCAL"
-                                            ? `/api/images/${encodeURIComponent(enlargedImage.uniqueId)}`
-                                            : enlargedImage.urls?.userPreference || enlargedImage.urls?.rawUrl || undefined}
+                                    src={enlargedImage.location === "LOCAL"
+                                        ? `/api/images/${encodeURIComponent(enlargedImage.uniqueId)}`
+                                        : enlargedImage.urls?.rawUrl || enlargedImage.urls?.userPreference || undefined}
                                     controls
                                     autoPlay
                                     preload="metadata"
@@ -704,14 +712,16 @@ export default function GalleryPage() {
 // MediaCard component
 const MediaCard = memo(function MediaCard({
     item,
-    apiKey,
+    user,
+    onRotated,
     onDelete,
     onPasswordChange,
     onEnlarge,
     lang
 }: {
     item: UploadedImagePage;
-    apiKey?: string;
+    user: UserObj | null;
+    onRotated: (oldId: string, uniqueId: string, urls: UrlSet) => void;
     onDelete: (item: UploadedImagePage) => void;
     onPasswordChange: (item: UploadedImagePage) => void;
     onEnlarge: (item: UploadedImagePage) => void;
@@ -728,12 +738,11 @@ const MediaCard = memo(function MediaCard({
         shortUrl: item.urls?.shortUrl || '',
     };
 
-    const title = deriveTitle(item, urls.original);
+    const title = item.description || item.uniqueId || "file";
     const size = formatBytes(item.size || 0);
 
     const showPlaceholder = imgFailed || !urls.original || item.size === 0;
     const rawUrl = item.location === "LOCAL" ? `/api/images/${encodeURIComponent(item.uniqueId)}` : urls.original;
-    const videoUrl = item.location === "R2" ? getR2VideoUrl("media", item.uniqueId) : rawUrl;
 
     return (
         <Surface className="group rounded-xl border-2 border-zinc-800 hover:border-zinc-700 bg-primary1 hover:bg-secondary/40 shadow-lg shadow-black/30 hover:shadow-black/50 transition-all duration-200 w-full h-full flex flex-col overflow-hidden">
@@ -752,7 +761,7 @@ const MediaCard = memo(function MediaCard({
                     </div>
                 ) : isVideo ? (
                     <video
-                        src={videoUrl ? versionedVideoUrl(videoUrl, videoVersion) : undefined}
+                        src={rawUrl ? versionedVideoUrl(rawUrl, videoVersion) : undefined}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         preload="metadata"
                         poster={item.location === "R2" ? undefined : item.urls?.posterUrl || undefined}
@@ -790,6 +799,17 @@ const MediaCard = memo(function MediaCard({
                     >
                         <FaCopy className="h-3 w-3" />
                     </span>
+                    <RotateLinkButton
+                        type="IMAGE"
+                        user={user}
+                        resourceId={item.uniqueId}
+                        className="h-5 w-5 text-[10px]"
+                        onRotated={({uniqueId, urlSet}) => {
+                            if (urlSet) {
+                                onRotated(item.uniqueId, uniqueId, urlSet);
+                            }
+                        }}
+                    />
                     {item.requiresPassword && (
                         <span className="inline-flex items-center gap-1 bg-amber-500/20 backdrop-blur-md text-[10px] px-1.5 py-0.5 rounded-md border border-amber-500/30 text-amber-300" title="Password protected">
                             <FaLock className="h-3 w-3" />
@@ -805,7 +825,7 @@ const MediaCard = memo(function MediaCard({
             <div className="p-3 space-y-1.5 flex-1 flex flex-col justify-between">
                 <div className="min-w-0 flex items-center justify-between gap-2 h-[16px]">
                     {item.type?.toLowerCase() === "mp4" && (
-                        <VideoConversionControl compact kind="image" id={item.uniqueId} size={item.size} apiKey={apiKey} onComplete={setVideoVersion} />
+                        <VideoConversionControl compact kind="image" id={item.uniqueId} size={item.size} apiKey={user?.apiKey} onComplete={setVideoVersion} />
                     )}
                     <p className="text-xs font-semibold text-gray-200 truncate group-hover:text-white transition-colors cursor-pointer" onClick={() => onEnlarge(item)} title={title}>
                         {title}.{item.type}
@@ -858,18 +878,6 @@ const MediaCard = memo(function MediaCard({
         </Surface>
     );
 });
-
-function deriveTitle(item: UploadedImagePage, originalUrl: string): string {
-    if (item.description) return item.description;
-    try {
-        const u = new URL(originalUrl);
-        const path = u.pathname.split('/').filter(Boolean);
-        const last = path[path.length - 1] || item.uniqueId;
-        return decodeURIComponent(last);
-    } catch {
-        return item.uniqueId || 'file';
-    }
-}
 
 function formatBytes(bytes: number): string {
     if (!bytes || bytes < 0) return '0 B';

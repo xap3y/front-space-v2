@@ -11,7 +11,7 @@ import {useEffect, useRef, useState} from "react";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import LoadingPage from "@/components/LoadingPage";
 import {useImage} from "@/context/ImageContext";
-import {getApiUrl, getR2VideoUrl, isVideoFile} from "@/lib/core";
+import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
 import {FaArrowDown, FaCheck, FaDownload, FaGlobe, FaImage, FaLink, FaLock} from "react-icons/fa6";
 import {toast} from "react-toastify";
@@ -66,7 +66,7 @@ export default function Page() {
 
     const isMobile = useIsMobile();
     const rawVideoUrl = image?.location === "R2" && !imageUrl?.startsWith("blob:")
-        ? getR2VideoUrl("media", image.uniqueId)
+        ? image.urlSet.rawUrl || imageUrl
         : imageUrl;
     const videoUrl = rawVideoUrl ? versionedVideoUrl(rawVideoUrl, videoVersion) : rawVideoUrl;
 
@@ -506,7 +506,7 @@ export default function Page() {
                                 <h1 className="text-base sm:text-xl font-bold leading-tight text-whitesmoke">
                                     {lang?.pages?.image_viewer?.password_required}
                                 </h1>
-                                <ResourceDeleteButton kind="image" id={String(uid)} ownerId={image.uploader?.uid} />
+                                <ResourceDeleteButton kind="image" id={image.uniqueId} ownerId={image.uploader?.uid} />
                             </div>
 
                             {/* Form */}

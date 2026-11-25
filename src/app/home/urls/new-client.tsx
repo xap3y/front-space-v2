@@ -14,6 +14,8 @@ import { format } from 'date-fns';
 import {ShortUrlDto} from "@/types/url";
 import {getUserShortUrls} from "@/lib/apiGetters";
 import {toast} from "react-toastify";
+import RotateLinkButton from "@/components/RotateLinkButton";
+import type {UserObj} from "@/types/user";
 import {deleteShortUrl} from "@/lib/apiPoster";
 import {FaExternalLinkAlt} from "react-icons/fa";
 import {errorToast} from "@/lib/client";
@@ -249,6 +251,10 @@ export default function UrlsPage() {
                                     <UrlRow
                                         key={u.uniqueId}
                                         url={u}
+                                        user={user}
+                                        onRotated={(uniqueId, urlSet) => setUrls(current => current.map(item =>
+                                            item.uniqueId === u.uniqueId ? {...item, uniqueId, urlSet} : item
+                                        ))}
                                         onCopy={() => handleCopy(u.urlSet?.shortUrl || "")}
                                         onDelete={() => handleDelete(u)}
                                     />
@@ -271,10 +277,14 @@ export default function UrlsPage() {
 
 function UrlRow({
                     url,
+                    user,
+                    onRotated,
                     onCopy,
                     onDelete
                 }: {
     url: ShortUrlDto;
+    user: UserObj;
+    onRotated: (uniqueId: string, urlSet: ShortUrlDto["urlSet"]) => void;
     onCopy: () => void;
     onDelete: () => void;
 }) {
@@ -319,6 +329,16 @@ function UrlRow({
                     >
                         <FaRegCopy className="h-3 w-3" />
                     </NativeButton>
+                    <RotateLinkButton
+                        type="URL"
+                        user={user}
+                        resourceId={url.uniqueId}
+                        onRotated={({uniqueId, urlSet}) => {
+                            if (urlSet) {
+                                onRotated(uniqueId, urlSet);
+                            }
+                        }}
+                    />
                     <NativeDeleteButton
                         onClick={onDelete}
                         className="p-1.5 rounded-md border-2 border-red-500/40 bg-red-600/10 hover:bg-red-600/20 text-red-400 transition-all duration-200"

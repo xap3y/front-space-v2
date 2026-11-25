@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { FaCopy, FaFloppyDisk, FaMagnifyingGlass, FaSpinner, FaTrashCan } from "react-icons/fa6";
 import HoverDiv, { DeleteButton as SharedDeleteButton, type HoverDivProps } from "@/components/HoverDiv";
 import MainStringInput, { type MainStringInputProps } from "@/components/MainStringInput";
@@ -93,6 +93,29 @@ export function Field({ label, hint, error, id, className, inputClassName, ...pr
                 </p>
             )}
         </div>
+    );
+}
+
+/**
+ * Password-like field that browsers don't treat as a login password: a plain text input
+ * masked with `.text-dots` once focused (same approach as the register page).
+ */
+export function SecretField({ className, onFocus, ...props }: Omit<FieldProps, "type">) {
+    const [masked, setMasked] = useState(false);
+    return (
+        <Field
+            {...props}
+            type="text"
+            autoComplete="off"
+            data-1p-ignore
+            data-lpignore="true"
+            data-bwignore="true"
+            className={cx(masked && "text-dots", className)}
+            onFocus={(event) => {
+                setTimeout(() => setMasked(true), 100);
+                onFocus?.(event);
+            }}
+        />
     );
 }
 

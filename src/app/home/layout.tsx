@@ -8,7 +8,7 @@ import {PageProvider} from "@/context/PageContext";
 import {IoMailOutline} from "react-icons/io5";
 import {PiLinkSimpleBold} from "react-icons/pi";
 import { FiTool } from "react-icons/fi";
-import {MdFolderZip} from "react-icons/md";
+import {MdFolderZip, MdPhotoLibrary} from "react-icons/md";
 
 export default function HomeLayout({
                                         children,
@@ -28,6 +28,7 @@ export default function HomeLayout({
                                 {title: "Analytics", icon: <FaChartLine className={"w-[20px] h-[20px]"} />, href: "/analytics", page: "analytics"},
                                 {title: "Editor · Beta", icon: <FaWandMagicSparkles className={"w-[20px] h-[20px]"} />, href: "/editor", page: "editor"},
                                 {title: lang.comp.sidebar.images, icon: <FaImages className={"w-[20px] h-[20px]"} />, href: "/gallery", page: "gallery"},
+                                {title: "Albums", icon: <MdPhotoLibrary className={"w-[20px] h-[20px]"} />, href: "/albums", page: "albums", permission: "CREATE_ALBUMS"},
                                 {title: lang.comp.sidebar.pastes, icon: <FaPaste className={"w-[20px] h-[20px]"} />, href: "/pastes", page: "pastes"},
                                 {title: lang.comp.sidebar.short_urls, icon: <FaLink className={"w-[20px] h-[20px]"} />, href: "/urls", page: "urls"},
                                 {title: lang.comp.sidebar.settings, icon: <IoIosSettings className={"w-[20px] h-[20px]"} />, href: "/settings", page: "settings"},

@@ -1,31 +1,37 @@
-import {UserObjShort} from "@/types/user";
-
-export type Uploader = {
-    id: number;
-    username: string;
+export type AlbumSummary = {
+    uniqueId: string;
+    name: string;
+    description?: string | null;
+    passwordProtected: boolean;
+    itemCount: number;
+    coverUrl?: string | null;
+    coverType?: string | null;
+    createdAt: string;
+    updatedAt: string;
 };
 
-export type ImageItem = {
+export type AlbumItem = {
     uniqueId: string;
     type: string;
-    description?: string;
+    description?: string | null;
     size: number;
     uploadedAt: string;
-    urlSet: {
-        webUrl: string;
-        portalUrl: string;
-        rawUrl: string;
-        shortUrl: string;
-        customUrl?: string | null;
-    };
-    uploader: Uploader;
+    locked: boolean;
+    portalUrl: string;
+    rawUrl: string;
+    shortUrl?: string | null;
+    posterUrl?: string | null;
 };
 
-export type Album = {
-    id: number;
+export type AlbumView = {
     uniqueId: string;
-    description?: string;
+    name: string;
+    description?: string | null;
+    passwordProtected: boolean;
+    canEdit: boolean;
     createdAt: string;
-    owner: UserObjShort;
-    images: ImageItem[];
+    updatedAt: string;
+    ownerName: string;
+    ownerAvatar?: string | null;
+    items: AlbumItem[];
 };

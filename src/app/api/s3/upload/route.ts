@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import {validateApiKeyServer} from "@/lib/serverFuncs";
+import {getApiUrl} from "@/lib/core";
 
 const s3 = new S3Client({
     region: 'auto',
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const contentType = body?.contentType?.trim();
     const filename = req.headers.get('filename');
 
-    if (!contentType || !filename) {
+    if (!contentType || !filename || !/^[a-zA-Z0-9]+$/.test(filename)) {
         return NextResponse.json({ error: 'Invalid content type or filename' }, { status: 400 })
     }
 
@@ -29,9 +29,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({error: true, message: "Missing API key"}, {status: 401});
     }
 
-    const isValidKey = await validateApiKeyServer(apiKey);
-    if (!isValidKey) {
-        return NextResponse.json({error: true, message: "Invalid API key"}, {status: 403});
+    const availability = await fetch(`${getApiUrl()}/v1/image/cloud-upload-availability/${encodeURIComponent(filename)}`, {
+        headers: {"X-API-Key": apiKey, Accept: "application/json"},
+        cache: "no-store",
+    });
+    if (!availability.ok) {
+        return new NextResponse(availability.body, {
+            status: availability.status,
+            headers: {"Content-Type": availability.headers.get("content-type") ?? "application/json"},
+        });
     }
 
     const command = new PutObjectCommand({

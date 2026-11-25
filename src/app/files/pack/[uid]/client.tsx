@@ -70,7 +70,8 @@ export function PackPageClient() {
     const [downloadError, setDownloadError] = useState<string | null>(null);
     const [previewFile, setPreviewFile] = useState<FileInfo | null>(null);
     const [videoVersion, setVideoVersion] = useState("");
-    const [previewPassword, setPreviewPassword] = useState("");
+    // Password that unlocked the pack; file and ZIP downloads must resend it.
+    const [unlockedPassword, setUnlockedPassword] = useState("");
 
     const cancelTokenRef = useRef<CancelTokenSource | null>(null);
     const requestedPackRef = useRef<string | null>(null);
@@ -79,7 +80,7 @@ export function PackPageClient() {
         try {
             const response = await axios.post(
                 `${getApiUrl()}/v1/files/pack/public/${packId}/file/${file.uniqueId}/download`,
-                {password},
+                {password: unlockedPassword || password},
                 {withCredentials: true}
             );
             window.location.assign(response.data.url);
@@ -145,6 +146,7 @@ export function PackPageClient() {
                 );
                 setRequiresPassword(false);
                 setPasswordError(null);
+                setUnlockedPassword(pwd);
                 setPassword("");
             }
         } catch (err: any) {
@@ -180,10 +182,10 @@ export function PackPageClient() {
             cancelTokenRef.current = axios.CancelToken.source();
 
             const requestBody = packInfo?.isPasswordProtected
-                ? { password: previewPassword || password }
+                ? { password: unlockedPassword || password }
                 : {};
 
-            if (packInfo?.isPasswordProtected && !packInfo.hasAccess && !previewPassword && !password) {
+            if (packInfo?.isPasswordProtected && !packInfo.hasAccess && !unlockedPassword && !password) {
                 errorToast("Password required to download");
                 setDownloading(false);
                 return;
@@ -531,15 +533,16 @@ export function PackPageClient() {
                                         </a>
 
                                         {/* Copy URL */}
-                                        <NativeButton variant="primary"
+                                        <HoverDiv
+                                            type="INFO"
                                             onClick={() =>
                                                 copyToClipboard(file.uniqueId)
                                             }
                                             className="p-2 hover:bg-blue-500 hover:bg-opacity-20 rounded transition"
                                             title="Copy URL"
-                                        >
-                                            <FaCopy className="w-4 h-4 text-blue-400" />
-                                        </NativeButton>
+                                            aria-label="Copy URL"
+                                            icon={<FaCopy className="w-4 h-4 text-blue-400" />}
+                                        />
 
                                         {/* Download */}
                                         <HoverDiv

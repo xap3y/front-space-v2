@@ -1,4 +1,5 @@
 "use client";
+import RotateLinkButton from "@/components/RotateLinkButton";
 import VideoConversionControl from "@/components/VideoConversionControl";
 import Surface from "@/components/ui/Surface";
 import {DeleteButton} from "@/components/HoverDiv";
@@ -398,6 +399,20 @@ export default function FilesPageClient() {
                                                     }`}
                                                 />
                                             </span>
+                                            {pack.isComplete && (
+                                                <RotateLinkButton
+                                                    type="FILE_PACK"
+                                                    user={user}
+                                                    resourceId={pack.packId}
+                                                    onRotated={({uniqueId}) => {
+                                                        setPacks(current => current.map(item => item.packId === pack.packId
+                                                            ? {...item, packId: uniqueId}
+                                                            : item
+                                                        ));
+                                                        setExpandedPackId(current => current === pack.packId ? uniqueId : current);
+                                                    }}
+                                                />
+                                            )}
                                             <DeleteButton
                                                 data-pack-action
 

@@ -4,10 +4,11 @@ import { SelectControl } from "@/components/ui/SelectControl";
 import Surface from "@/components/ui/Surface";
 
 
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import MainStringInput from "@/components/MainStringInput";
 import HoverDiv, {SaveButton} from "@/components/HoverDiv";
 import {FaBan, FaClock, FaGaugeHigh, FaRotateLeft, FaUserGear} from "react-icons/fa6";
+import {linkRotationResources, type LinkResourceType} from "@/lib/linkRotation";
 import {getApiUrl} from "@/lib/core";
 import {errorToast, okToast} from "@/lib/client";
 import {useUser} from "@/hooks/useUser";
@@ -90,10 +91,10 @@ function valueHint(value: number | null | undefined, bytes: boolean, inherit: bo
     return inherit ? `Inherit: ${bytes ? formatBytes(value) : value}` : "";
 }
 
-function LimitInput({label, value, placeholder, suffix, onChange}: {label: string; value: string; placeholder: string; suffix?: string; onChange: (value: string) => void}) {
+function LimitInput({label, value, placeholder, suffix, min = 0, onChange}: {label: string; value: string; placeholder?: string; suffix?: string; min?: number; onChange: (value: string) => void}) {
     return <label className="min-w-0">
         <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[.12em] text-gray-500">{label}</span>
-        <MainStringInput type="number" numericOnly min="0" step="1" value={value} placeholder={placeholder} onChange={onChange} suffix={suffix}
+        <MainStringInput type="number" numericOnly min={min} step="1" value={value} placeholder={placeholder} onChange={onChange} suffix={suffix}
                className="min-w-0 w-full rounded-lg border-white/10 bg-black/20" inputClassName="px-2.5 py-2 text-sm placeholder:text-gray-600"/>
     </label>;
 }
@@ -144,7 +145,7 @@ function UsageBar({label, used, limit, bytes}: {label: string; used: number; lim
 
 export default function ResourceLimitsClient({initialUsers, initialError = ""}: {initialUsers: UserObj[]; initialError?: string}) {
     const {user} = useUser();
-    const [tab, setTab] = useState<"roles" | "users">("roles");
+    const [tab, setTab] = useState<"roles" | "users" | "rotation">("roles");
     const [roles, setRoles] = useState<RoleLimitPolicy[]>([]);
     const [selectedRole, setSelectedRole] = useState("USER");
     const [roleForm, setRoleForm] = useState<PolicyForm>(emptyForm);
@@ -158,7 +159,7 @@ export default function ResourceLimitsClient({initialUsers, initialError = ""}: 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(initialError);
 
-    const request = async <T,>(path: string, method = "GET", body?: unknown): Promise<T> => {
+    const request = useCallback(async <T,>(path: string, method = "GET", body?: unknown): Promise<T> => {
         if (!user?.apiKey) throw new Error("Missing administrator API key");
         const response = await fetch(getApiUrl() + path, {
             method,
@@ -168,7 +169,7 @@ export default function ResourceLimitsClient({initialUsers, initialError = ""}: 
         const payload = await response.json().catch(() => null);
         if (!response.ok || payload?.error) throw new Error(String(payload?.message ?? `Request failed (${response.status})`));
         return payload.message as T;
-    };
+    }, [user?.apiKey]);
 
     useEffect(() => {
         if (!user?.apiKey) return;
@@ -244,11 +245,20 @@ export default function ResourceLimitsClient({initialUsers, initialError = ""}: 
             <Surface className="flex rounded-xl border border-white/10 bg-black/20 p-1">
                 <HoverDiv type="INFO" onClick={() => setTab("roles")} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${tab === "roles" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"}`}>Role defaults</HoverDiv>
                 <HoverDiv type="INFO" onClick={() => setTab("users")} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${tab === "users" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"}`}>User overrides</HoverDiv>
+                <HoverDiv
+                    type="INFO"
+                    onClick={() => setTab("rotation")}
+                    className={`rounded-lg px-3 py-2 text-xs font-semibold ${tab === "rotation" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-200"}`}
+                >
+                    Link rotation
+                </HoverDiv>
             </Surface>
         </header>
-        {error ? <div className="rounded-xl border border-red-500/20 bg-red-500/[.07] px-4 py-3 text-sm text-red-300">{error}</div> : null}
+        {error && tab !== "rotation" ? <div className="rounded-xl border border-red-500/20 bg-red-500/[.07] px-4 py-3 text-sm text-red-300">{error}</div> : null}
 
-        {tab === "roles" ? <>
+        {tab === "rotation" ? (
+            <RotationLimitsEditor request={request} ready={Boolean(user?.apiKey)} />
+        ) : tab === "roles" ? <>
             <Surface className="box-primary p-3 md:p-4">
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-semibold">Role policy</h2><p className="text-xs text-gray-500">Blank values are unlimited. ADMIN and OWNER always bypass policies.</p></div><div className="flex max-w-full gap-1.5 overflow-x-auto">{roles.map(item => <HoverDiv type="INFO" key={item.role} onClick={() => setSelectedRole(item.role)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold ${selectedRole === item.role ? "bg-emerald-400/10 text-emerald-300" : "text-gray-400"}`}>{item.role}</HoverDiv>)}</div></div>
                 <RuleEditor form={roleForm} setForm={setRoleForm}/>
@@ -274,4 +284,120 @@ export default function ResourceLimitsClient({initialUsers, initialError = ""}: 
             </div>
         </>}
     </section>;
+}
+
+type RotationRule = {maxCount: number; windowMinutes: number};
+type RotationPolicy = Record<LinkResourceType, RotationRule>;
+type RotationForm = Record<LinkResourceType, {maxCount: string; windowMinutes: string}>;
+
+const rotationTypes = Object.keys(linkRotationResources) as LinkResourceType[];
+const rotationPath = "/v1/admin/limits/link-rotation";
+
+function rotationFormFromPolicy(policy: RotationPolicy): RotationForm {
+    return Object.fromEntries(rotationTypes.map(type => [type, {
+        maxCount: String(policy[type].maxCount),
+        windowMinutes: String(policy[type].windowMinutes),
+    }])) as RotationForm;
+}
+
+function RotationLimitsEditor({request, ready}: {
+    request: <T>(path: string, method?: string, body?: unknown) => Promise<T>;
+    ready: boolean;
+}) {
+    const [form, setForm] = useState<RotationForm | null>(null);
+    const [error, setError] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (!ready) {
+            return;
+        }
+
+        let active = true;
+        request<RotationPolicy>(rotationPath).then(policy => {
+            if (active) {
+                setForm(rotationFormFromPolicy(policy));
+            }
+        }).catch(error => {
+            if (active) {
+                setError(error instanceof Error ? error.message : "Failed to load link rotation limits");
+            }
+        });
+
+        return () => {
+            active = false;
+        };
+    }, [ready, request]);
+
+    const change = (type: LinkResourceType, field: keyof RotationForm[LinkResourceType], value: string) => {
+        setForm(current => current && {...current, [type]: {...current[type], [field]: value}});
+    };
+
+    const save = async () => {
+        if (!form) {
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const policy = Object.fromEntries(rotationTypes.map(type => {
+                const {maxCount, windowMinutes} = form[type];
+                const count = Number(maxCount);
+                const minutes = Number(windowMinutes);
+                if (!maxCount.trim() || !Number.isInteger(count) || count < 0 || count > 2_147_483_647
+                    || !Number.isInteger(minutes) || minutes < 1 || minutes > 2_147_483_647) {
+                    throw new Error(`Enter a non-negative count and a positive duration for ${linkRotationResources[type].label}.`);
+                }
+                return [type, {maxCount: count, windowMinutes: minutes}];
+            }));
+            const updated = await request<RotationPolicy>(rotationPath, "PUT", policy);
+            setForm(rotationFormFromPolicy(updated));
+            okToast("Link rotation limits saved");
+        } catch (error) {
+            errorToast(error instanceof Error ? error.message : "Failed to save link rotation limits");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <Surface className="box-primary p-3 md:p-4">
+            <h2 className="font-semibold">Link rotation limits</h2>
+            <p className="mt-1 text-xs text-gray-500">
+                Limits apply per user and resource type over a rolling window. A maximum of 0 blocks link rotation.
+            </p>
+            {form ? (
+                <>
+                    <fieldset disabled={saving} className="mt-4 overflow-hidden rounded-xl border border-white/10">
+                        {rotationTypes.map(type => (
+                            <div key={type} className="grid gap-3 border-b border-white/10 p-3 last:border-b-0 md:grid-cols-[minmax(150px,.8fr)_minmax(0,2fr)] md:items-center md:p-4">
+                                <h3 className="text-sm font-semibold">{linkRotationResources[type].label}</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <LimitInput
+                                        label="Maximum rotations"
+                                        value={form[type].maxCount}
+                                        onChange={value => change(type, "maxCount", value)}
+                                    />
+                                    <LimitInput
+                                        label="Rolling window"
+                                        suffix="min"
+                                        min={1}
+                                        value={form[type].windowMinutes}
+                                        onChange={value => change(type, "windowMinutes", value)}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </fieldset>
+                    <div className="mt-4 flex justify-end">
+                        <SaveButton disabled={saving} onClick={() => void save()} className="px-4 py-2.5 text-sm font-semibold">
+                            Save limits
+                        </SaveButton>
+                    </div>
+                </>
+            ) : (
+                <p className="mt-4 text-sm text-gray-400">{error || "Loading link rotation limits…"}</p>
+            )}
+        </Surface>
+    );
 }

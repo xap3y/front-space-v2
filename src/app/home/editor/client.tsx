@@ -2,7 +2,7 @@
 import Surface from "@/components/ui/Surface";
 
 
-import {PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {PointerEvent as ReactPointerEvent, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState} from "react";
 import {useRouter} from "next/navigation";
 import {
     FaArrowDown, FaArrowUp, FaCircle, FaCloudArrowUp, FaDownload, FaEraser, FaEye, FaEyeSlash,
@@ -267,7 +267,7 @@ export default function ImageEditorClient() {
     const addImageSource = async (src: string, name: string, closeSource = false) => {
         try {
             const image = getImage(src);
-            await image.decode().catch(() => new Promise<void>((resolve, reject) => {image.onload = () => resolve(); image.onerror = () => reject(new Error("Image could not be loaded"));}));
+            await image.decode();
             const isFirst = layers.length === 0;
             const scale = Math.min(1, 1400 / image.naturalWidth, 1000 / image.naturalHeight);
             const width = Math.max(1, Math.round(image.naturalWidth * scale));
@@ -290,6 +290,38 @@ export default function ImageEditorClient() {
         const src = URL.createObjectURL(file);
         void addImageSource(src, file.name, !asLayer);
     };
+
+    const handlePaste = useEffectEvent((event: ClipboardEvent) => {
+        const clipboard = event.clipboardData;
+        if (!clipboard || !user) {
+            return;
+        }
+
+        const target = event.target;
+        const editingText = target instanceof HTMLElement
+            && target.closest("input, textarea, [contenteditable='true']");
+        if (editingText && clipboard.types.includes("text/plain")) {
+            return;
+        }
+
+        const imageItem = Array.from(clipboard.items).find(item =>
+            item.kind === "file" && item.type.startsWith("image/")
+        );
+        const file = imageItem?.getAsFile()
+            ?? Array.from(clipboard.files).find(file => file.type.startsWith("image/"));
+        if (!file) {
+            return;
+        }
+
+        event.preventDefault();
+        addFile(file, !sourceOpen);
+    });
+
+    useEffect(() => {
+        const onPaste = (event: ClipboardEvent) => handlePaste(event);
+        window.addEventListener("paste", onPaste);
+        return () => window.removeEventListener("paste", onPaste);
+    }, []);
 
     const openUploads = async () => {
         if (!user?.uid) return;
@@ -605,7 +637,7 @@ export default function ImageEditorClient() {
         <input ref={fileRef} hidden type="file" accept="image/*" onChange={event => addFile(event.target.files?.[0])}/>
         <input ref={layerFileRef} hidden type="file" accept="image/*" onChange={event => addFile(event.target.files?.[0], true)}/>
 
-        {sourceOpen && <div className="fixed inset-x-0 bottom-0 top-14 z-20 grid place-items-center bg-black/80 p-4 backdrop-blur-sm xl:left-64 xl:top-0"><div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#101014] p-5 shadow-2xl"><div className="mb-4 flex items-start justify-between gap-3"><div><span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Start editing</span><h2 className="mt-1 text-xl font-semibold">Choose an image source</h2><p className="mt-1 text-xs text-zinc-500">Your gallery stays private until you choose to open it.</p></div><EditorButton onClick={() => setSourceOpen(false)} className="px-3 py-2 text-xs">Close</EditorButton></div><Surface onDragOver={event => {event.preventDefault(); setDraggingFile(true);}} onDragLeave={() => setDraggingFile(false)} onDrop={event => {event.preventDefault(); setDraggingFile(false); addFile(event.dataTransfer.files[0]);}} className={`rounded-xl border-2 border-dashed p-8 text-center transition ${draggingFile ? "border-emerald-400 bg-emerald-400/10" : "border-zinc-700 bg-black/20"}`}><FaUpload className="mx-auto mb-3 text-3xl text-emerald-400"/><p className="text-sm font-semibold">Drop an image here</p><p className="mt-1 text-xs text-zinc-500">PNG, JPEG, WebP, GIF and other browser-supported formats</p></Surface><div className="mt-4 grid gap-2 sm:grid-cols-2"><EditorButton type="SAVE" icon={<FaImage/>} onClick={() => fileRef.current?.click()} className="w-full px-4 py-3 text-sm font-semibold">Select from computer</EditorButton><EditorButton icon={<FaLayerGroup/>} onClick={openUploads} className="w-full px-4 py-3 text-sm font-semibold">Select from uploads</EditorButton></div><div className="mt-2 grid gap-2 sm:grid-cols-2"><EditorButton onClick={() => setSourceOpen(false)} className="w-full px-4 py-2 text-xs">Use blank canvas</EditorButton><EditorButton onClick={() => router.push("/home/dashboard")} className="w-full px-4 py-2 text-xs">Exit editor</EditorButton></div></div></div>}
+        {sourceOpen && <div className="fixed inset-x-0 bottom-0 top-14 z-20 grid place-items-center bg-black/80 p-4 backdrop-blur-sm xl:left-64 xl:top-0"><div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#101014] p-5 shadow-2xl"><div className="mb-4 flex items-start justify-between gap-3"><div><span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Start editing</span><h2 className="mt-1 text-xl font-semibold">Choose an image source</h2><p className="mt-1 text-xs text-zinc-500">Your gallery stays private until you choose to open it.</p></div><EditorButton onClick={() => setSourceOpen(false)} className="px-3 py-2 text-xs">Close</EditorButton></div><Surface onDragOver={event => {event.preventDefault(); setDraggingFile(true);}} onDragLeave={() => setDraggingFile(false)} onDrop={event => {event.preventDefault(); setDraggingFile(false); addFile(event.dataTransfer.files[0]);}} className={`rounded-xl border-2 border-dashed p-8 text-center transition ${draggingFile ? "border-emerald-400 bg-emerald-400/10" : "border-zinc-700 bg-black/20"}`}><FaUpload className="mx-auto mb-3 text-3xl text-emerald-400"/><p className="text-sm font-semibold">Drop an image or paste with Ctrl+V</p><p className="mt-1 text-xs text-zinc-500">PNG, JPEG, WebP, GIF and other browser-supported formats</p></Surface><div className="mt-4 grid gap-2 sm:grid-cols-2"><EditorButton type="SAVE" icon={<FaImage/>} onClick={() => fileRef.current?.click()} className="w-full px-4 py-3 text-sm font-semibold">Select from computer</EditorButton><EditorButton icon={<FaLayerGroup/>} onClick={openUploads} className="w-full px-4 py-3 text-sm font-semibold">Select from uploads</EditorButton></div><div className="mt-2 grid gap-2 sm:grid-cols-2"><EditorButton onClick={() => setSourceOpen(false)} className="w-full px-4 py-2 text-xs">Use blank canvas</EditorButton><EditorButton onClick={() => router.push("/home/dashboard")} className="w-full px-4 py-2 text-xs">Exit editor</EditorButton></div></div></div>}
 
         {uploadsOpen && <div className="fixed inset-0 z-[60] grid place-items-center bg-black/80 p-4 backdrop-blur-sm"><div className="max-h-[82vh] w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#101014] shadow-2xl"><div className="flex items-center justify-between border-b border-white/10 p-4"><div><h2 className="font-semibold">Your uploads</h2><p className="text-xs text-zinc-500">Choose one image to open in the editor.</p></div><EditorButton onClick={() => setUploadsOpen(false)} className="px-3 py-2 text-xs">Close</EditorButton></div><div className="grid max-h-[68vh] grid-cols-2 gap-2 overflow-y-auto p-4 sm:grid-cols-3 md:grid-cols-4">{uploadsLoading ? <p className="col-span-full py-16 text-center text-sm text-zinc-500">Loading uploads…</p> : uploads.length ? uploads.map(image => {const src = image.urls.rawUrl; return <EditorButton type="INFO" key={image.uniqueId} onClick={() => void addImageSource(src, image.description || image.uniqueId, true)} className="group flex-col items-stretch gap-0 overflow-hidden rounded-xl bg-black/20 p-0 text-left"><img src={src} alt={image.description || image.uniqueId} className="aspect-square w-full object-cover transition group-hover:scale-[1.03]"/><span className="truncate p-2 text-[11px] text-zinc-400">{image.description || image.uniqueId}</span></EditorButton>;}) : <p className="col-span-full py-16 text-center text-sm text-zinc-500">No uploaded images found.</p>}</div></div></div>}
     </div>;

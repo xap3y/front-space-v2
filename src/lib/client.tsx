@@ -8,7 +8,6 @@ import {apiErrorMessage} from "@/lib/apiError";
 import {getApiUrl, getCurlHeaders} from "@/lib/core";
 import {CallServer, DefaultResponse} from "@/types/core";
 import LanguageModel from "@/types/LanguageModel";
-import {Album} from "@/types/album";
 import {logToServer} from "@/lib/serverFuncs";
 import {EmbedSettings, UrlPreferences} from "@/types/configs";
 import {getUserRoleBadgeElement} from "@/lib/roleBadge";
