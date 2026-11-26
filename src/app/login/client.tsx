@@ -19,12 +19,25 @@ import { useApiStatusStore } from "@/lib/stores/apiStatusStore";
 import {errorToast} from "@/lib/client";
 import {useAuthCheck} from "@/hooks/useAuthCheck";
 import {AuthChecking} from "@/components/AuthChecking";
+import HoverDiv from "@/components/HoverDiv";
 import {useUser} from "@/hooks/useUser";
 import MainStringInput from "@/components/MainStringInput";
 import {isValidEmail, toAsciiAlnumEmail, toAsciiAlnumPassword} from "@/lib/clientFuncs";
 import {useTurnstile} from "react-turnstile";
 import {TurnstileWidget} from "@/components/TurnstileWidget";
-import {FaArrowRight} from "react-icons/fa6";
+import {FaArrowRight, FaQrcode} from "react-icons/fa6";
+import type {UserObj} from "@/types/user";
+import QrLoginPanel from "./QrLoginPanel";
+
+async function setLoginCookie(user: UserObj) {
+    const token = await encrypt(JSON.stringify(user));
+    setCookie("auth_token", token, {
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+    });
+}
 
 export default function LoginPage() {
 
@@ -43,15 +56,26 @@ export default function LoginPage() {
     const [twoFactorChallenge, setTwoFactorChallenge] = useState("");
     const [twoFactorCode, setTwoFactorCode] = useState("");
     const [verifyingTwoFactor, setVerifyingTwoFactor] = useState(false);
+    const [showQrLogin, setShowQrLogin] = useState(false);
     const turnstile = useTurnstile();
 
     const lang = useTranslation();
 
-    const finishLogin = (destination: string) => {
+    const finishLogin = () => {
+        const origin = window.location.origin;
+        let destination = new URL("/home/dashboard", origin);
+        if (after.startsWith("/")) {
+            try {
+                const requested = new URL(after, origin);
+                if (requested.origin === origin) destination = requested;
+            } catch {
+                // Fall back to the dashboard when the redirect is malformed.
+            }
+        }
         // Start the authenticated app with a new document request. This prevents
         // Next's pre-login router/RSC cache from replaying an unauthenticated
         // redirect for pages that perform their own user lookup.
-        window.location.assign(destination);
+        window.location.assign(destination.href);
     };
 
     const { checkingAuth, setCheckingAuth } = useAuthCheck({
@@ -211,23 +235,11 @@ export default function LoginPage() {
                 return;
             }
 
-            const token = await encrypt(JSON.stringify(data["message"]));
-            setCookie("auth_token", token, {
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "lax",
-                maxAge: 60 * 60 * 24 * 7,
-            });
+            await setLoginCookie(data.message);
 
             toast.update(toastId, { render: lang.pages.login.success, type: "success", isLoading: false, autoClose: 1000, closeOnClick: true})
             setLoading(true);
-            setTimeout(() => {
-
-                if (after && after.startsWith("/")) {
-                    finishLogin(after);
-                    return;
-                }
-                finishLogin('/home/dashboard/');
-            }, 500)
+            setTimeout(finishLogin, 500);
         } catch (e) {
             console.error(e);
             toast.update(toastId, { render: "Login failed!", type: "error", isLoading: false, autoClose: 3000, closeOnClick: true})
@@ -246,11 +258,10 @@ export default function LoginPage() {
             });
             const data = await response.json();
             if (!response.ok || data.error) throw new Error(data.message || "Invalid authentication or backup code");
-            const token = await encrypt(JSON.stringify(data.message));
-            setCookie("auth_token", token, {secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 60 * 60 * 24 * 7});
+            await setLoginCookie(data.message);
             toast.update(toastId, {render: "Logged in successfully", type: "success", isLoading: false, autoClose: 1000});
             setLoading(true);
-            setTimeout(() => finishLogin(after && after.startsWith("/") ? after : "/home/dashboard/"), 400);
+            setTimeout(finishLogin, 400);
         } catch (err) {
             toast.update(toastId, {render: err instanceof Error ? err.message : "2FA verification failed", type: "error", isLoading: false, autoClose: 2200});
         } finally { setVerifyingTwoFactor(false); }
@@ -263,6 +274,19 @@ export default function LoginPage() {
     }
 
     if (checkingAuth) return <AuthChecking />
+
+    if (showQrLogin) {
+        return (
+            <QrLoginPanel
+                onBack={() => setShowQrLogin(false)}
+                onSignedIn={async (account) => {
+                    await setLoginCookie(account);
+                    setLoading(true);
+                    finishLogin();
+                }}
+            />
+        );
+    }
 
     const isMailValid: boolean = email == "" || isValidEmail(email)
 
@@ -310,6 +334,14 @@ export default function LoginPage() {
                                 <FaDiscord size={18} />
                                 Continue with Discord
                             </NativeButton>
+
+                            <HoverDiv
+                                className="min-h-10 w-64 px-4 py-2 text-sm font-semibold"
+                                icon={<FaQrcode aria-hidden="true" />}
+                                onClick={() => setShowQrLogin(true)}
+                            >
+                                Sign in with QR code
+                            </HoverDiv>
 
                             {/*<button
                                 className="w-64 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#0088cc] hover:bg-[#006a9e] text-white font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-[#0088cc]/20 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"

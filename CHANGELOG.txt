@@ -1,3 +1,7 @@
+26.11.2026 (Nevydáno)
+
++ Přidané přihlášení přes QR kód s náhledem účtu na počítači a potvrzením na přihlášeném telefonu
+
 26.11.2026 (1.10.0)
 
 + Přidaná stránka Changelog v administraci, která zobrazuje změny frontendu i backendu
