@@ -6,7 +6,7 @@ import {getApiUrl} from "@/lib/core";
 import {useRouter} from "next/navigation";
 
 export const HeartbeatChecker = () => {
-    const { setIsApiUp } = useApiStatusStore();
+    const setApiStatus = useApiStatusStore(state => state.setApiStatus);
     const router = useRouter();
 
     useEffect(() => {
@@ -14,20 +14,25 @@ export const HeartbeatChecker = () => {
             try {
                 console.log("[A] Checking API status...");
                 const res = await fetch(getApiUrl() + "/status", { cache: "no-store" });
-                setIsApiUp(res.ok);
                 console.log("[A] Status OK: " + res.ok);
                 if (!res.ok) {
+                    setApiStatus(false);
                     router.push("/");
+                    return;
                 }
+
+                const data: { version?: unknown } | null = await res.json().catch(() => null);
+                const version = typeof data?.version === "string" ? data.version.trim() : "";
+                setApiStatus(true, version || null);
             } catch {
-                setIsApiUp(false);
+                setApiStatus(false);
             }
         };
 
         checkApi();
         const interval = setInterval(checkApi, 30_000);
         return () => clearInterval(interval);
-    }, [setIsApiUp]);
+    }, [router, setApiStatus]);
 
     return null;
 };

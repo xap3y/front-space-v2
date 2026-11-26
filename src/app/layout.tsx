@@ -11,6 +11,7 @@ import Head from "next/head";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import CookieConsent from "@/components/CookieConsent";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import packageInfo from "../../package.json";
 
 /*const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -70,7 +71,7 @@ export default function RootLayout({
             cz-shortcut-listen="true"
             className={`dark h-full w-full antialiased bg-primary1 bg-primaryDottedSize bg-primaryDotted text-whitesmoke !font-source-code`}
         >
-        <ClientRoot>
+        <ClientRoot frontendVersion={packageInfo.version}>
             {children}
         </ClientRoot>
         <SpeedInsights />

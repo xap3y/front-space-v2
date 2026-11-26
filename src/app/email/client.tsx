@@ -210,14 +210,13 @@ export function EmailPage({ maxWidth, isPublic = false, initialTempMail = null, 
         >
             <div className="p-4 sm:p-6">
                 {/* Title row */}
-                <div className="flex items-center justify-between mb-1">
-                    <h1 className="text-3xl tracking-tight select-none font-bold">Temp Mail</h1>
+                <div className="relative z-20 mb-1 flex items-center justify-between gap-2 sm:gap-3">
+                    <h1 className="select-none text-2xl font-bold tracking-tight sm:text-3xl">Temp Mail</h1>
 
                     {/* History button — always shown once there's any history */}
                     {historyEntries.length > 0 && (
                         <TempMailHistoryPanel
                             history={historyEntries}
-                            activeMail={tempMail}
                             onReopen={handleReopen}
                             onDelete={handleDeleteHistory}
                         />

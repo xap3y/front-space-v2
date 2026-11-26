@@ -27,6 +27,7 @@ export interface MainStringInputProps
     borderColor?: string;
     className?: string;
     inputClassName?: string;
+    leadingIcon?: React.ReactNode;
     suffix?: React.ReactNode;
     suffixClassName?: string;
     numericOnly?: boolean;
@@ -51,6 +52,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
             borderColor = "border-primary0",
             className,
             inputClassName,
+            leadingIcon,
             suffix,
             suffixClassName,
             numericOnly = false,
@@ -100,6 +102,7 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
         };
 
         const isControlled = value !== undefined;
+        const hasLeadingIcon = leadingIcon != null && !multiline;
 
         return (
             <div
@@ -111,9 +114,16 @@ const MainStringInput = forwardRef<HTMLInputElement, MainStringInputProps>(
                     // disabled visuals
                     disabled && "opacity-50 cursor-not-allowed",
                     className,
-                    styles.textInput
+                    styles.textInput,
+                    hasLeadingIcon && styles.withLeadingIcon,
+                    suffix != null && styles.withSuffix
                 )}
             >
+                {hasLeadingIcon && (
+                    <span aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 flex -translate-y-1/2 text-sm text-zinc-500">
+                        {leadingIcon}
+                    </span>
+                )}
                 {multiline ? <textarea
                     {...(rest as unknown as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
                     ref={ref as React.Ref<HTMLTextAreaElement>}

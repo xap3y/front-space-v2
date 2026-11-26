@@ -1,18 +1,16 @@
 "use client";
+
+import HoverDiv from "@/components/HoverDiv";
 import Surface from "@/components/ui/Surface";
-
 import { NativeButton, NativeDeleteButton } from "@/components/ui/NativeButton";
-
-
-import React, { useEffect, useRef, useState } from "react";
-import { TempMail, TempMailHistoryEntry } from "@/hooks/useTempMail";
+import { useEffect, useId, useRef, useState } from "react";
+import type { TempMailHistoryEntry } from "@/hooks/useTempMail";
 import { MdHistory, MdClose, MdDeleteOutline, MdRestoreFromTrash } from "react-icons/md";
 import { FaBan } from "react-icons/fa";
 import { FaCircleExclamation } from "react-icons/fa6";
 
 interface Props {
     history: TempMailHistoryEntry[];
-    activeMail: TempMail | null;
     onReopen: (entry: TempMailHistoryEntry) => void;
     onDelete: (email: string) => void;
 }
@@ -35,56 +33,73 @@ function EntryStatusIcon({ entry }: { entry: TempMailHistoryEntry }) {
     return <span className="w-3 h-3 shrink-0 rounded-full bg-emerald-500/60 inline-block" title="Active" />;
 }
 
-export function TempMailHistoryPanel({ history, activeMail, onReopen, onDelete }: Props) {
+export function TempMailHistoryPanel({ history, onReopen, onDelete }: Props) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const panelId = useId();
 
-    // Close on outside click
     useEffect(() => {
         if (!open) return;
-        function handler(e: MouseEvent) {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
+        function onPointerDown(event: PointerEvent) {
+            if (event.target instanceof Node && !ref.current?.contains(event.target)) {
                 setOpen(false);
             }
         }
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
+        document.addEventListener("pointerdown", onPointerDown);
+        return () => document.removeEventListener("pointerdown", onPointerDown);
     }, [open]);
 
     const count = history.length;
 
     return (
-        <div ref={ref} className="relative">
-            {/* Toggle button — overflow-visible so badge isn't clipped */}
-            <NativeButton data-active={open}
-                onClick={() => setOpen(v => !v)}
-                style={{ overflow: "visible" }}
-                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 transition-all duration-200 text-xs font-medium select-none
-                    ${open
-                        ? "border-zinc-600 bg-primary1 text-gray-100 hover:in-shadow"
-                        : "border-zinc-800 hover:border-zinc-600 hover:in-shadow bg-primary1 text-gray-300"
-                    }`}
+        <div
+            ref={ref}
+            className="shrink-0"
+            onKeyDown={(event) => {
+                if (event.key === "Escape" && open) {
+                    setOpen(false);
+                    triggerRef.current?.focus();
+                }
+            }}
+        >
+            <HoverDiv
+                ref={triggerRef}
+                type="INFO"
+                icon={<MdHistory aria-hidden="true" />}
+                aria-expanded={open}
+                aria-controls={open ? panelId : undefined}
+                onClick={() => setOpen(current => !current)}
+                className="min-h-7 select-none whitespace-nowrap px-2.5 py-1 text-xs aria-expanded:border-zinc-600"
                 title="Temp mail session history"
             >
-                <MdHistory className="w-4 h-4" />
                 History
                 {count > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 bg-zinc-500 text-[10px] font-bold text-white rounded-full flex items-center justify-center leading-none pointer-events-none">
+                    <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 px-1 text-[10px] font-bold leading-none text-zinc-200">
                         {count > 9 ? "9+" : count}
                     </span>
                 )}
-            </NativeButton>
+            </HoverDiv>
 
             {/* Dropdown panel */}
             {open && (
-                <Surface className="absolute right-0 mt-2 w-80 rounded-xl border-2 border-zinc-800 bg-primary1 shadow-2xl z-[9999] overflow-hidden">
+                <Surface
+                    id={panelId}
+                    role="region"
+                    aria-label="Previous temp mail sessions"
+                    className="absolute right-0 top-full z-20 mt-2 w-80 max-w-full overflow-hidden shadow-2xl"
+                >
                     {/* Header */}
                     <div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-800 bg-primary2">
                         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 select-none">
                             Previous Sessions ({count})
                         </span>
                         <NativeButton
-                            onClick={() => setOpen(false)}
+                            aria-label="Close history"
+                            onClick={() => {
+                                setOpen(false);
+                                triggerRef.current?.focus();
+                            }}
                             className="text-gray-500 hover:text-gray-200 transition-colors p-0.5 rounded"
                         >
                             <MdClose className="w-3.5 h-3.5" />
@@ -92,7 +107,7 @@ export function TempMailHistoryPanel({ history, activeMail, onReopen, onDelete }
                     </div>
 
                     {/* List */}
-                    <div className="max-h-72 overflow-y-auto divide-y divide-zinc-800/60">
+                    <div className="max-h-[min(18rem,55dvh)] divide-y divide-zinc-800/60 overflow-y-auto">
                         {count === 0 ? (
                             <div className="p-4 text-center text-xs text-gray-500 select-none">
                                 No previous sessions yet.

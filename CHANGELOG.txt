@@ -1,11 +1,15 @@
-26.11.2026 (Nevydáno)
+26.11.2026 (1.11.0)
 
-+ Přidané přihlášení přes QR kód s náhledem účtu na počítači a potvrzením na přihlášeném telefonu
++ Přidané stažení konfigurací ShareX s vyplněným API klíčem v profilu
++ Přidané zobrazení verzí frontendu a backendu v patičce
+* Opravené posouvání seznamu sociálních sítí a odsazení vyhledávacího pole
+* Opravené zobrazení počítadla a nabídky historie v Temp Mailu
 
 26.11.2026 (1.10.0)
 
 + Přidaná stránka Changelog v administraci, která zobrazuje změny frontendu i backendu
 + Přidaná nabídka účtu v postranní navigaci s profilovou fotkou, UID a odznakem role
++ Přidané přihlášení přes QR kód s náhledem účtu na počítači a potvrzením na přihlášeném telefonu
 
 25.11.2026 (1.9.0)
 

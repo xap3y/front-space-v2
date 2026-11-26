@@ -12,7 +12,13 @@ import { ActiveSocketProvider } from "@/components/ActiveSocketProvider";
 
 const LanguageSwitcher = dynamic(() => import("@/components/LanguageSwitcher"));
 
-export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
+export const ClientRoot = ({
+    children,
+    frontendVersion,
+}: {
+    children: React.ReactNode;
+    frontendVersion: string;
+}) => {
 
     const [debug, setDebug] = useState(false);
     const [cookies, setCookies] = useState(false);
@@ -23,6 +29,7 @@ export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const isApiUp = useApiStatusStore(state => state.isApiUp);
+    const backendVersion = useApiStatusStore(state => state.backendVersion);
 
     return (
         <>
@@ -49,6 +56,17 @@ export const ClientRoot = ({ children }: { children: React.ReactNode }) => {
                     </div>
                 </>
             )}
+            <small className="pointer-events-none fixed bottom-1 right-2 font-mono text-[10px] leading-none text-zinc-500 print:hidden">
+                <span className="sr-only">Frontend </span>
+                v{frontendVersion}
+                {backendVersion && (
+                    <>
+                        {" ("}
+                        <span className="sr-only">Backend </span>
+                        {backendVersion})
+                    </>
+                )}
+            </small>
         </>
     );
 };
