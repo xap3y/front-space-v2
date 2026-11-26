@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import {getUser} from "@/lib/auth";
-import {UserObj} from "@/types/user";
+import type {UserObj} from "@/types/user";
+
+const avatarUpdatedEvent = "space:avatar-updated";
+
+type AvatarUpdate = {uid: UserObj["uid"]; avatar: string};
+
+export function publishAvatarUpdate(update: AvatarUpdate) {
+    window.dispatchEvent(new CustomEvent<AvatarUpdate>(avatarUpdatedEvent, {detail: update}));
+}
 
 export function useUser() {
     const [user, setUser] = useState<UserObj | null>(null);
@@ -35,9 +43,16 @@ export function useUser() {
             }
         };
 
+        const applyAvatarUpdate = (event: Event) => {
+            const {uid, avatar} = (event as CustomEvent<AvatarUpdate>).detail;
+            setUser(current => current && current.uid === uid ? {...current, avatar} : current);
+        };
+
+        window.addEventListener(avatarUpdatedEvent, applyAvatarUpdate);
         fetchUser();
         return () => {
             active = false;
+            window.removeEventListener(avatarUpdatedEvent, applyAvatarUpdate);
         };
     }, []);
 

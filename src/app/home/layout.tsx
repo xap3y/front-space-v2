@@ -1,6 +1,6 @@
 'use client';
 import {SidebarComp} from "@/components/Sidebar";
-import {FaFileAlt, FaHome, FaImages, FaPaste, FaUserCircle, FaHistory} from "react-icons/fa";
+import {FaFileAlt, FaHome, FaImages, FaPaste, FaHistory} from "react-icons/fa";
 import { IoIosSettings } from "react-icons/io";
 import {FaChartLine, FaFile, FaFolderClosed, FaLink, FaWandMagicSparkles} from "react-icons/fa6";
 import {useTranslation} from "@/hooks/useTranslation";
@@ -33,12 +33,14 @@ export default function HomeLayout({
                                 {title: lang.comp.sidebar.short_urls, icon: <FaLink className={"w-[20px] h-[20px]"} />, href: "/urls", page: "urls"},
                                 {title: lang.comp.sidebar.settings, icon: <IoIosSettings className={"w-[20px] h-[20px]"} />, href: "/settings", page: "settings"},
                                 {title: "Temp Mail", icon: <IoMailOutline className={"w-[20px] h-[20px]"} />, href: "/tempmail", page: "tempmail"},
-                                {title: lang.comp.sidebar.profile, icon: <FaUserCircle className={"w-[20px] h-[20px]"} />, href: "/profile", page: "profile"},
                                 {title: "Connections", icon: <PiLinkSimpleBold className={"w-[20px] h-[20px]"} />, href: "/connections", page: "connections"},
                                 {title: "Sessions", icon: <FaHistory className={"w-[20px] h-[20px]"} />, href: "/sessions", page: "sessions"},
                                 {title: "Tools", icon: <FiTool className={"w-[20px] h-[20px]"} />, href: "/tools", page: "tools"},
                                 {title: "Files", icon: <MdFolderZip className={"w-[20px] h-[20px]"} />, href: "/files", page: "files"},
-                            ]} logout_text={lang.comp.sidebar.logout} />
+                            ]}
+                                profileText={lang.comp.sidebar.profile}
+                                logoutText={lang.comp.sidebar.logout}
+                            />
                             <section className="flex-1 min-w-0 bg-primary1 bg-primaryDottedSize bg-primaryDotted">
                                 {children}
                             </section>

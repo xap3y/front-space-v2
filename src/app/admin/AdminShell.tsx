@@ -8,7 +8,7 @@ import LoadingPage from "@/components/LoadingPage";
 import {usePathname, useRouter} from "next/navigation";
 import {canAccessAdminPath, firstAdminPath} from "@/lib/permissions";
 import {FaDatabase, FaEnvelope, FaFileArchive, FaImage, FaLink, FaPaste, FaUserCog, FaUsers} from "react-icons/fa";
-import {MdDashboard, MdHistory, MdSettings, MdSpeed} from "react-icons/md";
+import {MdDashboard, MdHistory, MdOutlineListAlt, MdSettings, MdSpeed} from "react-icons/md";
 
 type Props = {
     children: ReactNode;
@@ -20,6 +20,12 @@ export default function AdminShell({ children }: Props) {
     const navItems: AdminNavItem[] = useMemo(
         () => [
             { title: "Overview", href: "/admin", page: "overview", icon: <MdDashboard className="h-5 w-5" /> },
+            {
+                title: "Changelog",
+                href: "/admin/changelog",
+                page: "changelog",
+                icon: <MdOutlineListAlt className="h-5 w-5" />,
+            },
             { title: "Users", href: "/admin/users", page: "users", icon: <FaUsers className="h-5 w-5" /> },
             { title: "Limits", href: "/admin/limits", page: "limits", icon: <MdSpeed className="h-5 w-5" /> },
             { title: "Invites", href: "/admin/invites", page: "invites", icon: <FaUserCog className="h-5 w-5" /> },

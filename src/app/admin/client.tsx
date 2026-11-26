@@ -5,9 +5,15 @@ import {useUser} from "@/hooks/useUser";
 import {canAccessAdminPath} from "@/lib/permissions";
 import { FaArrowRight, FaDatabase, FaEnvelope, FaImage, FaLink, FaPaste, FaUsers } from "react-icons/fa6";
 import { FaFileArchive, FaUserCog } from "react-icons/fa";
-import { MdDashboard, MdHistory, MdSettings, MdSpeed } from "react-icons/md";
+import { MdHistory, MdOutlineListAlt, MdSettings, MdSpeed } from "react-icons/md";
 
 const adminSections = [
+    {
+        title: "Changelog",
+        description: "View frontend and backend release notes.",
+        href: "/admin/changelog",
+        icon: <MdOutlineListAlt className="h-6 w-6" />,
+    },
     { title: "Event monitoring", description: "Track background tasks, logs and retry history.", href: "/admin/monitoring", icon: <MdHistory className="h-6 w-6" /> },
     { title: "Users", description: "Manage accounts, roles, and access.", href: "/admin/users", icon: <FaUsers className="h-6 w-6" /> },
     { title: "Limits", description: "Configure platform quotas and restrictions.", href: "/admin/limits", icon: <MdSpeed className="h-6 w-6" /> },

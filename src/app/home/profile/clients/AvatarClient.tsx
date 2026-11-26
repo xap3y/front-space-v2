@@ -4,14 +4,20 @@ import HoverDiv from "@/components/HoverDiv";
 
 import {useRef, useState} from "react";
 import {useRouter} from "next/navigation";
+import {publishAvatarUpdate} from "@/hooks/useUser";
 import {FaCamera, FaCloudArrowUp, FaXmark} from "react-icons/fa6";
 import {errorToast, okToast} from "@/lib/client";
 import {getApiUrl} from "@/lib/core";
 import {responseErrorMessage} from "@/lib/apiError";
 
-type Props = { avatar?: string; username: string; apiKey: string };
+type Props = {
+    uid: number;
+    avatar?: string;
+    username: string;
+    apiKey: string;
+};
 
-export default function AvatarClient({avatar, username, apiKey}: Props) {
+export default function AvatarClient({uid, avatar, username, apiKey}: Props) {
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
     const [open, setOpen] = useState(false);
@@ -47,6 +53,7 @@ export default function AvatarClient({avatar, username, apiKey}: Props) {
             const nextAvatar = payload?.message?.avatar;
             if (typeof nextAvatar !== "string") throw new Error("The server returned an invalid profile picture URL");
             setCurrentAvatar(nextAvatar);
+            publishAvatarUpdate({uid, avatar: nextAvatar});
             if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
             setFile(null); setPreview(null); setOpen(false);
             okToast("Profile picture updated"); router.refresh();

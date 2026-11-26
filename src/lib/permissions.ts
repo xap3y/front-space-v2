@@ -49,6 +49,9 @@ export function hasPermission(user: UserObj | null | undefined, permission: Perm
 }
 
 export function canAccessAdminPath(user: UserObj | null | undefined, pathname: string): boolean {
+    if (pathname === "/admin/changelog") {
+        return hasPermission(user, "ADMIN_OVERVIEW");
+    }
     if (pathname === "/admin/permissions" || pathname.startsWith("/admin/permissions/")) {
         return user?.role === "OWNER";
     }

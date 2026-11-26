@@ -1,0 +1,17 @@
+26.11.2026 (1.10.0)
+
++ Přidaná stránka Changelog v administraci, která zobrazuje změny frontendu i backendu
++ Přidaná nabídka účtu v postranní navigaci s profilovou fotkou, UID a odznakem role
+
+25.11.2026 (1.9.0)
+
++ Přidaná správa a sdílení alb s obrázky a videi
++ Přidaná obnova odkazů na obrázky, pasty, krátké URL a balíčky souborů
++ Přidané vkládání obrázků ze schránky do editoru
+* Opravené vyhledávání uživatelů
+* Skryté profilové fotky v galerii
+
+10.10.2026 (1.8.0)
+
++ Přidané sledování úloh na pozadí v administraci
+~ Sjednocený vzhled ovládacích prvků aplikace

@@ -5,12 +5,16 @@ import Surface from "@/components/ui/Surface";
 import { NativeButton } from "@/components/ui/NativeButton";
 
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import {MdLogout, MdMenu, MdClose, MdOutlineAdminPanelSettings} from 'react-icons/md';
+import {MdClose, MdKeyboardArrowUp, MdLogout, MdMenu, MdOutlineAdminPanelSettings, MdPersonOutline} from 'react-icons/md';
+import HoverDiv from "@/components/HoverDiv";
 import {useUser} from "@/hooks/useUser";
 import {firstAdminPath, hasPermission, type Permission} from "@/lib/permissions";
+import {getUserRoleBadgeElement} from "@/lib/roleBadge";
+import type {UserObj} from "@/types/user";
 
 type SidebarItem = {
     title: string;
@@ -22,7 +26,8 @@ type SidebarItem = {
 
 interface Props {
     sidebar: SidebarItem[];
-    logout_text: string;
+    profileText: string;
+    logoutText: string;
     brandTitle?: string; // optional brand text shown on desktop and in the drawer
 }
 
@@ -50,12 +55,175 @@ function useLockBodyScroll(locked: boolean) {
     }, [locked]);
 }
 
-export function SidebarComp({ sidebar, logout_text, brandTitle = 'SPACE' }: Props) {
+const defaultAvatar = "/images/default-avatar.svg";
+const accountLinkClass = "flex min-h-9 items-center gap-2.5 rounded-md px-2.5 py-2 text-sm motion-safe:transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-zinc-400";
+
+function SidebarAccount({user, profileText, logoutText, profileActive, onNavigate}: {
+    user: UserObj;
+    profileText: string;
+    logoutText: string;
+    profileActive: boolean;
+    onNavigate: () => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const accountRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const menuId = useId();
+    const adminHref = firstAdminPath(user);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        const closeOutside = (event: PointerEvent) => {
+            if (event.target instanceof Node && !accountRef.current?.contains(event.target)) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("pointerdown", closeOutside);
+        return () => document.removeEventListener("pointerdown", closeOutside);
+    }, [open]);
+
+    const navigate = () => {
+        setOpen(false);
+        onNavigate();
+    };
+
+    return (
+        <div
+            ref={accountRef}
+            className="flex flex-col-reverse"
+            onBlur={(event) => {
+                if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) {
+                    setOpen(false);
+                }
+            }}
+            onKeyDown={(event) => {
+                if (event.key === "Escape" && open) {
+                    event.stopPropagation();
+                    setOpen(false);
+                    triggerRef.current?.focus();
+                }
+            }}
+        >
+            <HoverDiv
+                ref={triggerRef}
+                type="INFO"
+                aria-expanded={open}
+                aria-controls={menuId}
+                className="group w-full select-none justify-start gap-3 rounded-lg px-2.5 py-2 text-left aria-expanded:border-zinc-600"
+                onClick={() => {
+                    triggerRef.current?.focus();
+                    setOpen(current => !current);
+                }}
+                icon={
+                    <img
+                        src={user.avatar || defaultAvatar}
+                        alt=""
+                        className="h-10 w-10 shrink-0 rounded-full border border-white/10 bg-primary0 object-cover"
+                        onError={(event) => {
+                            if (event.currentTarget.getAttribute("src") !== defaultAvatar) {
+                                event.currentTarget.src = defaultAvatar;
+                            }
+                        }}
+                    />
+                }
+            >
+                <span className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
+                    <span className="flex max-w-full min-w-0 items-baseline gap-1 text-sm leading-tight">
+                        <span className="min-w-0 truncate font-semibold text-white" title={user.username}>
+                            {user.username}
+                        </span>
+                        <span className="shrink-0 text-zinc-400">({user.uid})</span>
+                    </span>
+                    {getUserRoleBadgeElement(user.role, {size: "xs"})}
+                </span>
+                <span
+                    aria-hidden="true"
+                    className="text-zinc-400 motion-safe:transition-transform group-aria-expanded:rotate-180"
+                >
+                    <MdKeyboardArrowUp className="h-5 w-5" />
+                </span>
+            </HoverDiv>
+
+            <div
+                id={menuId}
+                inert={!open}
+                className={`grid motion-safe:transition-[grid-template-rows,opacity] motion-safe:duration-150 motion-safe:ease-out ${
+                    open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                }`}
+            >
+                <div className="min-h-0 overflow-hidden">
+                    <Surface className="mb-2 max-h-[45dvh] overflow-y-auto border p-1.5">
+                        <ul className="space-y-1">
+                            <li>
+                                <Link
+                                    href="/home/profile"
+                                    aria-current={profileActive ? "page" : undefined}
+                                    className={`${accountLinkClass} ${
+                                        profileActive
+                                            ? "bg-sky-400/10 text-sky-200 ring-1 ring-inset ring-sky-400/25"
+                                            : "text-zinc-200 hover:bg-white/[.07]"
+                                    }`}
+                                    onClick={navigate}
+                                >
+                                    <MdPersonOutline
+                                        aria-hidden="true"
+                                        className={`h-4 w-4 shrink-0 ${profileActive ? "text-sky-300" : "text-zinc-400"}`}
+                                    />
+                                    {profileText}
+                                </Link>
+                            </li>
+                            {adminHref && (
+                                <li>
+                                    <Link
+                                        href={adminHref}
+                                        className={`${accountLinkClass} text-zinc-200 hover:bg-white/[.07]`}
+                                        onClick={navigate}
+                                    >
+                                        <MdOutlineAdminPanelSettings aria-hidden="true" className="h-4 w-4 shrink-0 text-zinc-400" />
+                                        Admin
+                                    </Link>
+                                </li>
+                            )}
+                            <li className="border-t border-white/10 pt-1">
+                                <a
+                                    href="/logout"
+                                    className={`${accountLinkClass} text-red-300 hover:bg-red-500/10`}
+                                    onClick={navigate}
+                                >
+                                    <MdLogout aria-hidden="true" className="h-4 w-4 shrink-0" />
+                                    {logoutText}
+                                </a>
+                            </li>
+                        </ul>
+                    </Surface>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SidebarAccountSkeleton() {
+    return (
+        <div aria-hidden="true" className="flex items-center gap-3 rounded-lg border border-white/5 px-2.5 py-2 motion-safe:animate-pulse">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-white/5" />
+            <div className="space-y-2">
+                <div className="h-3 w-24 rounded bg-white/5" />
+                <div className="h-3 w-12 rounded bg-white/5" />
+            </div>
+        </div>
+    );
+}
+
+export function SidebarComp({ sidebar, profileText, logoutText, brandTitle = 'SPACE' }: Props) {
     // If you have a usePage() context, plug it in here:
     // const { pageName, setPage } = usePage();
     const setPage = (name: string) => {};
 
-    const { user, loadingUser, error } = useUser();
+    const { user, loadingUser } = useUser();
     const items = useMemo(
         () => sidebar.filter(item => !item.permission || hasPermission(user, item.permission)),
         [sidebar, user]
@@ -130,6 +298,17 @@ className={styles.navIndicator}
 
     if (!loadingUser && !user) return null;
 
+    const accountFooter = user ? (
+        <SidebarAccount
+            user={user}
+            profileText={profileText}
+            logoutText={logoutText}
+            profileActive={pathname === "/home/profile" || pathname.startsWith("/home/profile/")}
+            onNavigate={() => setMobileOpen(false)}
+        />
+    ) : <SidebarAccountSkeleton />;
+
+
     return (
         <>
             {/* Mobile top bar */}
@@ -163,7 +342,7 @@ className={styles.navIndicator}
                 <div className="border-b border-white/10" />
 
                 {/* Nav */}
-                <div className="flex-1 overflow-y-auto px-3 py-3">
+                <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
                     {showSkeleton ? (
                         <ul className="divide-y divide-white/5 animate-pulse">
                             {items.map((item) => (
@@ -178,59 +357,15 @@ className={styles.navIndicator}
                     )}
                 </div>
 
-                {/* Footer / Logout */}
-                <div className="border-t border-white/10 p-3">
-                    {showSkeleton ? (
-                        <div className="animate-pulse space-y-0">
-                            <div className={styles.navItem}>
-                                <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
-                                <div className="h-3.5 w-14 bg-white/5 rounded" />
-                            </div>
-                            <div className={styles.navItem}>
-                                <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
-                                <div className="h-3.5 w-16 bg-white/5 rounded" />
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            {firstAdminPath(user) && (
-                                <a href={firstAdminPath(user) ?? "/admin"} className="w-full block">
-                                    <NativeButton variant="ghost"
-                                        className={`${styles.navItem}
-                        w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                        text-gray-200 hover:bg-cyan-600/15 hover:text-white transition-colors
-                      `}
-                                        aria-label={"Admin"}
-                                        title={"Admin"}
-                                    >
-                                        <MdOutlineAdminPanelSettings className="h-5 w-5" />
-                                        <span>Admin</span>
-                                    </NativeButton>
-                                </a>
-                            )}
-                            {user && (
-                                <a href="/logout" className="w-full block">
-                                    <NativeButton variant="ghost"
-                                        className={`${styles.navItem}
-                        w-full inline-flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                        text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors
-                      `}
-                                        aria-label={logout_text}
-                                        title={logout_text}
-                                    >
-                                        <MdLogout className="h-5 w-5" />
-                                        <span>{logout_text}</span>
-                                    </NativeButton>
-                                </a>
-                            )}
-                        </>
-                    )}
+                <div className="shrink-0 border-t border-white/10 p-3">
+                    {accountFooter}
                 </div>
             </aside>
 
             {/* Mobile drawer + backdrop (not full height; inset-y-4 adds margins) */}
             <div
                 aria-hidden={!mobileOpen}
+                inert={!mobileOpen}
                 className={`
           xl:hidden fixed inset-0 z-40
           ${mobileOpen ? 'pointer-events-auto' : 'pointer-events-none'}
@@ -274,7 +409,7 @@ className={styles.navIndicator}
                     </div>
 
                     {/* Drawer nav (scrolls, with thin separators) */}
-                    <div className="flex-1 overflow-y-auto px-3 py-3">
+                    <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
                         {showSkeleton ? (
                             <ul className="divide-y divide-white/5 animate-pulse">
                                 {items.map((item) => (
@@ -289,33 +424,8 @@ className={styles.navIndicator}
                         )}
                     </div>
 
-                    {/* Drawer footer */}
-                    <div className="border-t border-white/10 p-3">
-                        {showSkeleton ? (
-                            <div className="animate-pulse space-y-0">
-                                <div className={styles.navItem}>
-                                    <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
-                                    <div className="h-3.5 w-14 bg-white/5 rounded" />
-                                </div>
-                                <div className={styles.navItem}>
-                                    <div className="h-5 w-5 bg-white/5 rounded shrink-0" />
-                                    <div className="h-3.5 w-16 bg-white/5 rounded" />
-                                </div>
-                            </div>
-                        ) : (
-                            user && (
-                                <a href="/logout" className="w-full block">
-                                    <NativeButton variant="ghost"
-                                        className={[styles.navItem, "\n                      w-full inline-flex items-center gap-3 px-3 py-3 rounded-lg text-sm\n                      text-gray-200 hover:bg-red-600/15 hover:text-white transition-colors\n                    "].join(" ")}
-                                        aria-label={logout_text}
-                                        title={logout_text}
-                                    >
-                                        <MdLogout className="h-5 w-5" />
-                                        <span>{logout_text}</span>
-                                    </NativeButton>
-                                </a>
-                            )
-                        )}
+                    <div className="shrink-0 border-t border-white/10 p-3">
+                        {accountFooter}
                     </div>
                 </Surface>
             </div>

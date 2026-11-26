@@ -33,7 +33,12 @@ export default function ProfileShell({user, discordContent}: Props) {
             <Surface className="relative overflow-hidden box-primary p-5 md:p-7">
                 <div className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-blue-600/10 blur-3xl" />
                 <div className="relative flex flex-col items-center gap-5 sm:flex-row">
-                    <AvatarClient avatar={user.avatar} username={user.username} apiKey={user.apiKey} />
+                    <AvatarClient
+                        uid={user.uid}
+                        avatar={user.avatar}
+                        username={user.username}
+                        apiKey={user.apiKey}
+                    />
                     <div className="min-w-0 flex-1 text-center sm:text-left">
                         <div className="flex flex-col items-center gap-2 sm:flex-row"><h1 className="truncate text-3xl font-bold tracking-tight">{user.username}</h1>{getUserRoleBadgeServer(user.role as RoleType)}</div>
                         <p className="mt-2 flex items-center justify-center gap-2 text-sm text-zinc-400 sm:justify-start"><FaEnvelope className="text-zinc-600" />{user.email}</p>

@@ -46,6 +46,15 @@ test("admin master switch is required for all sections, not content rights", () 
     assert.equal(firstAdminPath(user), "/admin/images");
 });
 
+test("changelog uses the overview permission and the admin master switch", () => {
+    const user = {role: "ADMIN", permissions: ["ADMIN_OVERVIEW"]};
+    assert.equal(canAccessAdminPath(user, "/admin/changelog"), false);
+    user.permissions.push("ADMIN_ACCESS");
+    assert.equal(canAccessAdminPath(user, "/admin/changelog"), true);
+    assert.equal(canAccessAdminPath(user, "/admin/changelog-extra"), false);
+    assert.equal(canAccessAdminPath({role: "ADMIN", permissions: ["ADMIN_ACCESS", "ADMIN_SYSTEM"]}, "/admin/changelog"), false);
+});
+
 test("permissions management is OWNER only and route boundaries are exact", () => {
     const user = {role: "ADMIN", permissions: PERMISSIONS.map(permission => permission.key)};
     assert.equal(canAccessAdminPath(user, "/admin/permissions"), false);
