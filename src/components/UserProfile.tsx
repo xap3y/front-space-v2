@@ -19,8 +19,7 @@ import {SocialLinkButton} from "@/components/SocialLinkButton";
 import {UserObj} from "@/types/user";
 import {useTranslation} from "@/hooks/useTranslation";
 import {getUserRoleBadge} from "@/lib/client";
-import {UserPopupCard} from "@/components/UserPopupCard";
-import {useState} from "react";
+import {UserHoverCard} from "@/components/UserPopupCard";
 import {useIsMobile} from "@/hooks/utils";
 import {useHoverCard} from "@/hooks/useHoverCard";
 
@@ -258,14 +257,7 @@ export function UserProfile({ user }: Props) {
 
             {
                 user.invitor && (
-                    <div
-                        className={`pointer-events-none transition-all duration-200 ease-out transform ${
-                            showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                        } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
-                        style={{ top: position.y + 10, left: position.x + 20 }}
-                    >
-                        <UserPopupCard user={user.invitor as UserObj} lang={lang} />
-                    </div>
+                    <UserHoverCard open={showCard} position={position} user={user.invitor} memberSince={lang.global.member_since} />
                 )
             }
         </div>

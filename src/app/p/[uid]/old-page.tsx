@@ -9,8 +9,7 @@ import {PasteDto} from "@/types/paste";
 import hljs from 'highlight.js';
 
 import 'highlight.js/styles/vs2015.min.css';
-import {UserPopupCard} from "@/components/UserPopupCard";
-import {UserObj} from "@/types/user";
+import {UserHoverCard} from "@/components/UserPopupCard";
 import LanguageModel from "@/types/LanguageModel";
 import {useTranslation} from "@/hooks/useTranslation";
 import {useIsMobile} from "@/hooks/utils";
@@ -95,14 +94,7 @@ export default function Page() {
                 <span>{paste.urlSet.shortUrl}</span>
             </div>
 
-            <div
-                className={`pointer-events-none transition-all duration-200 ease-out transform ${
-                    showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
-                style={{ top: position.y + 10, left: position.x + 20 }}
-            >
-                <UserPopupCard user={paste.uploader as UserObj} lang={lang} />
-            </div>
+            <UserHoverCard open={showCard} position={position} user={paste.uploader} memberSince={lang.global.member_since} />
         </>
     )
 }

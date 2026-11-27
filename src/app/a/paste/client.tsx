@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { useTranslation } from "@/hooks/useTranslation";
 import LoadingPage from "@/components/LoadingPage";
-import {errorToast, infoToast, okToast, validateApiKey} from "@/lib/client";
+import {errorToast, okToast, validateApiKey} from "@/lib/client";
+import {apiErrorMessage, responseErrorMessage} from "@/lib/apiError";
 import { getApiUrl } from "@/lib/core";
 import { ErrorToast } from "@/components/ErrorToast";
 import { LoadingDot } from "@/components/GlobalComponents";
@@ -17,7 +18,6 @@ import { FaCheck } from "react-icons/fa6";
 import { useDebounce } from "@/hooks/useDebounce";
 import MainStringInput from "@/components/MainStringInput";
 import {UserObjShort} from "@/types/user";
-import {DefaultResponse} from "@/types/core";
 
 export default function PasteCreator() {
     const router = useRouter();
@@ -87,6 +87,7 @@ export default function PasteCreator() {
     };
 
     const submit = async () => {
+        if (creating) return;
         const effectiveKey = user?.apiKey || apiKey?.trim();
 
         if (!title.trim() || !content.trim()) {
@@ -96,16 +97,14 @@ export default function PasteCreator() {
             return errorToast("API key is required.", 2000);
         }
 
-        // Re-validate key right before creating
-        const keyOk = await validateApiKey(effectiveKey);
-        if (!keyOk) {
-            setIsKeyValid(false);
-            return errorToast("Invalid API key.");
-        }
-
         setCreating(true);
 
         try {
+            if (!await validateApiKey(effectiveKey)) {
+                setIsKeyValid(false);
+                throw new Error("Invalid API key.");
+            }
+
             const res = await fetch(getApiUrl() + "/v1/paste/create", {
                 method: "POST",
                 headers: {
@@ -123,8 +122,7 @@ export default function PasteCreator() {
             });
 
             if (!res.ok) {
-                const errText = await res.text().catch(() => "Failed to create paste.");
-                throw new Error(errText || "Failed to create paste.");
+                throw new Error(await responseErrorMessage(res, "Failed to create paste."));
             }
 
             const data = await res.json();
@@ -141,9 +139,9 @@ export default function PasteCreator() {
 
             okToast("Paste created successfully!", 1200);
             router.push(`/p/${uniqueId}`);
-        } catch (err: any) {
-            errorToast(JSON.parse(err["message"])["message"] || "Failed to create paste.");
+        } catch (error) {
             setCreating(false);
+            errorToast(apiErrorMessage(error, "Failed to create paste."));
         }
     };
 
@@ -225,17 +223,9 @@ export default function PasteCreator() {
                             </div>
                         )}
 
-                        {/* Create button */}
-                        {!creating ? (
-                            <NativeButton variant="primary" type="submit" disabled={creating} className="w-full duration-200 bg-blue-500 hover:bg-blue-600 border-2 border-blue-600 text-white p-2 rounded">
-                                {"Create"}
-                            </NativeButton>
-                        ) : (
-                            <div className="w-full flex items-center justify-center gap-3 border-2 border-blue-600 bg-blue-500 text-white p-2 rounded">
-                                <LoadingDot />
-                                <span>{"Creating..."}</span>
-                            </div>
-                        )}
+                        <NativeButton type="submit" disabled={creating} aria-busy={creating || undefined} className="w-full disabled:!opacity-100">
+                            {creating ? "Creating..." : "Create"}
+                        </NativeButton>
                     </div>
                 </Surface>
             </form>

@@ -17,8 +17,7 @@ import { useHoverCard } from "@/hooks/useHoverCard";
 import { FaArrowDown } from "react-icons/fa6";
 import { infoToast, okToast } from "@/lib/client";
 import { FaCopy } from "react-icons/fa";
-import { UserObj } from "@/types/user";
-import { UserPopupCard } from "@/components/UserPopupCard";
+import { UserHoverCard } from "@/components/UserPopupCard";
 import {BundledTheme} from "shiki/themes";
 import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
 import ResourceDeleteButton from "@/components/ResourceDeleteButton";
@@ -644,14 +643,7 @@ export default function Page() {
                 </div>
             </div>
 
-            <Surface
-                className={`pointer-events-none transition-all duration-200 ease-out transform ${
-                    showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                } absolute box-primary p-4 z-50 flex flex-row gap-4`}
-                style={{ top: position.y + 10, left: position.x + 20 }}
-            >
-                <UserPopupCard user={paste.uploader as UserObj} lang={lang} />
-            </Surface>
+            <UserHoverCard open={showCard} position={position} user={paste.uploader} memberSince={lang.global.member_since} />
 
             <style jsx global>{`
                 .nice-scrollbar {

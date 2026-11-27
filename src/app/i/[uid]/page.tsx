@@ -6,28 +6,27 @@ import Surface from "@/components/ui/Surface";
 import { NativeButton } from "@/components/ui/NativeButton";
 
 
-import {notFound, useParams, useRouter} from "next/navigation";
-import {useEffect, useRef, useState} from "react";
+import {notFound, useParams} from "next/navigation";
+import {useEffect, useState} from "react";
 import {getImageInfoApi} from "@/lib/apiGetters";
 import LoadingPage from "@/components/LoadingPage";
 import {useImage} from "@/context/ImageContext";
 import {getApiUrl, isVideoFile} from "@/lib/core";
 import {UploadedImage} from "@/types/image";
-import {FaArrowDown, FaCheck, FaDownload, FaGlobe, FaImage, FaLink, FaLock} from "react-icons/fa6";
+import {FaLock} from "react-icons/fa6";
 import {toast} from "react-toastify";
 import {useTranslation} from "@/hooks/useTranslation";
-import {IoMdTrash} from "react-icons/io";
 import {useUser} from "@/hooks/useUser";
-import {UserPopupCard} from "@/components/UserPopupCard";
-import {UserObj} from "@/types/user";
+import {UserHoverCard} from "@/components/UserPopupCard";
 import {useHoverCard} from "@/hooks/useHoverCard";
 import {useIsMobile} from "@/hooks/utils";
-import {copyToClipboard, deleteImageApi, errorToast, infoToast} from "@/lib/client";
 import {FaEye, FaEyeSlash} from "react-icons/fa";
 import MainStringInput from "@/components/MainStringInput";
 import AuthenticatedPageNavClient from "@/components/AuthenticatedPageNavClient";
 import {hasPermission} from "@/lib/permissions";
 import ResourceDeleteButton from "@/components/ResourceDeleteButton";
+import ImageActions from "./ImageActions";
+import ui from "@/components/ui/ui.module.css";
 
 export default function Page() {
 
@@ -44,25 +43,9 @@ export default function Page() {
     const [imageUrl, setimageUrl] = useState<string | null>(null);
     const [videoVersion, setVideoVersion] = useState("");
     const [isReadOnly, setIsReadOnly] = useState(true);
-    const [open, setOpen] = useState(false);
-    const [copiedOption, setCopiedOption] = useState<string | null>(null);
-    const copyMenuRef = useRef<HTMLDivElement>(null);
     const [showPassword, setShowPassword] = useState(false);
 
-    const toggleDropdown = () => setOpen(!open);
-
-    const handleCopyUrl = (option: string, value: string) => {
-        if (!value) return errorToast(`${option} is not available`);
-        copyToClipboard(value, lang);
-        setCopiedOption(option);
-        window.setTimeout(() => {
-            setOpen(false);
-            setCopiedOption(null);
-        }, 650);
-    };
-
     const lang = useTranslation();
-    const router = useRouter();
 
     const isMobile = useIsMobile();
     const rawVideoUrl = image?.location === "R2" && !imageUrl?.startsWith("blob:")
@@ -77,22 +60,6 @@ export default function Page() {
         handleMouseLeave,
         handleMouseMove,
     } = useHoverCard(isMobile);
-
-    useEffect(() => {
-        if (!open) return;
-        const close = (event: MouseEvent) => {
-            if (!copyMenuRef.current?.contains(event.target as Node)) setOpen(false);
-        };
-        const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") setOpen(false);
-        };
-        document.addEventListener("mousedown", close);
-        window.addEventListener("keydown", closeOnEscape);
-        return () => {
-            document.removeEventListener("mousedown", close);
-            window.removeEventListener("keydown", closeOnEscape);
-        };
-    }, [open]);
 
     useEffect(() => {
 
@@ -162,47 +129,6 @@ export default function Page() {
         //console.log(image)
     }, [uid, setImage, loadingUser]);
 
-    const reportImage = () => {
-        toast.error("Not implemented yet!", {
-            autoClose: 500,
-            closeOnClick: true
-        })
-    }
-
-    const deleteImage = async () => {
-        if (!image || !user || !user.apiKey) {
-            errorToast("You need to be logged!")
-            return;
-        }
-
-        const toastId = toast.loading("Deleting image...");
-
-        try {
-            await deleteImageApi(image.uniqueId, user.apiKey);
-            toast.update(toastId, {
-                render: "Image deleted successfully",
-                type: "success",
-                autoClose: 1200,
-                closeOnClick: true,
-                isLoading: false
-            })
-            setShowImage(false);
-            setLoading(true)
-
-            setTimeout(() => {
-                router.push("/i")
-            }, 200);
-        } catch (err) {
-            toast.update(toastId, {
-                render: err instanceof Error ? err.message : "Failed to delete image",
-                type: "error",
-                autoClose: 1200,
-                closeOnClick: true,
-                isLoading: false
-            })
-        }
-    }
-
     const fetchImageBlob = async (pass?: string) => {
         const toastId = toast.loading(lang.toasts.loading.fetching_image);
         setLoading(true)
@@ -257,22 +183,6 @@ export default function Page() {
         }
     };
 
-    function downloadImage() {
-        if (!image) return;
-        fetch(imageUrl || "")
-            .then(res => res.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = image.uniqueId + "." + image.type;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            });
-    }
-
     const handleSubmitPassword = async () => {
         localStorage.setItem("image_password_" + uid, password);
         await fetchImageBlob();
@@ -320,7 +230,7 @@ export default function Page() {
             <AuthenticatedPageNavClient />
             {(!passwordRequired && showImage && image.type) ? (
                 <>
-                    <div className={"overflow-y-scroll overflow-x-hidden"}>
+                    <div className="overflow-x-clip">
 
                         <div className={"flex min-h-screen w-full items-center justify-center lg:mb-0 pb-56"}>
                             <Surface className={"p-4 mt-2 mx-4 lg:mx-0 shadow-sm flex flex-col items-center box-primary"} onMouseMove={handleMouseMove}>
@@ -390,83 +300,7 @@ export default function Page() {
                                 </div>
 
 
-                                <div className={"flex flex-row gap-4 mt-4 flex-wrap justify-center w-full lg:text-base text-sm font-bold"}>
-
-                                    {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-green-600 text-white px-2 rounded"} onClick={downloadImage}>
-                                        <FaDownload />
-                                        {lang.pages.image_viewer.download_button_text}
-                                    </button>*/}
-
-                                    <a
-                                        className={"lg:h-11 h-9 flex items-center gap-2 text-white px-2 rounded border border-white/10 bg-primary hover:bg-secondary"}
-                                        href={user?.uid === image.uploader?.uid && image.location === "LOCAL"
-                                            ? `/api/images/${encodeURIComponent(image.uniqueId)}?download=true`
-                                            : `${image.urlSet.rawUrl}${image.urlSet.rawUrl?.includes("?") ? "&" : "?"}download=true&password=${encodeURIComponent(password)}`}
-                                        target={"_self"}
-                                        rel="noopener noreferrer"
-                                        onClick={(e) => {
-                                            infoToast("Downloading image")
-                                        }}
-                                    >
-                                        <FaDownload className="h-4 w-4" />
-                                        {lang.pages.image_viewer.download_button_text}
-                                    </a>
-
-                                    {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-telegram text-white px-2 rounded"} onClick={copyToClipboard}>
-                                        <FaRegCopy />
-                                        {lang.pages.image_viewer.copy_button_text}
-                                    </button>*/}
-
-                                    <div ref={copyMenuRef} className="relative inline-block text-left">
-                                        <NativeButton data-active={open}
-                                            type="button"
-                                            aria-haspopup="menu"
-                                            aria-expanded={open}
-                                            className={`lg:h-11 h-9 flex items-center gap-2 border px-3 rounded-lg transition ${open ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-200" : "border-white/10 bg-primary text-white hover:bg-secondary"}`}
-                                            onClick={toggleDropdown}
-                                        >
-                                            <FaLink className="h-4 w-4" />
-                                            {lang.pages.image_viewer.copy_button_text}
-                                            <FaArrowDown className={`ml-1 h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-                                        </NativeButton>
-
-                                        <Surface
-                                            role="menu"
-                                            className={`absolute bottom-full right-0 z-50 mb-2 max-h-[calc(100vh-2rem)] w-[min(290px,calc(100vw-1.5rem))] origin-bottom-right overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/95 p-1.5 text-left shadow-2xl shadow-black/60 backdrop-blur-xl transition duration-150 ${
-                                                open ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-1 scale-[.98] opacity-0"
-                                            }`}
-                                        >
-                                            <div className="px-3 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500">Copy image link</div>
-                                            {[
-                                                {key: "Short URL", description: "Compact link for sharing", value: image?.urlSet.shortUrl || "", icon: <FaLink/>},
-                                                {key: "Portal URL", description: "Opens this image viewer", value: image?.urlSet.portalUrl || `https://space.xap3y.eu/i/${uid}`, icon: <FaGlobe/>},
-                                                {key: "Raw URL", description: "Direct link to the media file", value: image?.urlSet.rawUrl || "", icon: <FaImage/>},
-                                            ].map(option => <NativeButton
-                                                type="button"
-                                                role="menuitem"
-                                                key={option.key}
-                                                disabled={!option.value}
-                                                onClick={() => handleCopyUrl(option.key, option.value)}
-                                                className="group flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition hover:bg-white/[.07] focus-visible:bg-white/[.07] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                                            >
-                                                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg border transition ${copiedOption === option.key ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300" : "border-white/10 bg-white/[.035] text-zinc-400 group-hover:text-white"}`}>{copiedOption === option.key ? <FaCheck/> : option.icon}</span>
-                                                <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-zinc-100">{copiedOption === option.key ? "Copied" : option.key}</span><span className="block truncate text-[11px] font-normal text-zinc-500">{option.description}</span></span>
-                                            </NativeButton>)}
-                                        </Surface>
-                                    </div>
-
-                                    {/*<button className={"lg:h-11 h-9 flex items-center gap-2 bg-red-600 text-white px-2 rounded"} onClick={reportImage} >
-                                        <MdReport />
-                                        {lang.pages.image_viewer.report_button_text}
-                                    </button>*/}
-
-                                    {/* TODO - DELETE */}
-                                    <ResourceDeleteButton
-                                        kind="image"
-                                        id={image.uniqueId}
-                                        ownerId={image.uploader?.uid}
-                                        className="h-9! lg:h-11! px-3! text-xs!"
-                                    />
+                                <ImageActions image={image} password={password} viewerId={user?.uid}>
                                     {image.type?.toLowerCase() === "mp4" && user?.uid === image.uploader?.uid && (
                                         <VideoConversionControl
                                             kind="image"
@@ -477,7 +311,7 @@ export default function Page() {
                                         />
                                     )}
 
-                                </div>
+                                </ImageActions>
 
                             </Surface>
                         </div>
@@ -486,14 +320,7 @@ export default function Page() {
 
                     {
                         image.uploader && (
-                            <div
-                                className={`pointer-events-none transition-all duration-200 ease-out transform ${
-                                    showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                                } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
-                                style={{ top: position.y + 10, left: position.x + 20 }}
-                            >
-                                <UserPopupCard user={image.uploader as UserObj} lang={lang} />
-                            </div>
+                            <UserHoverCard open={showCard} position={position} user={image.uploader} memberSince={lang.global.member_since} />
                         )
                     }
                 </>
@@ -506,7 +333,7 @@ export default function Page() {
                                 <h1 className="text-base sm:text-xl font-bold leading-tight text-whitesmoke">
                                     {lang?.pages?.image_viewer?.password_required}
                                 </h1>
-                                <ResourceDeleteButton kind="image" id={image.uniqueId} ownerId={image.uploader?.uid} />
+                                <ResourceDeleteButton kind="image" id={image.uniqueId} ownerId={image.uploader?.uid} className={ui.button} />
                             </div>
 
                             {/* Form */}

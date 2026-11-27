@@ -175,7 +175,6 @@ export async function getImageInfoApi(uid: string): Promise<UploadedImage | null
     //console.log(data);
     if (data.error) return null;
     const img = data["data"] as UploadedImage;
-    if (img.uploader) img.uploader.createdAt = new Date(img.uploader.createdAt).toLocaleString()
     img.uploadedAt = new Date(img.uploadedAt).toLocaleString()
     return img;
 }
@@ -189,7 +188,6 @@ export async function getPasteApi(uid: string): Promise<PasteDto | null> {
 
     const pasteDto = data["data"] as PasteDto;
 
-    pasteDto.uploader.createdAt = new Date(pasteDto.uploader.createdAt).toLocaleString()
     pasteDto.createdAt = new Date(pasteDto.createdAt).toLocaleString()
 
     return pasteDto;

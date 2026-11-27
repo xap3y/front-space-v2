@@ -10,7 +10,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {MdClose, MdKeyboardArrowUp, MdLogout, MdMenu, MdOutlineAdminPanelSettings, MdPersonOutline} from 'react-icons/md';
-import HoverDiv from "@/components/HoverDiv";
 import {useUser} from "@/hooks/useUser";
 import {firstAdminPath, hasPermission, type Permission} from "@/lib/permissions";
 import {getUserRoleBadgeElement} from "@/lib/roleBadge";
@@ -56,7 +55,7 @@ function useLockBodyScroll(locked: boolean) {
 }
 
 const defaultAvatar = "/images/default-avatar.svg";
-const accountLinkClass = "flex min-h-9 items-center gap-2.5 rounded-md px-2.5 py-2 text-sm motion-safe:transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-zinc-400";
+const accountLinkClass = "flex min-h-9 items-center gap-2 rounded-md px-2.5 py-1.5 text-xs motion-safe:transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-sky-400";
 
 function SidebarAccount({user, profileText, logoutText, profileActive, onNavigate}: {
     user: UserObj;
@@ -67,7 +66,7 @@ function SidebarAccount({user, profileText, logoutText, profileActive, onNavigat
 }) {
     const [open, setOpen] = useState(false);
     const accountRef = useRef<HTMLDivElement>(null);
-    const triggerRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const menuId = useId();
     const adminHref = firstAdminPath(user);
 
@@ -108,31 +107,29 @@ function SidebarAccount({user, profileText, logoutText, profileActive, onNavigat
                 }
             }}
         >
-            <HoverDiv
+            <NativeButton
                 ref={triggerRef}
-                type="INFO"
+                type="button"
                 aria-expanded={open}
                 aria-controls={menuId}
-                className="group w-full select-none justify-start gap-3 rounded-lg px-2.5 py-2 text-left aria-expanded:border-zinc-600"
+                className="group w-full cursor-pointer select-none !justify-start !gap-2.5 rounded-lg !py-2 text-left"
                 onClick={() => {
                     triggerRef.current?.focus();
                     setOpen(current => !current);
                 }}
-                icon={
-                    <img
-                        src={user.avatar || defaultAvatar}
-                        alt=""
-                        className="h-10 w-10 shrink-0 rounded-full border border-white/10 bg-primary0 object-cover"
-                        onError={(event) => {
-                            if (event.currentTarget.getAttribute("src") !== defaultAvatar) {
-                                event.currentTarget.src = defaultAvatar;
-                            }
-                        }}
-                    />
-                }
             >
-                <span className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
-                    <span className="flex max-w-full min-w-0 items-baseline gap-1 text-sm leading-tight">
+                <img
+                    src={user.avatar || defaultAvatar}
+                    alt=""
+                    className="size-9 shrink-0 rounded-full border border-white/10 bg-primary0 object-cover"
+                    onError={(event) => {
+                        if (event.currentTarget.getAttribute("src") !== defaultAvatar) {
+                            event.currentTarget.src = defaultAvatar;
+                        }
+                    }}
+                />
+                <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
+                    <span className="flex max-w-full min-w-0 items-baseline gap-1 text-xs leading-tight">
                         <span className="min-w-0 truncate font-semibold text-white" title={user.username}>
                             {user.username}
                         </span>
@@ -144,9 +141,9 @@ function SidebarAccount({user, profileText, logoutText, profileActive, onNavigat
                     aria-hidden="true"
                     className="text-zinc-400 motion-safe:transition-transform group-aria-expanded:rotate-180"
                 >
-                    <MdKeyboardArrowUp className="h-5 w-5" />
+                    <MdKeyboardArrowUp className="size-4" />
                 </span>
-            </HoverDiv>
+            </NativeButton>
 
             <div
                 id={menuId}
@@ -156,8 +153,8 @@ function SidebarAccount({user, profileText, logoutText, profileActive, onNavigat
                 }`}
             >
                 <div className="min-h-0 overflow-hidden">
-                    <Surface className="mb-2 max-h-[45dvh] overflow-y-auto border p-1.5">
-                        <ul className="space-y-1">
+                    <div className="mb-1.5 max-h-[45dvh] overflow-y-auto rounded-lg border border-white/10 bg-[#141416] p-1.5">
+                        <ul className="flex flex-col-reverse gap-1">
                             <li>
                                 <Link
                                     href="/home/profile"
@@ -188,7 +185,7 @@ function SidebarAccount({user, profileText, logoutText, profileActive, onNavigat
                                     </Link>
                                 </li>
                             )}
-                            <li className="border-t border-white/10 pt-1">
+                            <li className="border-b border-white/10 pb-1">
                                 <a
                                     href="/logout"
                                     className={`${accountLinkClass} text-red-300 hover:bg-red-500/10`}
@@ -199,7 +196,7 @@ function SidebarAccount({user, profileText, logoutText, profileActive, onNavigat
                                 </a>
                             </li>
                         </ul>
-                    </Surface>
+                    </div>
                 </div>
             </div>
         </div>

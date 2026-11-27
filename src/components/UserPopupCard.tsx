@@ -1,31 +1,44 @@
-import {UserInvitor, UserObj} from "@/types/user";
-import {getUserRoleBadge} from "@/lib/client";
-import LanguageModel from "@/types/LanguageModel";
+import type {ComponentProps} from "react";
+import type {RoleType, UserObj} from "@/types/user";
+import {getUserRoleBadgeElement} from "@/lib/roleBadge";
+import FloatingHoverCard from "@/components/FloatingHoverCard";
 
 interface Props {
-    user: UserObj;
-    lang: LanguageModel
+    user: Pick<UserObj, "uid" | "username" | "avatar" | "createdAt"> & {role: string};
+    memberSince: string;
+    dateLocale?: string;
 }
 
-export function UserPopupCard({ lang, user }: Props) {
+export function UserPopupCard({user, memberSince, dateLocale}: Props) {
+    const date = new Date(user.createdAt);
+
     return (
-        <>
+        <div className="flex max-w-full items-center gap-3 rounded-lg border border-zinc-700 bg-[#19191c] px-3 py-2.5 shadow-xl">
             <img
                 src={user.avatar || "/images/default-avatar.svg"}
-                alt="avatar"
-                className="w-12 h-12 rounded-full mb-2"
+                alt=""
+                className="size-10 shrink-0 rounded-full border border-white/10 bg-[#172650] object-cover"
             />
-            <div>
-                <div className={"flex flex-row gap-2 items-center"}>
-                    <p className="text-xl font-semibold">{user.username}</p>
-                    <span className={"text-xs text-gray-400"}>{" (" + user.uid + ") "}</span>
-                    {getUserRoleBadge(user.role)}
+            <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="min-w-0 break-all text-sm font-semibold text-white">{user.username}</span>
+                    <span className="text-[11px] text-zinc-400">UID {user.uid}</span>
+                    {getUserRoleBadgeElement(user.role as RoleType, {size: "xs"})}
                 </div>
-
-                <p className="text-xs text-gray-500 mt-1">
-                    {lang.global.member_since + " " + new Date(user.createdAt || "").toLocaleDateString()}
-                </p>
+                {!Number.isNaN(date.getTime()) && (
+                    <span className="text-[11px] text-zinc-400">
+                        {memberSince} <time dateTime={date.toISOString()}>{date.toLocaleDateString(dateLocale)}</time>
+                    </span>
+                )}
             </div>
-        </>
-    )
+        </div>
+    );
+}
+
+export function UserHoverCard({open, position, ...profile}: Props & Pick<ComponentProps<typeof FloatingHoverCard>, "open" | "position">) {
+    return (
+        <FloatingHoverCard open={open} position={position} className="drop-shadow-2xl">
+            <UserPopupCard {...profile} />
+        </FloatingHoverCard>
+    );
 }

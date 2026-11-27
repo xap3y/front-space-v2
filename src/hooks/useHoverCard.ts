@@ -10,8 +10,9 @@ export function useHoverCard(isMobile: boolean = useIsMobile()) {
     const [showCard, setShowCard] = useState(false);
     const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
 
-    const handleMouseEnter = useCallback(() => {
+    const handleMouseEnter = useCallback((event?: React.MouseEvent) => {
         if (isMobile) return;
+        if (event) setPosition({x: event.clientX, y: event.clientY});
         setShowCard(true);
     }, [isMobile]);
 
@@ -21,10 +22,10 @@ export function useHoverCard(isMobile: boolean = useIsMobile()) {
     }, [isMobile]);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!isMobile) {
+        if (!isMobile && showCard) {
             setPosition({ x: e.clientX, y: e.clientY });
         }
-    }, [isMobile]);
+    }, [isMobile, showCard]);
 
     return {
         showCard,

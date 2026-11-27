@@ -32,6 +32,7 @@ import {useDebounce} from "@/hooks/useDebounce";
 import MainStringInput from "@/components/MainStringInput";
 import {UserObjShort} from "@/types/user";
 import HoverDiv from "@/components/HoverDiv";
+import FloatingHoverCard from "@/components/FloatingHoverCard";
 
 export default function ImageUploader() {
 
@@ -418,7 +419,19 @@ export default function ImageUploader() {
                                         </div>
                                         <NativeButton type="button" aria-label="Remove selected file" className="ml-2 shrink-0 rounded-lg p-1.5 transition hover:bg-red-500/10" onClick={handleRemoveFile}> <MdOutlineDelete className="h-6 w-6 text-red-500" /> </NativeButton>
                                     </div>
-                                    {supportsTransparency && <div className="flex items-center justify-between border-t border-white/10 px-2.5 py-2"><span className="text-[11px] text-zinc-400">Transparency grid</span><HoverDiv type={showTransparencyGrid ? "SAVE" : "INFO"} role="switch" aria-checked={showTransparencyGrid} aria-label="Toggle transparency grid" onClick={() => setShowTransparencyGrid(value => !value)} style={{justifyContent: showTransparencyGrid ? "flex-end" : "flex-start"}} className="h-6 w-11 shrink-0 rounded-full p-[3px]"><span className={`block h-4 w-4 shrink-0 rounded-full transition-colors ${showTransparencyGrid ? "bg-emerald-300" : "bg-zinc-500"}`}/></HoverDiv></div>}
+                                    {supportsTransparency && (
+                                        <NativeButton type="button" layout="row" role="switch" aria-checked={showTransparencyGrid}
+                                            onClick={() => setShowTransparencyGrid(value => !value)}
+                                            className="group cursor-pointer focus-visible:-outline-offset-2"
+                                        >
+                                            <span className="flex items-center justify-between border-t border-white/10 px-2.5 py-2 text-[11px] text-zinc-400 group-hover:text-zinc-200">
+                                                <span>Transparency grid</span>
+                                                <span aria-hidden="true" className="relative h-6 w-11 shrink-0 rounded-full border border-zinc-700 bg-zinc-800 motion-safe:transition-colors group-aria-checked:border-blue-500 group-aria-checked:bg-blue-700">
+                                                    <span className="absolute left-[3px] top-[3px] h-4 w-4 rounded-full bg-zinc-300 motion-safe:transition-transform group-aria-checked:translate-x-[19px] group-aria-checked:bg-white" />
+                                                </span>
+                                            </span>
+                                        </NativeButton>
+                                    )}
                                 </Surface>
                             )}
 
@@ -748,12 +761,7 @@ export default function ImageUploader() {
                 Image finder {">"}
             </a>
 
-            <div
-                className={`pointer-events-none transition-all duration-200 ease-out transform ${
-                    showCard ? "opacity-100 scale-100" : "opacity-0 scale-95"
-                } absolute bg-secondary shadow-lg border rounded-xl p-4 z-50 flex flex-row gap-4`}
-                style={{ top: position.y + 10, left: position.x + 20 }}
-            >
+            <FloatingHoverCard open={showCard && isOpen && hoverServer !== null} position={position}>
                 {isOpen && hoverServer && (
                     <div className={"flex flex-col"}>
                         <div className={"flex items-center gap-2"}>
@@ -785,7 +793,7 @@ export default function ImageUploader() {
                         </div>
                     </div>
                 )}
-            </div>
+            </FloatingHoverCard>
         </>
     )
 }

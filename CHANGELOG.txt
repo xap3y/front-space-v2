@@ -1,3 +1,13 @@
+27.11.2026 (Nevydáno)
+
++ Přidané interaktivní návrhy hover karet, profilového menu a akcí obrázku do katalogu /design
+~ Kompaktní profilové karty s ošetřeným umístěním u okrajů okna
+~ Položka Profile je nejblíž spouštěči nabídky účtu, Logout je oddělený
+~ Sjednocené akce obrázku se sdíleným UI a dělené Copy s nabídkou Short, Portal a Raw URL
+* Odstraněné přebytečné scrollbary při zobrazení hover karty a v detailu obrázku
+* Opravený přepínač mřížky průhlednosti v náhledu před uploadem
+* Tlačítko Create zachovává rozměry a vzhled během vytváření pasty
+
 26.11.2026 (1.11.0)
 
 + Přidané stažení konfigurací ShareX s vyplněným API klíčem v profilu

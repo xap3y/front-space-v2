@@ -67,6 +67,9 @@ export default function DesignShowcase() {
                     <a href="#layouts" className="hover:text-white">Karty a gridy</a>
                     <a href="#states" className="hover:text-white">Stavy a loading</a>
                     <a href="/design/convert" className="hover:text-white">Video compatibility →</a>
+                    <a href="/design/float" className="hover:text-white">Hover karty →</a>
+                    <a href="/design/profile" className="hover:text-white">Profilové menu →</a>
+                    <a href="/design/image" className="hover:text-white">Akce obrázku →</a>
                 </nav>
             </header>
 
