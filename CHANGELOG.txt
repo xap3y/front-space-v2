@@ -1,4 +1,4 @@
-27.11.2026 (Nevydáno)
+27.11.2026 (1.11.1)
 
 + Přidané interaktivní návrhy hover karet, profilového menu a akcí obrázku do katalogu /design
 ~ Kompaktní profilové karty s ošetřeným umístěním u okrajů okna
